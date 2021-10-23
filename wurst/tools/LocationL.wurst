@@ -1,0 +1,41 @@
+package LocationL
+
+import Defines
+
+public function groupHeroesInArea() returns group
+    let groupHeroes = CreateGroup()
+    bj_groupEnumOwningPlayer = Player(0)
+    GroupEnumUnitsInRect(groupHeroes, AREA, filterGetUnitsInRectOfPlayer)
+    return groupHeroes
+
+public function groupHeroesInRangeOnSpell(location loc, real radius, boolexpr expr) returns group
+    let groupHeroes = CreateGroup()
+    bj_groupEnumOwningPlayer = Player(0)
+    GroupEnumUnitsInRangeOfLoc(groupHeroes, loc, radius, expr)
+    return groupHeroes
+
+function randomUnitEnum()
+    bj_groupRandomConsidered++
+    if GetRandomInt(1, bj_groupRandomConsidered) == 1
+        bj_groupRandomCurrentPick = GetEnumUnit()
+
+public function getUnitInArea(group groupHeroes) returns int
+    bj_groupRandomConsidered = 0
+    bj_groupRandomCurrentPick = null
+
+    ForGroup( groupHeroes, function randomUnitEnum )
+    DestroyGroup( groupHeroes )
+
+    return bj_groupRandomConsidered
+
+public function getVectorBetweenUnits(location firstUnit, location secondUnit, bool process) returns location
+    real vectorX = GetLocationX(secondUnit) - GetLocationX(firstUnit)
+    real vectorY = GetLocationX(secondUnit) - GetLocationX(firstUnit)
+
+    if process
+        if vectorX.abs() > 50 and vectorX.abs() < 150
+            vectorX *= GetRandomReal(5, 7)
+        if vectorY.abs() > 50 and vectorY.abs() < 150
+            vectorY *= GetRandomReal(5, 7)
+    
+    return Location(vectorX, vectorY)

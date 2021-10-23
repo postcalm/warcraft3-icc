@@ -1,0 +1,8 @@
+---
+projectName: warcraft3-icc
+dependencies:
+- https://github.com/wurstscript/wurstStdlib2
+buildMapData:
+  name: ICC
+  fileName: ICC
+  author: meiso, IRMessiah

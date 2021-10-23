@@ -1,0 +1,27 @@
+package Defines
+
+/* Areas */
+public constant AREA = gg_rct_areaLM
+    
+/* Units */
+public constant LORD_MARROWGAR = gg_unit_U001_0004
+public constant DUMMY_LM = gg_unit_h002_0018
+
+/* Spells */
+public constant COLDFLAME = 'A001'
+public constant WHIRLWIND_AURA = 'A006'
+public constant CONSECRATION = 'A009'
+public constant CONSECRATION_TR = 'A00A'
+public constant HAMMER_RIGHTEOUS = 'A00B'
+public constant GREATER_BLESSING_KINGS = 'A00C'
+/* ---------------------------- */
+public constant BUFF_GBK = 'B000'
+
+/* Objects */
+public constant BONE_SPIKE_OBJ = 'h000'
+public constant COLDFLAME_OBJ = 'h001'
+public constant DUMMY = 'h002'
+public constant DUMMY_EQUIP = 'e000'
+
+/* Other */
+public constant COMMON_TIMER = 'BTLF'
