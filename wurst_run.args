@@ -1,3 +1,4 @@
 -runcompiletimefunctions
 -injectobjects
 -stacktraces
+-noExtractMapScript

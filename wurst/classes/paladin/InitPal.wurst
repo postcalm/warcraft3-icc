@@ -1,0 +1,15 @@
+package InitPal
+
+import Defines
+
+function initialize()
+    UnitAddAbility(gg_unit_Hpal_0017, 'AHds')
+    UnitAddAbility(gg_unit_Hpal_0017, 'AHad')
+    UnitAddAbility(gg_unit_Hpal_0017, CONSECRATION)
+    UnitAddAbility(gg_unit_Hpal_0017, CONSECRATION_TR)
+    UnitAddAbility(gg_unit_Hpal_0017, HAMMER_RIGHTEOUS)
+    UnitAddAbility(gg_unit_Hpal_0017, GREATER_BLESSING_KINGS)
+    UnitAddAbility(gg_unit_Hpal_0017, 'AHhb')
+
+init
+    initialize()

@@ -1,0 +1,21 @@
+package InitLM
+
+import Defines
+import EquipmentSystem
+
+function initialize()
+    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    UnitAddAbility(LORD_MARROWGAR, WHIRLWIND_AURA)
+
+    reg_item_eq('rhth', "AII2", 1)
+    reg_item_eq('I000', "A007", 1)
+    reg_item_eq('I001', "A008", 1)
+    
+    print("??")
+    equip_items_id(LORD_MARROWGAR, 'rhth', 1)
+    // equip_items_id(LORD_MARROWGAR, 'I000', 1)
+    // equip_items_id(LORD_MARROWGAR, 'I001', 1)
+
+init
+    initialize()
+

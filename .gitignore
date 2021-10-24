@@ -2,3 +2,5 @@
 _build/**
 .vscode/**
 wurst/war3map.j
+temp/output.j
+compiled.j.txt
