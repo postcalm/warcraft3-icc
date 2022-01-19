@@ -1,5 +1,5 @@
 // 
-library LocationLibrary requires Math
+library Paths requires Maths
 {
     // создаем группу юнитов находящихся в заданной области
     group GroupHeroesInArea()
