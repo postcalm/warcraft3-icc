@@ -1,5 +1,5 @@
-// 
-library Paths requires Maths
+// Библиотека для работы с юнитами
+library UnitPaths requires Maths
 {
     // создаем группу юнитов находящихся в заданной области
     group GroupHeroesInArea()
