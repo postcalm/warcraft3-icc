@@ -1,7 +1,7 @@
 
 define 
 {
-    /* Lord Marrowgard */
+    /* Lord Marrowgar */
     BONE_SPIKE_OBJ = 'h000'
     COLDFLAME_OBJ = 'h001'
 

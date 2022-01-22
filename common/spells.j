@@ -1,10 +1,10 @@
 
 define 
 {  
-    /* Lord Marrowgard */
+    /* Lord Marrowgar */
     COLDFLAME = 'A001'
     WHIRLWIND = 'A005'
-    
+
     /* Paladin */
     CONSECRATION = 'A009'
     CONSECRATION_TR = 'A00A'
