@@ -2,12 +2,12 @@
 library UnitPaths requires Maths
 {
     // создаем группу юнитов находящихся в заданной области
-    group GroupHeroesInArea()
+    group GroupHeroesInArea(rect area)
     {
         group groupHeroes = new group
         
         bj_groupEnumOwningPlayer = Player(0)
-        GroupEnumUnitsInRect( groupHeroes, AREA, filterGetUnitsInRectOfPlayer )
+        GroupEnumUnitsInRect( groupHeroes, area, filterGetUnitsInRectOfPlayer )
         
         return groupHeroes
     }

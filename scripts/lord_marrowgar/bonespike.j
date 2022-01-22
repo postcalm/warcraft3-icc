@@ -9,7 +9,7 @@ void BoneSpike_Actions()
     
     TriggerSleepAction( GetRandomReal( 14., 17. ) )
     
-    unit targetEnemy = GetUnitInArea( GroupHeroesInArea() )
+    unit targetEnemy = GetUnitInArea( GroupHeroesInArea(AREA_LM) )
     float targetEnemyHealth = GetUnitState( targetEnemy, UNIT_STATE_MAX_LIFE )
     
     if( BONE_SPIKE_EXIST )
