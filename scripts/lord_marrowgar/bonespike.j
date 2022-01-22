@@ -75,14 +75,14 @@ bool StartBoneSpike()
 }
 
 // main
-void InitTrig_Bone_Spike()
+void Init_BoneSpike()
 {
-    trigger pointTrigg = new trigger
+    trigger triggerBoneSpike = new trigger
 
-    TriggerRegisterUnitEvent( pointTrigg, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )    
-    TriggerAddCondition( pointTrigg, Condition( function StartBoneSpike ) )
-    TriggerAddAction( pointTrigg, function BoneSpike_Actions )
+    TriggerRegisterUnitEvent( triggerBoneSpike, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )    
+    TriggerAddCondition( triggerBoneSpike, Condition( function StartBoneSpike ) )
+    TriggerAddAction( triggerBoneSpike, function BoneSpike_Actions )
     
-    pointTrigg = null
+    triggerBoneSpike = null
 }
 

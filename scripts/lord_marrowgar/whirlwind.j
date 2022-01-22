@@ -38,14 +38,14 @@ bool StartWhirlwind()
 }
 
 // main
-void InitTrig_Whirlwind()
+void Init_Whirlwind()
 {
-    trigger triggerAttacked = new trigger
+    trigger triggerWhirlwind = new trigger
     
-    TriggerRegisterUnitEvent( triggerAttacked, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
-    TriggerAddCondition( triggerAttacked, Condition( function StartWhirlwind ) )
-    TriggerAddAction( triggerAttacked, function Whirlwind_Actions )
+    TriggerRegisterUnitEvent( triggerWhirlwind, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
+    TriggerAddCondition( triggerWhirlwind, Condition( function StartWhirlwind ) )
+    TriggerAddAction( triggerWhirlwind, function Whirlwind_Actions )
     
-    triggerAttacked = null
+    triggerWhirlwind = null
 }
 

@@ -8,13 +8,13 @@ void Actions_ShadowBolt()
                      ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
 }
 
-void InitTrig_ShadowBolt()
+void Init_ShadowBolt()
 {
-    trigger triggerAction = new trigger
+    trigger triggerShadowBolt = new trigger
 
-    TriggerRegisterUnitEvent( triggerAction, LADY_DEATHWHISPER, EVENT_UNIT_ATTACKED )
-    TriggerAddAction( triggerAction, function Actions_ShadowBolt )
+    TriggerRegisterUnitEvent( triggerShadowBolt, LADY_DEATHWHISPER, EVENT_UNIT_ATTACKED )
+    TriggerAddAction( triggerShadowBolt, function Actions_ShadowBolt )
 
-    triggerAction = null
+    triggerShadowBolt = null
 }
 

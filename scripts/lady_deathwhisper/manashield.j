@@ -31,14 +31,14 @@ bool UsingManaShield()
     return false
 }
 
-void InitTrig_ManaShield()
+void Init_ManaShield()
 {
-    trigger triggerAttacked = new trigger
+    trigger triggerManaShield = new trigger
     
-    TriggerRegisterUnitEvent( triggerAttacked, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED )
-    TriggerAddCondition( triggerAttacked, Condition( function UsingManaShield ) )
-    TriggerAddAction( triggerAttacked, function Actions_ManaShield )
+    TriggerRegisterUnitEvent( triggerManaShield, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED )
+    TriggerAddCondition( triggerManaShield, Condition( function UsingManaShield ) )
+    TriggerAddAction( triggerManaShield, function Actions_ManaShield )
     
-    triggerAttacked = null
+    triggerManaShield = null
 }
 
