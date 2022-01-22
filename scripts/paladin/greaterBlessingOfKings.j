@@ -3,6 +3,7 @@
 // требуется для фиксации бафа
 struct HeroesWithGBK extends array
 {
+    // NOTE: здесь может быть утечка памяти!
     unit hero  // id юнита
     bool onBuff  // есть баф или нет (true or false)
 }
