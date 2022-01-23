@@ -2,8 +2,8 @@
 // author Doc | 16.05.2012 | WWW.XGM.RU
 // author meiso | 23.01.2022 
 
-define private SIZE_ARRAY = 1
-type ArrayWords extends string array[SIZE_ARRAY]
+define private SIZE_STRING_ARRAY = 10
+type StringArray extends string array[SIZE_STRING_ARRAY]
 
 struct String
 {
@@ -64,22 +64,19 @@ struct String
     }
 
 
-    private int split(string splitChar)
+    StringArray split(string splitChar)
     {
         int i = -1
         int startInd = 0
         String temp = this.clone()
+        temp.removeAll(" ")
         int countSplit = countOf(splitChar)
-        setdef SIZE_ARRAY = countSplit
-        ArrayWords words = ArrayWords.create()
+        StringArray words = StringArray.create()
         whilenot(i++ == countSplit)
         {
             int charInd = temp.indexOf(splitChar)
-            string tm = SubString(temp.get(), startInd, startInd + charInd)
-            sBJDebugMsg("%s %i %i", tm, startInd, startInd + charInd)
             words[i] = SubString(temp.get(), startInd, startInd + charInd)
-            sBJDebugMsg("%s", words[i])
-            break
+            temp.getSubStr(startInd + charInd + 1, temp.getLength())
         }
         return words
     }
