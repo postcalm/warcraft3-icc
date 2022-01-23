@@ -3,15 +3,17 @@
 
 define 
 {
+    SUFFIX_NAME
+    SIZE
     /// Регистрирует предметы, назначая им способности
     /// items: структура, содержащая id предметов и их способности
     /// count: количество предметов в структуре
-    REGISTRATION_ITEMS(items, count) = {
+    <REGISTRATION_ITEMS()> = {
         int ri = -1
-        whilenot(ri++ == count)
+        whilenot(ri++ == SIZE)
         {
-            reg_item_eq(items[ri].item_id, \
-                        I2S(items[ri].item_spell_id), 1)
+            reg_item_eq(ItemsEq ## SUFFIX_NAME[ri].item_id, \
+                        I2S(ItemsEq ## SUFFIX_NAME[ri].item_spell_id), 1)
         }
     }
 
@@ -19,19 +21,19 @@ define
     /// unit_name: имя юнита, которому будут передаваться итемы
     /// items: структура, содержащая id предметов и их способности
     /// count: количество предметов в структуре
-    ADD_ITEMS_TO_UNIT(unit_name, items, count) = {
+    ADD_ITEMS_TO_UNIT(unit_name) = {
         int ai = -1
-        whilenot(ai++ == count)
+        whilenot(ai++ == SIZE)
         {
-            equip_items_id(unit_name, items[ai].item_id, 1)
+            equip_items_id(unit_name, ItemsEq ## SUFFIX_NAME[ai].item_id, 1)
         }
     }
 
     /// Создает структур с уникальным именем для юнита
     /// NOTE: Использовать только в глобальной области!
     /// name: идентификатор юнита
-    INIT_STRUCT_ITEMS(name) = {
-        struct ItemsEq ## name extends array
+    <INIT_STRUCT_ITEMS()> = {
+        struct ItemsEq ## SUFFIX_NAME extends array
         {
             int item_id
             int item_spell_id
@@ -42,21 +44,21 @@ define
     /// items: массив предметов
     /// items_spells: массив способностей
     /// struct_s: заполняемая структура
-    FILL_STRUCT_ITEMS(items, items_spells, struct_s) = 
+    FILL_STRUCT_ITEMS(items, items_spells) = 
     {
         InitItemsAndItemsSpells()
         int fi = -1
         StringArray items_s = items.split(",")
         StringArray items_spells_s = items_spells.split(",")
-        whilenot(fi++ == 3)
+        whilenot(fi++ == SIZE)
         {
             if( Items[fi].getIdByName(items_s[fi]) != 0 ) 
             {
-                struct_s[fi].item_id = Items[fi].item_id
+                ItemsEq ## SUFFIX_NAME[fi].item_id = Items[fi].item_id
             }
             if( ItemsSpells[fi].getIdByName(items_spells_s[fi]) != 0 )
             {
-                struct_s[fi].item_spell_id = ItemsSpells[fi].item_spell_id
+                ItemsEq ## SUFFIX_NAME[fi].item_spell_id = ItemsSpells[fi].item_spell_id
             }
         }
     }
