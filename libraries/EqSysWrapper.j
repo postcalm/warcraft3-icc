@@ -6,11 +6,11 @@ define
     SUFFIX_NAME
     SIZE
     /// Регистрирует предметы, назначая им способности
-    /// items: структура, содержащая id предметов и их способности
     /// count: количество предметов в структуре
-    <REGISTRATION_ITEMS()> = {
+    <REGISTRATION_ITEMS()> = 
+    {
         int ri = -1
-        whilenot(ri++ == SIZE)
+        whilenot( ri++ == SIZE )
         {
             reg_item_eq(ItemsEq ## SUFFIX_NAME[ri].item_id, \
                         I2S(ItemsEq ## SUFFIX_NAME[ri].item_spell_id), 1)
@@ -19,11 +19,11 @@ define
 
     /// Добавляет юниту предметы в инвентарь
     /// unit_name: имя юнита, которому будут передаваться итемы
-    /// items: структура, содержащая id предметов и их способности
     /// count: количество предметов в структуре
-    ADD_ITEMS_TO_UNIT(unit_name) = {
+    ADD_ITEMS_TO_UNIT(unit_name) = 
+    {
         int ai = -1
-        whilenot(ai++ == SIZE)
+        whilenot( ai++ == SIZE )
         {
             equip_items_id(unit_name, ItemsEq ## SUFFIX_NAME[ai].item_id, 1)
         }
@@ -32,7 +32,8 @@ define
     /// Создает структур с уникальным именем для юнита
     /// NOTE: Использовать только в глобальной области!
     /// name: идентификатор юнита
-    <INIT_STRUCT_ITEMS()> = {
+    <INIT_STRUCT_ITEMS()> = 
+    {
         struct ItemsEq ## SUFFIX_NAME extends array
         {
             int item_id
@@ -43,7 +44,6 @@ define
     /// Заполняет структуру предметами
     /// items: массив предметов
     /// items_spells: массив способностей
-    /// struct_s: заполняемая структура
     FILL_STRUCT_ITEMS(items, items_spells) = 
     {
         InitItemsAndItemsSpells()
