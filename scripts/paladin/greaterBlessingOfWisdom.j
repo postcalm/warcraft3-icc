@@ -52,8 +52,7 @@ void Actions()
         {
             HeroesWithGBS[i].hero = temp
             
-            SetHeroStr( HeroesWithGBS[i].hero, GetHeroStr( HeroesWithGBS[i].hero, false ) + \
-                                            R2I( GetHeroStr( HeroesWithGBS[i].hero, false ) * 0.1 ), false )
+            UnitAddAbilityBJ( GREATER_BLESSING_WISDOM, gg_unit_Hpal_0017 )
             
             HeroesWithGBS[i].onBuff = true
             GroupRemoveUnit( heroes, HeroesWithGBS[i].hero )
