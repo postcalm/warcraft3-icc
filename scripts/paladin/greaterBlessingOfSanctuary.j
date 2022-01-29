@@ -1,4 +1,8 @@
 
+setdef SUFFIX_NAME = GBS
+setdef COUNT = 1
+INIT_STRUCT_ITEMS()
+
 struct HeroesWithGBS extends array
 {
     // NOTE: здесь может быть утечка памяти!
@@ -6,58 +10,39 @@ struct HeroesWithGBS extends array
     bool onBuff
 }
 
-// NOTE: дублируется!
-//bool filter()
-//{
-    //return IsUnitAlly(GetTriggerUnit(), Player(0)) == true
-//}
-
-// NOTE: дублируется!
-// функция, проверяет наложен ли баф на игрока
-bool BuffOnUnitT(unit u, int count)
+void GBS()
 {
-    int i = 0
-    whilenot( i++ >= count )
-    {
-        if( HeroesWithGBS[i].hero == u ) { return true }
-    }
-    return false
-}
-
-// реализация способности
-void Actions()
-{
-    // добавим маленькую задержку
     TriggerSleepAction( 0.5 )
     
     bj_groupCountUnits = 0
-    // итератор для прохода по группе
-    int i = 0
-    // временная переменная, для проверки юнита
+    int i = -1
     unit temp = null
-    // получаем всех игроков в области бафа
-    group heroes = GroupHeroesInRangeOnSpell( GetUnitLoc( GetTriggerUnit() ), 900., Condition( function filter ) )
-    // кол-во всех игроков
+    group heroes = GroupHeroesInRangeOnSpell( GetUnitLoc( GetTriggerUnit() ), 900., null )
+    RemoveEnemies(heroes)
     int countHeroes = CountUnitsInGroup(heroes)
     
-    // проходим по всем юнитам
-    whilenot( i++ >= countHeroes )
+    String items_id = String.create("DEC_DMG_ITEM")
+    String items_spells_id = String.create("DECREASE_DMG")
+    FILL_STRUCT_ITEMS(items_id, items_spells_id)
+    REGISTRATION_ITEMS()
+    
+    whilenot( i++ >= countHeroes - 1  )
     {
         temp = FirstOfGroup(heroes)
-        
-        // todo: исключать игрока из пати
-        if( temp == LORD_MARROWGAR ) { GroupRemoveUnit( heroes, temp ) }
-        
-        if( !HeroesWithGBS[i].onBuff and !BuffOnUnitT( temp, countHeroes) )
+
+        if( !HeroesWithGBS[i].onBuff and !BuffOnHero( temp, countHeroes) )
         {
             HeroesWithGBS[i].hero = temp
-            
-            SetHeroStr( HeroesWithGBS[i].hero, GetHeroStr( HeroesWithGBS[i].hero, false ) + \
-                                            R2I( GetHeroStr( HeroesWithGBS[i].hero, false ) * 0.1 ), false )
+
+            ADD_ITEMS_TO_UNIT(HeroesWithGBS[i].hero)
+            SetHeroStr( HeroesWithGBS[i].hero, \
+                        GetHeroStr( HeroesWithGBS[i].hero, false ) + \
+                        R2I( GetHeroStr( HeroesWithGBS[i].hero, false ) * 0.1 ), false )
             
             HeroesWithGBS[i].onBuff = true
             GroupRemoveUnit( heroes, HeroesWithGBS[i].hero )
         }
+        temp = null
     }
     GroupClear(heroes)  
 }
@@ -73,7 +58,7 @@ void Init_GreaterBlessingOfSanctuary()
 
     TriggerRegisterPlayerUnitEvent( triggerGBSanctuary, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
     TriggerAddCondition( triggerGBSanctuary, function IsGreaterBlessingOfSanctuary )
-    TriggerAddAction( triggerGBSanctuary, function Actions )
+    TriggerAddAction( triggerGBSanctuary, function GBS )
 
     triggerGBSanctuary = null
 }
