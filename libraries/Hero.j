@@ -16,16 +16,6 @@ library Hero
         return IsUnitAlly(GetTriggerUnit(), Player(0)) == true
     }
 
-    bool BuffOnHero(unit u, int count)
-    {
-        int i = -1
-        whilenot( i++ >= count )
-        {
-            if( HeroesWithGBK[i].hero == u ) { return true }
-        }
-        return false
-    }
-
     void RemoveEnemies(group heroes)
     {
         int i = -1
@@ -34,7 +24,6 @@ library Hero
         whilenot(i++ == count - 1)
         {
             temp = FirstOfGroup(heroes)
-            sBJDebugMsg("%h", temp)
             if( IsUnitEnemy( temp, Player(0) ) )
             {
                 GroupRemoveUnit(heroes, temp)

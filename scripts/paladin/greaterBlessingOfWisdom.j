@@ -9,6 +9,16 @@ struct HeroesWithGBW extends array
     bool onBuff
 }
 
+bool BuffOnHeroGBW(unit u, int count)
+{
+    int i = -1
+    whilenot( i++ >= count - 1 )
+    {
+        if( HeroesWithGBW[i].hero == u ) { return true }
+    }
+    return false
+}
+
 void GBW()
 {
     TriggerSleepAction( 0.5 )
@@ -20,11 +30,11 @@ void GBW()
     RemoveEnemies(heroes)
     int countHeroes = CountUnitsInGroup(heroes)
 
-    whilenot( i++ >= countHeroes )
+    whilenot( i++ >= countHeroes - 1 )
     {
         temp = FirstOfGroup(heroes)
 
-        if( !HeroesWithGBW[i].onBuff and !BuffOnHero( temp, countHeroes) )
+        if( !HeroesWithGBW[i].onBuff and !BuffOnHeroGBW( temp, countHeroes ) )
         {
             HeroesWithGBW[i].hero = temp
             

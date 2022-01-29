@@ -1,6 +1,8 @@
 
 include "libraries/UnitLocation.j"
 include "libraries/Hero.j"
+include "libraries/String.j"
+include "libraries/EqSysWrapper.j"
 
 setdef SUFFIX_NAME = GBS
 setdef COUNT = 1
@@ -13,6 +15,16 @@ struct HeroesWithGBS extends array
     bool onBuff
 }
 
+bool BuffOnHeroGBS(unit u, int count)
+{
+    int i = -1
+    whilenot( i++ >= count - 1 )
+    {
+        if( HeroesWithGBS[i].hero == u ) { return true }
+    }
+    return false
+}
+
 void GBS()
 {
     TriggerSleepAction( 0.5 )
@@ -23,7 +35,7 @@ void GBS()
     group heroes = GroupHeroesInRangeOnSpell( GetUnitLoc( GetTriggerUnit() ), 900., null )
     RemoveEnemies(heroes)
     int countHeroes = CountUnitsInGroup(heroes)
-    
+
     String items_id = String.create("DEC_DMG_ITEM")
     String items_spells_id = String.create("DECREASE_DMG")
     FILL_STRUCT_ITEMS(items_id, items_spells_id)
@@ -33,7 +45,7 @@ void GBS()
     {
         temp = FirstOfGroup(heroes)
 
-        if( !HeroesWithGBS[i].onBuff and !BuffOnHero( temp, countHeroes) )
+        if( !HeroesWithGBS[i].onBuff and !BuffOnHeroGBS( temp, countHeroes) )
         {
             HeroesWithGBS[i].hero = temp
 
