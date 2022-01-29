@@ -1,4 +1,6 @@
 
+#guard objects
+
 define 
 {
     /* Lord Marrowgar */

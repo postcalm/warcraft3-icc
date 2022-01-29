@@ -1,6 +1,12 @@
 // Обертка над equipment system
 // author meiso | 23.01.2022 | WWW.XGM.RU
 
+#guard EqSysWrapper
+
+include "common/objects.j"
+include "libraries/EquipmentSystem.j"
+include "common/items.j"
+
 define 
 {
     /// Суффикс имени, по котрому будет генерироваться структура

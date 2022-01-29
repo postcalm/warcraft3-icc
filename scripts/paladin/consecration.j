@@ -1,6 +1,6 @@
 
 
-void Action()
+void Consecration()
 {
     IssuePointOrderLoc( GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()) )
 }
@@ -16,7 +16,7 @@ void Init_Consecration()
 
     TriggerRegisterPlayerUnitEvent( triggerConsecration, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
     TriggerAddCondition( triggerConsecration, function IsConsecration )
-    TriggerAddAction( triggerConsecration, function Action )
+    TriggerAddAction( triggerConsecration, function Consecration )
 
     triggerConsecration = null
 }

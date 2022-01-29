@@ -1,6 +1,8 @@
 // class String
 // author Doc | 16.05.2012 | WWW.XGM.RU
-// author meiso | 23.01.2022 
+// author meiso | 23.01.2022 | WWW.XGM.RU
+
+#guard String
 
 define private SIZE_STRING_ARRAY = 10
 type StringArray extends string array[SIZE_STRING_ARRAY]
@@ -12,7 +14,6 @@ struct String
     
     private int length
     
-    // Конструктор
     static String create(string Main)
     {
         String data = String.allocate()
@@ -20,6 +21,13 @@ struct String
         data.cache = Main
         data.length = StringLength(Main)
         return data
+    }
+
+    void destroy()
+    {
+        this.Main = null
+        this.length = 0
+        this.deallocate()
     }
     
     // Создает новый объект из строки
@@ -214,13 +222,5 @@ struct String
     void reset()
     {
         this.valueOf(this.cache)
-    }
-    
-    // Деструктор
-    void destroy()
-    {
-        this.Main = null
-        this.length = 0
-        this.deallocate()
     }
 }

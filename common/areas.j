@@ -1,4 +1,6 @@
 
+#guard areas
+
 define 
 {
     AREA_LM = gg_rct_areaLM

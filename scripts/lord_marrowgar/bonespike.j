@@ -1,4 +1,7 @@
 
+include "libraries/UnitLocation.j"
+include "common/areas.j"
+
 bool BONE_SPIKE_EXIST = false
 
 // механика спелла

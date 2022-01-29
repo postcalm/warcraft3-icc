@@ -7,7 +7,6 @@ struct Array
     
     int array 
 
-    // Конструктор
     static Array create(int size)
     {
         Array data = Array.allocate()
@@ -16,7 +15,6 @@ struct Array
         return data
     }
 
-    // Деструктор
     void destroy()
     {
         this.Main = null

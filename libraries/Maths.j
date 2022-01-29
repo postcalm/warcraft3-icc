@@ -1,4 +1,6 @@
 
+#guard Maths
+
 library Maths
 {
     // модуль числа

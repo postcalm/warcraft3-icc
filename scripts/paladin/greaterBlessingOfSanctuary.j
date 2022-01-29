@@ -1,4 +1,7 @@
 
+include "libraries/UnitLocation.j"
+include "libraries/Hero.j"
+
 setdef SUFFIX_NAME = GBS
 setdef COUNT = 1
 INIT_STRUCT_ITEMS()

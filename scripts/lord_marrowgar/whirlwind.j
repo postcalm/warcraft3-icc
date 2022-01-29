@@ -8,7 +8,7 @@ void ResetAnimation()
     if( WHIRLWIND_EXIST )
     {
         WHIRLWIND_EXIST = false
-        //whirlwindTimer = null
+        whirlwindTimer = null
     }
 }
 
@@ -16,10 +16,10 @@ void action()
 {
     IssueImmediateOrder( LORD_MARROWGAR, "whirlwind" )
     TimerStart( timerReset, 5., false, function ResetAnimation )
-    //timerReset = null
+    timerReset = null
 }
 
-void Whirlwind_Actions()
+void Whirlwind()
 {
     if( WHIRLWIND_EXIST )
     {
@@ -44,7 +44,7 @@ void Init_Whirlwind()
     
     TriggerRegisterUnitEvent( triggerWhirlwind, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
     TriggerAddCondition( triggerWhirlwind, Condition( function StartWhirlwind ) )
-    TriggerAddAction( triggerWhirlwind, function Whirlwind_Actions )
+    TriggerAddAction( triggerWhirlwind, function Whirlwind )
     
     triggerWhirlwind = null
 }

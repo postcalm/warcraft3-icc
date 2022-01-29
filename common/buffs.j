@@ -1,4 +1,6 @@
 
+#guard buffs
+
 define 
 {  
     /* Paladin */

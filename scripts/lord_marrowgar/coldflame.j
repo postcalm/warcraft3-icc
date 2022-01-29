@@ -1,4 +1,7 @@
 
+include "libraries/UnitLocation.j"
+include "common/objects.j"
+
 bool COLDFLAME_EXIST = false
 
 void Coldflame_Actions()

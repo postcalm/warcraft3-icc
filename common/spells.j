@@ -1,4 +1,6 @@
 
+#guard spells
+
 define 
 {  
     /* Lord Marrowgar */

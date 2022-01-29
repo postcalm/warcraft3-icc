@@ -1,7 +1,11 @@
+
+#guard UnitLocation
+
+include "libraries/Maths.j"
+
 // Библиотека для работы с расположением юнитов
-library UnitPaths requires Maths
+library UnitLocation requires Maths
 {
-    // создаем группу юнитов находящихся в заданной области
     group GroupHeroesInArea(rect area)
     {
         group groupHeroes = new group
@@ -22,8 +26,6 @@ library UnitPaths requires Maths
         return groupHeroes
     }
 
-    // рандомный юнит из группы юнитов
-    // FixMe
     void RandomUnitEnum()
     {
         bj_groupRandomConsidered++
@@ -33,7 +35,6 @@ library UnitPaths requires Maths
         }
     }
     
-    // возвращаем юнита 
     unit GetUnitInArea(group groupHeroes)
     {
         bj_groupRandomConsidered = 0
@@ -42,12 +43,13 @@ library UnitPaths requires Maths
         ForGroup( groupHeroes, function RandomUnitEnum )
         
         DestroyGroup( groupHeroes )
+        groupHeroes = null
         
         return bj_groupRandomCurrentPick
     }
     
     // возвращает вектор между двумя юнитами
-    // возвращает либо as is
+    // возвращает либо "as is"
     // либо обработанный: наименьшая координата обнуляется, наибольшая - увеличивается
     location GetVectorBetweenUnits(location firstUnit, location secondUnit, bool process)
     {
@@ -69,5 +71,4 @@ library UnitPaths requires Maths
         
         return Location( vectorX, vectorY )
     }
-
 }

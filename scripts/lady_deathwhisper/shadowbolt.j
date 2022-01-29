@@ -1,4 +1,7 @@
 
+include "libraries/UnitLocation.j"
+include "common/areas.j"
+
 void Actions_ShadowBolt()
 {
     unit targetEnemy = GetUnitInArea( GroupHeroesInArea(AREA_LD) )

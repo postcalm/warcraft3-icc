@@ -25,6 +25,8 @@
 1. в 'ablist' записываются id способностей предмета, без тегов и через запятую (Например : "I000,I001")
 */
 
+#guard EquipmentSystem
+
 library EquipmentSystem
 {
     int dummy_eq()
