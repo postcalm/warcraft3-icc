@@ -4,19 +4,19 @@
 #guard EqSysWrapper
 
 include "common/objects.j"
-include "libraries/EquipmentSystem.j"
 include "common/items.j"
+include "libraries/EquipmentSystem.j"
 
 define 
 {
-    /// Суффикс имени, по котрому будет генерироваться структура
+    /// Суффикс имени, по которому будет генерироваться структура
     /// Переопределяется в глобальной области
     SUFFIX_NAME
     /// Количество предметов, добавляемых герою/юниту
     /// Переопределяется в глобальной области
     COUNT
 
-    /// Создает структур с уникальным именем для юнита
+    /// Создает структур с уникальным именем
     /// Необходимо переопределить SUFFIX_NAME 
     <INIT_STRUCT_ITEMS()> = 
     {

@@ -1,6 +1,8 @@
 
 #guard items
 
+define private ITEMS_COUNT = 5
+
 struct Items extends array
 {
     int item_id
@@ -28,27 +30,27 @@ struct ItemsSpells extends array
 int SearchItem(string name)
 {
     int i = -1
-    whilenot(i++ == 4)
+    whilenot(i++ == ITEMS_COUNT)
     {
         if( Items[i].getIdByName(name) != 0 )
         {
             return Items[i].item_id
         }
     }
-    return 0;
+    return 0
 }
 
 int SearchItemSpell(string name)
 {
     int i = -1
-    whilenot(i++ == 4)
+    whilenot(i++ == ITEMS_COUNT)
     {
         if( ItemsSpells[i].getIdByName(name) != 0 )
         {
             return ItemsSpells[i].item_spell_id
         }
     }
-    return 0;
+    return 0
 }
 
 define <InitItemsAndItemsSpells()> =
@@ -64,6 +66,8 @@ define <InitItemsAndItemsSpells()> =
     Items[3].item_str = "MAGICARMOR_ITEM"
     Items[4].item_id  = 'I004'
     Items[4].item_str = "DEC_DMG_ITEM" // decrease damage item
+    Items[5].item_id  = 'I005'
+    Items[5].item_str = "BLESSING_OF_WISDOM_ITEM"
 
     // Способности, назначенные предметам
     ItemsSpells[0].item_spell_id  = 'A008'
@@ -76,4 +80,6 @@ define <InitItemsAndItemsSpells()> =
     ItemsSpells[3].item_spell_str = "MAGICARMOR_500"
     ItemsSpells[4].item_spell_id  = 'A00K'
     ItemsSpells[4].item_spell_str = "DECREASE_DMG"
+    ItemsSpells[5].item_spell_id  = 'A00F'
+    ItemsSpells[5].item_spell_str = "BLESSING_OF_WISDOM"
 }
