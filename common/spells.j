@@ -8,11 +8,16 @@ define
     WHIRLWIND = 'A005'
 
     /* Paladin */
-    CONSECRATION = 'A009'
-    CONSECRATION_TR = 'A00A'
-    HAMMER_RIGHTEOUS = 'A00B'
-    BLESSING_OF_KINGS = 'A00C'
-    BLESSING_OF_SANCTUARY = 'A00H'
-    CRUSADER_AURA = 'A00J'
-    BLESSING_OF_WISDOM = 'A00G'
+    DIVINE_SHIELD          = 'AHds'
+    CONSECRATION           = 'A009'
+    CONSECRATION_TR        = 'A00A'
+    HAMMER_RIGHTEOUS       = 'A00B'
+    BLESSING_OF_KINGS      = 'A00C'
+    BLESSING_OF_SANCTUARY  = 'A00H'
+    BLESSING_OF_WISDOM     = 'A00G'
+    BLESSING_OF_MIGHT      = 'A00M'
+    CRUSADER_AURA          = 'A00J'
+    DEVOTION_AURA          = 'AHhb'
+
+    SPELLBOOK_PALADIN      = 'A00L'
 }
