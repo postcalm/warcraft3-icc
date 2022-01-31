@@ -1,4 +1,4 @@
-
+include "common/spells.j"
 
 void Consecration()
 {
@@ -12,12 +12,12 @@ bool IsConsecration()
 
 void Init_Consecration()
 {
-    trigger triggerConsecration = new trigger
+    trigger triggerAbility = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerConsecration, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
-    TriggerAddCondition( triggerConsecration, function IsConsecration )
-    TriggerAddAction( triggerConsecration, function Consecration )
+    TriggerRegisterPlayerUnitEvent( triggerAbility, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
+    TriggerAddCondition( triggerAbility, function IsConsecration )
+    TriggerAddAction( triggerAbility, function Consecration )
 
-    triggerConsecration = null
+    triggerAbility = null
 }
 

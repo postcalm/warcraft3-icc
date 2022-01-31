@@ -5,5 +5,5 @@ define
 {  
     /* Paladin */
     BUFF_GBK = 'B000'
-    BUFF_GBS = null
+    JUDGEMENT_OF_LIGHT_BUFF = 'B002'
 }

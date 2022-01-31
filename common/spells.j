@@ -18,6 +18,7 @@ define
     BLESSING_OF_MIGHT      = 'A00M'
     CRUSADER_AURA          = 'A00J'
     DEVOTION_AURA          = 'AHhb'
+    JUDGEMENT_OF_LIGHT     = 'A00N'
 
     SPELLBOOK_PALADIN      = 'A00L'
 }

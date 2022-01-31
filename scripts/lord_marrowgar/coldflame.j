@@ -38,7 +38,7 @@ void Coldflame_Actions()
             // другим дамми-юнитом кастуем flame strike, иммитируя coldflame 
             IssueTargetOrder( DUMMY_LM, "flamestrike", coldflameObj )
             TriggerSleepAction( 0.03 )
-            if( GetUnitState( coldflameObj, UNIT_STATE_LIFE ) <= 0 ){ break }
+            if( GetUnitState( coldflameObj, UNIT_STATE_LIFE ) <= 0 ) { break }
         }
         
         COLDFLAME_EXIST = false
@@ -61,12 +61,12 @@ bool StartColdflame()
 // main
 void Init_Coldflame()
 {
-    trigger triggerColdflame = new trigger
+    trigger triggerAbility = new trigger
 
-    TriggerRegisterUnitEvent( triggerColdflame, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
-    TriggerAddCondition( triggerColdflame, Condition( function StartColdflame ) )
-    TriggerAddAction( triggerColdflame, function Coldflame_Actions )
+    TriggerRegisterUnitEvent( triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
+    TriggerAddCondition( triggerAbility, Condition( function StartColdflame ) )
+    TriggerAddAction( triggerAbility, function Coldflame_Actions )
 
-    triggerColdflame = null
+    triggerAbility = null
 }
 
