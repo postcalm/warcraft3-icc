@@ -19,6 +19,9 @@ define
     CRUSADER_AURA          = 'A00J'
     DEVOTION_AURA          = 'AHhb'
     JUDGEMENT_OF_LIGHT     = 'A00N'
+    JUDGEMENT_OF_LIGHT_TR  = 'A00P'
+    JUDGEMENT_OF_WISDOM    = 'A00O'
+    JUDGEMENT_OF_WISDOM_TR = 'A00Q'
 
     SPELLBOOK_PALADIN      = 'A00L'
 }

@@ -40,13 +40,11 @@ bool IsBlessingOfWisdom()
 
 void Init_BlessingOfWisdom()
 {
-    trigger triggerBuff = new trigger
+    trigger trigger_buff = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerBuff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
-    TriggerAddCondition( triggerBuff, function IsBlessingOfWisdom )
-    TriggerAddAction( triggerBuff, function BlessingOfWisdom )
-
-    triggerBuff = null
+    TriggerRegisterPlayerUnitEvent( trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
+    TriggerAddCondition( trigger_buff, function IsBlessingOfWisdom )
+    TriggerAddAction( trigger_buff, function BlessingOfWisdom )
 }
     
     

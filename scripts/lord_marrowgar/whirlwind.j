@@ -1,29 +1,29 @@
 
 bool WHIRLWIND_EXIST = false
-timer whirlwindTimer = new timer
-timer timerReset = new timer
+timer whirlwind_timer = new timer
+timer timer_reset = new timer
 
 void ResetAnimation()
 {
     if( WHIRLWIND_EXIST )
     {
         WHIRLWIND_EXIST = false
-        whirlwindTimer = null
+        whirlwind_timer = null
     }
 }
 
 void action()
 {
     IssueImmediateOrder( LORD_MARROWGAR, "whirlwind" )
-    TimerStart( timerReset, 5., false, function ResetAnimation )
-    timerReset = null
+    TimerStart( timer_reset, 5., false, function ResetAnimation )
+    timer_reset = null
 }
 
 void Whirlwind()
 {
     if( WHIRLWIND_EXIST )
     {
-        TimerStart( whirlwindTimer, GetRandomReal( 20., 30. ), false, function action )
+        TimerStart( whirlwind_timer, GetRandomReal( 20., 30. ), false, function action )
     }
 }
 
@@ -39,12 +39,10 @@ bool StartWhirlwind()
 
 void Init_Whirlwind()
 {
-    trigger triggerAbility = new trigger
+    trigger trigger_ability = new trigger
     
-    TriggerRegisterUnitEvent( triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
-    TriggerAddCondition( triggerAbility, Condition( function StartWhirlwind ) )
-    TriggerAddAction( triggerAbility, function Whirlwind )
-    
-    triggerAbility = null
+    TriggerRegisterUnitEvent( trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
+    TriggerAddCondition( trigger_ability, Condition( function StartWhirlwind ) )
+    TriggerAddAction( trigger_ability, function Whirlwind )
 }
 

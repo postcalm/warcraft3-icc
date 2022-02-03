@@ -66,7 +66,5 @@ void Init_Coldflame()
     TriggerRegisterUnitEvent( triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )
     TriggerAddCondition( triggerAbility, Condition( function StartColdflame ) )
     TriggerAddAction( triggerAbility, function Coldflame_Actions )
-
-    triggerAbility = null
 }
 

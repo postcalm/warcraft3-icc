@@ -34,13 +34,11 @@ bool IsBlessingOfMight()
 
 void Init_BlessingOfMight()
 {
-    trigger triggerBuff = new trigger
+    trigger trigger_buff = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerBuff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
-    TriggerAddCondition( triggerBuff, function IsBlessingOfMight )
-    TriggerAddAction( triggerBuff, function BlessingOfMight )
-
-    triggerBuff = null
+    TriggerRegisterPlayerUnitEvent( trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
+    TriggerAddCondition( trigger_buff, function IsBlessingOfMight )
+    TriggerAddAction( trigger_buff, function BlessingOfMight )
 }
     
     

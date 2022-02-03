@@ -12,12 +12,10 @@ bool IsConsecration()
 
 void Init_Consecration()
 {
-    trigger triggerAbility = new trigger
+    trigger trigger_ability = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerAbility, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
-    TriggerAddCondition( triggerAbility, function IsConsecration )
-    TriggerAddAction( triggerAbility, function Consecration )
-
-    triggerAbility = null
+    TriggerRegisterPlayerUnitEvent( trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
+    TriggerAddCondition( trigger_ability, function IsConsecration )
+    TriggerAddAction( trigger_ability, function Consecration )
 }
 

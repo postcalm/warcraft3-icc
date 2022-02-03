@@ -1,4 +1,5 @@
 
+include "common/spells.j"
 include "libraries/Buff.j"
 
 setdef SUFFIX_BUFF_NAME = BK
@@ -10,6 +11,7 @@ void BlessingOfKings()
 {   
     unit unit_s = GetSpellTargetUnit()
     int i = -1
+    // note: в структуру не заносятся новые юниты!
     ADD_UNIT(unit_s)
     whilenot(i++ == HERO_COUNT)
     {
@@ -37,13 +39,11 @@ bool IsBlessingOfKings()
 
 void Init_BlessingOfKings()
 {
-    trigger triggerBuff = new trigger
+    trigger trigger_buff = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerBuff, Player(0), EVENT_PLAYER_UNIT_SPELL_EFFECT, null )
-    TriggerAddCondition( triggerBuff, function IsBlessingOfKings )
-    TriggerAddAction( triggerBuff, function BlessingOfKings )
-
-    triggerBuff = null
+    TriggerRegisterPlayerUnitEvent( trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_EFFECT, null )
+    TriggerAddCondition( trigger_buff, function IsBlessingOfKings )
+    TriggerAddAction( trigger_buff, function BlessingOfKings )
 }
     
     

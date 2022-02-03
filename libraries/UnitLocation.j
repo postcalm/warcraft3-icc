@@ -8,22 +8,22 @@ library UnitLocation requires Maths
 {
     group GroupHeroesInArea(rect area)
     {
-        group groupHeroes = new group
+        group group_heroes = new group
         
         bj_groupEnumOwningPlayer = Player(0)
-        GroupEnumUnitsInRect( groupHeroes, area, filterGetUnitsInRectOfPlayer )
+        GroupEnumUnitsInRect( group_heroes, area, filterGetUnitsInRectOfPlayer )
         
-        return groupHeroes
+        return group_heroes
     }
     
     group GroupHeroesInRangeOnSpell(location loc, real radius, boolexpr expr)
     {
-        group groupHeroes = new group
+        group group_heroes = new group
         
         bj_groupEnumOwningPlayer = Player(0)
-        GroupEnumUnitsInRangeOfLoc( groupHeroes, loc, radius, expr )
+        GroupEnumUnitsInRangeOfLoc( group_heroes, loc, radius, expr )
         
-        return groupHeroes
+        return group_heroes
     }
 
     void RandomUnitEnum()
@@ -35,15 +35,15 @@ library UnitLocation requires Maths
         }
     }
     
-    unit GetUnitInArea(group groupHeroes)
+    unit GetUnitInArea(group group_heroes)
     {
         bj_groupRandomConsidered = 0
         bj_groupRandomCurrentPick = null
         
-        ForGroup( groupHeroes, function RandomUnitEnum )
+        ForGroup( group_heroes, function RandomUnitEnum )
         
-        DestroyGroup( groupHeroes )
-        groupHeroes = null
+        DestroyGroup( group_heroes )
+        group_heroes = null
         
         return bj_groupRandomCurrentPick
     }
@@ -51,24 +51,24 @@ library UnitLocation requires Maths
     // возвращает вектор между двумя юнитами
     // возвращает либо "as is"
     // либо обработанный: наименьшая координата обнуляется, наибольшая - увеличивается
-    location GetVectorBetweenUnits(location firstUnit, location secondUnit, bool process)
+    location GetVectorBetweenUnits(location first_unit, location second_unit, bool process)
     {
-        float vectorX = GetLocationX(secondUnit) - GetLocationX(firstUnit)
-        float vectorY = GetLocationY(secondUnit) - GetLocationY(firstUnit)
+        float vector_x = GetLocationX(second_unit) - GetLocationX(first_unit)
+        float vector_y = GetLocationY(second_unit) - GetLocationY(first_unit)
         
         if( process )
         {
-            if( Abs(vectorX) > 50. and Abs(vectorX) < 150. )
+            if( Abs(vector_x) > 50. and Abs(vector_x) < 150. )
             {
-                vectorX *= GetRandomReal( 5., 7. )
+                vector_x *= GetRandomReal( 5., 7. )
             }
             
-            if( Abs(vectorY) > 50. and Abs(vectorY) < 150. )
+            if( Abs(vector_y) > 50. and Abs(vector_y) < 150. )
             {
-                vectorY *= GetRandomReal( 5., 7. )
+                vector_y *= GetRandomReal( 5., 7. )
             }
         }
         
-        return Location( vectorX, vectorY )
+        return Location( vector_x, vector_y )
     }
 }

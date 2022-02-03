@@ -85,7 +85,5 @@ void Init_BoneSpike()
     TriggerRegisterUnitEvent( triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED )    
     TriggerAddCondition( triggerAbility, Condition( function StartBoneSpike ) )
     TriggerAddAction( triggerAbility, function BoneSpike_Actions )
-    
-    triggerAbility = null
 }
 

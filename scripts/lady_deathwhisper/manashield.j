@@ -1,13 +1,13 @@
 
-bool manaIsFull = true
+bool mana_is_full = true
 
 void Actions_ManaShield()
 {
-    effect manaShield = null
+    effect mana_shield = null
     real damage = GetEventDamage()
     sBJDebugMsg("Damage - %s", R2S(damage))
     
-    manaShield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx", \
+    mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx", \
                                         LADY_DEATHWHISPER, "origin")
     
     TriggerSleepAction(1.5)
@@ -18,27 +18,25 @@ void Actions_ManaShield()
     
     if( GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) <= 10. )
     {
-        manaIsFull = false
+        mana_is_full = false
     }
     
-    DestroyEffect(manaShield)
-    manaShield = null
+    DestroyEffect(mana_shield)
+    mana_shield = null
 }
 
 bool UsingManaShield()
 {
-    if(manaIsFull) { return true }
+    if(mana_is_full) { return true }
     return false
 }
 
 void Init_ManaShield()
 {
-    trigger triggerManaShield = new trigger
+    trigger trigger_ability = new trigger
     
-    TriggerRegisterUnitEvent( triggerManaShield, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED )
-    TriggerAddCondition( triggerManaShield, Condition( function UsingManaShield ) )
-    TriggerAddAction( triggerManaShield, function Actions_ManaShield )
-    
-    triggerManaShield = null
+    TriggerRegisterUnitEvent( trigger_ability, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED )
+    TriggerAddCondition( trigger_ability, Condition( function UsingManaShield ) )
+    TriggerAddAction( trigger_ability, function Actions_ManaShield )
 }
 

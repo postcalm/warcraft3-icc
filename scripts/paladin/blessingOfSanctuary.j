@@ -44,11 +44,9 @@ bool IsBlessingOfSanctuary()
 
 void Init_BlessingOfSanctuary()
 {
-    trigger triggerBuff = new trigger
+    trigger trigger_buff = new trigger
 
-    TriggerRegisterPlayerUnitEvent( triggerBuff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
-    TriggerAddCondition( triggerBuff, function IsBlessingOfSanctuary )
-    TriggerAddAction( triggerBuff, function BlessingOfSanctuary )
-
-    triggerBuff = null
+    TriggerRegisterPlayerUnitEvent( trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, null )
+    TriggerAddCondition( trigger_buff, function IsBlessingOfSanctuary )
+    TriggerAddAction( trigger_buff, function BlessingOfSanctuary )
 }

@@ -11,7 +11,7 @@ define
         struct HeroWithBuff ## SUFFIX_BUFF_NAME extends array
         {
             private unit hero
-            private bool onBuff
+            private bool on_buff
 
             void setHero(unit u)
             {
@@ -25,17 +25,17 @@ define
 
             bool buffOnUnit()
             {
-                return this.onBuff
+                return this.on_buff
             }
 
             void setBuffOnUnit()
             {
-                this.onBuff = true
+                this.on_buff = true
             }
 
             void resetBuffOnUnit()
             {
-                this.onBuff = false
+                this.on_buff = false
             }
         }
     }
