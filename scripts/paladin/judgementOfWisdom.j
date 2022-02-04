@@ -8,10 +8,10 @@ void JudgementOfWisdom()
     int debuff = GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_WISDOM_BUFF )
     if( debuff > 0 )
     {
+        // fixme: юнит хилится пока идёт бой!
         if( GetRandomReal(0., 1.) <= 0.7 )
         {
             real giveMP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
-            sBJDebugMsg("%r", giveMP)
             SetUnitState( PALADIN, \
                           UNIT_STATE_MANA, \
                           GetUnitState(PALADIN, UNIT_STATE_MANA) + giveMP )

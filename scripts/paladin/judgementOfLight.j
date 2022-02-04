@@ -8,10 +8,10 @@ void JudgementOfLight()
     int debuff = GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF )
     if( debuff > 0 )
     {
-        if( GetRandomReal(0., 1.) <= 0.7 )
+        // fixme: юнит хилится пока идёт бой!
+        if( GetRandomReal(0., 1.) <= 0.7  )
         {
             real giveHP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-            sBJDebugMsg("%r", giveHP)
             SetUnitState( PALADIN, \
                           UNIT_STATE_LIFE, \
                           GetUnitState(PALADIN, UNIT_STATE_LIFE) + giveHP )
@@ -21,7 +21,7 @@ void JudgementOfLight()
 
 bool IsJudgementOfLightDebuff()
 {
-    return GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+    return GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF ) > 0
 }
 
 void CastJudgementOfLight()
