@@ -10,7 +10,10 @@ struct Items extends array
 
     int getIdByName(string name)
     {
-        if(this.item_str == name) { return this.item_id }
+        if( this.item_str == name ) 
+        { 
+            return this.item_id 
+        }
         return 0
     }
 }
@@ -22,37 +25,44 @@ struct ItemsSpells extends array
 
     int getIdByName(string name)
     {
-        if(this.item_spell_str == name) { return this.item_spell_id }
+        if( this.item_spell_str == name ) 
+        { 
+            return this.item_spell_id 
+        }
         return 0
     }
 }
 
 int SearchItem(string name)
 {
-    int i = -1
-    whilenot(i++ == ITEMS_COUNT)
+    int i = 0
+    whilenot( i == ITEMS_COUNT )
     {
         if( Items[i].getIdByName(name) != 0 )
         {
             return Items[i].item_id
         }
+        i++
     }
     return 0
 }
 
 int SearchItemSpell(string name)
 {
-    int i = -1
-    whilenot(i++ == ITEMS_COUNT)
+    int i = 0
+    whilenot( i == ITEMS_COUNT )
     {
         if( ItemsSpells[i].getIdByName(name) != 0 )
         {
             return ItemsSpells[i].item_spell_id
         }
+        i++
     }
     return 0
 }
 
+// Столько странное решение объясняется тем, 
+// что jass не может в иницализацию массивов
 define <InitItemsAndItemsSpells()> =
 {
     // Предметы

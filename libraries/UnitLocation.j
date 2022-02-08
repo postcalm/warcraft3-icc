@@ -15,7 +15,7 @@ library UnitLocation requires Maths
         
         return group_heroes
     }
-    
+
     group GroupHeroesInRangeOnSpell(location loc, real radius, boolexpr expr)
     {
         group group_heroes = new group
@@ -24,6 +24,13 @@ library UnitLocation requires Maths
         GroupEnumUnitsInRangeOfLoc( group_heroes, loc, radius, expr )
         
         return group_heroes
+    }
+
+    group GroupUnitsInRangeOfLocUnit(real radius, location which_location)
+    {
+        group g = new group
+        GroupEnumUnitsInRangeOfLoc(g, which_location, radius, null)
+        return g 
     }
 
     void RandomUnitEnum()
@@ -68,7 +75,6 @@ library UnitLocation requires Maths
                 vector_y *= GetRandomReal( 5., 7. )
             }
         }
-        
         return Location( vector_x, vector_y )
     }
 }

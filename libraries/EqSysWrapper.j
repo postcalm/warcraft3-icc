@@ -1,5 +1,5 @@
 // Обертка над equipment system
-// author meiso | 23.01.2022 | WWW.XGM.RU
+// author meiso | 2022 | WWW.XGM.RU
 
 #guard EqSysWrapper
 
@@ -30,26 +30,28 @@ define
     /// Регистрирует предметы
     <REGISTRATION_ITEMS()> = 
     {
-        int ri = -1
+        int ri = 0
         int count_of_abilities = 1
-        whilenot(ri++ == COUNT)
+        whilenot( ri == COUNT )
         {
             reg_item_eq(ItemsEq ## SUFFIX_NAME[ri].item_id, \
                         I2S(ItemsEq ## SUFFIX_NAME[ri].item_spell_id), count_of_abilities)
+            ri++
         }
-        ri = -1
+        ri = 0
     }
 
     /// Добавляет юниту предметы в инвентарь
     /// unit_name: имя юнита, которому будут передаваться итемы
     ADD_ITEMS_TO_UNIT(unit_name) = 
     {
-        int ai1 = -1
-        whilenot(ai1++ == COUNT)
+        int ai1 = 0
+        whilenot( ai1 == COUNT )
         {
             equip_items_id(unit_name, ItemsEq ## SUFFIX_NAME[ai1].item_id, 1)
+            ai1++
         }
-        ai1 = -1
+        ai1 = 0
     }
 
     /// Добавляет юниту предметы в инвентарь
@@ -57,12 +59,13 @@ define
     /// size: количество предметов
     ADD_ITEMS_TO_UNIT(unit_name, size) = 
     {
-        int ai2 = -1
-        whilenot(ai2 == COUNT)
+        int ai2 = 0
+        whilenot( ai2 == COUNT )
         {
             equip_items_id(unit_name, ItemsEq ## SUFFIX_NAME[ai2].item_id, size)
+            ai2++
         }
-        ai2 = -1
+        ai2 = 0
     }
 
     /// Заполняет структуру предметами
@@ -71,10 +74,10 @@ define
     FILL_STRUCT_ITEMS(items, items_spells) = 
     {
         InitItemsAndItemsSpells()
-        int fi = -1
+        int fi = 0
         StringArray items_s = items.split(",")
         StringArray items_spells_s = items_spells.split(",")
-        whilenot(fi++ == COUNT)
+        whilenot( fi == COUNT )
         {
             int found_item = SearchItem(items_s[fi])
             int found_item_spell = SearchItem(items_spells_s[fi])
@@ -86,7 +89,8 @@ define
             {
                 ItemsEq ## SUFFIX_NAME[fi].item_spell_id = found_item_spell
             }
+            fi++
         }
-        fi = -1
+        fi = 0
     }
 }

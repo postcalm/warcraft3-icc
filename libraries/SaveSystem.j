@@ -1,19 +1,25 @@
+// author Vlod | WWW.XGM.RU
+// author meiso | WWW.XGM.RU
 include "common/spells.j"
 
 define 
 {
-    SCOPE_MAP = 2
-    SCOPE_RESOURCES = 3
-    SCOPE_HERO_DATA = 4
-    SCOPE_END = 5
-    SCOPE_STATE = 6
-    SCOPE_ABILITIES = 7
-    SCOPE_ITEMS = 8
+    SCOPE_MAP        = 2
+    SCOPE_RESOURCES  = 3
+    SCOPE_HERO_DATA  = 4
+    SCOPE_HERO_SKILL = 5
+    SCOPE_STATE      = 6
+    SCOPE_ABILITIES  = 7
+    SCOPE_ITEMS      = 8
 
-    MAGIC_NUMBER_ONE = 18259200
-    MAGIC_NUMBER_TWO = 44711
+    MAGIC_NUMBER_ONE   = 18259200
+    MAGIC_NUMBER_TWO   = 44711
     MAGIC_NUMBER_THREE = 259183
-    MAGIC_NUMBER_FOUR = 129593
+    MAGIC_NUMBER_FOUR  = 129593
+    MAGIC_NUMBER_FIVE  = 259200
+    MAGIC_NUMBER_SIX   = 54773
+    MAGIC_NUMBER_SEVEN = 7141
+    MAGIC_NUMBER_EIGHT = 421
 }
 
 // перерождение юнитов
@@ -71,16 +77,16 @@ integer c_module(integer dividend, integer divisor)
 //
 integer generation1()
 {
-    udg_SaveUnit_g1 = udg_SaveUnit_g1 * 7141 + 54773
-    udg_SaveUnit_g1 = c_module(udg_SaveUnit_g1, 259200)
+    udg_SaveUnit_g1 = udg_SaveUnit_g1 * MAGIC_NUMBER_SEVEN + MAGIC_NUMBER_SIX
+    udg_SaveUnit_g1 = c_module(udg_SaveUnit_g1, MAGIC_NUMBER_FIVE)
     return udg_SaveUnit_g1
 }
 
 // 
 integer generation2()
 {	
-    udg_SaveUnit_g2 = udg_SaveUnit_g2 * 421 + 54773
-    udg_SaveUnit_g2 = c_module(udg_SaveUnit_g2, 259200)
+    udg_SaveUnit_g2 = udg_SaveUnit_g2 * MAGIC_NUMBER_EIGHT + MAGIC_NUMBER_SIX
+    udg_SaveUnit_g2 = c_module(udg_SaveUnit_g2, MAGIC_NUMBER_FIVE)
     return udg_SaveUnit_g2
 }
 
@@ -146,7 +152,7 @@ integer scopeSaveUnitLoad___next(integer index, integer current_scope)
     {
         return index + 7
     }
-    if(current_scope == SCOPE_END)
+    if(current_scope == SCOPE_HERO_SKILL)
     {
         return index + udg_SaveUnit_data[index + 1] * 2 + 2
     }
@@ -188,7 +194,7 @@ void scopeSaveUnitLoad___load_userdata()
         whilenot( i > n)
         {
             case = udg_SaveUnit_data[i]
-            if(case == 1)
+            if( case == 1 )
             {
                 cjlocgn_00000003 = udg_SaveUnit_data[i + 1]
                 cjlocgn_00000004 = i + 1
@@ -211,11 +217,11 @@ void scopeSaveUnitLoad___load_forunit()
     real unit_loc_y
     item current_item
     integer current_case
-    integer case
+    integer i
     integer maximum_data
-    integer cjlocgn_00000007
-    integer cjlocgn_00000008
-    integer cjlocgn_00000009
+    integer max_count_data
+    integer j
+    integer count_level
     
     if( udg_SaveUnit_unit != null )
     {
@@ -223,75 +229,79 @@ void scopeSaveUnitLoad___load_forunit()
         unit_loc_x = GetUnitX(current_unit)
         unit_loc_y = GetUnitY(current_unit)
         current_case = -1
-        case = 1
+        i = 1
         maximum_data = udg_SaveUnit_data[0]
-        whilenot( case > maximum_data )
+        whilenot( i > maximum_data )
         {
-            current_case = udg_SaveUnit_data[case]
+            current_case = udg_SaveUnit_data[i]
+            
             // выдаем предметы
             if( current_case == SCOPE_ITEMS )
             {
-                cjlocgn_00000007 = udg_SaveUnit_data[case + 1]
-                cjlocgn_00000008 = case + 2
-                whilenot( cjlocgn_00000007 <= 0 )
+                max_count_data = udg_SaveUnit_data[i + 1]
+                j = i + 2
+                whilenot( max_count_data <= 0 )
                 {
-                    current_item = CreateItem(udg_SaveUnit_data[cjlocgn_00000008], unit_loc_x, unit_loc_y)
+                    current_item = CreateItem(udg_SaveUnit_data[j], unit_loc_x, unit_loc_y)
                     UnitAddItem(current_unit, current_item)
-                    SetItemCharges(current_item, udg_SaveUnit_data[cjlocgn_00000008 + 1])
-                    cjlocgn_00000008 = cjlocgn_00000008 + 2
-                    cjlocgn_00000007 = cjlocgn_00000007 - 1
+                    SetItemCharges(current_item, udg_SaveUnit_data[j + 1])
+                    j += 2
+                    max_count_data -= 1
                 }
             }
             
             // проставляем статы
             if( current_case == SCOPE_STATE )
             {
-                SetHeroXP(current_unit, udg_SaveUnit_data[case + 1], false)
-                if GetHeroStr(current_unit, false) < udg_SaveUnit_data[case + 2]
+                SetHeroXP(current_unit, udg_SaveUnit_data[i + 1], false)
+                if GetHeroStr(current_unit, false) < udg_SaveUnit_data[i + 2]
                 {
-                    SetHeroStr(current_unit, udg_SaveUnit_data[case + 2], false)
+                    SetHeroStr(current_unit, udg_SaveUnit_data[i + 2], false)
                 }
-                if GetHeroAgi(current_unit, false) < udg_SaveUnit_data[case + 3]
+                if GetHeroAgi(current_unit, false) < udg_SaveUnit_data[i + 3]
                 {
-                    SetHeroAgi(current_unit, udg_SaveUnit_data[case + 3], false)
+                    SetHeroAgi(current_unit, udg_SaveUnit_data[i + 3], false)
                 }
-                if GetHeroInt(current_unit, false) < udg_SaveUnit_data[case + 4]
+                if GetHeroInt(current_unit, false) < udg_SaveUnit_data[i + 4]
                 {
-                    SetHeroInt(current_unit, udg_SaveUnit_data[case + 4], false)
+                    SetHeroInt(current_unit, udg_SaveUnit_data[i + 4], false)
                 }
             }
             
-            if( current_case == 5 )
+            // выдаем юниту его навыки
+            if( current_case == SCOPE_HERO_SKILL )
             {
-                cjlocgn_00000007 = udg_SaveUnit_data[case + 1]
-                cjlocgn_00000008 = case + 2
-                whilenot( cjlocgn_00000007 <= 0 )
+                max_count_data = udg_SaveUnit_data[i + 1]
+                j = i + 2
+                whilenot( max_count_data <= 0 )
                 {
-                    cjlocgn_00000009 = udg_SaveUnit_data[cjlocgn_00000008 + 1]
-                    whilenot( cjlocgn_00000009 <= 0 )
+                    count_level = udg_SaveUnit_data[j + 1]
+                    whilenot( count_level <= 0 )
                     {
-                        SelectHeroSkill(current_unit, udg_SaveUnit_data[cjlocgn_00000008])
-                        cjlocgn_00000009 = cjlocgn_00000009 - 1
+                        SelectHeroSkill(current_unit, udg_SaveUnit_data[j])
+                        count_level -= 1
                     }
-                    cjlocgn_00000008 = cjlocgn_00000008 + 2
-                    cjlocgn_00000007 = cjlocgn_00000007 - 1
+                    j += 2
+                    max_count_data -= 1
                 }
             }
 
             // выдаем способности
             if( current_case == SCOPE_ABILITIES )
             {
-                cjlocgn_00000007 = udg_SaveUnit_data[case + 1]
-                cjlocgn_00000008 = case + 2
-                whilenot( cjlocgn_00000007 <= 0 )
+                // сколько всего способностей было сохранено
+                max_count_data = udg_SaveUnit_data[i + 1]
+                // индекс, по которому лежит способность
+                j = i + 2
+                whilenot( max_count_data <= 0 )
                 {
-                    UnitAddAbility(current_unit, udg_SaveUnit_data[cjlocgn_00000008])
-                    SetUnitAbilityLevel(current_unit, udg_SaveUnit_data[cjlocgn_00000008], udg_SaveUnit_data[cjlocgn_00000008 + 1])
-                    cjlocgn_00000008 = cjlocgn_00000008 + 2
-                    cjlocgn_00000007 = cjlocgn_00000007 - 1
+                    UnitAddAbility(current_unit, udg_SaveUnit_data[j])
+                    SetUnitAbilityLevel(current_unit, udg_SaveUnit_data[j], udg_SaveUnit_data[j + 1])
+                    j += 2
+                    max_count_data -= 1
                 }
             }
-            case = scopeSaveUnitLoad___next(case, current_case)
+            i = scopeSaveUnitLoad___next(i, current_case)
         }
         current_unit = null
         current_item = null
@@ -679,7 +689,7 @@ integer SaveGeneralState(integer i, unit u, rect world)
         udg_SaveUnit_data[i] = SCOPE_RESOURCES; i++
         udg_SaveUnit_data[i] = count_gold; i++
         udg_SaveUnit_data[i] = count_lumber; i++
-        udg_SaveUnit_data[i] = SCOPE_END; i++
+        udg_SaveUnit_data[i] = SCOPE_HERO_SKILL; i++
         scope_ability = i; i++
         PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + "logs.txt")
         
@@ -872,11 +882,12 @@ void scopeSaveUnitSave__ada(boolean is_player, string name, unit u)
         if( is_player )
         {
             PreloadGenClear()
-            i = -1
+            i = 0
             n = item_data + 1
-            whilenot( i++ > n )
+            whilenot( i > n )
             {
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(cjlocgn_00000007[i]) + "," + I2S(udg_SaveUnit_data[i]) + ") \n //")
+                i++
             }
             
             // сохранение данных в файл
@@ -905,7 +916,7 @@ void Save()
     string full_command_from_chat
     integer i
     
-    if udg_SaveUnit_bool
+    if( udg_SaveUnit_bool )
     {
         udg_SaveUnit_bool = false
         handle_player = GetTriggerPlayer()

@@ -50,29 +50,33 @@ define
 
     ADD_UNIT(u) =
     {
-        int ind = -1
-        whilenot(ind++ == HERO_COUNT)
+        int ind = 0
+        whilenot( ind == HERO_COUNT )
         {
-            if( HeroWithBuff ## SUFFIX_BUFF_NAME[ind].getHero() == u ) { break }
+            if( HeroWithBuff ## SUFFIX_BUFF_NAME[ind].getHero() == u ) 
+            { 
+                break 
+            }
             if( HeroWithBuff ## SUFFIX_BUFF_NAME[ind].getHero() == null ) 
             { 
                 HeroWithBuff ## SUFFIX_BUFF_NAME[ind].setHero(u)
                 break
             }
+            ind++
         }
-        ind = -1
+        ind = 0
     }
 }
 
 void RemoveEnemies(group heroes)
 {
-    int i = -1
+    int i = 0
     unit temp = null
     int count = CountUnitsInGroup(heroes)
-    whilenot(i++ == count - 1)
+    whilenot( i == count - 1 )
     {
         temp = FirstOfGroup(heroes)
-        if( IsUnitEnemy( temp, Player(0) ) )
+        if( IsUnitEnemy(temp, Player(0)) )
         {
             GroupRemoveUnit(heroes, temp)
         }
@@ -81,6 +85,7 @@ void RemoveEnemies(group heroes)
             GroupRemoveUnit(heroes, temp)
             GroupAddUnit(heroes, temp)
         }
+        i++
         temp = null
     }
 }
