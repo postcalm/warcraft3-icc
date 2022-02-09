@@ -4,7 +4,8 @@ include "common/areas.j"
 
 void Actions_ShadowBolt()
 {
-    unit target_enemy = GetUnitInArea( GroupHeroesInArea(AREA_LD) )
+    player whoPlayer = GetTriggerPlayer()
+    unit target_enemy = GetUnitInArea( GroupHeroesInArea(AREA_LD, whoPlayer) )
     
     real damage = GetRandomReal( 9200., 12000. )
     UnitDamageTarget(LADY_DEATHWHISPER, target_enemy, damage, true, false, \
