@@ -9,7 +9,8 @@ void Coldflame_Actions()
     TriggerSleepAction( GetRandomReal( 2., 3. ) )
     
     unit coldflameObj = null
-    unit randUnit = GetUnitInArea( GroupHeroesInArea(AREA_LM) )
+    player which_player = GetTriggerPlayer()
+    unit randUnit = GetUnitInArea( GroupHeroesInArea(AREA_LM, which_player) )
     
     float MarrowgarLocX = GetLocationX( GetUnitLoc(LORD_MARROWGAR) )
     float MarrowgarLocY = GetLocationY( GetUnitLoc(LORD_MARROWGAR) )
