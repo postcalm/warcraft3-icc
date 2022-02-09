@@ -9,10 +9,11 @@ void BoneSpike_Actions()
 {
     unit boneSpikeObj = null
     player whoPlayer = GetTriggerPlayer()
-    
+    sBJDebugMsg("player - %h", whoPlayer)
     TriggerSleepAction( GetRandomReal( 14., 17. ) )
     
     unit targetEnemy = GetUnitInArea( GroupHeroesInArea(AREA_LM) )
+    sBJDebugMsg("target - %h", targetEnemy)
     float targetEnemyHealth = GetUnitState( targetEnemy, UNIT_STATE_MAX_LIFE )
     
     if( BONE_SPIKE_EXIST )
