@@ -19,9 +19,9 @@ void InitTrig_Init_LM()
     
     FILL_STRUCT_ITEMS(items_id, items_spells_id)
     REGISTRATION_ITEMS()
-    //ADD_ITEMS_TO_UNIT(LORD_MARROWGAR)
+    ADD_ITEMS_TO_UNIT(LORD_MARROWGAR)
     
-    //Init_Coldflame()
-    //Init_BoneSpike()
-    //Init_Whirlwind()
+    Init_Coldflame()
+    Init_BoneSpike()
+    Init_Whirlwind()
 }
