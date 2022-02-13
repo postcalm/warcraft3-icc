@@ -57,34 +57,30 @@ function c_module(dividend, divisor)
     return dividend - (dividend/divisor) * divisor
 end
 
---
 function generation1()
     udg_SaveUnit_g1 = udg_SaveUnit_g1 * MAGIC_NUMBER_SEVEN + MAGIC_NUMBER_SIX
     udg_SaveUnit_g1 = c_module(udg_SaveUnit_g1, MAGIC_NUMBER_FIVE)
     return udg_SaveUnit_g1
 end
 
---
 function generation2()
     udg_SaveUnit_g2 = udg_SaveUnit_g2 * MAGIC_NUMBER_EIGHT + MAGIC_NUMBER_SIX
     udg_SaveUnit_g2 = c_module(udg_SaveUnit_g2, MAGIC_NUMBER_FIVE)
     return udg_SaveUnit_g2
 end
 
--- получение ключа игрока
+--получение ключа игрока
 function GetUserKey()
     if udg_SaveUnit_author > 0 then
-        Preloader("save\\" + udg_SaveUnit_directory + "\\" + "user")
-
-        local public_key = GetPlayerTechMaxAllowed(Player(15), -1)
-        local secret_key = GetPlayerTechMaxAllowed(Player(15), 0)
+        Preloader("save\\"..udg_SaveUnit_directory.."\\".."user")
+        local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
+        local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
 
         if public_key <= 0 or ( public_key/8286 ) > 259199 then
             return 0
         end
 
         udg_SaveUnit_g1 = public_key
-
         secret_key = secret_key - generation1()
         if secret_key <= 0 then
             return 0
@@ -94,14 +90,21 @@ function GetUserKey()
     return 0
 end
 
--- генерация ключа игрока
+local function save_file(save_code)
+    Preload("\")\n call BlzSetAbilityTooltip('Agyv',\""..save_code.."\",0)".."\n//")
+end
+
+--генерация ключа игрока
 function CreateUserKey(salt, val)
+    local save_code
     if udg_SaveUnit_author > 0 then
         udg_SaveUnit_g1 = salt
         PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(-1) + "," + I2S(salt) + ") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(0) + "," + I2S(val + generation1()) + ") //")
-        PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + "user")
+        save_code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //"
+        save_file(save_code)
+        save_code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + generation1())..") //"
+        save_file(save_code)
+        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
         return val
     end
     return 0
@@ -338,7 +341,7 @@ end
 function scopeSaveUnitLoad___load_uploading(author, user)
     local encrypted_data
     if author > 0 and user > 0 then
-        local player_s = Player(15)
+        local player_s = Player(25)
         local max_count_data = GetPlayerTechMaxAllowed(player_s, -1)
         local saved_encrypted_key = GetPlayerTechMaxAllowed(player_s, -2)
 
@@ -374,7 +377,7 @@ function scopeSaveUnitLoad___load_uploading(author, user)
                 return true
             end
         end
-        PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\logs.txt")
+        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\logs.txt")
         DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Error load. Pls, take a look \"Allow Local Files\"")
     end
     return false
@@ -405,7 +408,7 @@ function scopeSaveUnitLoad___afa(gc, pl, name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\" + udg_SaveUnit_directory + "\\" + name)
+            Preloader("save\\"..udg_SaveUnit_directory.."\\"..name)
         end
 
         TriggerSleepAction(0.)
@@ -446,12 +449,12 @@ function Load()
         scopeSaveUnitLoad___afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, udg_SaveUnit_data[1] do
-            Preload( I2S(udg_SaveUnit_data[i]) + " data[" + I2S(i) + "] < load" )
+            Preload( I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load" )
         end
         for i = 1, udg_SaveUnit_user_data[1] do
-            Preload(I2S(udg_SaveUnit_user_data[i]) + " user_data[" + I2S(i) + "] < load")
+            Preload(I2S(udg_SaveUnit_user_data[i]).." user_data["..I2S(i).."] < load")
         end
-        PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + "logs.txt")
+        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."logs.txt")
     end
 end
 
@@ -463,20 +466,20 @@ function scopeSaveUnitSave__save_userdata(i)
         if n > 0 then
 
             udg_SaveUnit_data[i] = 1
-            Preload(I2S(udg_SaveUnit_data[i]) + " udg_SaveUnit_data[" + I2S(i) + "] < save_userdata")
+            Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata")
             i = i + 1
             udg_SaveUnit_data[i] = n
-            Preload(I2S(udg_SaveUnit_data[i]) + " udg_SaveUnit_data[" + I2S(i) + "] < save_userdata")
+            Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata")
             i = i + 1
             for j = 2, n do
                 udg_SaveUnit_data[i] = udg_SaveUnit_user_data[j]
-                Preload(I2S(udg_SaveUnit_data[i]) + " udg_SaveUnit_data[" + I2S(i) + "] < save_userdata cycle")
+                Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata cycle")
                 i = i + 1
             end
         end
     end
     Preload( I2S(i) )
-    PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + "logs_save.txt")
+    PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."logs_save.txt")
     return i
 end
 
@@ -529,7 +532,7 @@ function SaveGeneralState(i, u, world)
         i = i + 1
         local scope_ability = i
         i = i + 1
-        PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + "logs.txt")
+        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."logs.txt")
 
         while udg_SaveUnit_ability[ai] == 0 do
             local ability_level = GetUnitAbilityLevel(u, udg_SaveUnit_ability[ai])
@@ -613,7 +616,7 @@ function scopeSaveUnitSave__ada(is_player, name, u)
     local salt = GetRandomInt(1, 259199)
     local value_for_key = GetRandomInt(1, 2000000000)
     local cjlocgn_00000007 = {}
-    local item_data = 1
+    local item_data = 2
     local n
     local encrypted_data
     local cjlocgn_0000000c = 0
@@ -628,12 +631,12 @@ function scopeSaveUnitSave__ada(is_player, name, u)
         end
         BJDebugMsg("yep")
         if is_player then
-            user_key = GetUserKey()
+            user_key = 0 --GetUserKey()
             if user_key == 0 then
                 user_key = CreateUserKey(salt, value_for_key)
             end
         end
-        BJDebugMsg("" + I2S(user_key))
+        BJDebugMsg("user_key "..I2S(user_key))
         if is_player then
             item_data = scopeSaveUnitSave__save_hero(item_data, u)
         end
@@ -641,7 +644,8 @@ function scopeSaveUnitSave__ada(is_player, name, u)
         if is_player then
             item_data = SaveGeneralState(item_data, u, handle_world)
         end
-        BJDebugMsg("" + I2S(udg_SaveUnit_user_data[1]))
+
+        BJDebugMsg(I2S(udg_SaveUnit_user_data[1]))
         if udg_SaveUnit_user_data[1] > 0 then
             if is_player then
                 if udg_SaveUnit_user_data[1] + item_data < 1200 then
@@ -698,19 +702,19 @@ function scopeSaveUnitSave__ada(is_player, name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(cjlocgn_00000007[i]) + "," + I2S(udg_SaveUnit_data[i]) + ") \n //")
+                Preload("\")\n\n SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(udg_SaveUnit_data[i])..") \n //")
             end
 
             -- сохранение данных в файл
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(-1) + "," + I2S(item_data) + ") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(-2) + "," + I2S(encrypted_key) + ") \n //")
+            Preload("\")\n\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
+            Preload("\")\n\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(encrypted_key)..") \n //")
             -- смысл этих вычислений скрыт от мира сего
             local a = c_module(user_key, MAGIC_NUMBER_TWO) * c_module(cjlocgn_0000000c, MAGIC_NUMBER_TWO)
             local b = c_module(a, MAGIC_NUMBER_TWO) * c_module(encrypted_key, MAGIC_NUMBER_TWO)
             local c = c_module(b, MAGIC_NUMBER_TWO) * c_module(id_author, MAGIC_NUMBER_TWO)
             encrypted_data = c_module(c, MAGIC_NUMBER_TWO)
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(15)," + I2S(-3) + "," + I2S(encrypted_data) + ") \n //")
-            PreloadGenEnd("save\\" + udg_SaveUnit_directory + "\\" + name)
+            Preload("\")\n\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
+            PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\"..name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -718,7 +722,6 @@ function scopeSaveUnitSave__ada(is_player, name, u)
     end
 end
 
--- сохранение
 function Save()
     local file
     if udg_SaveUnit_bool then
