@@ -90,20 +90,20 @@ function GetUserKey()
     return 0
 end
 
-local function save_file(save_code)
-    Preload("\")\n call BlzSetAbilityTooltip('Agyv',\""..save_code.."\",0)".."\n//")
+local function save_code(code)
+    Preload("\")\n call BlzSetAbilityTooltip('Agyv',\""..code.."\",0)".."\n//")
 end
 
 --генерация ключа игрока
 function CreateUserKey(salt, val)
-    local save_code
+    local code
     if udg_SaveUnit_author > 0 then
         udg_SaveUnit_g1 = salt
         PreloadGenClear()
-        save_code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //"
-        save_file(save_code)
-        save_code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + generation1())..") //"
-        save_file(save_code)
+        code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //"
+        save_code(code)
+        code = "\")\n SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + generation1())..") //"
+        save_code(code)
         PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
         return val
     end
