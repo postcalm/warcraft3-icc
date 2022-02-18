@@ -1,18 +1,18 @@
 
 include "libraries/Buff.j"
 
+int COUNT_BM = 1
 setdef SUFFIX_BUFF_NAME = BM
-setdef HERO_COUNT = 1
 
 INIT_BUFF_STRUCT()
 
 void BlessingOfMight()
 {
     unit unit_s = GetSpellTargetUnit()
-    int i = -1
-    ADD_UNIT(unit_s)
+    int i = 0
+    ADD_UNIT(unit_s, COUNT_BM)
 
-    whilenot( i++ == HERO_COUNT )
+    whilenot( i == COUNT_BM )
     {
         if( GET_HERO(i) == null ) { break }
         if( !BUFF_ON_UNIT(i) )
@@ -21,8 +21,10 @@ void BlessingOfMight()
             SetHeroStr( unit_s, \
                         GetHeroStr( unit_s, false ) + 225, false )
             SET_BUFF_ON_UNIT(i)
+            COUNT_BM++
             break
         }
+        i++
     }
     unit_s = null
 }

@@ -4,7 +4,6 @@
 define
 {
     SUFFIX_BUFF_NAME
-    HERO_COUNT
 
     <INIT_BUFF_STRUCT()> =
     {
@@ -48,10 +47,10 @@ define
 
     GET_HERO(i) = HeroWithBuff ## SUFFIX_BUFF_NAME[i].getHero()
 
-    ADD_UNIT(u) =
+    ADD_UNIT(u, COUNT) =
     {
         int ind = 0
-        whilenot( ind == HERO_COUNT )
+        whilenot( ind == COUNT )
         {
             if( HeroWithBuff ## SUFFIX_BUFF_NAME[ind].getHero() == u ) 
             { 

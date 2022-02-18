@@ -2,18 +2,19 @@
 include "common/spells.j"
 include "libraries/Buff.j"
 
+int COUNT_BK = 1
+
 setdef SUFFIX_BUFF_NAME = BK
-setdef HERO_COUNT = 1
 
 INIT_BUFF_STRUCT()
 
 void BlessingOfKings()
 {   
     unit unit_s = GetSpellTargetUnit()
-    int i = -1
+    int i = 0
     // note: в структуру не заносятся новые юниты!
-    ADD_UNIT(unit_s)
-    whilenot(i++ == HERO_COUNT)
+    ADD_UNIT(unit_s, COUNT_BK)
+    whilenot(i == COUNT_BK)
     {
         if( GET_HERO(i) == null ) { break }
         if( !BUFF_ON_UNIT(i) )
@@ -26,8 +27,10 @@ void BlessingOfKings()
                         GetHeroInt( unit_s, false ) + R2I( GetHeroInt( unit_s, false ) * 0.1 ), false )
             
             SET_BUFF_ON_UNIT(i)
+            COUNT_BK++
             break
         }
+        i++
     }
     unit_s = null
 }
