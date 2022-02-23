@@ -1,4 +1,5 @@
 require 'lfs' -- подключаем LuaFileSystem https://keplerproject.github.io/luafilesystem/manual.html
+
 local param = {
     game       = [[E:\Warcraft III\x86_64]], -- папка с игрой
     map        = [[\ICC.w3x]], -- папка с картой
@@ -6,7 +7,9 @@ local param = {
     patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
     files      = { -- порядок сборки файлов
         [[\common]],
-        [[\libraries]],
+        [[\libraries\SaveSystem]],
+        [[\libraries\EquipmentSystem]],
+        [[\scripts\lord_marrowgar\initLordMarrowgar.lua]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проэкта

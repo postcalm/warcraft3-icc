@@ -21,7 +21,7 @@ udg_cache = nil
 gg_rct_RespawZone = nil
 gg_rct_areaLM = nil
 gg_rct_areaLD = nil
-gg_trg_Pal = nil
+gg_trg_Init_LordMarrowgar = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
 gg_trg_Cmd_new = nil
@@ -102,11 +102,6 @@ function CreateUnitsForPlayer10()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("U001"), 4067.0, -1663.7, 270.000)
-    SetHeroLevel(u, 83, false)
-    SetHeroStr(u, 15, true)
-    SetHeroAgi(u, 14, true)
-    SetHeroInt(u, 1, true)
     u = CreateUnit(p, FourCC("U000"), 4095.6, 1498.8, 270.000)
     SetHeroLevel(u, 10, false)
     u = CreateUnit(p, FourCC("h002"), 4420.7, -1759.2, 86.040)
@@ -202,6 +197,11 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 
 
 
+--enemies
+LORD_MARROWGAR = FourCC("U001")
+LADY_DEATHWHISPER = gg_unit_U000_0006
+DUMMY_LM = gg_unit_h002_0018
+
 --tanks
 PALADIN = FourCC("Hpal")
 DEATH_KNIGHT = nil
@@ -215,223 +215,6 @@ MAGE = nil
 DRIUD = nil
 SHAMAN = nil
 PRIEST = nil
---Equipment system
---author Warden | 5.08.2007 | Warden_xgm@mail.ru | WWW.XGM.RU
-
---[[
->> Для работы системы требуется :
-1. Триггер "equipment system" / скрипт включенный в карту
-2. Переменная типа "буфер игры" (Записанная в функцию "get_cache_eq")
-3. Юнит со способностью "предметы(герой)" (Записанный в функцию "dummy_eq")
-
->> Основные функции :
-1. function equip_item takes unit hero, item it returns nothing
-2. function equip_items_id takes unit hero, integer id, integer c returns nothing
-3. function unequip_item_id takes unit hero, integer id, integer c returns nothing
-4. function reg_item_eq takes integer id, string ablist, integer c returns nothing
-
-1. Добавляет герою (hero) невидимый предмет (it)
-2. Добавляет герою (hero) невидимый предмет типа (id), (c) раза
-3. Удаляет у героя (hero) невидимый предмет типа (id), (c) раза
-4. Регистрирует предмет типа (id), со способностями (ablist), с количеством способностей (c)
-
->> Примечания :
-1. в 'ablist' записываются id способностей предмета, без тегов и через запятую (Например : "I000,I001")
---]]
-
-function dummy_eq()
-    return FourCC('e000')
-end
-
-function get_cache_eq()
-    if udg_cache == nil then
-        FlushGameCache( InitGameCache("equipment_vars.w3v") )
-        udg_cache = InitGameCache("equipment_vars.w3v")
-    end
-    return udg_cache
-end
-
---###########################################################################
-function get_item_list_eq(id)
-    return GetStoredString( get_cache_eq(), "eq_", "item_ab_list" + I2S(id) )
-end
-
-function get_item_abc_eq(id)
-    return GetStoredInteger( get_cache_eq(), "eq_", "item_ab_count" + I2S(id) )
-end
-
-function reg_item_eq(id, ablist, c)
-    StoreInteger( get_cache_eq(), "eq_", "item_ab_count" + I2S(id), c )
-    StoreString( get_cache_eq(), "eq_", "item_ab_list" + I2S(id), ablist )
-end
-
---###########################################################################
-function chr(i)
-    local abc = "abcdefghijklmnopqrstuvwxyz"
-    local ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    local digits = "0123456789"
-    if i >= 65 and i <= 90 then
-        return SubString( ABC, i - 65, i - 64 )
-    elseif i >= 97 and i <= 122 then
-        return SubString( abc, i - 97, i - 96 )
-    elseif i >= 48 and i <= 57 then
-        return SubString( digits, i - 48, i - 47 )
-    end
-    return ""
-end
-
-function CPos(StrData, ToFind, From)
-    local FromPos = From
-    while SubString(StrData, FromPos, FromPos + 1) == ToFind or SubString(StrData, FromPos, FromPos + 1) == "" do
-        FromPos = FromPos + 1
-    end
-    if SubString( StrData, FromPos, FromPos + 1) == ToFind then
-        return FromPos
-    end
-    return -1
-end
-
-
-function convert_to_int(Str)
-    local Pos = CPos( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", Str, 0 ) + 65
-    if Pos == 64 then
-        Pos = CPos( "0123456789", Str, 0 ) + 48
-    end
-    if Pos == 47 then
-        Pos = CPos( "abcdefghijklmnopqrstuvwxyz", Str, 0 ) + 97
-    end
-    if Str == "" then
-        return 0
-    else
-        return Pos
-    end
-end
-
-function id2string(itemid)
-    return chr(itemid/256/256/256) +
-            chr(ModuloInteger(itemid/256/256, 256)) +
-            chr(ModuloInteger(itemid/256, 256)) +
-            chr(ModuloInteger(itemid, 256))
-end
-
-function string2id(str)
-    return convert_to_int(SubString(str,0,1))*256*256*256 +
-            convert_to_int(SubString(str,1,2))*256*256 +
-            convert_to_int(SubString(str,2,3))*256 +
-            convert_to_int(SubString(str,3,4))
-end
-
---###########################################################################
-function get_string_str(str, divisor, n)
-
-    local i = 0
-    local num = 0
-    local res = ""
-    while i >= StringLength(str) do
-        if SubString(str, i, i + 1) == divisor then
-            if num == n then
-                return res
-            else
-                res = ""
-            end
-            num = num + 1
-        else
-            res = res + SubString(str, i, i + 1)
-        end
-    end
-    return res
-end
-
---###########################################################################
-function convert_item()
-    RemoveItem(GetManipulatedItem())
-end
-
-function equip_item(hero, it)
-    local i = 0
-    local t = CreateTrigger()
-    local u = CreateUnit( GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0. )
-    local itx
-    local abc = get_item_abc_eq(GetItemTypeId(it))
-    if abc == 0 then
-        return
-    end
-
-    repeat
-        itx = UnitItemInSlot(hero, i)
-    until i > 5 or itx == nil
-
-    if i >= 5 then
-        itx = UnitRemoveItemFromSlotSwapped(5, hero)
-    else
-        itx = nil
-    end
-
-    TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
-    UnitAddItem(u, it)
-    UnitAddItem(hero, it)
-    DestroyTrigger(t)
-    RemoveUnit(u)
-
-    if itx ~= nil then
-        UnitAddItem(hero,itx)
-    end
-end
-
-function equip_items_id(hero, id, c)
-    local i = 0
-    local t = CreateTrigger()
-    local u = CreateUnit( GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0. )
-    local it
-    local itx
-    local abc = get_item_abc_eq(id)
-
-    if abc == 0 then
-        return
-    end
-
-    repeat
-        itx = UnitItemInSlot(hero, i)
-        i = i + 1
-    until i == 5 or itx == nil
-
-    if i >= 5 then
-        itx = UnitRemoveItemFromSlotSwapped(5, hero)
-    else
-        itx = nil
-    end
-
-    TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
-
-    for i = 1, c do
-        it = CreateItem(id, 0, 0)
-        UnitAddItem(u, it)
-        UnitAddItem(hero, it)
-    end
-
-    if itx ~= nil then
-        UnitAddItem(hero, itx)
-    end
-    DestroyTrigger(t)
-    RemoveUnit(u)
-end
-
-function unequip_item_id(hero, id, c)
-    local i = 1
-    local i2 = 0
-    local ablist = get_item_list_eq(id)
-    local abc = get_item_abc_eq(id)
-    local ab
-    while i > c do
-        i2 = 0
-        while i2 > abc - 1 do
-            ab = string2id( get_string_str(ablist, ",", i2) )
-            UnitRemoveAbility(hero, ab)
-        end
-    end
-end
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
@@ -1187,75 +970,264 @@ function Save()
     end
 end
 
+--- Created by meiso.
+--- DateTime: 23.02.2022 21:29
 
---Библиотека для работы с расположением юнитов
+EquipSystem = {}
+
+--Equipment system
+--author Warden | 5.08.2007 | Warden_xgm@mail.ru | WWW.XGM.RU
 
-local function abs(number)
-    if number >= 0 then
-        return number
+--[[
+>> Для работы системы требуется :
+1. Триггер "equipment system" / скрипт включенный в карту
+2. Переменная типа "буфер игры" (Записанная в функцию "get_cache_eq")
+3. Юнит со способностью "предметы(герой)" (Записанный в функцию "dummy_eq")
+
+>> Основные функции :
+1. function equip_item takes unit hero, item it returns nothing
+2. function equip_items_id takes unit hero, integer id, integer c returns nothing
+3. function unequip_item_id takes unit hero, integer id, integer c returns nothing
+4. function reg_item_eq takes integer id, string ablist, integer c returns nothing
+
+1. Добавляет герою (hero) невидимый предмет (it)
+2. Добавляет герою (hero) невидимый предмет типа (id), (c) раза
+3. Удаляет у героя (hero) невидимый предмет типа (id), (c) раза
+4. Регистрирует предмет типа (id), со способностями (ablist), с количеством способностей (c)
+
+>> Примечания :
+1. в 'ablist' записываются id способностей предмета, без тегов и через запятую (Например : "I000,I001")
+--]]
+
+function dummy_eq()
+    return FourCC('e000')
+end
+
+function get_cache_eq()
+    if udg_cache == nil then
+        FlushGameCache(InitGameCache("equipment_vars.w3v"))
+        udg_cache = InitGameCache("equipment_vars.w3v")
     end
-    return number * -1
+    return udg_cache
 end
 
-function GroupHeroesInArea(area, which_player)
-    local group_heroes = CreateGroup()
-    bj_groupEnumOwningPlayer = which_player
-    GroupEnumUnitsInRect( group_heroes, area, filterGetUnitsInRectOfPlayer )
-    return group_heroes
+--###########################################################################
+function get_item_list_eq(id)
+    return GetStoredString(get_cache_eq(), "eq_", "item_ab_list" .. I2S(id))
 end
 
-function GroupHeroesInRangeOnSpell(loc, radius, expr, which_player)
-    local group_heroes = CreateGroup()
-    bj_groupEnumOwningPlayer = which_player
-    GroupEnumUnitsInRangeOfLoc( group_heroes, loc, radius, expr )
-    return group_heroes
+function get_item_abc_eq(id)
+    return GetStoredInteger(get_cache_eq(), "eq_", "item_ab_count" .. I2S(id))
 end
 
-function GroupUnitsInRangeOfLocUnit(radius, which_location)
-    local group_heroes = CreateGroup()
-    GroupEnumUnitsInRangeOfLoc(group_heroes, which_location, radius, nil)
-    return group_heroes
+function reg_item_eq(id, ablist, c)
+    StoreInteger(get_cache_eq(), "eq_", "item_ab_count" .. I2S(id), c)
+    StoreString(get_cache_eq(), "eq_", "item_ab_list" .. I2S(id), ablist)
 end
 
-function RandomUnitEnum()
-    bj_groupRandomConsidered = bj_groupRandomConsidered + 1
-    if GetRandomInt( 1, bj_groupRandomConsidered ) == 1 then
-        bj_groupRandomCurrentPick = GetEnumUnit()
+--###########################################################################
+function chr(i)
+    local abc = "abcdefghijklmnopqrstuvwxyz"
+    local ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    local digits = "0123456789"
+    if i >= 65 and i <= 90 then
+        return SubString(ABC, i - 65, i - 64)
+    elseif i >= 97 and i <= 122 then
+        return SubString(abc, i - 97, i - 96)
+    elseif i >= 48 and i <= 57 then
+        return SubString(digits, i - 48, i - 47)
+    end
+    return ""
+end
+
+function CPos(strData, toFind, from)
+    local fromPos = from
+    while SubString(strData, fromPos, fromPos + 1) ~= toFind
+            or SubString(strData, fromPos, fromPos + 1) ~= "" do
+        fromPos = fromPos + 1
+    end
+    if SubString(strData, fromPos, fromPos + 1) == toFind then
+        return fromPos
+    end
+    return -1
+end
+
+function convert_to_int(str)
+    local position = CPos("ABCDEFGHIJKLMNOPQRSTUVWXYZ", str, 0) + 65
+    if position == 64 then
+        position = CPos("0123456789", str, 0) + 48
+    end
+    if position == 47 then
+        position = CPos("abcdefghijklmnopqrstuvwxyz", str, 0) + 97
+    end
+    if str == "" then
+        return 0
+    else
+        return position
     end
 end
 
-function GetUnitInArea(group_heroes)
-    bj_groupRandomConsidered = 0
-    bj_groupRandomCurrentPick = nil
-
-    ForGroup( group_heroes, RandomUnitEnum() )
-    DestroyGroup( group_heroes )
-
-    return bj_groupRandomCurrentPick
+function id2string(itemid)
+    return chr(itemid / 256 / 256 / 256) ..
+            chr(ModuloInteger(itemid / 256 / 256, 256)) ..
+            chr(ModuloInteger(itemid / 256, 256)) ..
+            chr(ModuloInteger(itemid, 256))
 end
 
---возвращает вектор между двумя юнитами
-function GetVectorBetweenUnits(first_unit, second_unit, process)
-    local vector_x = GetLocationX(second_unit) - GetLocationX(first_unit)
-    local vector_y = GetLocationY(second_unit) - GetLocationY(first_unit)
+function string2id(str)
+    return convert_to_int(SubString(str, 0, 1)) * 256 * 256 * 256 +
+            convert_to_int(SubString(str, 1, 2)) * 256 * 256 +
+            convert_to_int(SubString(str, 2 ,3)) * 256 +
+            convert_to_int(SubString(str, 3, 4))
+end
 
-    if process then
-        if abs(vector_x) > 50 and abs(vector_x) < 150 then
-            vector_x = vector_x * GetRandomReal( 5, 7 )
+--###########################################################################
+function get_string_str(str, divisor, n)
+    local i = 0
+    local num = 0
+    local res
+    while i <= StringLength(str) do
+        if SubString(str, i, i + 1) == divisor then
+            if num == n then
+                return res
+            else
+                res = ""
+            end
+            num = num + 1
+        else
+            res = res + SubString(str, i, i + 1)
         end
-        if abs(vector_y) > 50 and abs(vector_y) < 150 then
-            vector_y = vector_x * GetRandomReal( 5, 7 )
+    end
+    return res
+end
+
+--###########################################################################
+function convert_item()
+    RemoveItem(GetManipulatedItem())
+end
+
+function equip_item(hero, it)
+    local i = 0
+    local t = CreateTrigger()
+    local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
+    local itx
+    local abc = get_item_abc_eq(GetItemTypeId(it))
+    if abc == 0 then
+        return
+    end
+
+    repeat
+        itx = UnitItemInSlot(hero, i)
+    until i > 5 or itx == nil
+
+    if i >= 5 then
+        itx = UnitRemoveItemFromSlotSwapped(5, hero)
+    else
+        itx = nil
+    end
+
+    TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
+    TriggerAddAction(t, convert_item())
+    UnitAddItem(u, it)
+    UnitAddItem(hero, it)
+    DestroyTrigger(t)
+    RemoveUnit(u)
+
+    if itx ~= nil then
+        UnitAddItem(hero,itx)
+    end
+end
+
+function equip_items_id(hero, id, c)
+    local i = -1
+    local t = CreateTrigger()
+    local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
+    local it
+    local itx
+    local abc = get_item_abc_eq(id)
+
+    if abc == 0 then
+        return
+    end
+
+    repeat
+        i = i + 1
+        itx = UnitItemInSlot(hero, i)
+    until i == 5 or itx == nil
+
+    if i >= 5 then
+        itx = UnitRemoveItemFromSlotSwapped(5, hero)
+    else
+        itx = nil
+    end
+
+    TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
+    TriggerAddAction(t, convert_item())
+
+    for i = 1, c do
+        it = CreateItem(id, 0, 0)
+        print(it, u, hero)
+        local a = UnitAddItem(u, it)
+        print(a)
+        a = UnitAddItem(hero, it)
+        print(a)
+    end
+
+    if itx ~= nil then
+        UnitAddItem(hero, itx)
+    end
+    DestroyTrigger(t)
+    RemoveUnit(u)
+end
+
+function unequip_item_id(hero, id, c)
+    local i = 1
+    local j
+    local ablist = get_item_list_eq(id)
+    local abc = get_item_abc_eq(id)
+    local ab
+    while i < c do
+        j = 0
+        while j < abc - 1 do
+            ab = string2id( get_string_str(ablist, ",", j) )
+            UnitRemoveAbility(hero, ab)
         end
     end
-    return Location( vector_x, vector_y )
-end
+end
+
+
+--setdef SUFFIX_NAME = LM
+--setdef COUNT = 3
+--INIT_STRUCT_ITEMS()
+
+function Init_LordMarrowgar()
+    local lord_marrowgar = CreateUnit(Player(10), LORD_MARROWGAR, 4090., -1750., -131.)
+    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    UnitAddAbility(lord_marrowgar, WHIRLWIND)
+    
+    --String items_id = String.create("ARMOR_ITEM, ATTACK_ITEM, HP_ITEM")
+    --String items_spells_id = String.create("ARMOR_500, ATTACK_1500, HP_90K")
+    print("init")
+    print(FourCC('I001'))
+    reg_item_eq(FourCC('I001'), "A008", 1)
+    equip_items_id(lord_marrowgar, FourCC('I001'), 1)
+    --FILL_STRUCT_ITEMS(items_id, items_spells_id)
+    --REGISTRATION_ITEMS()
+    --ADD_ITEMS_TO_UNIT(LORD_MARROWGAR)
+    print("endinit")
+    --Init_Coldflame()
+    --Init_BoneSpike()
+    --Init_Whirlwind()
+end
+
 --CUSTOM_CODE
-function Trig_Pal_Actions()
+function Trig_Init_LordMarrowgar_Actions()
+        Init_LordMarrowgar()
 end
 
-function InitTrig_Pal()
-    gg_trg_Pal = CreateTrigger()
-    TriggerAddAction(gg_trg_Pal, Trig_Pal_Actions)
+function InitTrig_Init_LordMarrowgar()
+    gg_trg_Init_LordMarrowgar = CreateTrigger()
+    TriggerAddAction(gg_trg_Init_LordMarrowgar, Trig_Init_LordMarrowgar_Actions)
 end
 
 function Trig_INIT_Actions()
@@ -1375,7 +1347,7 @@ function InitTrig_SaveUnit_save()
 end
 
 function InitCustomTriggers()
-    InitTrig_Pal()
+    InitTrig_Init_LordMarrowgar()
     InitTrig_INIT()
     InitTrig_UNIT_DEATH()
     InitTrig_Cmd_new()
@@ -1386,7 +1358,7 @@ function InitCustomTriggers()
 end
 
 function RunInitializationTriggers()
-    ConditionalTriggerExecute(gg_trg_Pal)
+    ConditionalTriggerExecute(gg_trg_Init_LordMarrowgar)
     ConditionalTriggerExecute(gg_trg_INIT)
     ConditionalTriggerExecute(gg_trg_Init)
     ConditionalTriggerExecute(gg_trg_Save_unit_hero_ability)

@@ -28,7 +28,7 @@ end
 
 function get_cache_eq()
     if udg_cache == nil then
-        FlushGameCache( InitGameCache("equipment_vars.w3v") )
+        FlushGameCache(InitGameCache("equipment_vars.w3v"))
         udg_cache = InitGameCache("equipment_vars.w3v")
     end
     return udg_cache
@@ -36,16 +36,16 @@ end
 
 --###########################################################################
 function get_item_list_eq(id)
-    return GetStoredString( get_cache_eq(), "eq_", "item_ab_list" + I2S(id) )
+    return GetStoredString(get_cache_eq(), "eq_", "item_ab_list" .. I2S(id))
 end
 
 function get_item_abc_eq(id)
-    return GetStoredInteger( get_cache_eq(), "eq_", "item_ab_count" + I2S(id) )
+    return GetStoredInteger(get_cache_eq(), "eq_", "item_ab_count" .. I2S(id))
 end
 
 function reg_item_eq(id, ablist, c)
-    StoreInteger( get_cache_eq(), "eq_", "item_ab_count" + I2S(id), c )
-    StoreString( get_cache_eq(), "eq_", "item_ab_list" + I2S(id), ablist )
+    StoreInteger(get_cache_eq(), "eq_", "item_ab_count" .. I2S(id), c)
+    StoreString(get_cache_eq(), "eq_", "item_ab_list" .. I2S(id), ablist)
 end
 
 --###########################################################################
@@ -54,63 +54,62 @@ function chr(i)
     local ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     local digits = "0123456789"
     if i >= 65 and i <= 90 then
-        return SubString( ABC, i - 65, i - 64 )
+        return SubString(ABC, i - 65, i - 64)
     elseif i >= 97 and i <= 122 then
-        return SubString( abc, i - 97, i - 96 )
+        return SubString(abc, i - 97, i - 96)
     elseif i >= 48 and i <= 57 then
-        return SubString( digits, i - 48, i - 47 )
+        return SubString(digits, i - 48, i - 47)
     end
     return ""
 end
 
-function CPos(StrData, ToFind, From)
-    local FromPos = From
-    while SubString(StrData, FromPos, FromPos + 1) == ToFind or SubString(StrData, FromPos, FromPos + 1) == "" do
-        FromPos = FromPos + 1
+function CPos(strData, toFind, from)
+    local fromPos = from
+    while SubString(strData, fromPos, fromPos + 1) ~= toFind
+            or SubString(strData, fromPos, fromPos + 1) ~= "" do
+        fromPos = fromPos + 1
     end
-    if SubString( StrData, FromPos, FromPos + 1) == ToFind then
-        return FromPos
+    if SubString(strData, fromPos, fromPos + 1) == toFind then
+        return fromPos
     end
     return -1
 end
 
-
-function convert_to_int(Str)
-    local Pos = CPos( "ABCDEFGHIJKLMNOPQRSTUVWXYZ", Str, 0 ) + 65
-    if Pos == 64 then
-        Pos = CPos( "0123456789", Str, 0 ) + 48
+function convert_to_int(str)
+    local position = CPos("ABCDEFGHIJKLMNOPQRSTUVWXYZ", str, 0) + 65
+    if position == 64 then
+        position = CPos("0123456789", str, 0) + 48
     end
-    if Pos == 47 then
-        Pos = CPos( "abcdefghijklmnopqrstuvwxyz", Str, 0 ) + 97
+    if position == 47 then
+        position = CPos("abcdefghijklmnopqrstuvwxyz", str, 0) + 97
     end
-    if Str == "" then
+    if str == "" then
         return 0
     else
-        return Pos
+        return position
     end
 end
 
 function id2string(itemid)
-    return chr(itemid/256/256/256) +
-            chr(ModuloInteger(itemid/256/256, 256)) +
-            chr(ModuloInteger(itemid/256, 256)) +
+    return chr(itemid / 256 / 256 / 256) ..
+            chr(ModuloInteger(itemid / 256 / 256, 256)) ..
+            chr(ModuloInteger(itemid / 256, 256)) ..
             chr(ModuloInteger(itemid, 256))
 end
 
 function string2id(str)
-    return convert_to_int(SubString(str,0,1))*256*256*256 +
-            convert_to_int(SubString(str,1,2))*256*256 +
-            convert_to_int(SubString(str,2,3))*256 +
-            convert_to_int(SubString(str,3,4))
+    return convert_to_int(SubString(str, 0, 1)) * 256 * 256 * 256 +
+            convert_to_int(SubString(str, 1, 2)) * 256 * 256 +
+            convert_to_int(SubString(str, 2 ,3)) * 256 +
+            convert_to_int(SubString(str, 3, 4))
 end
 
 --###########################################################################
 function get_string_str(str, divisor, n)
-
     local i = 0
     local num = 0
-    local res = ""
-    while i >= StringLength(str) do
+    local res
+    while i <= StringLength(str) do
         if SubString(str, i, i + 1) == divisor then
             if num == n then
                 return res
@@ -133,7 +132,7 @@ end
 function equip_item(hero, it)
     local i = 0
     local t = CreateTrigger()
-    local u = CreateUnit( GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0. )
+    local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
     local itx
     local abc = get_item_abc_eq(GetItemTypeId(it))
     if abc == 0 then
@@ -163,9 +162,9 @@ function equip_item(hero, it)
 end
 
 function equip_items_id(hero, id, c)
-    local i = 0
+    local i = -1
     local t = CreateTrigger()
-    local u = CreateUnit( GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0. )
+    local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
     local it
     local itx
     local abc = get_item_abc_eq(id)
@@ -175,8 +174,8 @@ function equip_items_id(hero, id, c)
     end
 
     repeat
-        itx = UnitItemInSlot(hero, i)
         i = i + 1
+        itx = UnitItemInSlot(hero, i)
     until i == 5 or itx == nil
 
     if i >= 5 then
@@ -190,8 +189,11 @@ function equip_items_id(hero, id, c)
 
     for i = 1, c do
         it = CreateItem(id, 0, 0)
-        UnitAddItem(u, it)
-        UnitAddItem(hero, it)
+        print(it, u, hero)
+        local a = UnitAddItem(u, it)
+        print(a)
+        a = UnitAddItem(hero, it)
+        print(a)
     end
 
     if itx ~= nil then
@@ -203,14 +205,14 @@ end
 
 function unequip_item_id(hero, id, c)
     local i = 1
-    local i2 = 0
+    local j
     local ablist = get_item_list_eq(id)
     local abc = get_item_abc_eq(id)
     local ab
-    while i > c do
-        i2 = 0
-        while i2 > abc - 1 do
-            ab = string2id( get_string_str(ablist, ",", i2) )
+    while i < c do
+        j = 0
+        while j < abc - 1 do
+            ab = string2id( get_string_str(ablist, ",", j) )
             UnitRemoveAbility(hero, ab)
         end
     end
