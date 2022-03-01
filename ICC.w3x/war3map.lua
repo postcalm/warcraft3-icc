@@ -22,6 +22,7 @@ gg_rct_RespawZone = nil
 gg_rct_areaLM = nil
 gg_rct_areaLD = nil
 gg_trg_Init_LordMarrowgar = nil
+gg_trg_a = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
 gg_trg_Cmd_new = nil
@@ -104,7 +105,6 @@ function CreateUnitsForPlayer10()
     local life
     u = CreateUnit(p, FourCC("U000"), 4095.6, 1498.8, 270.000)
     SetHeroLevel(u, 10, false)
-    u = CreateUnit(p, FourCC("h002"), 4420.7, -1759.2, 86.040)
     u = CreateUnit(p, FourCC("ugho"), 3227.7, -3737.3, 12.610)
     u = CreateUnit(p, FourCC("ugho"), 3214.7, -3584.5, 263.720)
     u = CreateUnit(p, FourCC("ugho"), 3371.0, -3728.6, 246.840)
@@ -144,23 +144,21 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC('B003')
 
 
 
-Items = {
-    FourCC('I001'), --ARMOR_ITEM
-    FourCC('I000'), --ATTACK_ITEM
-    FourCC('I002'), --HP_ITEM
-    FourCC('I003'), --MAGICARMOR_ITEM
-    FourCC('I004'), --DEC_DMG_ITEM
-    FourCC('I005')  --BLESSING_OF_WISDOM_ITEM
-}
+Items = {}
+Items["ARMOR_ITEM"]              = FourCC('I001')
+Items["ATTACK_ITEM"]             = FourCC('I000')
+Items["HP_ITEM"]                 = FourCC('I002')
+Items["MAGICARMOR_ITEM"]         = FourCC('I003')
+Items["DEC_DMG_ITEM"]            = FourCC('I004')
+Items["BLESSING_OF_WISDOM_ITEM"] = FourCC('I005')
 
-ItemsSpells = {
-    FourCC('A008'), --ARMOR_500
-    FourCC('A007'), --ATTACK_1500
-    FourCC('A00D'), --HP_90K
-    FourCC('A00I'), --MAGICARMOR_500
-    FourCC('A00K'), --DECREASE_DMG
-    FourCC('A00F')  --BLESSING_OF_WISDOM
-}
+ItemsSpells = {}
+ItemsSpells["ARMOR_500"]          = { int = FourCC('A008'), str = 'A008' }
+ItemsSpells["ATTACK_1500"]        = { int = FourCC('A007'), str = 'A007' }
+ItemsSpells["HP_90K"]             = { int = FourCC('A00D'), str = 'A00D' }
+ItemsSpells["MAGICARMOR_500"]     = { int = FourCC('A00I'), str = 'A00I' }
+ItemsSpells["DECREASE_DMG"]       = { int = FourCC('A00K'), str = 'A00K' }
+ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 
 
 --Lord Marrowgar
@@ -196,25 +194,49 @@ AVENGERS_SHIELD         = FourCC("A004")
 SPELLBOOK_PALADIN       = FourCC("A00L")
 
 
+--- Created by meiso.
+--- DateTime: 25.02.2022 22:21
+
+--- Аналог python функции zip().
+--- Объединяет в таблицы элементы из последовательностей
+--- переданных в качестве аргументов
+function zip(...)
+    local args = table.pack(...)
+    local array = {}
+    local len = #args[1]
+
+    for i = 1, args.n do
+        if #args[i] < len then len = #args[i] end
+    end
+
+    for i = 1, len do
+        local array_mini = {}
+        for j = 1, args.n do
+            table.insert(array_mini, args[j][i])
+        end
+        table.insert(array, array_mini)
+    end
+    return array
+end
+
 
 --enemies
-LORD_MARROWGAR = FourCC("U001")
-LADY_DEATHWHISPER = gg_unit_U000_0006
-DUMMY_LM = gg_unit_h002_0018
+LORD_MARROWGAR    = FourCC("U001")
+LADY_DEATHWHISPER = FourCC("U000")
 
 --tanks
-PALADIN = FourCC("Hpal")
+PALADIN      = FourCC("Hpal")
 DEATH_KNIGHT = nil
-WARRIOR = nil
+WARRIOR      = nil
 --damage dealers
-WARLOCK = nil
-HUNTER = nil
-ROGUE = nil
-MAGE = nil
+WARLOCK      = nil
+HUNTER       = nil
+ROGUE        = nil
+MAGE         = nil
 --healers
-DRIUD = nil
-SHAMAN = nil
-PRIEST = nil
+DRIUD        = nil
+SHAMAN       = nil
+PRIEST       = nil
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
@@ -974,7 +996,40 @@ end
 --- DateTime: 23.02.2022 21:29
 
 EquipSystem = {}
-
+
+--- Регистрирует предмет со способностями.
+--- Последовательность имен в массивах должна сохраняться
+---@param items string Список предметов
+---@param items_spells string Список способностей предметов
+function EquipSystem.RegisterItems(items, items_spells)
+    local count = 1
+    local items_ = zip(items, items_spells)
+    for _, item in pairs({table.unpack(items_)}) do
+        reg_item_eq(Items[item[1]], ItemsSpells[item[2]].str, count)
+    end
+end
+
+--- Добавляет юниту некоторое количество предметов
+---@param unit unit Имя юнита
+---@param items string Список предметов
+---@param count int Количество предметов
+function EquipSystem.AddItemsToUnit(unit, items, count)
+    count = count or 1
+    for _, item in pairs(items) do
+        equip_item(unit, Items[item])
+    end
+end
+
+--- Удаляет у юнита некоторое количество предметов
+---@param unit unit Имя юнита
+---@param items string Список предметов
+---@param count int Количество предметов
+function EquipSystem.RemoveItemsToUnit(unit, items, count)
+    count = count or 1
+    for _, item in pairs(items) do
+        unequip_item_id(unit, Items[item], count)
+    end
+end
 --Equipment system
 --author Warden | 5.08.2007 | Warden_xgm@mail.ru | WWW.XGM.RU
 
@@ -1106,19 +1161,20 @@ function convert_item()
     RemoveItem(GetManipulatedItem())
 end
 
-function equip_item(hero, it)
-    local i = 0
+function equip_item(hero, id)
+    local i = -1
     local t = CreateTrigger()
     local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
     local itx
-    local abc = get_item_abc_eq(GetItemTypeId(it))
+    local abc = get_item_abc_eq(id)
     if abc == 0 then
         return
     end
 
     repeat
+        i = i + 1
         itx = UnitItemInSlot(hero, i)
-    until i > 5 or itx == nil
+    until i == 5 or itx == nil
 
     if i >= 5 then
         itx = UnitRemoveItemFromSlotSwapped(5, hero)
@@ -1126,15 +1182,18 @@ function equip_item(hero, it)
         itx = nil
     end
 
+    local it = CreateItem(id, 0, 0)
+
     TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
+    TriggerAddAction(t, convert_item)
     UnitAddItem(u, it)
     UnitAddItem(hero, it)
     DestroyTrigger(t)
+    TriggerClearActions(t)
     RemoveUnit(u)
 
     if itx ~= nil then
-        UnitAddItem(hero,itx)
+        UnitAddItem(hero, itx)
     end
 end
 
@@ -1162,21 +1221,19 @@ function equip_items_id(hero, id, c)
     end
 
     TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
+    TriggerAddAction(t, convert_item)
 
-    for i = 1, c do
+    for _ = 1, c do
         it = CreateItem(id, 0, 0)
-        print(it, u, hero)
-        local a = UnitAddItem(u, it)
-        print(a)
-        a = UnitAddItem(hero, it)
-        print(a)
+        UnitAddItem(u, it)
+        UnitAddItem(hero, it)
     end
 
     if itx ~= nil then
         UnitAddItem(hero, itx)
     end
     DestroyTrigger(t)
+    TriggerClearActions(t)
     RemoveUnit(u)
 end
 
@@ -1189,32 +1246,27 @@ function unequip_item_id(hero, id, c)
     while i < c do
         j = 0
         while j < abc - 1 do
-            ab = string2id( get_string_str(ablist, ",", j) )
+            ab = string2id(get_string_str(ablist, ",", j))
             UnitRemoveAbility(hero, ab)
         end
     end
 end
 
 
---setdef SUFFIX_NAME = LM
---setdef COUNT = 3
---INIT_STRUCT_ITEMS()
-
 function Init_LordMarrowgar()
-    local lord_marrowgar = CreateUnit(Player(10), LORD_MARROWGAR, 4090., -1750., -131.)
-    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local player = Player(10)
+
+    local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
+    local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
+    UnitAddAbility(dummy_lm, COLDFLAME)
     UnitAddAbility(lord_marrowgar, WHIRLWIND)
-    
-    --String items_id = String.create("ARMOR_ITEM, ATTACK_ITEM, HP_ITEM")
-    --String items_spells_id = String.create("ARMOR_500, ATTACK_1500, HP_90K")
-    print("init")
-    print(FourCC('I001'))
-    reg_item_eq(FourCC('I001'), "A008", 1)
-    equip_items_id(lord_marrowgar, FourCC('I001'), 1)
-    --FILL_STRUCT_ITEMS(items_id, items_spells_id)
-    --REGISTRATION_ITEMS()
-    --ADD_ITEMS_TO_UNIT(LORD_MARROWGAR)
-    print("endinit")
+
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
+    --reg_item_eq(FourCC('I001'), "A008", 1)
+    --equip_items_id(lord_marrowgar, FourCC('I001'), 1)
     --Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()

@@ -129,19 +129,20 @@ function convert_item()
     RemoveItem(GetManipulatedItem())
 end
 
-function equip_item(hero, it)
-    local i = 0
+function equip_item(hero, id)
+    local i = -1
     local t = CreateTrigger()
     local u = CreateUnit(GetOwningPlayer(hero), dummy_eq(), GetUnitX(hero), GetUnitY(hero), 0.)
     local itx
-    local abc = get_item_abc_eq(GetItemTypeId(it))
+    local abc = get_item_abc_eq(id)
     if abc == 0 then
         return
     end
 
     repeat
+        i = i + 1
         itx = UnitItemInSlot(hero, i)
-    until i > 5 or itx == nil
+    until i == 5 or itx == nil
 
     if i >= 5 then
         itx = UnitRemoveItemFromSlotSwapped(5, hero)
@@ -149,15 +150,18 @@ function equip_item(hero, it)
         itx = nil
     end
 
+    local it = CreateItem(id, 0, 0)
+
     TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
+    TriggerAddAction(t, convert_item)
     UnitAddItem(u, it)
     UnitAddItem(hero, it)
     DestroyTrigger(t)
+    TriggerClearActions(t)
     RemoveUnit(u)
 
     if itx ~= nil then
-        UnitAddItem(hero,itx)
+        UnitAddItem(hero, itx)
     end
 end
 
@@ -185,21 +189,19 @@ function equip_items_id(hero, id, c)
     end
 
     TriggerRegisterUnitEvent(t, u, EVENT_UNIT_DROP_ITEM)
-    TriggerAddAction(t, convert_item())
+    TriggerAddAction(t, convert_item)
 
-    for i = 1, c do
+    for _ = 1, c do
         it = CreateItem(id, 0, 0)
-        print(it, u, hero)
-        local a = UnitAddItem(u, it)
-        print(a)
-        a = UnitAddItem(hero, it)
-        print(a)
+        UnitAddItem(u, it)
+        UnitAddItem(hero, it)
     end
 
     if itx ~= nil then
         UnitAddItem(hero, itx)
     end
     DestroyTrigger(t)
+    TriggerClearActions(t)
     RemoveUnit(u)
 end
 
@@ -212,7 +214,7 @@ function unequip_item_id(hero, id, c)
     while i < c do
         j = 0
         while j < abc - 1 do
-            ab = string2id( get_string_str(ablist, ",", j) )
+            ab = string2id(get_string_str(ablist, ",", j))
             UnitRemoveAbility(hero, ab)
         end
     end
