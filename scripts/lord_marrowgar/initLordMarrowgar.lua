@@ -6,11 +6,16 @@ function Init_LordMarrowgar()
 
     local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
     local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
-    UnitAddAbility(dummy_lm, COLDFLAME)
-    UnitAddAbility(lord_marrowgar, WHIRLWIND)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
+    LORD_MARROWGAR = lord_marrowgar
+    DUMMY_LM = dummy_lm
+    AREA_LM = gg_rct_areaLM
+
+    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
+
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
 
     --Init_Coldflame()
     --Init_BoneSpike()

@@ -9,7 +9,8 @@ local param = {
         [[\common]],
         [[\libraries\SaveSystem]],
         [[\libraries\EquipmentSystem]],
-        [[\scripts\lord_marrowgar\initLordMarrowgar.lua]],
+        [[\libraries\UnitLocation.lua]],
+        [[\scripts\lord_marrowgar]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проэкта

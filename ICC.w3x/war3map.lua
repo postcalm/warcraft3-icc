@@ -19,10 +19,8 @@ udg_SaveUnit_data = __jarray(0)
 udg_SaveUnit_directory = ""
 udg_cache = nil
 gg_rct_RespawZone = nil
-gg_rct_areaLM = nil
 gg_rct_areaLD = nil
 gg_trg_Init_LordMarrowgar = nil
-gg_trg_a = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
 gg_trg_Cmd_new = nil
@@ -30,6 +28,8 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
+gg_trg_aaaaaa = nil
+gg_rct_areaLM = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -127,14 +127,14 @@ end
 function CreateRegions()
     local we
     gg_rct_RespawZone = Rect(3936.0, -3616.0, 4256.0, -3168.0)
-    gg_rct_areaLM = Rect(3040.0, -2688.0, 5184.0, -1056.0)
     gg_rct_areaLD = Rect(2944.0, -128.0, 5248.0, 1984.0)
+    gg_rct_areaLM = Rect(3040.0, -2688.0, 5184.0, -1056.0)
 end
 
 --CUSTOM_CODE
 
-AREA_LM = gg_rct_areaLM
-AREA_LD = gg_rct_areaLD
+--AREA_LM = Rect(3040.0, -2688.0, 5184.0, -1056.0) -- gg_rct_areaLM
+--AREA_LD = Rect(2944.0, -128.0, 5248.0, 1984.0) -- gg_rct_areaLD
 
 
 --Paladin
@@ -168,7 +168,7 @@ COLDFLAME_OBJ = FourCC('h001')
 --Common
 DUMMY = FourCC('h002')
 DUMMY_EQUIP = FourCC('e000')
-
+COMMON_TIMER = FourCC('BTLF')
 
 --Lord Marrowgar
 COLDFLAME = FourCC("A001")
@@ -1253,6 +1253,176 @@ function unequip_item_id(hero, id, c)
 end
 
 
+-- Обертки над близовскими функциями для работы с областями и их переделка под себя
+
+function GroupHeroesInArea(area, which_player)
+    return GetUnitsInRectOfPlayer(area, which_player)
+end
+
+function GroupHeroesInRangeOnSpell(loc, radius, expr, which_player)
+    local group_heroes = CreateGroup()
+    bj_groupEnumOwningPlayer = which_player
+    GroupEnumUnitsInRangeOfLoc(group_heroes, loc, radius, expr)
+    return group_heroes
+end
+
+function GroupUnitsInRangeOfLocUnit(radius, which_location)
+    local group_heroes = CreateGroup()
+    GroupEnumUnitsInRangeOfLoc(group_heroes, which_location, radius, nil)
+    return group_heroes
+end
+
+function GetUnitInArea(group_heroes)
+    bj_groupRandomConsidered = 0
+    bj_groupRandomCurrentPick = nil
+
+    ForGroup(group_heroes, GroupPickRandomUnitEnum)
+    DestroyGroup(group_heroes)
+
+    return bj_groupRandomCurrentPick
+end
+
+--возвращает вектор между двумя юнитами
+function GetVectorBetweenUnits(first_unit, second_unit, process)
+    local vector_x = GetLocationX(second_unit) - GetLocationX(first_unit)
+    local vector_y = GetLocationY(second_unit) - GetLocationY(first_unit)
+
+    if process then
+        if math.abs(vector_x) > 50 and math.abs(vector_x) < 150 then
+            vector_x = vector_x * GetRandomReal( 5, 7 )
+        end
+        if math.abs(vector_y) > 50 and math.abs(vector_y) < 150 then
+            vector_y = vector_x * GetRandomReal( 5, 7 )
+        end
+    end
+    return Location(vector_x, vector_y)
+end
+
+BONE_SPIKE_EXIST = false
+
+function BoneSpike()
+    local whoPlayer = GetOwningPlayer(GetAttacker())
+    TriggerSleepAction(GetRandomReal(14., 17.))
+    local gr = GroupHeroesInArea(AREA_LM, whoPlayer)
+    local targetEnemy = GetUnitInArea(gr)
+    local targetEnemyHealth = GetUnitState(targetEnemy, UNIT_STATE_MAX_LIFE)
+
+    if BONE_SPIKE_EXIST then
+        -- призываем шип в позиции атакованной цели
+        local boneSpikeObj = CreateUnit(whoPlayer, BONE_SPIKE_OBJ,
+                                        GetLocationX(GetUnitLoc(targetEnemy)),
+                                        GetLocationY(GetUnitLoc(targetEnemy)), 0.)
+
+        SetUnitAnimation(boneSpikeObj, "Stand Lumber")
+        SetUnitFlyHeight(targetEnemy, 150., 0.)
+
+        PauseUnit(targetEnemy, true)
+        PauseUnit(boneSpikeObj, true)
+        
+        -- сразу 9к
+        SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - 9000.)
+
+        while true do
+            SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - (targetEnemyHealth * 0.10))
+            TriggerSleepAction(3.)
+
+            -- TODO: поменять время разложения
+            -- если шип уничтожен - выходим и сбрасываем игрока
+            if GetUnitState(boneSpikeObj, UNIT_STATE_LIFE) <= 0  then
+                SetUnitAnimation(boneSpikeObj, "Decay")
+                SetUnitFlyHeight(targetEnemy, 0., 0.)
+                PauseUnit(targetEnemy, false)
+                RemoveUnit(boneSpikeObj)
+                BONE_SPIKE_EXIST = false
+                break
+            -- если игрок умер - сбрасываем шип
+            elseif GetUnitState(targetEnemy, UNIT_STATE_LIFE) <= 0 then
+                RemoveUnit(boneSpikeObj)
+                BONE_SPIKE_EXIST = false
+                break
+            end
+        end
+    end
+end
+
+-- если шип не призван
+function StartBoneSpike()
+    if not BONE_SPIKE_EXIST then
+        BONE_SPIKE_EXIST = true
+        return BONE_SPIKE_EXIST
+    end
+    return false
+end
+
+function Init_BoneSpike()
+    local triggerAbility = CreateTrigger()
+    TriggerRegisterUnitEvent(triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(triggerAbility, Condition(StartBoneSpike))
+    TriggerAddAction(triggerAbility, BoneSpike)
+end
+
+
+
+COLDFLAME_EXIST = false
+
+function Coldflame()
+    TriggerSleepAction(GetRandomReal(2., 3.))
+    
+    local which_player = GetOwningPlayer(GetAttacker())
+    local randUnit = GetUnitInArea(GroupHeroesInArea(AREA_LM, which_player))
+    
+    local MarrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
+    local MarrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+
+    local randUnitLocX = GetLocationX(GetUnitLoc(randUnit))
+    local randUnitLocY = GetLocationY(GetUnitLoc(randUnit))
+
+    local vector = GetVectorBetweenUnits(GetUnitLoc(LORD_MARROWGAR), GetUnitLoc(randUnit), true)
+    local position = Location(randUnitLocX + GetLocationX(vector),
+                              randUnitLocY + GetLocationY(vector))
+    
+    if COLDFLAME_EXIST then
+        print("ok")
+        -- призываем дамми-юнита и направляем его в сторону игрока
+        local coldflameObj = CreateUnit(GetTriggerPlayer(), DUMMY, MarrowgarLocX, MarrowgarLocY, 0.)
+        
+        SetUnitMoveSpeed(coldflameObj, 0.5)
+        SetUnitPathing(coldflameObj, false)
+        IssuePointOrderLoc(coldflameObj, "move", position)
+        
+        -- через 9 сек дамми-юнит должен умереть
+        print(COMMON_TIMER)
+        UnitApplyTimedLife(coldflameObj, COMMON_TIMER, 9.)
+        
+        while true do
+            print("this")
+            -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
+            IssueTargetOrder(DUMMY_LM, "flamestrike", coldflameObj)
+            TriggerSleepAction(0.03)
+            if GetUnitState(coldflameObj, UNIT_STATE_LIFE) <= 0 then break end
+        end
+        
+        COLDFLAME_EXIST = false
+    end
+end
+
+function StartColdflame()
+    if not COLDFLAME_EXIST then
+        COLDFLAME_EXIST = true
+        return COLDFLAME_EXIST
+    end
+    return false
+end
+
+function Init_Coldflame()
+    local triggerAbility = CreateTrigger()
+    TriggerRegisterUnitEvent(triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(triggerAbility, Condition(StartColdflame))
+    TriggerAddAction(triggerAbility, Coldflame)
+end
+
+
+
 function Init_LordMarrowgar()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
@@ -1260,16 +1430,57 @@ function Init_LordMarrowgar()
 
     local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
     local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
-    UnitAddAbility(dummy_lm, COLDFLAME)
-    UnitAddAbility(lord_marrowgar, WHIRLWIND)
+    LORD_MARROWGAR = lord_marrowgar
+    DUMMY_LM = dummy_lm
+    AREA_LM = gg_rct_areaLM
+    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
-    --reg_item_eq(FourCC('I001'), "A008", 1)
-    --equip_items_id(lord_marrowgar, FourCC('I001'), 1)
-    --Init_Coldflame()
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
+
+    Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()
+end
+
+
+WHIRLWIND_EXIST = false
+
+function ResetAnimation()
+    if WHIRLWIND_EXIST then
+        WHIRLWIND_EXIST = false
+    end
+    DestroyTimer(timer_reset)
+end
+
+function action()
+    timer_reset = CreateTimer()
+    IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
+    TimerStart(timer_reset, 5., false, ResetAnimation)
+    DestroyTimer(whirlwind_timer)
+end
+
+function Whirlwind()
+    whirlwind_timer = CreateTimer()
+    if WHIRLWIND_EXIST then
+        TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
+    end
+end
+
+function StartWhirlwind()
+    if not WHIRLWIND_EXIST then
+        WHIRLWIND_EXIST = true
+        return WHIRLWIND_EXIST
+    end
+    return false
+end
+
+function Init_Whirlwind()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(trigger_ability, Condition(StartWhirlwind))
+    TriggerAddAction(trigger_ability, Whirlwind)
 end
 
 --CUSTOM_CODE
@@ -1280,6 +1491,15 @@ end
 function InitTrig_Init_LordMarrowgar()
     gg_trg_Init_LordMarrowgar = CreateTrigger()
     TriggerAddAction(gg_trg_Init_LordMarrowgar, Trig_Init_LordMarrowgar_Actions)
+end
+
+function Trig_aaaaaa_Actions()
+    KillUnit(GetAttacker())
+end
+
+function InitTrig_aaaaaa()
+    gg_trg_aaaaaa = CreateTrigger()
+    TriggerAddAction(gg_trg_aaaaaa, Trig_aaaaaa_Actions)
 end
 
 function Trig_INIT_Actions()
@@ -1400,6 +1620,7 @@ end
 
 function InitCustomTriggers()
     InitTrig_Init_LordMarrowgar()
+    InitTrig_aaaaaa()
     InitTrig_INIT()
     InitTrig_UNIT_DEATH()
     InitTrig_Cmd_new()
