@@ -65,8 +65,8 @@ end
 
 function CPos(strData, toFind, from)
     local fromPos = from
-    while SubString(strData, fromPos, fromPos + 1) ~= toFind
-            or SubString(strData, fromPos, fromPos + 1) ~= "" do
+    while not SubString(strData, fromPos, fromPos + 1) == toFind or
+            not SubString(strData, fromPos, fromPos + 1) == "" do
         fromPos = fromPos + 1
     end
     if SubString(strData, fromPos, fromPos + 1) == toFind then
@@ -106,10 +106,9 @@ end
 
 --###########################################################################
 function get_string_str(str, divisor, n)
-    local i = 0
     local num = 0
-    local res
-    while i <= StringLength(str) do
+    local res = ""
+    for i = 0, StringLength(str) do
         if SubString(str, i, i + 1) == divisor then
             if num == n then
                 return res
@@ -118,7 +117,7 @@ function get_string_str(str, divisor, n)
             end
             num = num + 1
         else
-            res = res + SubString(str, i, i + 1)
+            res = res .. SubString(str, i, i + 1)
         end
     end
     return res
@@ -206,16 +205,12 @@ function equip_items_id(hero, id, c)
 end
 
 function unequip_item_id(hero, id, c)
-    local i = 1
-    local j
     local ablist = get_item_list_eq(id)
     local abc = get_item_abc_eq(id)
-    local ab
-    while i < c do
-        j = 0
-        while j < abc - 1 do
-            ab = string2id(get_string_str(ablist, ",", j))
-            UnitRemoveAbility(hero, ab)
+    for i = 1, c do
+        for j = 0, abc - 1 do
+            local str = get_string_str(ablist, ",", j)
+            UnitRemoveAbility(hero, FourCC(str))
         end
     end
 end

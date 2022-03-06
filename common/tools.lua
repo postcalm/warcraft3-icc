@@ -1,5 +1,5 @@
 --- Created by meiso.
---- DateTime: 25.02.2022 22:21
+--- DateTime: 25.02.2022
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей
@@ -9,6 +9,7 @@ function zip(...)
     local array = {}
     local len = #args[1]
 
+    --опеределяем самую маленькую последовательность
     for i = 1, args.n do
         if #args[i] < len then len = #args[i] end
     end

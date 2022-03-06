@@ -9,8 +9,10 @@ local param = {
         [[\common]],
         [[\libraries\SaveSystem]],
         [[\libraries\EquipmentSystem]],
+        [[\libraries\BuffSystem.lua]],
         [[\libraries\UnitLocation.lua]],
         [[\scripts\lord_marrowgar]],
+        [[\scripts\paladin]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проэкта

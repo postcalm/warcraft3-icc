@@ -14,9 +14,8 @@ function Init_LordMarrowgar()
     UnitAddAbility(DUMMY_LM, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
-
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
     --Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()

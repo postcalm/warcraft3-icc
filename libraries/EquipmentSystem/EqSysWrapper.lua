@@ -16,18 +16,18 @@ function EquipSystem.RegisterItems(items, items_spells)
 end
 
 --- Добавляет юниту некоторое количество предметов
----@param unit unit Имя юнита
+---@param unit unit Id юнита
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.AddItemsToUnit(unit, items, count)
     count = count or 1
     for _, item in pairs(items) do
-        equip_item(unit, Items[item])
+        equip_items_id(unit, Items[item], count)
     end
 end
 
 --- Удаляет у юнита некоторое количество предметов
----@param unit unit Имя юнита
+---@param unit unit Id юнита
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.RemoveItemsToUnit(unit, items, count)

@@ -20,7 +20,10 @@ udg_SaveUnit_directory = ""
 udg_cache = nil
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
+gg_rct_areaLM = nil
 gg_trg_Init_LordMarrowgar = nil
+gg_trg_aaaaaa = nil
+gg_trg_Init_Paladin = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
 gg_trg_Cmd_new = nil
@@ -28,8 +31,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_trg_aaaaaa = nil
-gg_rct_areaLM = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -81,9 +82,6 @@ function CreateUnitsForPlayer0()
     local life
     u = CreateUnit(p, FourCC("Hpal"), 4482.6, 329.9, 110.510)
     u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
-    u = CreateUnit(p, FourCC("Hpal"), 3839.9, -2903.6, 90.000)
-    SetHeroLevel(u, 80, false)
-    SetUnitState(u, UNIT_STATE_MANA, 800)
     u = CreateUnit(p, FourCC("Hpal"), 4062.6, -5020.2, 109.900)
 end
 
@@ -195,7 +193,7 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 
 
 --- Created by meiso.
---- DateTime: 25.02.2022 22:21
+--- DateTime: 25.02.2022
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей
@@ -205,6 +203,7 @@ function zip(...)
     local array = {}
     local len = #args[1]
 
+    --опеределяем самую маленькую последовательность
     for i = 1, args.n do
         if #args[i] < len then len = #args[i] end
     end
@@ -1010,18 +1009,18 @@ function EquipSystem.RegisterItems(items, items_spells)
 end
 
 --- Добавляет юниту некоторое количество предметов
----@param unit unit Имя юнита
+---@param unit unit Id юнита
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.AddItemsToUnit(unit, items, count)
     count = count or 1
     for _, item in pairs(items) do
-        equip_item(unit, Items[item])
+        equip_items_id(unit, Items[item], count)
     end
 end
 
 --- Удаляет у юнита некоторое количество предметов
----@param unit unit Имя юнита
+---@param unit unit Id юнита
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
@@ -1097,8 +1096,8 @@ end
 
 function CPos(strData, toFind, from)
     local fromPos = from
-    while SubString(strData, fromPos, fromPos + 1) ~= toFind
-            or SubString(strData, fromPos, fromPos + 1) ~= "" do
+    while not SubString(strData, fromPos, fromPos + 1) == toFind or
+            not SubString(strData, fromPos, fromPos + 1) == "" do
         fromPos = fromPos + 1
     end
     if SubString(strData, fromPos, fromPos + 1) == toFind then
@@ -1138,10 +1137,9 @@ end
 
 --###########################################################################
 function get_string_str(str, divisor, n)
-    local i = 0
     local num = 0
-    local res
-    while i <= StringLength(str) do
+    local res = ""
+    for i = 0, StringLength(str) do
         if SubString(str, i, i + 1) == divisor then
             if num == n then
                 return res
@@ -1150,7 +1148,7 @@ function get_string_str(str, divisor, n)
             end
             num = num + 1
         else
-            res = res + SubString(str, i, i + 1)
+            res = res .. SubString(str, i, i + 1)
         end
     end
     return res
@@ -1238,18 +1236,90 @@ function equip_items_id(hero, id, c)
 end
 
 function unequip_item_id(hero, id, c)
-    local i = 1
-    local j
     local ablist = get_item_list_eq(id)
     local abc = get_item_abc_eq(id)
-    local ab
-    while i < c do
-        j = 0
-        while j < abc - 1 do
-            ab = string2id(get_string_str(ablist, ",", j))
-            UnitRemoveAbility(hero, ab)
+    for i = 1, c do
+        for j = 0, abc - 1 do
+            local str = get_string_str(ablist, ",", j)
+            UnitRemoveAbility(hero, FourCC(str))
         end
     end
+end
+
+--- Created by meiso.
+--- DateTime: 06.03.2022
+
+BuffSystem = {}
+--- Таблица содержащая всех героев с бафами
+buffs = {}
+
+--- Регистрирует героя в системе бафов
+---@param hero unit Id героя
+function BuffSystem.RegisterHero(hero)
+    if BuffSystem.IsHeroInSystem(hero) then
+        return
+    end
+    local u = ""..GetHandleId(hero)
+    buffs[u] = {}
+end
+
+--- Добавляет герою баф
+---@param hero unit Id героя
+---@param buff buff Id бафа
+function BuffSystem.AddBuffToHero(hero, buff)
+    if BuffSystem.IsBuffOnHero(hero, buff) then
+        return
+    end
+    local u = ""..GetHandleId(hero)
+    table.insert(buffs[u], buff)
+end
+
+--- Проверяет есть ли герой в системе бафов
+---@param hero unit Id героя
+---@return boolean
+function BuffSystem.IsHeroInSystem(hero)
+    local u = ""..GetHandleId(hero)
+    for name, _ in pairs(buffs) do
+        if name == u then
+            return true
+        end
+    end
+    return false
+end
+
+--- Проверяет есть ли на герое баф
+---@param hero unit Id героя
+---@param buff buff Id бафа
+---@return boolean
+function BuffSystem.IsBuffOnHero(hero, buff)
+    local u = ""..GetHandleId(hero)
+    if #buffs[u] == 0 then return false end
+    for i = 1, #buffs[u] do
+        if buffs[u][i] == buff then
+            return true
+        end
+    end
+    return false
+end
+
+--- Удаляет у героя баф
+---@param hero unit Id героя
+---@param buff buff Id бафа
+function BuffSystem.RemoveBuffToHero(hero, buff)
+    local u = ""..GetHandleId(hero)
+    for i = 1, #buffs[u] do
+        if buffs[u][i] == buff then
+            --UnitRemoveAbility(hero, buff)
+            buffs[u][i] = nil
+        end
+    end
+end
+
+--- Удаляет героя из системы бафов
+---@param hero unit Id героя
+function BuffSystem.RemoveHero(hero)
+    local u = ""..GetHandleId(hero)
+    buffs[u] = nil
 end
 
 
@@ -1430,16 +1500,17 @@ function Init_LordMarrowgar()
 
     local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
     local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
+
     LORD_MARROWGAR = lord_marrowgar
     DUMMY_LM = dummy_lm
     AREA_LM = gg_rct_areaLM
+
     UnitAddAbility(DUMMY_LM, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(lord_marrowgar, items_list)
-
-    Init_Coldflame()
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
+    --Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()
 end
@@ -1483,6 +1554,328 @@ function Init_Whirlwind()
     TriggerAddAction(trigger_ability, Whirlwind)
 end
 
+
+function AvengersShield()
+    local first_target = GetSpellTargetUnit()
+    local light_magic_damage = 1
+    local factor = 0.07
+    local attack_power = GetHeroStr(GetTriggerUnit(), true ) * 2
+    local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
+    UnitDamageTargetBJ(GetTriggerUnit(), first_target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+    --local next_target = GetUnitInArea( GroupUnitsInRangeOfLocUnit( 400, GetUnitLoc(first_target) ) )
+end
+
+function IsAvengersShield()
+    return GetSpellAbilityId() == AVENGERS_SHIELD
+end
+
+function Init_AvengersShield()
+    local trigger_ability = CreateTrigger()
+
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, IsAvengersShield)
+    TriggerAddAction(trigger_ability, AvengersShield)
+end
+
+function RemoveBlessingOfKings(unit, stat)
+    SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
+    SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
+    SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
+    BuffSystem.RemoveBuffToHero(unit, "bok")
+    DestroyTimer(GetExpiredTimer())
+end
+
+function BlessingOfKings()
+    local unit = GetSpellTargetUnit()
+    BuffSystem.RegisterHero(unit)
+
+    if not BuffSystem.IsBuffOnHero(unit, "bok") then
+        local stat = {
+            R2I(GetHeroStr(unit, false) * 0.1),
+            R2I(GetHeroAgi(unit, false) * 0.1),
+            R2I(GetHeroInt(unit, false) * 0.1)
+        }
+        SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
+        SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
+        SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+        BuffSystem.AddBuffToHero(unit, "bok")
+
+        local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
+        local tm = CreateTimer()
+        TimerStart(tm, 600., false, remove_buff)
+    end
+end
+
+function IsBlessingOfKings()
+    return GetSpellAbilityId() == BLESSING_OF_KINGS
+end
+
+function Init_BlessingOfKings()
+    local trigger_buff = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_EFFECT, nil)
+    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfKings))
+    TriggerAddAction(trigger_buff, BlessingOfKings)
+end
+
+
+function RemoveBlessingOfMight(unit)
+    SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
+    BuffSystem.RemoveBuffToHero(unit, "bom")
+    DestroyTimer(GetExpiredTimer())
+end
+
+function BlessingOfMight()
+    local unit = GetSpellTargetUnit()
+
+    BuffSystem.RegisterHero(unit)
+
+    if not BuffSystem.IsBuffOnHero(unit, "bom") then
+        -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
+        SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+        BuffSystem.AddBuffToHero(unit, "bom")
+
+        local remove_buff = function() RemoveBlessingOfMight(unit) end
+        local tm = CreateTimer()
+        TimerStart(tm, 600., false, remove_buff)
+    end
+end
+
+function IsBlessingOfMight()
+    return GetSpellAbilityId() == BLESSING_OF_MIGHT
+end
+
+function Init_BlessingOfMight()
+    local trigger_buff = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfMight))
+    TriggerAddAction(trigger_buff, BlessingOfMight)
+end
+    
+
+function RemoveBlessingOfSanctuary(unit, stat, items_list)
+    SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
+    EquipSystem.RemoveItemsToUnit(unit, items_list)
+    BuffSystem.RemoveBuffToHero(unit, "bos")
+    DestroyTimer(GetExpiredTimer())
+end
+
+function BlessingOfSanctuary()
+    local unit = GetSpellTargetUnit()
+    local items_list = {"DEC_DMG_ITEM"}
+    local items_spells_list = {"DECREASE_DMG"}
+
+    BuffSystem.RegisterHero(unit)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+
+    if not BuffSystem.IsBuffOnHero(unit, "bos") then
+        EquipSystem.AddItemsToUnit(unit, items_list)
+        local stat = R2I(GetHeroStr(unit, false) * 0.1)
+        SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
+        BuffSystem.AddBuffToHero(unit, "bos")
+
+        local remove_buff = function() RemoveBlessingOfSanctuary(unit, stat, items_list) end
+        local tm = CreateTimer()
+        TimerStart(tm, 3., false, remove_buff)
+    end
+end
+
+function IsBlessingOfSanctuary()
+    return GetSpellAbilityId() == BLESSING_OF_SANCTUARY
+end
+
+function Init_BlessingOfSanctuary()
+    local trigger_buff = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfSanctuary))
+    TriggerAddAction(trigger_buff, BlessingOfSanctuary)
+end
+
+
+function RemoveBlessingOfWisdom(unit, items_list)
+    EquipSystem.RemoveItemsToUnit(unit, items_list)
+    BuffSystem.RemoveBuffToHero(unit, "bow")
+    DestroyTimer(GetExpiredTimer())
+end
+
+function BlessingOfWisdom()
+    local unit = GetSpellTargetUnit()
+    local items_list = {"BLESSING_OF_WISDOM_ITEM"}
+    local items_spells_list = {"BLESSING_OF_WISDOM"}
+
+    BuffSystem.RegisterHero(unit)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+
+    if not BuffSystem.IsBuffOnHero(unit, "bow") then
+        EquipSystem.AddItemsToUnit(unit, items_list)
+        BuffSystem.AddBuffToHero(unit, "bow")
+
+        local remove_buff = function() RemoveBlessingOfWisdom(unit, items_list) end
+        local tm = CreateTimer()
+        TimerStart(tm, 600., false, remove_buff)
+    end
+end
+
+function IsBlessingOfWisdom()
+    return GetSpellAbilityId() == BLESSING_OF_WISDOM
+end
+
+function Init_BlessingOfWisdom()
+    local trigger_buff = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfWisdom))
+    TriggerAddAction(trigger_buff, BlessingOfWisdom)
+end
+    
+
+function Consecration()
+    IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
+end
+
+function IsConsecration()
+    return GetSpellAbilityId() == CONSECRATION_TR
+end
+
+function Init_Consecration()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, Condition(IsConsecration))
+    TriggerAddAction(trigger_ability, Consecration)
+end
+
+
+function Init_Paladin()
+    local u = CreateUnit(Player(0), PALADIN, 3839.9, -2903.6, 90.000)
+    PALADIN = u
+    SetHeroLevel(PALADIN, 80, false)
+    UnitAddAbility(PALADIN, DEVOTION_AURA)
+    UnitAddAbility(PALADIN, DIVINE_SHIELD)
+    UnitAddAbility(PALADIN, CONSECRATION)
+    UnitAddAbility(PALADIN, CONSECRATION_TR)
+    UnitAddAbility(PALADIN, HAMMER_RIGHTEOUS)
+    UnitAddAbility(PALADIN, JUDGEMENT_OF_LIGHT_TR)
+    UnitAddAbility(PALADIN, JUDGEMENT_OF_WISDOM_TR)
+    UnitAddAbility(PALADIN, SHIELD_OF_RIGHTEOUSNESS)
+    UnitAddAbility(PALADIN, AVENGERS_SHIELD)
+    
+    UnitAddAbility(PALADIN, SPELLBOOK_PALADIN)
+    UnitMakeAbilityPermanent(PALADIN, true, SPELLBOOK_PALADIN)
+    SetPlayerAbilityAvailable(Player(0), SPELLBOOK_PALADIN, true)
+    
+    Init_Consecration()
+    Init_BlessingOfKings()
+    Init_BlessingOfMight()
+    Init_BlessingOfSanctuary()
+    Init_BlessingOfWisdom()
+    --Init_JudgementOfLight()
+    --Init_JudgementOfWisdom()
+    --Init_ShieldOfRighteousness()
+    --Init_AvengersShield()
+end
+
+
+
+function JudgementOfLight()
+    local debuff = GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF)
+    if debuff > 0 then
+        -- fixme: юнит хилится пока идёт бой!
+        if GetRandomReal(0., 1.) <= 0.7  then
+            local giveHP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
+            SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + giveHP)
+        end
+    end
+end
+
+function IsJudgementOfLightDebuff()
+    return GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+end
+
+function CastJudgementOfLight()
+    local paladin_loc_x = GetLocationX(GetUnitLoc(PALADIN))
+    local paladin_loc_y = GetLocationY(GetUnitLoc(PALADIN))
+    local jol_unit = CreateUnit(GetTriggerPlayer(), DUMMY, paladin_loc_x, paladin_loc_y, 0.)
+    UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
+    IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
+    UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
+    RemoveUnit(jol_unit)
+end
+
+function IsJudgementOfLight()
+    return GetSpellAbilityId() == JUDGEMENT_OF_LIGHT_TR
+end
+
+function Init_JudgementOfLight()
+    local trigger_ability = CreateTrigger()
+    local trigger_jol = CreateTrigger()
+
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, IsJudgementOfLight)
+    TriggerAddAction(trigger_ability, CastJudgementOfLight)
+
+    TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_ATTACKED, nil)
+    TriggerAddCondition(trigger_jol, IsJudgementOfLightDebuff)
+    TriggerAddAction(trigger_jol, JudgementOfLight)
+end
+
+function JudgementOfWisdom()
+    local debuff = GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_WISDOM_BUFF)
+    if debuff > 0 then
+        -- fixme: юнит хилится пока идёт бой!
+        if GetRandomReal(0., 1.) <= 0.7 then
+            local giveMP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
+            SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + giveMP)
+        end
+    end
+end
+
+function IsJudgementOfWisdomDebuff()
+    return GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+end
+
+function CastJudgementOfWisdom()
+    local paladin_loc_x = GetLocationX(GetUnitLoc(PALADIN))
+    local paladin_loc_y = GetLocationY(GetUnitLoc(PALADIN))
+    local jow_unit = CreateUnit(GetTriggerPlayer(), DUMMY, paladin_loc_x, paladin_loc_y, 0.)
+    UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
+    IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
+    UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
+    RemoveUnit(jow_unit)
+end
+
+function IsJudgementOfWisdom()
+    return GetSpellAbilityId() == JUDGEMENT_OF_WISDOM_TR
+end
+
+function Init_JudgementOfWisdom()
+    local trigger_ability = CreateTrigger()
+    local trigger_jow = CreateTrigger()
+    
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, IsJudgementOfWisdom)
+    TriggerAddAction(trigger_ability, CastJudgementOfWisdom)
+
+    TriggerRegisterPlayerUnitEvent(trigger_jow, Player(0), EVENT_PLAYER_UNIT_ATTACKED, nil)
+    TriggerAddCondition(trigger_jow, IsJudgementOfWisdomDebuff)
+    TriggerAddAction(trigger_jow, JudgementOfWisdom)
+end
+
+function ShieldOfRighteousness()
+    -- 42 от силы + 520 ед. урона дополнительно
+    local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
+    UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
+                     ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
+end
+
+function IsShieldOfRighteousness()
+    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+end
+
+function Init_ShieldOfRighteousness()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, IsShieldOfRighteousness)
+    TriggerAddAction(trigger_ability, ShieldOfRighteousness)
+end
+
 --CUSTOM_CODE
 function Trig_Init_LordMarrowgar_Actions()
         Init_LordMarrowgar()
@@ -1494,12 +1887,21 @@ function InitTrig_Init_LordMarrowgar()
 end
 
 function Trig_aaaaaa_Actions()
-    KillUnit(GetAttacker())
+    IssuePointOrderLocBJ(nil, "flamestrike", GetUnitLoc(GetTriggerUnit()))
 end
 
 function InitTrig_aaaaaa()
     gg_trg_aaaaaa = CreateTrigger()
     TriggerAddAction(gg_trg_aaaaaa, Trig_aaaaaa_Actions)
+end
+
+function Trig_Init_Paladin_Actions()
+        Init_Paladin()
+end
+
+function InitTrig_Init_Paladin()
+    gg_trg_Init_Paladin = CreateTrigger()
+    TriggerAddAction(gg_trg_Init_Paladin, Trig_Init_Paladin_Actions)
 end
 
 function Trig_INIT_Actions()
@@ -1621,6 +2023,7 @@ end
 function InitCustomTriggers()
     InitTrig_Init_LordMarrowgar()
     InitTrig_aaaaaa()
+    InitTrig_Init_Paladin()
     InitTrig_INIT()
     InitTrig_UNIT_DEATH()
     InitTrig_Cmd_new()
@@ -1632,6 +2035,7 @@ end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_Init_LordMarrowgar)
+    ConditionalTriggerExecute(gg_trg_Init_Paladin)
     ConditionalTriggerExecute(gg_trg_INIT)
     ConditionalTriggerExecute(gg_trg_Init)
     ConditionalTriggerExecute(gg_trg_Save_unit_hero_ability)
