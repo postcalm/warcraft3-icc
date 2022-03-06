@@ -12,6 +12,7 @@ local param = {
         [[\libraries\BuffSystem.lua]],
         [[\libraries\UnitLocation.lua]],
         [[\scripts\lord_marrowgar]],
+        [[\scripts\lady_deathwhisper]],
         [[\scripts\paladin]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода

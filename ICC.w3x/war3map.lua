@@ -22,7 +22,6 @@ gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
 gg_trg_Init_LordMarrowgar = nil
-gg_trg_aaaaaa = nil
 gg_trg_Init_Paladin = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
@@ -31,6 +30,7 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
+gg_trg_Init_LadyDeathwhisper = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -101,8 +101,6 @@ function CreateUnitsForPlayer10()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("U000"), 4095.6, 1498.8, 270.000)
-    SetHeroLevel(u, 10, false)
     u = CreateUnit(p, FourCC("ugho"), 3227.7, -3737.3, 12.610)
     u = CreateUnit(p, FourCC("ugho"), 3214.7, -3584.5, 263.720)
     u = CreateUnit(p, FourCC("ugho"), 3371.0, -3728.6, 246.840)
@@ -1555,6 +1553,76 @@ function Init_Whirlwind()
 end
 
 
+function Init_LadyDeathwhisper()
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local player = Player(10)
+
+    local lady_deathwhisper = CreateUnit(player, LADY_DEATHWHISPER, 4095.6, 1498.8, 270.000)
+    LADY_DEATHWHISPER = lady_deathwhisper
+    AREA_LM = gg_rct_areaLD
+
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
+    
+    Init_ManaShield()
+    Init_ShadowBolt()
+end
+
+
+mana_is_full = true
+
+function ManaShield()
+    local mana_shield = nil
+    local damage = GetEventDamage()
+
+    mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
+                                         LADY_DEATHWHISPER, "origin")
+
+    TriggerSleepAction(1.5)
+    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
+                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
+    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
+                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+
+    if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) <= 10. then
+        mana_is_full = false
+    end
+
+    DestroyEffect(mana_shield)
+end
+
+function UsingManaShield()
+    if mana_is_full then return true end
+    return false
+end
+
+function Init_ManaShield()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterUnitEvent(trigger_ability, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED)
+    TriggerAddCondition(trigger_ability, Condition(UsingManaShield))
+    TriggerAddAction(trigger_ability, ManaShield)
+end
+
+
+
+function ShadowBolt()
+    local whoPlayer = GetOwningPlayer(GetAttacker())
+    local target_enemy = GetUnitInArea(GroupHeroesInArea(AREA_LD, whoPlayer))
+    
+    local damage = GetRandomReal(9200., 12000.)
+    UnitDamageTarget(LADY_DEATHWHISPER, target_enemy, damage, true, false,
+                     ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+end
+
+function Init_ShadowBolt()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterUnitEvent(trigger_ability, LADY_DEATHWHISPER, EVENT_UNIT_ATTACKED)
+    TriggerAddAction(trigger_ability, ShadowBolt)
+end
+
+
+
 function AvengersShield()
     local first_target = GetSpellTargetUnit()
     local light_magic_damage = 1
@@ -1675,7 +1743,7 @@ function BlessingOfSanctuary()
 
         local remove_buff = function() RemoveBlessingOfSanctuary(unit, stat, items_list) end
         local tm = CreateTimer()
-        TimerStart(tm, 3., false, remove_buff)
+        TimerStart(tm, 600., false, remove_buff)
     end
 end
 
@@ -1747,6 +1815,7 @@ function Init_Paladin()
     local u = CreateUnit(Player(0), PALADIN, 3839.9, -2903.6, 90.000)
     PALADIN = u
     SetHeroLevel(PALADIN, 80, false)
+    SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
     UnitAddAbility(PALADIN, DEVOTION_AURA)
     UnitAddAbility(PALADIN, DIVINE_SHIELD)
     UnitAddAbility(PALADIN, CONSECRATION)
@@ -1768,7 +1837,7 @@ function Init_Paladin()
     Init_BlessingOfWisdom()
     --Init_JudgementOfLight()
     --Init_JudgementOfWisdom()
-    --Init_ShieldOfRighteousness()
+    Init_ShieldOfRighteousness()
     --Init_AvengersShield()
 end
 
@@ -1886,13 +1955,13 @@ function InitTrig_Init_LordMarrowgar()
     TriggerAddAction(gg_trg_Init_LordMarrowgar, Trig_Init_LordMarrowgar_Actions)
 end
 
-function Trig_aaaaaa_Actions()
-    IssuePointOrderLocBJ(nil, "flamestrike", GetUnitLoc(GetTriggerUnit()))
+function Trig_Init_LadyDeathwhisper_Actions()
+        Init_LadyDeathwhisper()
 end
 
-function InitTrig_aaaaaa()
-    gg_trg_aaaaaa = CreateTrigger()
-    TriggerAddAction(gg_trg_aaaaaa, Trig_aaaaaa_Actions)
+function InitTrig_Init_LadyDeathwhisper()
+    gg_trg_Init_LadyDeathwhisper = CreateTrigger()
+    TriggerAddAction(gg_trg_Init_LadyDeathwhisper, Trig_Init_LadyDeathwhisper_Actions)
 end
 
 function Trig_Init_Paladin_Actions()
@@ -2022,7 +2091,7 @@ end
 
 function InitCustomTriggers()
     InitTrig_Init_LordMarrowgar()
-    InitTrig_aaaaaa()
+    InitTrig_Init_LadyDeathwhisper()
     InitTrig_Init_Paladin()
     InitTrig_INIT()
     InitTrig_UNIT_DEATH()
@@ -2035,6 +2104,7 @@ end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_Init_LordMarrowgar)
+    ConditionalTriggerExecute(gg_trg_Init_LadyDeathwhisper)
     ConditionalTriggerExecute(gg_trg_Init_Paladin)
     ConditionalTriggerExecute(gg_trg_INIT)
     ConditionalTriggerExecute(gg_trg_Init)
