@@ -7,16 +7,17 @@ local param = {
     patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
     files      = { -- порядок сборки файлов
         [[\common]],
+        [[\classes]],
         [[\libraries\SaveSystem]],
         [[\libraries\EquipmentSystem]],
         [[\libraries\BuffSystem.lua]],
-        [[\libraries\UnitLocation.lua]],
+        [[\libraries\LocationSystem.lua]],
         [[\scripts\lord_marrowgar]],
         [[\scripts\lady_deathwhisper]],
         [[\scripts\paladin]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
-    current    = lfs.currentdir() -- текущая папка проэкта
+    current    = lfs.currentdir() -- текущая папка проекта
 }
 
 -- подключаем нужные функции

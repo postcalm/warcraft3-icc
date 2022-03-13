@@ -23,3 +23,13 @@ function zip(...)
     end
     return array
 end
+
+---@param number number
+---@return number
+function Round(number)
+    return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
+end
+
+function convertLength(len)
+    return Round(Round(len) / 100)
+end

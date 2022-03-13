@@ -22,6 +22,7 @@ gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
 gg_trg_Init_LordMarrowgar = nil
+gg_trg_Init_LadyDeathwhisper = nil
 gg_trg_Init_Paladin = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
@@ -30,7 +31,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_trg_Init_LadyDeathwhisper = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -81,18 +81,10 @@ function CreateUnitsForPlayer0()
     local t
     local life
     u = CreateUnit(p, FourCC("Hpal"), 4482.6, 329.9, 110.510)
-    u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
-    u = CreateUnit(p, FourCC("Hpal"), 4062.6, -5020.2, 109.900)
-end
-
-function CreateUnitsForPlayer1()
-    local p = Player(1)
-    local u
-    local unitID
-    local t
-    local life
     u = CreateUnit(p, FourCC("Hpal"), 4291.2, -2880.6, 52.820)
     SetHeroLevel(u, 80, false)
+    u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
+    u = CreateUnit(p, FourCC("Hpal"), 4062.6, -5020.2, 109.900)
 end
 
 function CreateUnitsForPlayer10()
@@ -111,7 +103,6 @@ end
 
 function CreatePlayerUnits()
     CreateUnitsForPlayer0()
-    CreateUnitsForPlayer1()
     CreateUnitsForPlayer10()
 end
 
@@ -128,10 +119,6 @@ function CreateRegions()
 end
 
 --CUSTOM_CODE
-
---AREA_LM = Rect(3040.0, -2688.0, 5184.0, -1056.0) -- gg_rct_areaLM
---AREA_LD = Rect(2944.0, -128.0, 5248.0, 1984.0) -- gg_rct_areaLD
-
 
 --Paladin
 BUFF_GBK = FourCC('B000')
@@ -215,7 +202,16 @@ function zip(...)
     end
     return array
 end
-
+
+---@param number number
+---@return number
+function Round(number)
+    return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
+end
+
+function convertLength(len)
+    return Round(Round(len) / 100)
+end
 
 --enemies
 LORD_MARROWGAR    = FourCC("U001")
@@ -234,6 +230,74 @@ MAGE         = nil
 DRIUD        = nil
 SHAMAN       = nil
 PRIEST       = nil
+--- Created by meiso.
+
+Line = {}
+setmetatable(Line, {__index = Point})
+
+function Line:new(point1, point2)
+    local obj = {}
+    setmetatable(obj, self)
+    self.__index = self
+    self.point1 = point1 or nil
+    self.point2 = point2 or nil
+    return obj
+end
+
+function Line:getPoints(quantity)
+    local new_points = {}
+    local points = {}
+    quantity = quantity or 1
+    local ydiff, xdiff = self.point2.Y - self.point1.Y,
+                         self.point2.X - self.point1.X
+    local slope = (ydiff) / (xdiff)
+    local x, y
+
+    for i = 1, quantity do
+        if slope == 0 then y = 0
+        else y = ydiff * (i / quantity) end
+
+        if slope == 0 then x = xdiff * (i / quantity)
+        else x = y / slope end
+
+        points = Point:new(Round(x) + self.point1.X,
+                           Round(y) + self.point1.Y)
+        table.insert(new_points, i, points:get2DPoint())
+    end
+    table.insert(new_points, 1, self.point1:get2DPoint())
+    return new_points
+end
+
+function Line:getLength()
+    local x = (self.point2.X - self.point1.X) ^ 2
+    local y = (self.point2.Y - self.point1.Y) ^ 2
+    local len = math.sqrt(x + y)
+    return len
+end
+
+
+--- Created by meiso.
+
+Point = {}
+
+function Point:new(X, Y, Z)
+    local obj = {}
+    obj.X = X or 0
+    obj.Y = Y or 0
+    obj.Z = Z or 0
+    setmetatable(obj, self)
+    self.__index = self
+    return obj
+end
+
+function Point:get2DPoint()
+    return { self.X, self.Y }
+end
+
+function Point:get3DPoint()
+    return { self.X, self.Y, self.Z }
+end
+
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
@@ -1371,13 +1435,13 @@ BONE_SPIKE_EXIST = false
 function BoneSpike()
     local whoPlayer = GetOwningPlayer(GetAttacker())
     TriggerSleepAction(GetRandomReal(14., 17.))
-    local gr = GroupHeroesInArea(AREA_LM, whoPlayer)
+    local gr = GroupHeroesInArea(gg_rct_areaLM, whoPlayer)
     local targetEnemy = GetUnitInArea(gr)
     local targetEnemyHealth = GetUnitState(targetEnemy, UNIT_STATE_MAX_LIFE)
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local boneSpikeObj = CreateUnit(whoPlayer, BONE_SPIKE_OBJ,
+        local boneSpikeObj = CreateUnit(GetOwningPlayer(LORD_MARROWGAR), BONE_SPIKE_OBJ,
                                         GetLocationX(GetUnitLoc(targetEnemy)),
                                         GetLocationY(GetUnitLoc(targetEnemy)), 0.)
 
@@ -1434,42 +1498,36 @@ end
 COLDFLAME_EXIST = false
 
 function Coldflame()
-    TriggerSleepAction(GetRandomReal(2., 3.))
+    --TriggerSleepAction(GetRandomReal(2., 3.))
     
     local which_player = GetOwningPlayer(GetAttacker())
-    local randUnit = GetUnitInArea(GroupHeroesInArea(AREA_LM, which_player))
+    local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
     
-    local MarrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
-    local MarrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarPoints = Point:new(marrowgarLocX, marrowgarLocY)
 
     local randUnitLocX = GetLocationX(GetUnitLoc(randUnit))
     local randUnitLocY = GetLocationY(GetUnitLoc(randUnit))
+    local randUnitPoints = Point:new(randUnitLocX, randUnitLocY)
 
-    local vector = GetVectorBetweenUnits(GetUnitLoc(LORD_MARROWGAR), GetUnitLoc(randUnit), true)
-    local position = Location(randUnitLocX + GetLocationX(vector),
-                              randUnitLocY + GetLocationY(vector))
+    local distance = Line:new(marrowgarPoints, randUnitPoints)
+    local position = {}
+    --local vector = GetVectorBetweenUnits(GetUnitLoc(LORD_MARROWGAR), GetUnitLoc(randUnit), true)
+    --local position = Location(randUnitLocX + GetLocationX(vector),
+    --                          randUnitLocY + GetLocationY(vector))
     
     if COLDFLAME_EXIST then
-        print("ok")
-        -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflameObj = CreateUnit(GetTriggerPlayer(), DUMMY, MarrowgarLocX, MarrowgarLocY, 0.)
-        
-        SetUnitMoveSpeed(coldflameObj, 0.5)
-        SetUnitPathing(coldflameObj, false)
-        IssuePointOrderLoc(coldflameObj, "move", position)
-        
-        -- через 9 сек дамми-юнит должен умереть
-        print(COMMON_TIMER)
-        UnitApplyTimedLife(coldflameObj, COMMON_TIMER, 9.)
-        
-        while true do
-            print("this")
-            -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(DUMMY_LM, "flamestrike", coldflameObj)
+        print(distance:getLength())
+        local points = distance:getPoints(50)
+        print(#points)
+        for i = 1, #points do
+            --print(points[i][1], points[i][2])
+            position = Location(points[i][1], points[i][2])
+            IssuePointOrderLoc(DUMMY_LM, "flamestrike", position)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflameObj, UNIT_STATE_LIFE) <= 0 then break end
         end
-        
+
         COLDFLAME_EXIST = false
     end
 end
@@ -1501,14 +1559,13 @@ function Init_LordMarrowgar()
 
     LORD_MARROWGAR = lord_marrowgar
     DUMMY_LM = dummy_lm
-    AREA_LM = gg_rct_areaLM
 
     UnitAddAbility(DUMMY_LM, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
-    --Init_Coldflame()
+    Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()
 end
@@ -1812,8 +1869,14 @@ end
 
 
 function Init_Paladin()
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
     local u = CreateUnit(Player(0), PALADIN, 3839.9, -2903.6, 90.000)
     PALADIN = u
+
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(PALADIN, items_list)
+
     SetHeroLevel(PALADIN, 80, false)
     SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
     UnitAddAbility(PALADIN, DEVOTION_AURA)
@@ -2193,7 +2256,7 @@ function config()
     SetPlayers(4)
     SetTeams(4)
     SetGamePlacement(MAP_PLACEMENT_TEAMS_TOGETHER)
-    DefineStartLocation(0, 6912.0, -9216.0)
+    DefineStartLocation(0, 4096.0, -3392.0)
     DefineStartLocation(1, 6912.0, -9216.0)
     DefineStartLocation(2, 6912.0, -9216.0)
     DefineStartLocation(3, 6912.0, -9216.0)

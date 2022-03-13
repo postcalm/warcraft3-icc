@@ -4,13 +4,13 @@ BONE_SPIKE_EXIST = false
 function BoneSpike()
     local whoPlayer = GetOwningPlayer(GetAttacker())
     TriggerSleepAction(GetRandomReal(14., 17.))
-    local gr = GroupHeroesInArea(AREA_LM, whoPlayer)
+    local gr = GroupHeroesInArea(gg_rct_areaLM, whoPlayer)
     local targetEnemy = GetUnitInArea(gr)
     local targetEnemyHealth = GetUnitState(targetEnemy, UNIT_STATE_MAX_LIFE)
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local boneSpikeObj = CreateUnit(whoPlayer, BONE_SPIKE_OBJ,
+        local boneSpikeObj = CreateUnit(GetOwningPlayer(LORD_MARROWGAR), BONE_SPIKE_OBJ,
                                         GetLocationX(GetUnitLoc(targetEnemy)),
                                         GetLocationY(GetUnitLoc(targetEnemy)), 0.)
 

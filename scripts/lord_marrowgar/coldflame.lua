@@ -2,42 +2,30 @@
 COLDFLAME_EXIST = false
 
 function Coldflame()
-    TriggerSleepAction(GetRandomReal(2., 3.))
+    --TriggerSleepAction(GetRandomReal(2., 3.))
     
     local which_player = GetOwningPlayer(GetAttacker())
-    local randUnit = GetUnitInArea(GroupHeroesInArea(AREA_LM, which_player))
+    local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
     
-    local MarrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
-    local MarrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+    local marrowgarPoints = Point:new(marrowgarLocX, marrowgarLocY)
 
     local randUnitLocX = GetLocationX(GetUnitLoc(randUnit))
     local randUnitLocY = GetLocationY(GetUnitLoc(randUnit))
+    local randUnitPoints = Point:new(randUnitLocX, randUnitLocY)
 
-    local vector = GetVectorBetweenUnits(GetUnitLoc(LORD_MARROWGAR), GetUnitLoc(randUnit), true)
-    local position = Location(randUnitLocX + GetLocationX(vector),
-                              randUnitLocY + GetLocationY(vector))
-    
+    local distance = Line:new(marrowgarPoints, randUnitPoints)
+    local position = {}
+
     if COLDFLAME_EXIST then
-        print("ok")
-        -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflameObj = CreateUnit(GetTriggerPlayer(), DUMMY, MarrowgarLocX, MarrowgarLocY, 0.)
-        
-        SetUnitMoveSpeed(coldflameObj, 0.5)
-        SetUnitPathing(coldflameObj, false)
-        IssuePointOrderLoc(coldflameObj, "move", position)
-        
-        -- через 9 сек дамми-юнит должен умереть
-        print(COMMON_TIMER)
-        UnitApplyTimedLife(coldflameObj, COMMON_TIMER, 9.)
-        
-        while true do
-            print("this")
-            -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(DUMMY_LM, "flamestrike", coldflameObj)
+        local points = distance:getPoints(50)
+        for i = 1, #points do
+            position = Location(points[i][1], points[i][2])
+            IssuePointOrderLoc(DUMMY_LM, "flamestrike", position)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflameObj, UNIT_STATE_LIFE) <= 0 then break end
         end
-        
+
         COLDFLAME_EXIST = false
     end
 end

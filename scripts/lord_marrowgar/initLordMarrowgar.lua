@@ -9,14 +9,13 @@ function Init_LordMarrowgar()
 
     LORD_MARROWGAR = lord_marrowgar
     DUMMY_LM = dummy_lm
-    AREA_LM = gg_rct_areaLM
 
     UnitAddAbility(DUMMY_LM, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
-    --Init_Coldflame()
+    Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()
 end
