@@ -1,0 +1,17 @@
+[Misc]
+AgiAttackSpeedBonus=0.0
+AgiDefenseBase=0.0
+AgiDefenseBonus=2.0
+DamageBonusHero=1.00,1.00,1.00,0.50,1.00,20.00,0.05,50.00
+DamageBonusSpells=1.00,1.00,1.00,1.00,1.00,0.75,0.05,50.00
+DefenseArmor=0.1
+EffectDeathTime=1.0
+FlyingHeroesBestowAuras=1
+HeroExpRange=0.0
+IntManaBonus=0.0
+MagicImmunesResistDamage=0
+MaxHeroLevel=83
+MaxUnitLevel=83
+StrAttackBonus=2.0
+StrHitPointBonus=10.0
+
