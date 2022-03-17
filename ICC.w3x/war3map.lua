@@ -121,7 +121,6 @@ end
 --CUSTOM_CODE
 
 --Paladin
-BUFF_GBK = FourCC('B000')
 JUDGEMENT_OF_LIGHT_BUFF = FourCC('B002')
 JUDGEMENT_OF_WISDOM_BUFF = FourCC('B003')
 
@@ -1498,7 +1497,7 @@ end
 COLDFLAME_EXIST = false
 
 function Coldflame()
-    --TriggerSleepAction(GetRandomReal(2., 3.))
+    TriggerSleepAction(GetRandomReal(2., 3.))
     
     local which_player = GetOwningPlayer(GetAttacker())
     local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
@@ -1513,16 +1512,10 @@ function Coldflame()
 
     local distance = Line:new(marrowgarPoints, randUnitPoints)
     local position = {}
-    --local vector = GetVectorBetweenUnits(GetUnitLoc(LORD_MARROWGAR), GetUnitLoc(randUnit), true)
-    --local position = Location(randUnitLocX + GetLocationX(vector),
-    --                          randUnitLocY + GetLocationY(vector))
-    
+
     if COLDFLAME_EXIST then
-        print(distance:getLength())
         local points = distance:getPoints(50)
-        print(#points)
         for i = 1, #points do
-            --print(points[i][1], points[i][2])
             position = Location(points[i][1], points[i][2])
             IssuePointOrderLoc(DUMMY_LM, "flamestrike", position)
             TriggerSleepAction(0.03)
@@ -1898,8 +1891,8 @@ function Init_Paladin()
     Init_BlessingOfMight()
     Init_BlessingOfSanctuary()
     Init_BlessingOfWisdom()
-    --Init_JudgementOfLight()
-    --Init_JudgementOfWisdom()
+    Init_JudgementOfLight()
+    Init_JudgementOfWisdom()
     Init_ShieldOfRighteousness()
     --Init_AvengersShield()
 end
@@ -1907,28 +1900,25 @@ end
 
 
 function JudgementOfLight()
-    local debuff = GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF)
-    if debuff > 0 then
-        -- fixme: юнит хилится пока идёт бой!
-        if GetRandomReal(0., 1.) <= 0.7  then
-            local giveHP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-            SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + giveHP)
-        end
+    -- fixme: юнит хилится пока идёт бой!
+    if GetRandomReal(0., 1.) <= 0.7  then
+        local give_HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
+        print(give_HP)
+        SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + give_HP)
     end
 end
 
 function IsJudgementOfLightDebuff()
-    return GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+    print(GetEventDamageSource() == LORD_MARROWGAR)
+    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_LIGHT_BUFF) > 0
 end
 
 function CastJudgementOfLight()
-    local paladin_loc_x = GetLocationX(GetUnitLoc(PALADIN))
-    local paladin_loc_y = GetLocationY(GetUnitLoc(PALADIN))
-    local jol_unit = CreateUnit(GetTriggerPlayer(), DUMMY, paladin_loc_x, paladin_loc_y, 0.)
+    local paladin_loc = GetUnitLoc(PALADIN)
+    local jol_unit = CreateUnitAtLoc(GetTriggerPlayer(), DUMMY, paladin_loc, 0.)
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
-    RemoveUnit(jol_unit)
 end
 
 function IsJudgementOfLight()
@@ -1940,11 +1930,11 @@ function Init_JudgementOfLight()
     local trigger_jol = CreateTrigger()
 
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, IsJudgementOfLight)
+    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfLight))
     TriggerAddAction(trigger_ability, CastJudgementOfLight)
 
-    TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_ATTACKED, nil)
-    TriggerAddCondition(trigger_jol, IsJudgementOfLightDebuff)
+    TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
+    TriggerAddCondition(trigger_jol, Condition(IsJudgementOfLightDebuff))
     TriggerAddAction(trigger_jol, JudgementOfLight)
 end
 
@@ -1982,11 +1972,11 @@ function Init_JudgementOfWisdom()
     local trigger_jow = CreateTrigger()
     
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, IsJudgementOfWisdom)
+    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfWisdom))
     TriggerAddAction(trigger_ability, CastJudgementOfWisdom)
 
-    TriggerRegisterPlayerUnitEvent(trigger_jow, Player(0), EVENT_PLAYER_UNIT_ATTACKED, nil)
-    TriggerAddCondition(trigger_jow, IsJudgementOfWisdomDebuff)
+    TriggerRegisterPlayerUnitEvent(trigger_jow, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
+    TriggerAddCondition(trigger_jow, Condition(IsJudgementOfWisdomDebuff))
     TriggerAddAction(trigger_jow, JudgementOfWisdom)
 end
 
@@ -2004,7 +1994,7 @@ end
 function Init_ShieldOfRighteousness()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, IsShieldOfRighteousness)
+    TriggerAddCondition(trigger_ability, Condition(IsShieldOfRighteousness))
     TriggerAddAction(trigger_ability, ShieldOfRighteousness)
 end
 

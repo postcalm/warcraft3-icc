@@ -2,7 +2,7 @@
 COLDFLAME_EXIST = false
 
 function Coldflame()
-    --TriggerSleepAction(GetRandomReal(2., 3.))
+    TriggerSleepAction(GetRandomReal(2., 3.))
     
     local which_player = GetOwningPlayer(GetAttacker())
     local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
