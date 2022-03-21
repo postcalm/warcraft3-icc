@@ -53,7 +53,7 @@ Bone Spike
 }
 
 STRING 25
-// Войска: h001 (Coldflame), Name (Название)
+// Способности: A001 (Coldflame), Name (Название)
 {
 Coldflame
 }
@@ -68,18 +68,6 @@ STRING 27
 // Войска: U001 (Lord Marrowgar), Name (Название)
 {
 Lord Marrowgar
-}
-
-STRING 28
-// Способности: A001 (Coldflame), Name (Название)
-{
-Coldflame
-}
-
-STRING 31
-// Войска: h002 (dummy), Name (Название)
-{
-dummy
 }
 
 STRING 32
@@ -537,11 +525,6 @@ STRING 162
 Щит мстителя (|cffffcc00C|r)
 }
 
-STRING 163
-{
-Игрок 11
-}
-
 STRING 164
 {
 Клан 2
@@ -557,5 +540,22 @@ STRING 166
 Введите -save _название_ для сохранения персонажа
 Введите -load _название_ для загрузки персонажа
 Введите -new  для создания персонажа
+}
+
+STRING 167
+{
+Король-лич
+}
+
+STRING 168
+// Войска: h001 (dynamic_dummy), Name (Название)
+{
+dynamic_dummy
+}
+
+STRING 169
+// Войска: h002 (static_dummy), Name (Название)
+{
+static_dummy
 }
 

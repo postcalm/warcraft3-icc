@@ -1,9 +1,9 @@
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
-COLDFLAME_OBJ = FourCC('h001')
 
 --Common
-DUMMY = FourCC('h002')
+DYNAMIC_DUMMY = FourCC('h001')
+STATIC_DUMMY = FourCC('h002')
 DUMMY_EQUIP = FourCC('e000')
 COMMON_TIMER = FourCC('BTLF')

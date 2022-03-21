@@ -6,7 +6,7 @@ function AvengersShield()
     local attack_power = GetHeroStr(GetTriggerUnit(), true ) * 2
     local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
     UnitDamageTargetBJ(GetTriggerUnit(), first_target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-    --local next_target = GetUnitInArea( GroupUnitsInRangeOfLocUnit( 400, GetUnitLoc(first_target) ) )
+    --local next_target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(400, GetUnitLoc(first_target)))
 end
 
 function IsAvengersShield()

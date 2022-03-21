@@ -19,7 +19,7 @@ function Init_Paladin()
     UnitAddAbility(PALADIN, JUDGEMENT_OF_WISDOM_TR)
     UnitAddAbility(PALADIN, SHIELD_OF_RIGHTEOUSNESS)
     UnitAddAbility(PALADIN, AVENGERS_SHIELD)
-    
+
     UnitAddAbility(PALADIN, SPELLBOOK_PALADIN)
     UnitMakeAbilityPermanent(PALADIN, true, SPELLBOOK_PALADIN)
     SetPlayerAbilityAvailable(Player(0), SPELLBOOK_PALADIN, true)

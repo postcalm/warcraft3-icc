@@ -145,10 +145,10 @@ ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
-COLDFLAME_OBJ = FourCC('h001')
 
 --Common
-DUMMY = FourCC('h002')
+DYNAMIC_DUMMY = FourCC('h001')
+STATIC_DUMMY = FourCC('h002')
 DUMMY_EQUIP = FourCC('e000')
 COMMON_TIMER = FourCC('BTLF')
 
@@ -1498,27 +1498,29 @@ COLDFLAME_EXIST = false
 
 function Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
-    
+
     local which_player = GetOwningPlayer(GetAttacker())
     local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
-    
-    local marrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
-    local marrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
-    local marrowgarPoints = Point:new(marrowgarLocX, marrowgarLocY)
 
-    local randUnitLocX = GetLocationX(GetUnitLoc(randUnit))
-    local randUnitLocY = GetLocationY(GetUnitLoc(randUnit))
-    local randUnitPoints = Point:new(randUnitLocX, randUnitLocY)
-
-    local distance = Line:new(marrowgarPoints, randUnitPoints)
-    local position = {}
+    local MarrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
+    local MarrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
 
     if COLDFLAME_EXIST then
-        local points = distance:getPoints(50)
-        for i = 1, #points do
-            position = Location(points[i][1], points[i][2])
-            IssuePointOrderLoc(DUMMY_LM, "flamestrike", position)
+        -- призываем дамми-юнита и направляем его в сторону игрока
+        local coldflameObj = CreateUnit(GetTriggerPlayer(), DYNAMIC_DUMMY, MarrowgarLocX, MarrowgarLocY, 0.)
+
+        SetUnitMoveSpeed(coldflameObj, 0.6)
+        SetUnitPathing(coldflameObj, false)
+        IssueTargetOrder(coldflameObj, "move", randUnit)
+
+        -- через 9 сек дамми-юнит должен умереть
+        UnitApplyTimedLife(coldflameObj, COMMON_TIMER, 9.)
+
+        while true do
+            -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
+            IssueTargetOrder(DUMMY_LM, "flamestrike", coldflameObj)
             TriggerSleepAction(0.03)
+            if GetUnitState(coldflameObj, UNIT_STATE_LIFE) <= 0 then break end
         end
 
         COLDFLAME_EXIST = false
@@ -1539,7 +1541,6 @@ function Init_Coldflame()
     TriggerAddCondition(triggerAbility, Condition(StartColdflame))
     TriggerAddAction(triggerAbility, Coldflame)
 end
-
 
 
 function Init_LordMarrowgar()
@@ -1548,7 +1549,7 @@ function Init_LordMarrowgar()
     local player = Player(10)
 
     local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
-    local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
+    local dummy_lm = CreateUnit(player, STATIC_DUMMY, 4410., -1750., -131.)
 
     LORD_MARROWGAR = lord_marrowgar
     DUMMY_LM = dummy_lm
@@ -1680,7 +1681,7 @@ function AvengersShield()
     local attack_power = GetHeroStr(GetTriggerUnit(), true ) * 2
     local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
     UnitDamageTargetBJ(GetTriggerUnit(), first_target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-    --local next_target = GetUnitInArea( GroupUnitsInRangeOfLocUnit( 400, GetUnitLoc(first_target) ) )
+    --local next_target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(400, GetUnitLoc(first_target)))
 end
 
 function IsAvengersShield()
@@ -1881,7 +1882,7 @@ function Init_Paladin()
     UnitAddAbility(PALADIN, JUDGEMENT_OF_WISDOM_TR)
     UnitAddAbility(PALADIN, SHIELD_OF_RIGHTEOUSNESS)
     UnitAddAbility(PALADIN, AVENGERS_SHIELD)
-    
+
     UnitAddAbility(PALADIN, SPELLBOOK_PALADIN)
     UnitMakeAbilityPermanent(PALADIN, true, SPELLBOOK_PALADIN)
     SetPlayerAbilityAvailable(Player(0), SPELLBOOK_PALADIN, true)
@@ -1903,13 +1904,11 @@ function JudgementOfLight()
     -- fixme: юнит хилится пока идёт бой!
     if GetRandomReal(0., 1.) <= 0.7  then
         local give_HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-        print(give_HP)
         SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + give_HP)
     end
 end
 
 function IsJudgementOfLightDebuff()
-    print(GetEventDamageSource() == LORD_MARROWGAR)
     return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_LIGHT_BUFF) > 0
 end
 
@@ -1939,28 +1938,23 @@ function Init_JudgementOfLight()
 end
 
 function JudgementOfWisdom()
-    local debuff = GetUnitAbilityLevel(GetAttacker(), JUDGEMENT_OF_WISDOM_BUFF)
-    if debuff > 0 then
-        -- fixme: юнит хилится пока идёт бой!
-        if GetRandomReal(0., 1.) <= 0.7 then
-            local giveMP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
-            SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + giveMP)
-        end
+    -- fixme: юнит хилится пока идёт бой!
+    if GetRandomReal(0., 1.) <= 0.7 then
+        local give_MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
+        SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + give_MP)
     end
 end
 
 function IsJudgementOfWisdomDebuff()
-    return GetUnitAbilityLevel( GetAttacker(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_WISDOM_BUFF) > 0
 end
 
 function CastJudgementOfWisdom()
-    local paladin_loc_x = GetLocationX(GetUnitLoc(PALADIN))
-    local paladin_loc_y = GetLocationY(GetUnitLoc(PALADIN))
-    local jow_unit = CreateUnit(GetTriggerPlayer(), DUMMY, paladin_loc_x, paladin_loc_y, 0.)
+    local paladin_loc = GetUnitLoc(PALADIN)
+    local jow_unit = CreateUnitAtLoc(GetTriggerPlayer(), DUMMY, paladin_loc, 0.)
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
-    RemoveUnit(jow_unit)
 end
 
 function IsJudgementOfWisdom()
@@ -1981,7 +1975,7 @@ function Init_JudgementOfWisdom()
 end
 
 function ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
@@ -2184,7 +2178,6 @@ function InitCustomPlayerSlots()
     SetPlayerRaceSelectable(Player(2), true)
     SetPlayerController(Player(2), MAP_CONTROL_USER)
     SetPlayerStartLocation(Player(10), 3)
-    ForcePlayerStartLocation(Player(10), 3)
     SetPlayerColor(Player(10), ConvertPlayerColor(10))
     SetPlayerRacePreference(Player(10), RACE_PREF_UNDEAD)
     SetPlayerRaceSelectable(Player(10), true)
@@ -2249,7 +2242,7 @@ function config()
     DefineStartLocation(0, 4096.0, -3392.0)
     DefineStartLocation(1, 6912.0, -9216.0)
     DefineStartLocation(2, 6912.0, -9216.0)
-    DefineStartLocation(3, 6912.0, -9216.0)
+    DefineStartLocation(3, 4096.0, -6464.0)
     InitCustomPlayerSlots()
     InitCustomTeams()
     InitAllyPriorities()

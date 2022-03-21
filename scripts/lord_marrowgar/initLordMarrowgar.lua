@@ -5,7 +5,7 @@ function Init_LordMarrowgar()
     local player = Player(10)
 
     local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
-    local dummy_lm = CreateUnit(player, DUMMY, 4410., -1750., -131.)
+    local dummy_lm = CreateUnit(player, STATIC_DUMMY, 4410., -1750., -131.)
 
     LORD_MARROWGAR = lord_marrowgar
     DUMMY_LM = dummy_lm
