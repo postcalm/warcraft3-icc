@@ -297,6 +297,21 @@ function Point:get3DPoint()
     return { self.X, self.Y, self.Z }
 end
 
+--- Created by meiso.
+
+Unit = {}
+
+function Unit:new(player, unit_id, location, face)
+    local obj = {}
+    local x = GetLocationX(location)
+    local y = GetLocationY(location)
+    obj.face = face or 0
+    obj.unit = CreateUnit(player, unit_id, x, y, obj.face)
+    setmetatable(obj, self)
+    self.__index = self
+    return obj.unit
+end
+
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
@@ -1427,7 +1442,8 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
         end
     end
     return Location(vector_x, vector_y)
-end
+end
+
 
 BONE_SPIKE_EXIST = false
 
@@ -1500,27 +1516,27 @@ function Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
     local which_player = GetOwningPlayer(GetAttacker())
-    local randUnit = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
+    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
 
-    local MarrowgarLocX = GetLocationX(GetUnitLoc(LORD_MARROWGAR))
-    local MarrowgarLocY = GetLocationY(GetUnitLoc(LORD_MARROWGAR))
+    local lord_location = GetUnitLoc(LORD_MARROWGAR)
+    local target_location = GetUnitLoc(target)
 
     if COLDFLAME_EXIST then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflameObj = CreateUnit(GetTriggerPlayer(), DYNAMIC_DUMMY, MarrowgarLocX, MarrowgarLocY, 0.)
+        local coldflame_obj = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, lord_location)
 
-        SetUnitMoveSpeed(coldflameObj, 0.6)
-        SetUnitPathing(coldflameObj, false)
-        IssueTargetOrder(coldflameObj, "move", randUnit)
+        SetUnitMoveSpeed(coldflame_obj, 0.6)
+        SetUnitPathing(coldflame_obj, false)
+        IssuePointOrderLoc(coldflame_obj, "move", target_location)
 
         -- через 9 сек дамми-юнит должен умереть
-        UnitApplyTimedLife(coldflameObj, COMMON_TIMER, 9.)
+        UnitApplyTimedLife(coldflame_obj, COMMON_TIMER, 9.)
 
         while true do
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(DUMMY_LM, "flamestrike", coldflameObj)
+            IssueTargetOrder(COLDFLAME_DUMMY, "flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflameObj, UNIT_STATE_LIFE) <= 0 then break end
+            if GetUnitState(coldflame_obj, UNIT_STATE_LIFE) <= 0 then break end
         end
 
         COLDFLAME_EXIST = false
@@ -1536,10 +1552,10 @@ function StartColdflame()
 end
 
 function Init_Coldflame()
-    local triggerAbility = CreateTrigger()
-    TriggerRegisterUnitEvent(triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(triggerAbility, Condition(StartColdflame))
-    TriggerAddAction(triggerAbility, Coldflame)
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(trigger_ability, Condition(StartColdflame))
+    TriggerAddAction(trigger_ability, Coldflame)
 end
 
 
@@ -1548,13 +1564,10 @@ function Init_LordMarrowgar()
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
     local player = Player(10)
 
-    local lord_marrowgar = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
-    local dummy_lm = CreateUnit(player, STATIC_DUMMY, 4410., -1750., -131.)
+    LORD_MARROWGAR = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
+    COLDFLAME_DUMMY = CreateUnit(player, STATIC_DUMMY, 4410., -1750., -131.)
 
-    LORD_MARROWGAR = lord_marrowgar
-    DUMMY_LM = dummy_lm
-
-    UnitAddAbility(DUMMY_LM, COLDFLAME)
+    UnitAddAbility(COLDFLAME_DUMMY, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
@@ -1678,7 +1691,7 @@ function AvengersShield()
     local first_target = GetSpellTargetUnit()
     local light_magic_damage = 1
     local factor = 0.07
-    local attack_power = GetHeroStr(GetTriggerUnit(), true ) * 2
+    local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
     local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
     UnitDamageTargetBJ(GetTriggerUnit(), first_target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
     --local next_target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(400, GetUnitLoc(first_target)))
@@ -1690,11 +1703,11 @@ end
 
 function Init_AvengersShield()
     local trigger_ability = CreateTrigger()
-
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
     TriggerAddCondition(trigger_ability, IsAvengersShield)
     TriggerAddAction(trigger_ability, AvengersShield)
-end
+end
+
 
 function RemoveBlessingOfKings(unit, stat)
     SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
@@ -1975,7 +1988,7 @@ function Init_JudgementOfWisdom()
 end
 
 function ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)

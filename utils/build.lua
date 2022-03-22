@@ -11,7 +11,7 @@ local param = {
         [[\libraries\SaveSystem]],
         [[\libraries\EquipmentSystem]],
         [[\libraries\BuffSystem.lua]],
-        [[\libraries\LocationSystem.lua]],
+        [[\libraries\Wrappers.lua]],
         [[\scripts\lord_marrowgar]],
         [[\scripts\lady_deathwhisper]],
         [[\scripts\paladin]],
