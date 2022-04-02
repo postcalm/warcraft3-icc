@@ -23,6 +23,7 @@ gg_rct_areaLD = nil
 gg_rct_areaLM = nil
 gg_trg_Init_LordMarrowgar = nil
 gg_trg_Init_LadyDeathwhisper = nil
+gg_trg_Init_Priest = nil
 gg_trg_Init_Paladin = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
@@ -31,7 +32,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_trg_Init_Priest = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -181,7 +181,8 @@ AVENGERS_SHIELD         = FourCC("A004")
 SPELLBOOK_PALADIN       = FourCC("A00L")
 
 --Priest
-FLASH_HEAL = FourCC("A00S")
+FLASH_HEAL = FourCC("A00S")
+RENEW = FourCC("A00T")
 --- Created by meiso.
 --- DateTime: 25.02.2022
 
@@ -1457,40 +1458,43 @@ end
 BONE_SPIKE_EXIST = false
 
 function BoneSpike()
+    local whoPlayer = GetOwningPlayer(GetAttacker())
     TriggerSleepAction(GetRandomReal(14., 17.))
-    local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
-    local target_enemy = GetUnitInArea(gr)
-    local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
+    local gr = GroupHeroesInArea(gg_rct_areaLM, whoPlayer)
+    local targetEnemy = GetUnitInArea(gr)
+    local targetEnemyHealth = GetUnitState(targetEnemy, UNIT_STATE_MAX_LIFE)
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit:new(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
+        local boneSpikeObj = CreateUnit(GetOwningPlayer(LORD_MARROWGAR), BONE_SPIKE_OBJ,
+                                        GetLocationX(GetUnitLoc(targetEnemy)),
+                                        GetLocationY(GetUnitLoc(targetEnemy)), 0.)
 
-        SetUnitAnimation(bone_spike_obj, "Stand Lumber")
-        SetUnitFlyHeight(target_enemy, 150., 0.)
+        SetUnitAnimation(boneSpikeObj, "Stand Lumber")
+        SetUnitFlyHeight(targetEnemy, 150., 0.)
 
-        PauseUnit(target_enemy, true)
-        PauseUnit(bone_spike_obj, true)
+        PauseUnit(targetEnemy, true)
+        PauseUnit(boneSpikeObj, true)
         
         -- сразу 9к
-        SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - 9000.)
+        SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - 9000.)
 
         while true do
-            SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - (target_enemy_health * 0.10))
+            SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - (targetEnemyHealth * 0.10))
             TriggerSleepAction(3.)
 
             -- TODO: поменять время разложения
             -- если шип уничтожен - выходим и сбрасываем игрока
-            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0  then
-                SetUnitAnimation(bone_spike_obj, "Decay")
-                SetUnitFlyHeight(target_enemy, 0., 0.)
-                PauseUnit(target_enemy, false)
-                RemoveUnit(bone_spike_obj)
+            if GetUnitState(boneSpikeObj, UNIT_STATE_LIFE) <= 0  then
+                SetUnitAnimation(boneSpikeObj, "Decay")
+                SetUnitFlyHeight(targetEnemy, 0., 0.)
+                PauseUnit(targetEnemy, false)
+                RemoveUnit(boneSpikeObj)
                 BONE_SPIKE_EXIST = false
                 break
             -- если игрок умер - сбрасываем шип
-            elseif GetUnitState(target_enemy, UNIT_STATE_LIFE) <= 0 then
-                RemoveUnit(bone_spike_obj)
+            elseif GetUnitState(targetEnemy, UNIT_STATE_LIFE) <= 0 then
+                RemoveUnit(boneSpikeObj)
                 BONE_SPIKE_EXIST = false
                 break
             end
@@ -1508,10 +1512,10 @@ function StartBoneSpike()
 end
 
 function Init_BoneSpike()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartBoneSpike))
-    TriggerAddAction(trigger_ability, BoneSpike)
+    local triggerAbility = CreateTrigger()
+    TriggerRegisterUnitEvent(triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(triggerAbility, Condition(StartBoneSpike))
+    TriggerAddAction(triggerAbility, BoneSpike)
 end
 
 
@@ -1568,18 +1572,16 @@ end
 function Init_LordMarrowgar()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local player = Player(10)
 
-    LORD_MARROWGAR = Unit:new(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    COLDFLAME_DUMMY = Unit:new(LICH_KING, STATIC_DUMMY, Location(4410., -1750.), -131.)
-
-    SetHeroLevel(LORD_MARROWGAR, 83, false)
+    LORD_MARROWGAR = CreateUnit(player, LORD_MARROWGAR, 4090., -1750., -131.)
+    COLDFLAME_DUMMY = CreateUnit(player, STATIC_DUMMY, 4410., -1750., -131.)
 
     UnitAddAbility(COLDFLAME_DUMMY, COLDFLAME)
     UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
-
     Init_Coldflame()
     --Init_BoneSpike()
     --Init_Whirlwind()
@@ -1695,47 +1697,14 @@ end
 
 
 
-function AtPoint(target_point, unit_point)
-    if target_point.X == unit_point.X and target_point.Y == unit_point.Y then
-        return true
-    end
-    return false
-end
-
 function AvengersShield()
-    local target = GetSpellTargetUnit()
+    local first_target = GetSpellTargetUnit()
     local light_magic_damage = 1
     local factor = 0.07
-    --т.к. силы атаки так таковой нет, считается она, как сила героя помноженная на 2
     local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
-
-    local pal_loc = GetUnitLoc(GetTriggerUnit())
-    local target_loc = GetUnitLoc(target)
-    local target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-
     local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
-    local dd_unit = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, pal_loc)
-
-    IssuePointOrderLoc(dd_unit, "move", target_loc)
-    while true do
-        local dd_loc = GetUnitLoc(dd_unit)
-        local dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
-        if AtPoint(target_point, dd_point) then
-            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-        end
-        for _ = 1, 2 do
-            target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target)))
-            target_loc = GetUnitLoc(target)
-            target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-            IssuePointOrderLoc(dd_unit, "move", target_loc)
-            damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
-            dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
-            if AtPoint(target_point, dd_point) then
-                UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-            end
-        end
-        break
-    end
+    UnitDamageTargetBJ(GetTriggerUnit(), first_target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+    --local next_target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(400, GetUnitLoc(first_target)))
 end
 
 function IsAvengersShield()
@@ -1745,7 +1714,7 @@ end
 function Init_AvengersShield()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsAvengersShield))
+    TriggerAddCondition(trigger_ability, IsAvengersShield)
     TriggerAddAction(trigger_ability, AvengersShield)
 end
 
@@ -1760,11 +1729,9 @@ end
 
 function BlessingOfKings()
     local unit = GetSpellTargetUnit()
-    --регистрируем юнита с системе бафов
     BuffSystem.RegisterHero(unit)
 
     if not BuffSystem.IsBuffOnHero(unit, "bok") then
-        --массив в доп. статами
         local stat = {
             R2I(GetHeroStr(unit, false) * 0.1),
             R2I(GetHeroAgi(unit, false) * 0.1),
@@ -1775,7 +1742,6 @@ function BlessingOfKings()
         SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
         BuffSystem.AddBuffToHero(unit, "bok")
 
-        --скидываем баф через 10 минут
         local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
         local tm = CreateTimer()
         TimerStart(tm, 600., false, remove_buff)
@@ -1802,6 +1768,7 @@ end
 
 function BlessingOfMight()
     local unit = GetSpellTargetUnit()
+
     BuffSystem.RegisterHero(unit)
 
     if not BuffSystem.IsBuffOnHero(unit, "bom") then
@@ -1921,14 +1888,14 @@ end
 function Init_Paladin()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    PALADIN = Unit:new(Player(0), PALADIN, Location(3839., -2903.), 90.)
+    local u = CreateUnit(Player(0), PALADIN, 3839.9, -2903.6, 90.000)
+    PALADIN = u
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(PALADIN, items_list)
 
     SetHeroLevel(PALADIN, 80, false)
     SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
-
     UnitAddAbility(PALADIN, DEVOTION_AURA)
     UnitAddAbility(PALADIN, DIVINE_SHIELD)
     UnitAddAbility(PALADIN, CONSECRATION)
@@ -1939,7 +1906,6 @@ function Init_Paladin()
     UnitAddAbility(PALADIN, SHIELD_OF_RIGHTEOUSNESS)
     UnitAddAbility(PALADIN, AVENGERS_SHIELD)
 
-    --даём паладину книжку с бафами и пассивками
     UnitAddAbility(PALADIN, SPELLBOOK_PALADIN)
     UnitMakeAbilityPermanent(PALADIN, true, SPELLBOOK_PALADIN)
     SetPlayerAbilityAvailable(Player(0), SPELLBOOK_PALADIN, true)
@@ -1952,15 +1918,16 @@ function Init_Paladin()
     Init_JudgementOfLight()
     Init_JudgementOfWisdom()
     Init_ShieldOfRighteousness()
-    Init_AvengersShield()
+    --Init_AvengersShield()
 end
 
 
 
 function JudgementOfLight()
+    -- fixme: юнит хилится пока идёт бой!
     if GetRandomReal(0., 1.) <= 0.7  then
-        local HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-        SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + HP)
+        local give_HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
+        SetUnitState(PALADIN, UNIT_STATE_LIFE, GetUnitState(PALADIN, UNIT_STATE_LIFE) + give_HP)
     end
 end
 
@@ -1969,9 +1936,8 @@ function IsJudgementOfLightDebuff()
 end
 
 function CastJudgementOfLight()
-    --создаем юнита и выдаем ему основную способность
-    --и бьем по таргету паладина
-    local jol_unit = Unit:new(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local paladin_loc = GetUnitLoc(PALADIN)
+    local jol_unit = CreateUnitAtLoc(GetTriggerPlayer(), DUMMY, paladin_loc, 0.)
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
@@ -1985,21 +1951,20 @@ function Init_JudgementOfLight()
     local trigger_ability = CreateTrigger()
     local trigger_jol = CreateTrigger()
 
-    --событие того, что персонаж использовал способность
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
     TriggerAddCondition(trigger_ability, Condition(IsJudgementOfLight))
     TriggerAddAction(trigger_ability, CastJudgementOfLight)
 
-    --событие того, персонаж бьёт юнита с дебафом
     TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
     TriggerAddCondition(trigger_jol, Condition(IsJudgementOfLightDebuff))
     TriggerAddAction(trigger_jol, JudgementOfLight)
 end
 
 function JudgementOfWisdom()
+    -- fixme: юнит хилится пока идёт бой!
     if GetRandomReal(0., 1.) <= 0.7 then
-        local MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
-        SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + MP)
+        local give_MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
+        SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + give_MP)
     end
 end
 
@@ -2008,7 +1973,8 @@ function IsJudgementOfWisdomDebuff()
 end
 
 function CastJudgementOfWisdom()
-    local jow_unit = Unit:new(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local paladin_loc = GetUnitLoc(PALADIN)
+    local jow_unit = CreateUnitAtLoc(GetTriggerPlayer(), DUMMY, paladin_loc, 0.)
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
@@ -2080,12 +2046,51 @@ function Init_Priest()
     EquipSystem.AddItemsToUnit(PRIEST, items_list)
 
     SetHeroLevel(PRIEST, 80, false)
-    SetUnitState(PRIEST, UNIT_STATE_MANA, 800)
+    SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
 
-    UnitAddAbility(PRIEST, FLASH_HEAL)
+    --UnitAddAbility(PRIEST, FLASH_HEAL)
+    --Init_Flash_Heal()
 
-    Init_Flash_Heal()
+    --Спел Обновление
+    UnitAddAbility(PRIEST, RENEW)
+    Init_Renew()
 
+end
+---
+--- Generated by EmmyLua(https://github.com/EmmyLua)
+--- Created by Kodpi.
+
+
+function RemoveHeal(unit,HP)
+    print("heal",HP)
+    SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) + HP)
+end
+
+function CastRenew()
+    local HP = 280
+    local unit = GetSpellTargetUnit()
+
+    for i = 1, 5 do
+        RemoveHeal(unit,HP)
+        TriggerSleepAction(3.)
+    end
+
+
+    local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.17
+    SetUnitState(PRIEST, UNIT_STATE_MANA, GetUnitState(PRIEST, UNIT_STATE_MANA) - mana)
+    print("mana =", mana)
+
+end
+
+function IsRenew()
+    return GetSpellAbilityId() == RENEW
+end
+
+function Init_Renew()
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+    TriggerAddCondition(trigger_ability, Condition(IsRenew))
+    TriggerAddAction(trigger_ability, CastRenew)
 end
 --CUSTOM_CODE
 function Trig_Init_LordMarrowgar_Actions()

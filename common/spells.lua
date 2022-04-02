@@ -24,3 +24,4 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 
 --Priest
 FLASH_HEAL = FourCC("A00S")
+RENEW = FourCC("A00T")
