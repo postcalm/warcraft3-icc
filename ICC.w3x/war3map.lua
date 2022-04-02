@@ -23,6 +23,7 @@ gg_rct_areaLD = nil
 gg_rct_areaLM = nil
 gg_trg_Init_LordMarrowgar = nil
 gg_trg_Init_LadyDeathwhisper = nil
+gg_trg_Init_Priest = nil
 gg_trg_Init_Paladin = nil
 gg_trg_INIT = nil
 gg_trg_UNIT_DEATH = nil
@@ -31,7 +32,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_trg_Init_Priest = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -2032,7 +2032,7 @@ function Init_JudgementOfWisdom()
 end
 
 function ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)

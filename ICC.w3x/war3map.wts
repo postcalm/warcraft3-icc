@@ -560,3 +560,9 @@ STRING 171
 Flash Heal
 }
 
+STRING 172
+// Способности: A00T (Renew), Name (Название)
+{
+Renew
+}
+

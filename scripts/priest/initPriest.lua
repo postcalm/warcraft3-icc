@@ -9,7 +9,7 @@ function Init_Priest()
     EquipSystem.AddItemsToUnit(PRIEST, items_list)
 
     SetHeroLevel(PRIEST, 80, false)
-    SetUnitState(PRIEST, UNIT_STATE_MANA, 800)
+    SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
 
     UnitAddAbility(PRIEST, FLASH_HEAL)
 
