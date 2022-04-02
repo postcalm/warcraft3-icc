@@ -31,6 +31,7 @@ local param = {
         [[\scripts\lord_marrowgar]],
         [[\scripts\lady_deathwhisper]],
         [[\scripts\paladin]],
+        [[\scripts\priest]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проекта

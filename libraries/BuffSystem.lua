@@ -61,7 +61,6 @@ function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
         if buffs[u][i] == buff then
-            --UnitRemoveAbility(hero, buff)
             buffs[u][i] = nil
         end
     end

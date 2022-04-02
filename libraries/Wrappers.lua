@@ -35,10 +35,10 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 
     if process then
         if math.abs(vector_x) > 50 and math.abs(vector_x) < 150 then
-            vector_x = vector_x * GetRandomReal( 5, 7 )
+            vector_x = vector_x * GetRandomReal(5, 7)
         end
         if math.abs(vector_y) > 50 and math.abs(vector_y) < 150 then
-            vector_y = vector_x * GetRandomReal( 5, 7 )
+            vector_y = vector_x * GetRandomReal(5, 7)
         end
     end
     return Location(vector_x, vector_y)

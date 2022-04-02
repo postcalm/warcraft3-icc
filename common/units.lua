@@ -15,4 +15,4 @@ MAGE         = nil
 --healers
 DRIUD        = nil
 SHAMAN       = nil
-PRIEST       = nil
+PRIEST       = FourCC("Hblm")

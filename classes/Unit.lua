@@ -2,6 +2,10 @@
 
 Unit = {}
 
+---@param player player
+---@param unit_id unit
+---@param location location
+---@param face real
 function Unit:new(player, unit_id, location, face)
     local obj = {}
     local x = GetLocationX(location)

@@ -3,11 +3,6 @@
 Игрок 1
 }
 
-STRING 2
-{
-Клан 1
-}
-
 STRING 3
 {
 ICC
@@ -525,11 +520,6 @@ STRING 162
 Щит мстителя (|cffffcc00C|r)
 }
 
-STRING 164
-{
-Клан 2
-}
-
 STRING 165
 {
 Игрок 3
@@ -557,5 +547,16 @@ STRING 169
 // Войска: h002 (static_dummy), Name (Название)
 {
 static_dummy
+}
+
+STRING 170
+{
+Силы света
+}
+
+STRING 171
+// Способности: A00S (Flash Heal), Name (Название)
+{
+Flash Heal
 }
 
