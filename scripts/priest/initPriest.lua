@@ -11,8 +11,11 @@ function Init_Priest()
     SetHeroLevel(PRIEST, 80, false)
     SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
 
-    UnitAddAbility(PRIEST, FLASH_HEAL)
+    --UnitAddAbility(PRIEST, FLASH_HEAL)
+    --Init_Flash_Heal()
 
-    Init_Flash_Heal()
+    --Спел Обновление
+    UnitAddAbility(PRIEST, RENEW)
+    Init_Renew()
 
 end
