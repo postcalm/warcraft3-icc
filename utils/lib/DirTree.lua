@@ -8,7 +8,7 @@ function DirTree(dir)
     local function yieldtree(d)
         for entry in lfs.dir(d) do
             if entry ~= "." and entry ~= ".." then
-                entry      = d .. "\\" .. entry
+                entry = d .. "\\" .. entry
                 local attr = lfs.attributes(entry)
                 coroutine.yield(entry, attr)
                 if attr.mode == "directory" then

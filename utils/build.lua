@@ -1,7 +1,23 @@
 require 'lfs' -- подключаем LuaFileSystem https://keplerproject.github.io/luafilesystem/manual.html
 
+function GetCatalog(dirs)
+    for i = 1, #dirs do
+        if IsDir(dirs[i]) then
+            return dirs[i]
+        end
+    end
+end
+
+function IsDir(name)
+    if type(name) ~= "string" then return false end
+    local cd = lfs.currentdir()
+    local is = lfs.chdir(name) and true or false
+    lfs.chdir(cd)
+    return is
+end
+
 local param = {
-    game       = [[E:\Warcraft III\x86_64]], -- папка с игрой
+    game_dirs  = { [[E:\Warcraft III\x86_64]], [[E:\Games\Warcraft III\x86_64]] }, -- папка с игрой
     map        = [[\ICC.w3x]], -- папка с картой
     customCode = [[\custom-code.lua]], -- файл, в который собирается весь код
     patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
@@ -60,10 +76,10 @@ os.execute('start "" "' .. param.current .. param.patcher .. '" "' .. param.curr
 
 -- запускаем игру
 if type(IsRunGame) == 'boolean' then
-    os.execute('start  "" "' .. param.game .. '\\' .. 'Warcraft III.exe" -loadfile "' .. param.current .. '\\' .. param.map .. '"')
+    os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'Warcraft III.exe" -loadfile "' .. param.current .. '\\' .. param.map .. '"')
 end
 
 -- запускаем редактор
 if type(IsRunEditor) == 'boolean' then
-    os.execute('start  "" "' .. param.game .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current .. '\\' .. param.map .. '"')
+    os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current .. '\\' .. param.map .. '"')
 end

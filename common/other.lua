@@ -1,0 +1,4 @@
+
+LICH_KING = Player(10)
+
+COMMON_TIMER = FourCC('BTLF')
