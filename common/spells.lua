@@ -23,6 +23,6 @@ AVENGERS_SHIELD         = FourCC("A004")
 SPELLBOOK_PALADIN       = FourCC("A00L")
 
 --Priest
-FLASH_HEAL = FourCC("A00S")
-RENEW = FourCC("A00T")
-CIRCLE_OF_HEALING = FourCC("A00U")
+FLASH_HEAL              = FourCC("A00S")
+RENEW                   = FourCC("A00T")
+CIRCLE_OF_HEALING       = FourCC("A00U")

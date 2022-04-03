@@ -2,43 +2,40 @@
 BONE_SPIKE_EXIST = false
 
 function BoneSpike()
-    local whoPlayer = GetOwningPlayer(GetAttacker())
     TriggerSleepAction(GetRandomReal(14., 17.))
-    local gr = GroupHeroesInArea(gg_rct_areaLM, whoPlayer)
-    local targetEnemy = GetUnitInArea(gr)
-    local targetEnemyHealth = GetUnitState(targetEnemy, UNIT_STATE_MAX_LIFE)
+    local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
+    local target_enemy = GetUnitInArea(gr)
+    local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local boneSpikeObj = CreateUnit(GetOwningPlayer(LORD_MARROWGAR), BONE_SPIKE_OBJ,
-                                        GetLocationX(GetUnitLoc(targetEnemy)),
-                                        GetLocationY(GetUnitLoc(targetEnemy)), 0.)
+        local bone_spike_obj = Unit:new(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
 
-        SetUnitAnimation(boneSpikeObj, "Stand Lumber")
-        SetUnitFlyHeight(targetEnemy, 150., 0.)
+        SetUnitAnimation(bone_spike_obj, "Stand Lumber")
+        SetUnitFlyHeight(target_enemy, 150., 0.)
 
-        PauseUnit(targetEnemy, true)
-        PauseUnit(boneSpikeObj, true)
+        PauseUnit(target_enemy, true)
+        PauseUnit(bone_spike_obj, true)
         
         -- сразу 9к
-        SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - 9000.)
+        SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - 9000.)
 
         while true do
-            SetUnitState(targetEnemy, UNIT_STATE_LIFE, GetUnitState(targetEnemy, UNIT_STATE_LIFE) - (targetEnemyHealth * 0.10))
+            SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - (target_enemy_health * 0.10))
             TriggerSleepAction(3.)
 
             -- TODO: поменять время разложения
             -- если шип уничтожен - выходим и сбрасываем игрока
-            if GetUnitState(boneSpikeObj, UNIT_STATE_LIFE) <= 0  then
-                SetUnitAnimation(boneSpikeObj, "Decay")
-                SetUnitFlyHeight(targetEnemy, 0., 0.)
-                PauseUnit(targetEnemy, false)
-                RemoveUnit(boneSpikeObj)
+            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0  then
+                SetUnitAnimation(bone_spike_obj, "Decay")
+                SetUnitFlyHeight(target_enemy, 0., 0.)
+                PauseUnit(target_enemy, false)
+                RemoveUnit(bone_spike_obj)
                 BONE_SPIKE_EXIST = false
                 break
             -- если игрок умер - сбрасываем шип
-            elseif GetUnitState(targetEnemy, UNIT_STATE_LIFE) <= 0 then
-                RemoveUnit(boneSpikeObj)
+            elseif GetUnitState(target_enemy, UNIT_STATE_LIFE) <= 0 then
+                RemoveUnit(bone_spike_obj)
                 BONE_SPIKE_EXIST = false
                 break
             end
@@ -56,9 +53,9 @@ function StartBoneSpike()
 end
 
 function Init_BoneSpike()
-    local triggerAbility = CreateTrigger()
-    TriggerRegisterUnitEvent(triggerAbility, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(triggerAbility, Condition(StartBoneSpike))
-    TriggerAddAction(triggerAbility, BoneSpike)
+    local trigger_ability = CreateTrigger()
+    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
+    TriggerAddCondition(trigger_ability, Condition(StartBoneSpike))
+    TriggerAddAction(trigger_ability, BoneSpike)
 end
 

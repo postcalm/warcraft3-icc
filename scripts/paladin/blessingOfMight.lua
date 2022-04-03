@@ -7,7 +7,6 @@ end
 
 function BlessingOfMight()
     local unit = GetSpellTargetUnit()
-
     BuffSystem.RegisterHero(unit)
 
     if not BuffSystem.IsBuffOnHero(unit, "bom") then

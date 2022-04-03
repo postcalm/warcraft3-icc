@@ -1,9 +1,8 @@
 
 function JudgementOfWisdom()
-    -- fixme: юнит хилится пока идёт бой!
     if GetRandomReal(0., 1.) <= 0.7 then
-        local give_MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
-        SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + give_MP)
+        local MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
+        SetUnitState(PALADIN, UNIT_STATE_MANA, GetUnitState(PALADIN, UNIT_STATE_MANA) + MP)
     end
 end
 
@@ -12,8 +11,7 @@ function IsJudgementOfWisdomDebuff()
 end
 
 function CastJudgementOfWisdom()
-    local paladin_loc = GetUnitLoc(PALADIN)
-    local jow_unit = CreateUnitAtLoc(GetTriggerPlayer(), DUMMY, paladin_loc, 0.)
+    local jow_unit = Unit:new(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)

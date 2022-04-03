@@ -12,6 +12,7 @@ function BlessingOfKings()
     BuffSystem.RegisterHero(unit)
 
     if not BuffSystem.IsBuffOnHero(unit, "bok") then
+        --массив с доп. статами
         local stat = {
             R2I(GetHeroStr(unit, false) * 0.1),
             R2I(GetHeroAgi(unit, false) * 0.1),
@@ -22,6 +23,7 @@ function BlessingOfKings()
         SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
         BuffSystem.AddBuffToHero(unit, "bok")
 
+        --скидываем баф через 10 минут
         local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
         local tm = CreateTimer()
         TimerStart(tm, 600., false, remove_buff)

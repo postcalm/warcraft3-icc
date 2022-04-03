@@ -12,12 +12,10 @@ function Init_Priest()
     SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
 
     --UnitAddAbility(PRIEST, FLASH_HEAL)
-    --Init_Flash_Heal()
-    --Спел Обновление
     --UnitAddAbility(PRIEST, RENEW)
-    --Init_Renew()
-    --Спел Круг исцеления
     UnitAddAbility(PRIEST, CIRCLE_OF_HEALING)
-    Init_Circle_Of_Healing()
 
+    --Init_Flash_Heal()
+    --Init_Renew()
+    Init_Circle_Of_Healing()
 end
