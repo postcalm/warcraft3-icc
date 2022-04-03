@@ -1699,11 +1699,7 @@ end
 
 
 function AtPoint(target_point, unit_point)
-    print(math.abs(target_point.X - unit_point.X))
-    print(math.abs(target_point.Y - unit_point.Y))
-    local inaccuracy = 50.
-    if math.abs(target_point.X - unit_point.X) <= inaccuracy and
-            math.abs(target_point.Y - unit_point.Y) <= inaccuracy then
+    if target_point.X == unit_point.X and target_point.Y == unit_point.Y then
         return true
     end
     return false
@@ -1717,56 +1713,32 @@ function AvengersShield()
     local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
 
     local pal_loc = GetUnitLoc(GetTriggerUnit())
-    local target_loc
-    local target_point
+    local target_loc = GetUnitLoc(target)
+    local target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
 
-    local damage = 0
-    local dd_loc
-    local dd_point
+    local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
     local dd_unit = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, pal_loc)
-    SetUnitMoveSpeed(dd_unit, 500.)
 
-    local exclude_targets = {}
-
-    function AddTarget()
-        table.insert(exclude_targets, target)
-    end
-
-    function TargetTookDamage()
-        for i = 1, #exclude_targets do
-            if target == exclude_targets[i] then return true
-            else return false end
+    IssuePointOrderLoc(dd_unit, "move", target_loc)
+    while true do
+        local dd_loc = GetUnitLoc(dd_unit)
+        local dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
+        if AtPoint(target_point, dd_point) then
+            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
         end
-    end
-
-    function GetTarget()
-        while true do
+        for _ = 1, 2 do
             target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target)))
-            if not TargetTookDamage() then
-                return target
+            target_loc = GetUnitLoc(target)
+            target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
+            IssuePointOrderLoc(dd_unit, "move", target_loc)
+            damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
+            dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
+            if AtPoint(target_point, dd_point) then
+                UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
             end
         end
+        break
     end
-
-    local i = 0
-    while i ~= 3 do
-        --находим положения цели
-        target_loc = GetUnitLoc(target)
-        target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-        --направляем юнита к месту цели
-        IssuePointOrderLoc(dd_unit, "move", target_loc)
-        TriggerSleepAction(0.)
-        dd_loc = GetUnitLoc(dd_unit)
-        dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
-        if AtPoint(target_point, dd_point) or GetDyingUnit() == target then
-            damage = GetRandomInt(11000, 13440) + (factor * light_magic_damage) + (factor * attack_power)
-            AddTarget()
-            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-            target = GetTarget()
-            i = i + 1
-        end
-    end
-    KillUnit(dd_unit)
 end
 
 function IsAvengersShield()
@@ -2062,7 +2034,7 @@ function Init_JudgementOfWisdom()
 end
 
 function ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
@@ -2084,7 +2056,7 @@ end
 --- Created by Kodpi.
 --- DateTime: 02.04.2022 20:48
 ---
-function CastCircleOfHealing()
+function CastCircle_Of_Healing()
     local target = GetSpellTargetUnit()
 
     local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.21
@@ -2096,15 +2068,15 @@ function CastCircleOfHealing()
     print(heal)
 end
 
-function IsCircleOfHealing()
+function IsCircle_Of_Healing()
     return GetSpellAbilityId() == CIRCLE_OF_HEALING
 end
 
-function Init_CircleOfHealing()
+function Init_Circle_Of_Healing()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsCircleOfHealing))
-    TriggerAddAction(trigger_ability, CastCircleOfHealing)
+    TriggerAddCondition(trigger_ability, Condition(IsCircle_Of_Healing))
+    TriggerAddAction(trigger_ability, CastCircle_Of_Healing)
 end
 --- Created by meiso.
 
@@ -2120,7 +2092,7 @@ function IsFlashHeal()
     return GetSpellAbilityId() == FLASH_HEAL
 end
 
-function Init_FlashHeal()
+function Init_Flash_Heal()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
     TriggerAddCondition(trigger_ability, Condition(IsFlashHeal))
@@ -2139,13 +2111,13 @@ function Init_Priest()
     SetHeroLevel(PRIEST, 80, false)
     SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
 
-    UnitAddAbility(PRIEST, FLASH_HEAL)
-    UnitAddAbility(PRIEST, RENEW)
+    --UnitAddAbility(PRIEST, FLASH_HEAL)
+    --UnitAddAbility(PRIEST, RENEW)
     UnitAddAbility(PRIEST, CIRCLE_OF_HEALING)
 
-    Init_FlashHeal()
-    Init_Renew()
-    Init_CircleOfHealing()
+    --Init_Flash_Heal()
+    --Init_Renew()
+    Init_Circle_Of_Healing()
 end
 
 --- Created by Kodpi.
