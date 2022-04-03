@@ -567,24 +567,12 @@ Renew
 }
 
 STRING 173
-// Способности: A00S (Flash Heal), Tip (Подсказка: используется, нормальная)
-{
-Flash Heal
-}
-
-STRING 174
 // Способности: A00S (Flash Heal), Ubertip (Подсказка: используется, подробная)
 {
 Flash Heal
 }
 
 STRING 175
-// Способности: A00T (Renew), Tip (Подсказка: используется, нормальная)
-{
-Renew
-}
-
-STRING 176
 // Способности: A00T (Renew), Ubertip (Подсказка: используется, подробная)
 {
 Renew
@@ -602,9 +590,39 @@ STRING 178
 Circle of Healing
 }
 
-STRING 179
+STRING 180
+// Способности: A00S (Flash Heal), Tip (Подсказка: используется, нормальная)
+{
+Flash Heal (|cffffcc00Q|r)
+}
+
+STRING 181
+// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 182
+// Способности: A00T (Renew), Tip (Подсказка: используется, нормальная)
+{
+Renew (|cffffcc00E|r)
+}
+
+STRING 183
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 184
 // Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
 {
-Circle of Healing
+Circle of Healing (|cffffcc00W|r)
+}
+
+STRING 185
+// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+{
+W
 }
 

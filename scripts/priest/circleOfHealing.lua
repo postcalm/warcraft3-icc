@@ -3,7 +3,7 @@
 --- Created by Kodpi.
 --- DateTime: 02.04.2022 20:48
 ---
-function CastCircle_Of_Healing()
+function CastCircleOfHealing()
     local target = GetSpellTargetUnit()
 
     local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.21
@@ -15,13 +15,13 @@ function CastCircle_Of_Healing()
     print(heal)
 end
 
-function IsCircle_Of_Healing()
+function IsCircleOfHealing()
     return GetSpellAbilityId() == CIRCLE_OF_HEALING
 end
 
-function Init_Circle_Of_Healing()
+function Init_CircleOfHealing()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsCircle_Of_Healing))
-    TriggerAddAction(trigger_ability, CastCircle_Of_Healing)
+    TriggerAddCondition(trigger_ability, Condition(IsCircleOfHealing))
+    TriggerAddAction(trigger_ability, CastCircleOfHealing)
 end

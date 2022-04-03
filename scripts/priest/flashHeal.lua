@@ -12,7 +12,7 @@ function IsFlashHeal()
     return GetSpellAbilityId() == FLASH_HEAL
 end
 
-function Init_Flash_Heal()
+function Init_FlashHeal()
     local trigger_ability = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
     TriggerAddCondition(trigger_ability, Condition(IsFlashHeal))
