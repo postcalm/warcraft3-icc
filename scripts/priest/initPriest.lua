@@ -13,9 +13,11 @@ function Init_Priest()
 
     --UnitAddAbility(PRIEST, FLASH_HEAL)
     --Init_Flash_Heal()
-
     --Спел Обновление
-    UnitAddAbility(PRIEST, RENEW)
-    Init_Renew()
+    --UnitAddAbility(PRIEST, RENEW)
+    --Init_Renew()
+    --Спел Круг исцеления
+    UnitAddAbility(PRIEST, CIRCLE_OF_HEALING)
+    Init_Circle_Of_Healing()
 
 end
