@@ -2,7 +2,7 @@
 mana_is_full = true
 
 function ManaShield()
-    local mana_shield = nil
+    local mana_shield
     local damage = GetEventDamage()
 
     mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
