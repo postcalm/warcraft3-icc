@@ -1699,7 +1699,11 @@ end
 
 
 function AtPoint(target_point, unit_point)
-    if target_point.X == unit_point.X and target_point.Y == unit_point.Y then
+    print(math.abs(target_point.X - unit_point.X))
+    print(math.abs(target_point.Y - unit_point.Y))
+    local inaccuracy = 50.
+    if math.abs(target_point.X - unit_point.X) <= inaccuracy and
+            math.abs(target_point.Y - unit_point.Y) <= inaccuracy then
         return true
     end
     return false
@@ -1713,32 +1717,56 @@ function AvengersShield()
     local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
 
     local pal_loc = GetUnitLoc(GetTriggerUnit())
-    local target_loc = GetUnitLoc(target)
-    local target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
+    local target_loc
+    local target_point
 
-    local damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
+    local damage = 0
+    local dd_loc
+    local dd_point
     local dd_unit = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, pal_loc)
+    SetUnitMoveSpeed(dd_unit, 500.)
 
-    IssuePointOrderLoc(dd_unit, "move", target_loc)
-    while true do
-        local dd_loc = GetUnitLoc(dd_unit)
-        local dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
-        if AtPoint(target_point, dd_point) then
-            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+    local exclude_targets = {}
+
+    function AddTarget()
+        table.insert(exclude_targets, target)
+    end
+
+    function TargetTookDamage()
+        for i = 1, #exclude_targets do
+            if target == exclude_targets[i] then return true
+            else return false end
         end
-        for _ = 1, 2 do
+    end
+
+    function GetTarget()
+        while true do
             target = GetUnitInArea(GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target)))
-            target_loc = GetUnitLoc(target)
-            target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-            IssuePointOrderLoc(dd_unit, "move", target_loc)
-            damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
-            dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
-            if AtPoint(target_point, dd_point) then
-                UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            if not TargetTookDamage() then
+                return target
             end
         end
-        break
     end
+
+    local i = 0
+    while i ~= 3 do
+        --находим положения цели
+        target_loc = GetUnitLoc(target)
+        target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
+        --направляем юнита к месту цели
+        IssuePointOrderLoc(dd_unit, "move", target_loc)
+        TriggerSleepAction(0.)
+        dd_loc = GetUnitLoc(dd_unit)
+        dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
+        if AtPoint(target_point, dd_point) or GetDyingUnit() == target then
+            damage = GetRandomInt(11000, 13440) + (factor * light_magic_damage) + (factor * attack_power)
+            AddTarget()
+            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            target = GetTarget()
+            i = i + 1
+        end
+    end
+    KillUnit(dd_unit)
 end
 
 function IsAvengersShield()
