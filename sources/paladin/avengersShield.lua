@@ -104,8 +104,8 @@ function IsAvengersShield()
 end
 
 function Init_AvengersShield()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsAvengersShield))
-    TriggerAddAction(trigger_ability, AvengersShield)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsAvengersShield)
+    event:AddAction(AvengersShield)
 end

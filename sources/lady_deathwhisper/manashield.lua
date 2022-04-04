@@ -27,9 +27,9 @@ function UsingManaShield()
 end
 
 function Init_ManaShield()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LADY_DEATHWHISPER, EVENT_UNIT_DAMAGED)
-    TriggerAddCondition(trigger_ability, Condition(UsingManaShield))
-    TriggerAddAction(trigger_ability, ManaShield)
+    local event = EventsUnit(LADY_DEATHWHISPER)
+    event:RegisterDamaged()
+    event:AddCondition(UsingManaShield)
+    event:AddAction(ManaShield)
 end
 

@@ -16,6 +16,13 @@ function IsDir(name)
     return is
 end
 
+function WriteToFile(customCode, path)
+    for line in io.lines(path) do
+        customCode:write(line, '\n')
+    end
+    customCode:write('\n')
+end
+
 local param = {
     game_dirs  = { [[E:\Warcraft III\x86_64]], [[E:\Games\Warcraft III\x86_64]] }, -- папка с игрой
     map        = [[\ICC.w3x]], -- папка с картой
@@ -48,11 +55,11 @@ for i = 1, #param.files do
     local file = param.files[i]
     local path = param.current .. file
     if file:match "[^.]+$" == 'lua' then
-        customCode:write(FileContent(path), '\n')
+        WriteToFile(customCode, path)
     else
         for filepath, attr in DirTree(path) do
             if (attr.mode == 'file') then
-                customCode:write(FileContent(filepath), '\n')
+                WriteToFile(customCode, filepath)
             end
         end
     end
