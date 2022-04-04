@@ -24,14 +24,14 @@ local param = {
     files      = { -- порядок сборки файлов
         [[\common]],
         [[\classes]],
-        [[\libraries\SaveSystem]],
-        [[\libraries\EquipmentSystem]],
-        [[\libraries\BuffSystem.lua]],
-        [[\libraries\Wrappers.lua]],
-        [[\scripts\lord_marrowgar]],
-        [[\scripts\lady_deathwhisper]],
-        [[\scripts\paladin]],
-        [[\scripts\priest]],
+        [[\libs\SaveSystem]],
+        [[\libs\EquipmentSystem]],
+        [[\libs\BuffSystem.lua]],
+        [[\libs\Wrappers.lua]],
+        [[\sources\lord_marrowgar]],
+        [[\sources\lady_deathwhisper]],
+        [[\sources\paladin]],
+        [[\sources\priest]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проекта
