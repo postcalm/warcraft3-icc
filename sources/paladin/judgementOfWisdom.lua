@@ -22,14 +22,16 @@ function IsJudgementOfWisdom()
 end
 
 function Init_JudgementOfWisdom()
-    local trigger_ability = CreateTrigger()
-    local trigger_jow = CreateTrigger()
-    
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfWisdom))
-    TriggerAddAction(trigger_ability, CastJudgementOfWisdom)
+    local event_ability = EventsPlayer(Player(0))
+    local event_jow = EventsPlayer(Player(0))
 
-    TriggerRegisterPlayerUnitEvent(trigger_jow, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerAddCondition(trigger_jow, Condition(IsJudgementOfWisdomDebuff))
-    TriggerAddAction(trigger_jow, JudgementOfWisdom)
+    --событие того, что персонаж использовал способность
+    event_ability:RegisterUnitSpellCast()
+    event_ability:AddCondition(IsJudgementOfWisdom)
+    event_ability:AddAction(CastJudgementOfWisdom)
+
+    --событие того, персонаж бьёт юнита с дебафом
+    event_jow:RegisterUnitDamaging()
+    event_jow:AddCondition(IsJudgementOfWisdomDebuff)
+    event_jow:AddAction(JudgementOfWisdom)
 end

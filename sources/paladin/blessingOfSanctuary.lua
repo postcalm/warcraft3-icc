@@ -31,8 +31,8 @@ function IsBlessingOfSanctuary()
 end
 
 function Init_BlessingOfSanctuary()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfSanctuary))
-    TriggerAddAction(trigger_buff, BlessingOfSanctuary)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfSanctuary)
+    event:AddAction(BlessingOfSanctuary)
 end

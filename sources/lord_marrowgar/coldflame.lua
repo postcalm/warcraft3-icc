@@ -41,8 +41,8 @@ function StartColdflame()
 end
 
 function Init_Coldflame()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartColdflame))
-    TriggerAddAction(trigger_ability, Coldflame)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartColdflame)
+    event:AddAction(Coldflame)
 end

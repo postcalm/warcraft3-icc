@@ -35,8 +35,8 @@ function IsBlessingOfKings()
 end
 
 function Init_BlessingOfKings()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_EFFECT, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfKings))
-    TriggerAddAction(trigger_buff, BlessingOfKings)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfKings)
+    event:AddAction(BlessingOfKings)
 end

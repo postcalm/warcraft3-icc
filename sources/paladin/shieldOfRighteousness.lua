@@ -11,8 +11,8 @@ function IsShieldOfRighteousness()
 end
 
 function Init_ShieldOfRighteousness()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsShieldOfRighteousness))
-    TriggerAddAction(trigger_ability, ShieldOfRighteousness)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsShieldOfRighteousness)
+    event:AddAction(ShieldOfRighteousness)
 end

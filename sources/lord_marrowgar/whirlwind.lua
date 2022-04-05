@@ -31,8 +31,8 @@ function StartWhirlwind()
 end
 
 function Init_Whirlwind()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartWhirlwind))
-    TriggerAddAction(trigger_ability, Whirlwind)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartWhirlwind)
+    event:AddAction(Whirlwind)
 end

@@ -28,9 +28,9 @@ function IsBlessingOfWisdom()
 end
 
 function Init_BlessingOfWisdom()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfWisdom))
-    TriggerAddAction(trigger_buff, BlessingOfWisdom)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfWisdom)
+    event:AddAction(BlessingOfWisdom)
 end
     

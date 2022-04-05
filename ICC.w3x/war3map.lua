@@ -261,7 +261,7 @@ function Events:_init()
 end
 
 --- Добавляет условие для события
----@param func function Функция, возвращая bool или boolexpr
+---@param func function Функция, возвращающая bool или boolexpr
 function Events:AddCondition(func)
     TriggerAddCondition(self.trigger, Condition(func))
 end
@@ -293,9 +293,29 @@ function EventsPlayer:_init(player)
     self.player = player or 0
 end
 
---- Регистриует событие получения урона юнитом
+--- Регистриует событие каста способности юнитом игрока
 function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
+end
+
+--- Регистриует событие нанесения урона юнитом игрока
+function EventsPlayer:RegisterUnitDamaging()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DAMAGING)
+end
+
+-- абсолютно две бессмысленные обёртки над методами родителя
+-- и нужны только для того, чтобы методы показывались в IDE
+
+--- Добавляет условие для события
+---@param func function Функция, возвращающая bool или boolexpr
+function EventsPlayer:AddCondition(func)
+    Events.AddCondition(self, func)
+end
+
+--- Добавляет действие для события
+---@param func function Функция, запускающаяся после срабатывания события
+function EventsPlayer:AddAction(func)
+    Events.AddAction(self, func)
 end
 
 --- Created by meiso.
@@ -320,6 +340,21 @@ end
 --- Регистриует событие получения урона юнитом
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
+end
+
+-- абсолютно две бессмысленные обёртки над методами родителя
+-- и нужны только для того, чтобы методы показывались в IDE
+
+--- Добавляет условие для события
+---@param func function Функция, возвращающая bool или boolexpr
+function EventsUnit:AddCondition(func)
+    Events.AddCondition(self, func)
+end
+
+--- Добавляет действие для события
+---@param func function Функция, запускающаяся после срабатывания события
+function EventsUnit:AddAction(func)
+    Events.AddAction(self, func)
 end
 
 --- Created by meiso.
@@ -1930,10 +1965,10 @@ function IsBlessingOfKings()
 end
 
 function Init_BlessingOfKings()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_EFFECT, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfKings))
-    TriggerAddAction(trigger_buff, BlessingOfKings)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfKings)
+    event:AddAction(BlessingOfKings)
 end
 
 
@@ -1963,10 +1998,10 @@ function IsBlessingOfMight()
 end
 
 function Init_BlessingOfMight()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfMight))
-    TriggerAddAction(trigger_buff, BlessingOfMight)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfMight)
+    event:AddAction(BlessingOfMight)
 end
     
 
@@ -2003,10 +2038,10 @@ function IsBlessingOfSanctuary()
 end
 
 function Init_BlessingOfSanctuary()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfSanctuary))
-    TriggerAddAction(trigger_buff, BlessingOfSanctuary)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfSanctuary)
+    event:AddAction(BlessingOfSanctuary)
 end
 
 
@@ -2039,10 +2074,10 @@ function IsBlessingOfWisdom()
 end
 
 function Init_BlessingOfWisdom()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfWisdom))
-    TriggerAddAction(trigger_buff, BlessingOfWisdom)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfWisdom)
+    event:AddAction(BlessingOfWisdom)
 end
     
 
@@ -2056,10 +2091,10 @@ function IsConsecration()
 end
 
 function Init_Consecration()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsConsecration))
-    TriggerAddAction(trigger_ability, Consecration)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsConsecration)
+    event:AddAction(Consecration)
 end
 
 
@@ -2127,18 +2162,18 @@ function IsJudgementOfLight()
 end
 
 function Init_JudgementOfLight()
-    local trigger_ability = CreateTrigger()
-    local trigger_jol = CreateTrigger()
+    local event_ability = EventsPlayer(Player(0))
+    local event_jol = EventsPlayer(Player(0))
 
     --событие того, что персонаж использовал способность
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfLight))
-    TriggerAddAction(trigger_ability, CastJudgementOfLight)
+    event_ability:RegisterUnitSpellCast()
+    event_ability:AddCondition(IsJudgementOfLight)
+    event_ability:AddAction(CastJudgementOfLight)
 
     --событие того, персонаж бьёт юнита с дебафом
-    TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerAddCondition(trigger_jol, Condition(IsJudgementOfLightDebuff))
-    TriggerAddAction(trigger_jol, JudgementOfLight)
+    event_jol:RegisterUnitDamaging()
+    event_jol:AddCondition(IsJudgementOfLightDebuff)
+    event_jol:AddAction(JudgementOfLight)
 end
 
 
@@ -2165,16 +2200,18 @@ function IsJudgementOfWisdom()
 end
 
 function Init_JudgementOfWisdom()
-    local trigger_ability = CreateTrigger()
-    local trigger_jow = CreateTrigger()
-    
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfWisdom))
-    TriggerAddAction(trigger_ability, CastJudgementOfWisdom)
+    local event_ability = EventsPlayer(Player(0))
+    local event_jow = EventsPlayer(Player(0))
 
-    TriggerRegisterPlayerUnitEvent(trigger_jow, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerAddCondition(trigger_jow, Condition(IsJudgementOfWisdomDebuff))
-    TriggerAddAction(trigger_jow, JudgementOfWisdom)
+    --событие того, что персонаж использовал способность
+    event_ability:RegisterUnitSpellCast()
+    event_ability:AddCondition(IsJudgementOfWisdom)
+    event_ability:AddAction(CastJudgementOfWisdom)
+
+    --событие того, персонаж бьёт юнита с дебафом
+    event_jow:RegisterUnitDamaging()
+    event_jow:AddCondition(IsJudgementOfWisdomDebuff)
+    event_jow:AddAction(JudgementOfWisdom)
 end
 
 
@@ -2190,10 +2227,10 @@ function IsShieldOfRighteousness()
 end
 
 function Init_ShieldOfRighteousness()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsShieldOfRighteousness))
-    TriggerAddAction(trigger_ability, ShieldOfRighteousness)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsShieldOfRighteousness)
+    event:AddAction(ShieldOfRighteousness)
 end
 
 ---

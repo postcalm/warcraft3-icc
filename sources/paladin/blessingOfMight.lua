@@ -25,9 +25,9 @@ function IsBlessingOfMight()
 end
 
 function Init_BlessingOfMight()
-    local trigger_buff = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_buff, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_buff, Condition(IsBlessingOfMight))
-    TriggerAddAction(trigger_buff, BlessingOfMight)
+    local event = EventsPlayer(Player(0))
+    event:RegisterUnitSpellCast()
+    event:AddCondition(IsBlessingOfMight)
+    event:AddAction(BlessingOfMight)
 end
     

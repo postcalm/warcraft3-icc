@@ -18,7 +18,7 @@ function Events:_init()
 end
 
 --- Добавляет условие для события
----@param func function Функция, возвращая bool или boolexpr
+---@param func function Функция, возвращающая bool или boolexpr
 function Events:AddCondition(func)
     TriggerAddCondition(self.trigger, Condition(func))
 end

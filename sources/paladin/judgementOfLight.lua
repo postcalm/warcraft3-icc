@@ -24,16 +24,16 @@ function IsJudgementOfLight()
 end
 
 function Init_JudgementOfLight()
-    local trigger_ability = CreateTrigger()
-    local trigger_jol = CreateTrigger()
+    local event_ability = EventsPlayer(Player(0))
+    local event_jol = EventsPlayer(Player(0))
 
     --событие того, что персонаж использовал способность
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsJudgementOfLight))
-    TriggerAddAction(trigger_ability, CastJudgementOfLight)
+    event_ability:RegisterUnitSpellCast()
+    event_ability:AddCondition(IsJudgementOfLight)
+    event_ability:AddAction(CastJudgementOfLight)
 
     --событие того, персонаж бьёт юнита с дебафом
-    TriggerRegisterPlayerUnitEvent(trigger_jol, Player(0), EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerAddCondition(trigger_jol, Condition(IsJudgementOfLightDebuff))
-    TriggerAddAction(trigger_jol, JudgementOfLight)
+    event_jol:RegisterUnitDamaging()
+    event_jol:AddCondition(IsJudgementOfLightDebuff)
+    event_jol:AddAction(JudgementOfLight)
 end

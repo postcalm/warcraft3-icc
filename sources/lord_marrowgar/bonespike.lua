@@ -53,9 +53,9 @@ function StartBoneSpike()
 end
 
 function Init_BoneSpike()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartBoneSpike))
-    TriggerAddAction(trigger_ability, BoneSpike)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartBoneSpike)
+    event:AddAction(BoneSpike)
 end
 
