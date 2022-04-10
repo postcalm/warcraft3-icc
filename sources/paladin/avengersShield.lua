@@ -20,7 +20,7 @@ function AvengersShield()
 
     local exclude_targets = {}
 
-    function AtPoint(target_point_, unit_point_)
+    local function AtPoint(target_point_, unit_point_)
         local inaccuracy = 50.
         if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
                 math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
@@ -29,18 +29,18 @@ function AvengersShield()
         return false
     end
 
-    function AddTarget(target_, exc)
+    local function AddTarget(target_, exc)
         table.insert(exc, target_)
     end
 
-    function TargetTookDamage(target_, exc)
+    local function TargetTookDamage(target_, exc)
         for i = 1, #exc do
             if target_ == exc[i] then return true end
         end
         return false
     end
 
-    function GetTarget(target_, exc)
+    local function GetTarget(target_, exc)
         local temp
         local group = GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target_))
         for _ = 1, CountUnitsInGroup(group) do
@@ -56,7 +56,7 @@ function AvengersShield()
         return 0
     end
 
-    function shield(location)
+    local function shield(location)
         local temp = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
         SetUnitMoveSpeed(temp, 500.)
         return temp

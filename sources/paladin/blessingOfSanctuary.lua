@@ -2,7 +2,7 @@
 function RemoveBlessingOfSanctuary(unit, stat, items_list)
     SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
     EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "bos")
+    BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -14,11 +14,11 @@ function BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bos") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
         EquipSystem.AddItemsToUnit(unit, items_list)
         local stat = R2I(GetHeroStr(unit, false) * 0.1)
         SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
-        BuffSystem.AddBuffToHero(unit, "bos")
+        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary")
 
         local remove_buff = function() RemoveBlessingOfSanctuary(unit, stat, items_list) end
         local tm = CreateTimer()

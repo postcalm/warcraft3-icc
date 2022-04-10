@@ -1,7 +1,7 @@
 
 function RemoveBlessingOfWisdom(unit, items_list)
     EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "bow")
+    BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -13,9 +13,9 @@ function BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bow") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
         EquipSystem.AddItemsToUnit(unit, items_list)
-        BuffSystem.AddBuffToHero(unit, "bow")
+        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom")
 
         local remove_buff = function() RemoveBlessingOfWisdom(unit, items_list) end
         local tm = CreateTimer()

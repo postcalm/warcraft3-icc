@@ -303,6 +303,11 @@ function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DAMAGING)
 end
 
+--- Регистриует событие смерти юнита игрока
+function EventsPlayer:RegisterUnitDeath()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DEATH)
+end
+
 -- абсолютно две бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
@@ -340,6 +345,11 @@ end
 --- Регистриует событие получения урона юнитом
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
+end
+
+--- Регистриует событие, когда юнита атакуют
+function EventsUnit:RegisterAttacked()
+    TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
 -- абсолютно две бессмысленные обёртки над методами родителя
@@ -1455,8 +1465,7 @@ function unequip_item_id(hero, id, c)
     end
 end
 
---- Created by meiso.
---- DateTime: 06.03.2022
+-- Copyright (c) 2022 meiso
 
 BuffSystem = {}
 --- Таблица содержащая всех героев с бафами
@@ -1465,9 +1474,7 @@ buffs = {}
 --- Регистрирует героя в системе бафов
 ---@param hero unit Id героя
 function BuffSystem.RegisterHero(hero)
-    if BuffSystem.IsHeroInSystem(hero) then
-        return
-    end
+    if BuffSystem.IsHeroInSystem(hero) then return end
     local u = ""..GetHandleId(hero)
     buffs[u] = {}
 end
@@ -1475,12 +1482,12 @@ end
 --- Добавляет герою баф
 ---@param hero unit Id героя
 ---@param buff buff Id бафа
-function BuffSystem.AddBuffToHero(hero, buff)
-    if BuffSystem.IsBuffOnHero(hero, buff) then
-        return
-    end
+---@param func function Функция, снимающая баф
+function BuffSystem.AddBuffToHero(hero, buff, func)
+    if BuffSystem.IsBuffOnHero(hero, buff) then return end
     local u = ""..GetHandleId(hero)
-    table.insert(buffs[u], buff)
+    table.insert(buffs[u], { buff_ = buff, func_ = func })
+    BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
 
 --- Проверяет есть ли герой в системе бафов
@@ -1504,7 +1511,7 @@ function BuffSystem.IsBuffOnHero(hero, buff)
     local u = ""..GetHandleId(hero)
     if #buffs[u] == 0 then return false end
     for i = 1, #buffs[u] do
-        if buffs[u][i] == buff then
+        if buffs[u][i].buff_ == buff then
             return true
         end
     end
@@ -1517,8 +1524,22 @@ end
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
-        if buffs[u][i] == buff then
+        if buffs[u][i].buff_ == buff then
             buffs[u][i] = nil
+        end
+    end
+end
+
+--- Использует лямбда-функцию для удаления бафа
+---@param hero unit Id героя
+---@param buff buff Id бафа
+function BuffSystem.UseRemovingFunction(hero, buff)
+    local u = ""..GetHandleId(hero)
+    for i = 1, #buffs[u] do
+        print(buffs[u][i])
+        if buffs[u][i] == nil then return end
+        if buffs[u][i].buff_ == buff then
+            buffs[u][i].func_()
         end
     end
 end
@@ -1528,6 +1549,34 @@ end
 function BuffSystem.RemoveHero(hero)
     local u = ""..GetHandleId(hero)
     buffs[u] = nil
+end
+
+function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    local u = ""..GetHandleId(hero)
+    local buffs_exceptions = {
+        paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
+    }
+
+    local function getBuffsByClass()
+        for class, buffs in pairs(buffs_exceptions) do
+            for i in pairs(buffs) do
+                if buffs[i] == buff then return buffs_exceptions[class] end
+            end
+        end
+    end
+
+    for _, buff_ in pairs(getBuffsByClass()) do
+        if buff_ ~= buff then
+            print(buff_)
+            BuffSystem.UseRemovingFunction(hero, buff_)
+        end
+    end
+end
+
+function BuffSystem.CheckingDebuffsExceptions()
+    debuffs_exceptions = {
+        paladin = {"JudgementOfWisdom", "JudgementOfLight"},
+    }
 end
 
 
@@ -1575,6 +1624,18 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
     end
     return Location(vector_x, vector_y)
 end
+
+
+
+--- Устанавливает кулдаун способности
+---@param unit unit
+---@param ability ability
+---@param cooldown real
+function SetCooldown(unit, ability, cooldown)
+    local level = GetUnitAbilityLevel(unit, ability)
+    BlzSetUnitAbilityCooldown(unit, ability, level, cooldown)
+end
+
 
 
 BONE_SPIKE_EXIST = false
@@ -1631,10 +1692,10 @@ function StartBoneSpike()
 end
 
 function Init_BoneSpike()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartBoneSpike))
-    TriggerAddAction(trigger_ability, BoneSpike)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartBoneSpike)
+    event:AddAction(BoneSpike)
 end
 
 
@@ -1681,10 +1742,10 @@ function StartColdflame()
 end
 
 function Init_Coldflame()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartColdflame))
-    TriggerAddAction(trigger_ability, Coldflame)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartColdflame)
+    event:AddAction(Coldflame)
 end
 
 
@@ -1741,10 +1802,10 @@ function StartWhirlwind()
 end
 
 function Init_Whirlwind()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LORD_MARROWGAR, EVENT_UNIT_ATTACKED)
-    TriggerAddCondition(trigger_ability, Condition(StartWhirlwind))
-    TriggerAddAction(trigger_ability, Whirlwind)
+    local event = EventsUnit(LORD_MARROWGAR)
+    event:RegisterAttacked()
+    event:AddCondition(StartWhirlwind)
+    event:AddAction(Whirlwind)
 end
 
 
@@ -1838,7 +1899,7 @@ function AvengersShield()
 
     local exclude_targets = {}
 
-    function AtPoint(target_point_, unit_point_)
+    local function AtPoint(target_point_, unit_point_)
         local inaccuracy = 50.
         if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
                 math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
@@ -1847,18 +1908,18 @@ function AvengersShield()
         return false
     end
 
-    function AddTarget(target_, exc)
+    local function AddTarget(target_, exc)
         table.insert(exc, target_)
     end
 
-    function TargetTookDamage(target_, exc)
+    local function TargetTookDamage(target_, exc)
         for i = 1, #exc do
             if target_ == exc[i] then return true end
         end
         return false
     end
 
-    function GetTarget(target_, exc)
+    local function GetTarget(target_, exc)
         local temp
         local group = GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target_))
         for _ = 1, CountUnitsInGroup(group) do
@@ -1874,7 +1935,7 @@ function AvengersShield()
         return 0
     end
 
-    function shield(location)
+    local function shield(location)
         local temp = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
         SetUnitMoveSpeed(temp, 500.)
         return temp
@@ -1930,10 +1991,13 @@ end
 
 
 function RemoveBlessingOfKings(unit, stat)
-    SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
-    SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
-    SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-    BuffSystem.RemoveBuffToHero(unit, "bok")
+    if BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
+        print("yep")
+        SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
+        SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
+        SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
+        BuffSystem.RemoveBuffToHero(unit, "BlessingOfKings")
+    end
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -1941,7 +2005,7 @@ function BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bok") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
         --массив с доп. статами
         local stat = {
             R2I(GetHeroStr(unit, false) * 0.1),
@@ -1951,12 +2015,15 @@ function BlessingOfKings()
         SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
-        BuffSystem.AddBuffToHero(unit, "bok")
+
+        --создаем лямбду для снятия бафа
+        local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
+        local timer = CreateTimer()
+
+        BuffSystem.AddBuffToHero(unit, "BlessingOfKings", remove_buff)
 
         --скидываем баф через 10 минут
-        local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
-        local tm = CreateTimer()
-        TimerStart(tm, 600., false, remove_buff)
+        TimerStart(timer, 600., false, remove_buff)
     end
 end
 
@@ -1974,7 +2041,7 @@ end
 
 function RemoveBlessingOfMight(unit)
     SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-    BuffSystem.RemoveBuffToHero(unit, "bom")
+    BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -1982,10 +2049,10 @@ function BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bom") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
-        BuffSystem.AddBuffToHero(unit, "bom")
+        BuffSystem.AddBuffToHero(unit, "BlessingOfMight")
 
         local remove_buff = function() RemoveBlessingOfMight(unit) end
         local tm = CreateTimer()
@@ -2009,7 +2076,7 @@ end
 function RemoveBlessingOfSanctuary(unit, stat, items_list)
     SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
     EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "bos")
+    BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -2021,11 +2088,11 @@ function BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bos") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
         EquipSystem.AddItemsToUnit(unit, items_list)
         local stat = R2I(GetHeroStr(unit, false) * 0.1)
         SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
-        BuffSystem.AddBuffToHero(unit, "bos")
+        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary")
 
         local remove_buff = function() RemoveBlessingOfSanctuary(unit, stat, items_list) end
         local tm = CreateTimer()
@@ -2047,7 +2114,7 @@ end
 
 function RemoveBlessingOfWisdom(unit, items_list)
     EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "bow")
+    BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -2059,9 +2126,9 @@ function BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not BuffSystem.IsBuffOnHero(unit, "bow") then
+    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
         EquipSystem.AddItemsToUnit(unit, items_list)
-        BuffSystem.AddBuffToHero(unit, "bow")
+        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom")
 
         local remove_buff = function() RemoveBlessingOfWisdom(unit, items_list) end
         local tm = CreateTimer()

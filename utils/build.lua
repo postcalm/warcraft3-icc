@@ -35,6 +35,7 @@ local param = {
         [[\libs\EquipmentSystem]],
         [[\libs\BuffSystem.lua]],
         [[\libs\Wrappers.lua]],
+        [[\libs\AbilityWrappers.lua]],
         [[\sources\lord_marrowgar]],
         [[\sources\lady_deathwhisper]],
         [[\sources\paladin]],

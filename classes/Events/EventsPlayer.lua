@@ -27,6 +27,11 @@ function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DAMAGING)
 end
 
+--- Регистриует событие смерти юнита игрока
+function EventsPlayer:RegisterUnitDeath()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DEATH)
+end
+
 -- абсолютно две бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
