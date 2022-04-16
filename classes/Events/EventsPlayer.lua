@@ -24,12 +24,17 @@ end
 
 --- Регистриует событие нанесения урона юнитом игрока
 function EventsPlayer:RegisterUnitDamaging()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DAMAGING)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING)
+end
+
+--- Регистриует событие получения урона юнитом игрока
+function EventsPlayer:RegisterUnitDamaged()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED)
 end
 
 --- Регистриует событие смерти юнита игрока
 function EventsPlayer:RegisterUnitDeath()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DEATH)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH)
 end
 
 -- абсолютно две бессмысленные обёртки над методами родителя

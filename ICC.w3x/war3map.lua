@@ -32,6 +32,7 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
+gg_unit_Hpal_0005 = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -272,7 +273,17 @@ function Events:AddAction(func)
     TriggerAddAction(self.trigger, func)
 end
 
+function Events:DisableTrigger()
+    DisableTrigger(self.trigger)
+end
 
+function Events:EnableTrigger()
+    EnableTrigger(self.trigger)
+end
+
+function Events:DestroyTrigger()
+    DestroyTrigger(self.trigger)
+end
 
 --- Created by meiso.
 
@@ -300,12 +311,17 @@ end
 
 --- Регистриует событие нанесения урона юнитом игрока
 function EventsPlayer:RegisterUnitDamaging()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DAMAGING)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING)
+end
+
+--- Регистриует событие получения урона юнитом игрока
+function EventsPlayer:RegisterUnitDamaged()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED)
 end
 
 --- Регистриует событие смерти юнита игрока
 function EventsPlayer:RegisterUnitDeath()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.unit, EVENT_PLAYER_UNIT_DEATH)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH)
 end
 
 -- абсолютно две бессмысленные обёртки над методами родителя
@@ -472,6 +488,7 @@ SCOPE_ABILITIES  = 7
 --- Область, за которой следуют данные об имеющихся предметах
 SCOPE_ITEMS      = 8
 
+-- Числа, расшифровать смысл которых, так и не получилось
 MAGIC_NUMBER_ONE   = 18259200
 MAGIC_NUMBER_TWO   = 44711
 MAGIC_NUMBER_THREE = 259183
@@ -485,7 +502,7 @@ MAGIC_NUMBER_NINE  = 259199
 --- Возрождает юнита
 function UnitsRespawn()
     local u = GetTriggerUnit()
-    if IsUnitType(u, UNIT_TYPE_HERO) == true  then
+    if IsUnitType(u, UNIT_TYPE_HERO) == true then
         TriggerSleepAction(5)
         ReviveHero(u, udg_SaveUnit_x, udg_SaveUnit_y, false)
     end
@@ -1406,7 +1423,6 @@ function equip_item(hero, id)
     UnitAddItem(u, it)
     UnitAddItem(hero, it)
     DestroyTrigger(t)
-    TriggerClearActions(t)
     RemoveUnit(u)
 
     if itx ~= nil then
@@ -1450,7 +1466,6 @@ function equip_items_id(hero, id, c)
         UnitAddItem(hero, itx)
     end
     DestroyTrigger(t)
-    TriggerClearActions(t)
     RemoveUnit(u)
 end
 
@@ -1512,10 +1527,9 @@ function BuffSystem.IsBuffOnHero(hero, buff)
     if #buffs[u] == 0 then return false end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #buffs[u] do
-        if buffs[u][i] ~= nil then
-            if buffs[u][i].buff_ == buff then
-                return true
-            end
+        if buffs[u][i] == nil then return false end
+        if buffs[u][i].buff_ == buff then
+            return true
         end
     end
     return false
@@ -1553,9 +1567,13 @@ function BuffSystem.RemoveHero(hero)
     buffs[u] = nil
 end
 
+--- Проверят относится ли баф к
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
         paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
+        priest = {},
+        shaman = {},
+        druid = {},
     }
 
     local function getBuffsByClass()
@@ -1570,6 +1588,13 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
         if buff_ ~= buff then
             BuffSystem.UseRemovingFunction(hero, buff_)
         end
+    end
+end
+
+function BuffSystem.RemoveAllBuffs(hero)
+    local u = ""..GetHandleId(hero)
+    for i = 1, #buffs[u] do
+        BuffSystem.UseRemovingFunction(hero, buffs[u][i].buff_)
     end
 end
 
@@ -1759,7 +1784,7 @@ function Init_LordMarrowgar()
     SetHeroLevel(LORD_MARROWGAR, 83, false)
 
     UnitAddAbility(COLDFLAME_DUMMY, COLDFLAME)
-    UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
+    --UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
@@ -1825,36 +1850,45 @@ function Init_LadyDeathwhisper()
 end
 
 
-mana_is_full = true
-
 function ManaShield()
-    local mana_shield
-    local damage = GetEventDamage()
+    local event = EventsUnit(LADY_DEATHWHISPER)
+    event:RegisterDamaged()
 
-    mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
-                                         LADY_DEATHWHISPER, "origin")
+    local function ManaShield()
+        local damage = GetEventDamage()
+        print(damage)
 
-    TriggerSleepAction(1.5)
-    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
-                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
-    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
-                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        if damage == 0 then
+            event:DestroyTrigger()
+            return
+        end
 
-    if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) <= 10. then
-        mana_is_full = false
+        local mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
+                LADY_DEATHWHISPER, "origin")
+        TriggerSleepAction(1.5)
+        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
+                GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
+        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
+                GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        DestroyEffect(mana_shield)
+        event:DestroyTrigger()
     end
 
-    DestroyEffect(mana_shield)
-end
+    local function UsingManaShield()
+        if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) >= 10. then
+            return true
+        end
+        event:DestroyTrigger()
+        return false
+    end
 
-function UsingManaShield()
-    if mana_is_full then return true end
-    return false
+    event:AddCondition(UsingManaShield)
+    event:AddAction(ManaShield)
 end
 
 function Init_ManaShield()
     local event = EventsUnit(LADY_DEATHWHISPER)
-    event:RegisterDamaged()
+    event:RegisterAttacked()
     event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
 end
@@ -2182,8 +2216,8 @@ function Init_Paladin()
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(PALADIN, items_list)
-    --
-    --SetHeroLevel(PALADIN, 80, false)
+
+    SetHeroLevel(PALADIN, 80, false)
     SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
 
     UnitAddAbility(PALADIN, DEVOTION_AURA)
@@ -2247,7 +2281,7 @@ function Init_JudgementOfLight()
     event_ability:AddCondition(IsJudgementOfLight)
     event_ability:AddAction(CastJudgementOfLight)
 
-    --событие того, персонаж бьёт юнита с дебафом
+    --событие того, что персонаж бьёт юнита с дебафом
     event_jol:RegisterUnitDamaging()
     event_jol:AddCondition(IsJudgementOfLightDebuff)
     event_jol:AddAction(JudgementOfLight)
@@ -2469,6 +2503,7 @@ end
 
 function Trig_UNIT_DEATH_Actions()
         UnitsRespawn()
+        BuffSystem.RemoveAllBuffs(GetTriggerUnit())
 end
 
 function InitTrig_UNIT_DEATH()

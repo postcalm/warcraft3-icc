@@ -1,34 +1,43 @@
 
-mana_is_full = true
-
 function ManaShield()
-    local mana_shield
-    local damage = GetEventDamage()
+    local event = EventsUnit(LADY_DEATHWHISPER)
+    event:RegisterDamaged()
 
-    mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
-                                         LADY_DEATHWHISPER, "origin")
+    local function ManaShield()
+        local damage = GetEventDamage()
+        print(damage)
 
-    TriggerSleepAction(1.5)
-    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
-                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
-    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
-                 GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        if damage == 0 then
+            event:DestroyTrigger()
+            return
+        end
 
-    if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) <= 10. then
-        mana_is_full = false
+        local mana_shield = AddSpecialEffectTarget("Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx",
+                LADY_DEATHWHISPER, "origin")
+        TriggerSleepAction(1.5)
+        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
+                GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
+        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
+                GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        DestroyEffect(mana_shield)
+        event:DestroyTrigger()
     end
 
-    DestroyEffect(mana_shield)
-end
+    local function UsingManaShield()
+        if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) >= 10. then
+            return true
+        end
+        event:DestroyTrigger()
+        return false
+    end
 
-function UsingManaShield()
-    if mana_is_full then return true end
-    return false
+    event:AddCondition(UsingManaShield)
+    event:AddAction(ManaShield)
 end
 
 function Init_ManaShield()
     local event = EventsUnit(LADY_DEATHWHISPER)
-    event:RegisterDamaged()
+    event:RegisterAttacked()
     event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
 end

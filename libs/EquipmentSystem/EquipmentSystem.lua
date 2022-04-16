@@ -156,7 +156,6 @@ function equip_item(hero, id)
     UnitAddItem(u, it)
     UnitAddItem(hero, it)
     DestroyTrigger(t)
-    TriggerClearActions(t)
     RemoveUnit(u)
 
     if itx ~= nil then
@@ -200,7 +199,6 @@ function equip_items_id(hero, id, c)
         UnitAddItem(hero, itx)
     end
     DestroyTrigger(t)
-    TriggerClearActions(t)
     RemoveUnit(u)
 end
 

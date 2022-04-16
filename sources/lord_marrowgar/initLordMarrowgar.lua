@@ -9,7 +9,7 @@ function Init_LordMarrowgar()
     SetHeroLevel(LORD_MARROWGAR, 83, false)
 
     UnitAddAbility(COLDFLAME_DUMMY, COLDFLAME)
-    UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
+    --UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)

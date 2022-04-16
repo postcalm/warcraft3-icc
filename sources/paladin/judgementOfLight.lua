@@ -32,7 +32,7 @@ function Init_JudgementOfLight()
     event_ability:AddCondition(IsJudgementOfLight)
     event_ability:AddAction(CastJudgementOfLight)
 
-    --событие того, персонаж бьёт юнита с дебафом
+    --событие того, что персонаж бьёт юнита с дебафом
     event_jol:RegisterUnitDamaging()
     event_jol:AddCondition(IsJudgementOfLightDebuff)
     event_jol:AddAction(JudgementOfLight)

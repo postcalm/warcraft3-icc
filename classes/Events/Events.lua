@@ -29,4 +29,14 @@ function Events:AddAction(func)
     TriggerAddAction(self.trigger, func)
 end
 
+function Events:DisableTrigger()
+    DisableTrigger(self.trigger)
+end
 
+function Events:EnableTrigger()
+    EnableTrigger(self.trigger)
+end
+
+function Events:DestroyTrigger()
+    DestroyTrigger(self.trigger)
+end

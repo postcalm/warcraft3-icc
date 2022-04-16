@@ -4,8 +4,8 @@ function Init_Paladin()
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
     PALADIN = Unit:new(Player(0), PALADIN, Location(3800., 200.), 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(PALADIN, items_list)
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(PALADIN, items_list)
 
     SetHeroLevel(PALADIN, 80, false)
     SetUnitState(PALADIN, UNIT_STATE_MANA, 800)

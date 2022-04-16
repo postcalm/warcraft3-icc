@@ -16,6 +16,7 @@ SCOPE_ABILITIES  = 7
 --- Область, за которой следуют данные об имеющихся предметах
 SCOPE_ITEMS      = 8
 
+-- Числа, расшифровать смысл которых, так и не получилось
 MAGIC_NUMBER_ONE   = 18259200
 MAGIC_NUMBER_TWO   = 44711
 MAGIC_NUMBER_THREE = 259183
@@ -29,7 +30,7 @@ MAGIC_NUMBER_NINE  = 259199
 --- Возрождает юнита
 function UnitsRespawn()
     local u = GetTriggerUnit()
-    if IsUnitType(u, UNIT_TYPE_HERO) == true  then
+    if IsUnitType(u, UNIT_TYPE_HERO) == true then
         TriggerSleepAction(5)
         ReviveHero(u, udg_SaveUnit_x, udg_SaveUnit_y, false)
     end
