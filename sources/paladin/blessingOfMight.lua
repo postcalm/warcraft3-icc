@@ -1,7 +1,9 @@
 
 function RemoveBlessingOfMight(unit)
-    SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-    BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
+    if BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
+        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
+        BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
+    end
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -12,11 +14,13 @@ function BlessingOfMight()
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
-        BuffSystem.AddBuffToHero(unit, "BlessingOfMight")
 
         local remove_buff = function() RemoveBlessingOfMight(unit) end
-        local tm = CreateTimer()
-        TimerStart(tm, 600., false, remove_buff)
+        local timer = CreateTimer()
+
+        BuffSystem.AddBuffToHero(unit, "BlessingOfMight", remove_buff)
+
+        TimerStart(timer, 600., false, remove_buff)
     end
 end
 

@@ -43,9 +43,12 @@ end
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = ""..GetHandleId(hero)
     if #buffs[u] == 0 then return false end
+    BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #buffs[u] do
-        if buffs[u][i].buff_ == buff then
-            return true
+        if buffs[u][i] ~= nil then
+            if buffs[u][i].buff_ == buff then
+                return true
+            end
         end
     end
     return false
@@ -69,7 +72,6 @@ end
 function BuffSystem.UseRemovingFunction(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
-        print(buffs[u][i])
         if buffs[u][i] == nil then return end
         if buffs[u][i].buff_ == buff then
             buffs[u][i].func_()
@@ -85,7 +87,6 @@ function BuffSystem.RemoveHero(hero)
 end
 
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
-    local u = ""..GetHandleId(hero)
     local buffs_exceptions = {
         paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
     }
@@ -100,7 +101,6 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            print(buff_)
             BuffSystem.UseRemovingFunction(hero, buff_)
         end
     end

@@ -1,7 +1,6 @@
 
 function RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
-        print("yep")
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)

@@ -1510,9 +1510,12 @@ end
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = ""..GetHandleId(hero)
     if #buffs[u] == 0 then return false end
+    BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #buffs[u] do
-        if buffs[u][i].buff_ == buff then
-            return true
+        if buffs[u][i] ~= nil then
+            if buffs[u][i].buff_ == buff then
+                return true
+            end
         end
     end
     return false
@@ -1536,7 +1539,6 @@ end
 function BuffSystem.UseRemovingFunction(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
-        print(buffs[u][i])
         if buffs[u][i] == nil then return end
         if buffs[u][i].buff_ == buff then
             buffs[u][i].func_()
@@ -1552,7 +1554,6 @@ function BuffSystem.RemoveHero(hero)
 end
 
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
-    local u = ""..GetHandleId(hero)
     local buffs_exceptions = {
         paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
     }
@@ -1567,7 +1568,6 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            print(buff_)
             BuffSystem.UseRemovingFunction(hero, buff_)
         end
     end
@@ -1992,7 +1992,6 @@ end
 
 function RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
-        print("yep")
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
@@ -2040,8 +2039,10 @@ end
 
 
 function RemoveBlessingOfMight(unit)
-    SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-    BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
+    if BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
+        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
+        BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
+    end
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -2052,11 +2053,13 @@ function BlessingOfMight()
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
-        BuffSystem.AddBuffToHero(unit, "BlessingOfMight")
 
         local remove_buff = function() RemoveBlessingOfMight(unit) end
-        local tm = CreateTimer()
-        TimerStart(tm, 600., false, remove_buff)
+        local timer = CreateTimer()
+
+        BuffSystem.AddBuffToHero(unit, "BlessingOfMight", remove_buff)
+
+        TimerStart(timer, 600., false, remove_buff)
     end
 end
 
@@ -2074,9 +2077,11 @@ end
 
 
 function RemoveBlessingOfSanctuary(unit, stat, items_list)
-    SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
-    EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
+    if BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
+        SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
+        EquipSystem.RemoveItemsToUnit(unit, items_list)
+        BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
+    end
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -2092,11 +2097,13 @@ function BlessingOfSanctuary()
         EquipSystem.AddItemsToUnit(unit, items_list)
         local stat = R2I(GetHeroStr(unit, false) * 0.1)
         SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
-        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary")
 
         local remove_buff = function() RemoveBlessingOfSanctuary(unit, stat, items_list) end
-        local tm = CreateTimer()
-        TimerStart(tm, 600., false, remove_buff)
+        local timer = CreateTimer()
+
+        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary", remove_buff)
+
+        TimerStart(timer, 600., false, remove_buff)
     end
 end
 
@@ -2113,8 +2120,10 @@ end
 
 
 function RemoveBlessingOfWisdom(unit, items_list)
-    EquipSystem.RemoveItemsToUnit(unit, items_list)
-    BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
+    if BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
+        EquipSystem.RemoveItemsToUnit(unit, items_list)
+        BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
+    end
     DestroyTimer(GetExpiredTimer())
 end
 
@@ -2128,11 +2137,12 @@ function BlessingOfWisdom()
 
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
         EquipSystem.AddItemsToUnit(unit, items_list)
-        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom")
 
         local remove_buff = function() RemoveBlessingOfWisdom(unit, items_list) end
-        local tm = CreateTimer()
-        TimerStart(tm, 600., false, remove_buff)
+        local timer = CreateTimer()
+        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom", remove_buff)
+
+        TimerStart(timer, 600., false, remove_buff)
     end
 end
 
@@ -2170,10 +2180,10 @@ function Init_Paladin()
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
     PALADIN = Unit:new(Player(0), PALADIN, Location(3800., 200.), 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(PALADIN, items_list)
-
-    SetHeroLevel(PALADIN, 80, false)
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(PALADIN, items_list)
+    --
+    --SetHeroLevel(PALADIN, 80, false)
     SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
 
     UnitAddAbility(PALADIN, DEVOTION_AURA)
