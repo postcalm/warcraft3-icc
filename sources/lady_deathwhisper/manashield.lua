@@ -5,7 +5,6 @@ function ManaShield()
 
     local function ManaShield()
         local damage = GetEventDamage()
-        print(damage)
 
         if damage == 0 then
             event:DestroyTrigger()

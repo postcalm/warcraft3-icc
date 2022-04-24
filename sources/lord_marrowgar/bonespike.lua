@@ -9,7 +9,7 @@ function BoneSpike()
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit:new(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)

@@ -29,14 +29,17 @@ function Events:AddAction(func)
     TriggerAddAction(self.trigger, func)
 end
 
+--- Отключает триггер
 function Events:DisableTrigger()
     DisableTrigger(self.trigger)
 end
 
+--- Включает триггер
 function Events:EnableTrigger()
     EnableTrigger(self.trigger)
 end
 
+--- Уничтожает триггер
 function Events:DestroyTrigger()
     DestroyTrigger(self.trigger)
 end

@@ -41,3 +41,18 @@ end
 function EventsUnit:AddAction(func)
     Events.AddAction(self, func)
 end
+
+--- Отключает триггер
+function EventsUnit:DisableTrigger()
+    Events.DisableTrigger(self)
+end
+
+--- Включает триггер
+function EventsUnit:EnableTrigger()
+    Events.EnableTrigger(self)
+end
+
+--- Уничтожает триггер
+function EventsUnit:DestroyTrigger()
+    Events.DestroyTrigger(self)
+end

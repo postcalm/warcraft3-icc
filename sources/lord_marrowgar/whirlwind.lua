@@ -5,18 +5,18 @@ function ResetAnimation()
     if WHIRLWIND_EXIST then
         WHIRLWIND_EXIST = false
     end
-    DestroyTimer(timer_reset)
+    DestroyTimer(GetExpiredTimer())
 end
 
 function action()
-    timer_reset = CreateTimer()
+    local timer_reset = CreateTimer()
     IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
     TimerStart(timer_reset, 5., false, ResetAnimation)
-    DestroyTimer(whirlwind_timer)
+    DestroyTimer(GetExpiredTimer())
 end
 
 function Whirlwind()
-    whirlwind_timer = CreateTimer()
+    local whirlwind_timer = CreateTimer()
     if WHIRLWIND_EXIST then
         TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
     end

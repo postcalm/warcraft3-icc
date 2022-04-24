@@ -32,7 +32,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_unit_Hpal_0005 = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -163,6 +162,9 @@ COMMON_TIMER = FourCC('BTLF')
 COLDFLAME = FourCC("A001")
 WHIRLWIND = FourCC("A005")
 
+--Lady Deathwhisper
+SHADOW_BOLT = FourCC("A00V")
+
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")
 CONSECRATION            = FourCC("A009")
@@ -223,6 +225,15 @@ function convertLength(len)
     return Round(Round(len) / 100)
 end
 
+function AtPoint(target_point_, unit_point_)
+    local inaccuracy = 50.
+    if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
+            math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
+        return true
+    end
+    return false
+end
+
 
 --enemies
 LORD_MARROWGAR    = FourCC("U001")
@@ -273,14 +284,17 @@ function Events:AddAction(func)
     TriggerAddAction(self.trigger, func)
 end
 
+--- Отключает триггер
 function Events:DisableTrigger()
     DisableTrigger(self.trigger)
 end
 
+--- Включает триггер
 function Events:EnableTrigger()
     EnableTrigger(self.trigger)
 end
 
+--- Уничтожает триггер
 function Events:DestroyTrigger()
     DestroyTrigger(self.trigger)
 end
@@ -339,6 +353,21 @@ function EventsPlayer:AddAction(func)
     Events.AddAction(self, func)
 end
 
+--- Отключает триггер
+function EventsPlayer:DisableTrigger()
+    Events.DisableTrigger(self)
+end
+
+--- Включает триггер
+function EventsPlayer:EnableTrigger()
+    Events.EnableTrigger(self)
+end
+
+--- Уничтожает триггер
+function EventsPlayer:DestroyTrigger()
+    Events.DestroyTrigger(self)
+end
+
 --- Created by meiso.
 
 EventsUnit = {}
@@ -381,6 +410,21 @@ end
 ---@param func function Функция, запускающаяся после срабатывания события
 function EventsUnit:AddAction(func)
     Events.AddAction(self, func)
+end
+
+--- Отключает триггер
+function EventsUnit:DisableTrigger()
+    Events.DisableTrigger(self)
+end
+
+--- Включает триггер
+function EventsUnit:EnableTrigger()
+    Events.EnableTrigger(self)
+end
+
+--- Уничтожает триггер
+function EventsUnit:DestroyTrigger()
+    Events.DestroyTrigger(self)
 end
 
 --- Created by meiso.
@@ -454,20 +498,25 @@ end
 --- Created by meiso.
 
 Unit = {}
+Unit.__index = Unit
+
+setmetatable(Unit, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self.unit
+    end,
+})
 
 ---@param player player
 ---@param unit_id unit
 ---@param location location
 ---@param face real
-function Unit:new(player, unit_id, location, face)
-    local obj = {}
+function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    obj.face = face or 0
-    obj.unit = CreateUnit(player, unit_id, x, y, obj.face)
-    setmetatable(obj, self)
-    self.__index = self
-    return obj.unit
+    self.face = face or 0
+    self.unit = CreateUnit(player, unit_id, x, y, self.face)
 end
 
 ---@author Vlod | WWW.XGM.RU
@@ -1550,7 +1599,7 @@ end
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
 ---@param buff buff Id бафа
-function BuffSystem.UseRemovingFunction(hero, buff)
+function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
         if buffs[u][i] == nil then return end
@@ -1586,7 +1635,7 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            BuffSystem.UseRemovingFunction(hero, buff_)
+            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
         end
     end
 end
@@ -1594,7 +1643,7 @@ end
 function BuffSystem.RemoveAllBuffs(hero)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
-        BuffSystem.UseRemovingFunction(hero, buffs[u][i].buff_)
+        BuffSystem.RemoveBuffToHeroByFunc(hero, buffs[u][i].buff_)
     end
 end
 
@@ -1673,7 +1722,7 @@ function BoneSpike()
 
     if BONE_SPIKE_EXIST then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit:new(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)
@@ -1738,7 +1787,7 @@ function Coldflame()
 
     if COLDFLAME_EXIST then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, lord_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, lord_location)
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)
@@ -1778,8 +1827,8 @@ function Init_LordMarrowgar()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    LORD_MARROWGAR = Unit:new(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    COLDFLAME_DUMMY = Unit:new(LICH_KING, STATIC_DUMMY, Location(4410., -1750.), -131.)
+    LORD_MARROWGAR = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
+    COLDFLAME_DUMMY = Unit(LICH_KING, STATIC_DUMMY, Location(4410., -1750.), -131.)
 
     SetHeroLevel(LORD_MARROWGAR, 83, false)
 
@@ -1801,18 +1850,18 @@ function ResetAnimation()
     if WHIRLWIND_EXIST then
         WHIRLWIND_EXIST = false
     end
-    DestroyTimer(timer_reset)
+    DestroyTimer(GetExpiredTimer())
 end
 
 function action()
-    timer_reset = CreateTimer()
+    local timer_reset = CreateTimer()
     IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
     TimerStart(timer_reset, 5., false, ResetAnimation)
-    DestroyTimer(whirlwind_timer)
+    DestroyTimer(GetExpiredTimer())
 end
 
 function Whirlwind()
-    whirlwind_timer = CreateTimer()
+    local whirlwind_timer = CreateTimer()
     if WHIRLWIND_EXIST then
         TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
     end
@@ -1838,12 +1887,14 @@ function Init_LadyDeathwhisper()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    LADY_DEATHWHISPER = Unit:new(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.000)
+    LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.000)
 
-    SetHeroLevel(LORD_MARROWGAR, 83, false)
+    SetHeroLevel(LADY_DEATHWHISPER, 83, false)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
+
+    UnitAddAbility(LADY_DEATHWHISPER, SHADOW_BOLT)
     
     Init_ManaShield()
     Init_ShadowBolt()
@@ -1856,7 +1907,6 @@ function ManaShield()
 
     local function ManaShield()
         local damage = GetEventDamage()
-        print(damage)
 
         if damage == 0 then
             event:DestroyTrigger()
@@ -1896,18 +1946,28 @@ end
 
 
 function ShadowBolt()
-    local whoPlayer = GetOwningPlayer(GetAttacker())
-    local target_enemy = GetUnitInArea(GroupHeroesInArea(AREA_LD, whoPlayer))
-    
+    local gr = GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))
+    local enemy = GetUnitInArea(gr)
+
+    local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
     local damage = GetRandomReal(9200., 12000.)
-    UnitDamageTarget(LADY_DEATHWHISPER, target_enemy, damage, true, false,
-                     ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    --UnitDamageTarget(LADY_DEATHWHISPER, target_enemy, damage, true, false,
+    --                 ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    IssueTargetOrder(LADY_DEATHWHISPER, "absorb", enemy)
+
+    local function shadow_bolt()
+        local temp = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, GetUnitLoc(GetTriggerUnit()))
+        SetUnitMoveSpeed(temp, 500.)
+        return temp
+    end
+
+    IssuePointOrderLoc(shadow_bolt(), "move", GetUnitLoc(enemy))
 end
 
 function Init_ShadowBolt()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterUnitEvent(trigger_ability, LADY_DEATHWHISPER, EVENT_UNIT_ATTACKED)
-    TriggerAddAction(trigger_ability, ShadowBolt)
+    local event = EventsUnit(LADY_DEATHWHISPER)
+    event:RegisterAttacked()
+    event:AddAction(ShadowBolt)
 end
 
 
@@ -1932,15 +1992,6 @@ function AvengersShield()
     local model
 
     local exclude_targets = {}
-
-    local function AtPoint(target_point_, unit_point_)
-        local inaccuracy = 50.
-        if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
-                math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
-            return true
-        end
-        return false
-    end
 
     local function AddTarget(target_, exc)
         table.insert(exc, target_)
@@ -1970,7 +2021,7 @@ function AvengersShield()
     end
 
     local function shield(location)
-        local temp = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
+        local temp = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
         SetUnitMoveSpeed(temp, 500.)
         return temp
     end
@@ -2212,7 +2263,7 @@ end
 function Init_Paladin()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    PALADIN = Unit:new(Player(0), PALADIN, Location(3800., 200.), 90.)
+    PALADIN = Unit(Player(0), PALADIN, Location(3800., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(PALADIN, items_list)
@@ -2262,7 +2313,7 @@ end
 function CastJudgementOfLight()
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit:new(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local jol_unit = Unit(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
@@ -2300,7 +2351,7 @@ function IsJudgementOfWisdomDebuff()
 end
 
 function CastJudgementOfWisdom()
-    local jow_unit = Unit:new(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local jow_unit = Unit(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
@@ -2327,7 +2378,7 @@ end
 
 
 function ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
@@ -2398,7 +2449,7 @@ end
 function Init_Priest()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    PRIEST = Unit:new(Player(0), PRIEST, Location(3950., -3040.), 90.)
+    PRIEST = Unit(Player(0), PRIEST, Location(3950., -3040.), 90.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(PRIEST, items_list)
@@ -2707,7 +2758,7 @@ function config()
     DefineStartLocation(0, 4096.0, 192.0)
     DefineStartLocation(1, 6912.0, -9216.0)
     DefineStartLocation(2, 6912.0, -9216.0)
-    DefineStartLocation(3, 4096.0, -6464.0)
+    DefineStartLocation(3, 6912.0, -9216.0)
     InitCustomPlayerSlots()
     InitCustomTeams()
     InitAllyPriorities()

@@ -3,6 +3,9 @@
 COLDFLAME = FourCC("A001")
 WHIRLWIND = FourCC("A005")
 
+--Lady Deathwhisper
+SHADOW_BOLT = FourCC("A00V")
+
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")
 CONSECRATION            = FourCC("A009")

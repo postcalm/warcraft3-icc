@@ -4,15 +4,14 @@ COLDFLAME_EXIST = false
 function Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local which_player = GetOwningPlayer(GetAttacker())
-    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
+    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
     local lord_location = GetUnitLoc(LORD_MARROWGAR)
     local target_location = GetUnitLoc(target)
 
     if COLDFLAME_EXIST then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, lord_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)

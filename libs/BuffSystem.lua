@@ -68,7 +68,7 @@ end
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
 ---@param buff buff Id бафа
-function BuffSystem.UseRemovingFunction(hero, buff)
+function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
         if buffs[u][i] == nil then return end
@@ -104,7 +104,7 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            BuffSystem.UseRemovingFunction(hero, buff_)
+            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
         end
     end
 end
@@ -112,7 +112,7 @@ end
 function BuffSystem.RemoveAllBuffs(hero)
     local u = ""..GetHandleId(hero)
     for i = 1, #buffs[u] do
-        BuffSystem.UseRemovingFunction(hero, buffs[u][i].buff_)
+        BuffSystem.RemoveBuffToHeroByFunc(hero, buffs[u][i].buff_)
     end
 end
 

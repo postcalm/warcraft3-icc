@@ -1,9 +1,7 @@
 --- Created by meiso.
---- DateTime: 25.02.2022
 
 --- Аналог python функции zip().
---- Объединяет в таблицы элементы из последовательностей
---- переданных в качестве аргументов
+--- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
 function zip(...)
     local args = table.pack(...)
     local array = {}
@@ -32,4 +30,13 @@ end
 
 function convertLength(len)
     return Round(Round(len) / 100)
+end
+
+function AtPoint(target_point_, unit_point_)
+    local inaccuracy = 50.
+    if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
+            math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
+        return true
+    end
+    return false
 end

@@ -3,6 +3,6 @@
 BONE_SPIKE_OBJ = FourCC('h000')
 
 --Common
-DYNAMIC_DUMMY = FourCC('h001')
-STATIC_DUMMY = FourCC('h002')
+DUMMY = FourCC('h002')
+SPELL_DUMMY = FourCC('h003')
 DUMMY_EQUIP = FourCC('e000')

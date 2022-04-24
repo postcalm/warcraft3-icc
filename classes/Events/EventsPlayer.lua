@@ -51,3 +51,18 @@ end
 function EventsPlayer:AddAction(func)
     Events.AddAction(self, func)
 end
+
+--- Отключает триггер
+function EventsPlayer:DisableTrigger()
+    Events.DisableTrigger(self)
+end
+
+--- Включает триггер
+function EventsPlayer:EnableTrigger()
+    Events.EnableTrigger(self)
+end
+
+--- Уничтожает триггер
+function EventsPlayer:DestroyTrigger()
+    Events.DestroyTrigger(self)
+end

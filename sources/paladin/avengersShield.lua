@@ -14,20 +14,11 @@ function AvengersShield()
     local dd_loc
     local dd_point
     local dd_unit
-    local modelName = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
+    local model_name = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
     --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
-    local model
+    local effect
 
     local exclude_targets = {}
-
-    local function AtPoint(target_point_, unit_point_)
-        local inaccuracy = 50.
-        if math.abs(target_point_.X - unit_point_.X) <= inaccuracy and
-                math.abs(target_point_.Y - unit_point_.Y) <= inaccuracy then
-            return true
-        end
-        return false
-    end
 
     local function AddTarget(target_, exc)
         table.insert(exc, target_)
@@ -57,7 +48,7 @@ function AvengersShield()
     end
 
     local function shield(location)
-        local temp = Unit:new(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
+        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit()))
         SetUnitMoveSpeed(temp, 500.)
         return temp
     end
@@ -65,8 +56,8 @@ function AvengersShield()
     local i = 0
     dd_unit = shield(pal_loc)
     while i < 3 do
-        model = AddSpecialEffectLoc(modelName, GetUnitLoc(dd_unit))
-        BlzSetSpecialEffectScale(model, 0.3)
+        effect = AddSpecialEffectTarget(model_name, dd_unit, "overhead")
+        BlzSetSpecialEffectScale(effect, 0.3)
         --находим положения цели
         target_loc = GetUnitLoc(target)
         target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
@@ -93,10 +84,10 @@ function AvengersShield()
             if target == 0 then break end
             i = i + 1
         end
-        DestroyEffect(model)
+        DestroyEffect(effect)
     end
     RemoveUnit(dd_unit)
-    DestroyEffect(model)
+    DestroyEffect(effect)
 end
 
 function IsAvengersShield()
