@@ -609,7 +609,7 @@ Shadow bolt
 }
 
 STRING 191
-// Войска: h003 (spell_dummy), Name (Название)
+// Войска: h001 (spell_dummy), Name (Название)
 {
 spell_dummy
 }

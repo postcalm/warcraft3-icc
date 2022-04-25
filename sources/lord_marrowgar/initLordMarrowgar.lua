@@ -4,7 +4,7 @@ function Init_LordMarrowgar()
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
     LORD_MARROWGAR = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    COLDFLAME_DUMMY = Unit(LICH_KING, STATIC_DUMMY, Location(4410., -1750.), -131.)
+    COLDFLAME_DUMMY = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     SetHeroLevel(LORD_MARROWGAR, 83, false)
 

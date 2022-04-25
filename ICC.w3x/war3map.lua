@@ -148,8 +148,8 @@ ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 BONE_SPIKE_OBJ = FourCC('h000')
 
 --Common
-DYNAMIC_DUMMY = FourCC('h001')
-STATIC_DUMMY = FourCC('h002')
+DUMMY       = FourCC('h002')
+SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
 
 
@@ -190,11 +190,9 @@ RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
 
 --- Created by meiso.
---- DateTime: 25.02.2022
 
 --- Аналог python функции zip().
---- Объединяет в таблицы элементы из последовательностей
---- переданных в качестве аргументов
+--- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
 function zip(...)
     local args = table.pack(...)
     local array = {}
@@ -1779,15 +1777,14 @@ COLDFLAME_EXIST = false
 function Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local which_player = GetOwningPlayer(GetAttacker())
-    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, which_player))
+    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
     local lord_location = GetUnitLoc(LORD_MARROWGAR)
     local target_location = GetUnitLoc(target)
 
     if COLDFLAME_EXIST then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, lord_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)
@@ -1828,7 +1825,7 @@ function Init_LordMarrowgar()
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
     LORD_MARROWGAR = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    COLDFLAME_DUMMY = Unit(LICH_KING, STATIC_DUMMY, Location(4410., -1750.), -131.)
+    COLDFLAME_DUMMY = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     SetHeroLevel(LORD_MARROWGAR, 83, false)
 
@@ -1887,7 +1884,7 @@ function Init_LadyDeathwhisper()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.000)
+    LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     SetHeroLevel(LADY_DEATHWHISPER, 83, false)
 
@@ -1946,22 +1943,48 @@ end
 
 
 function ShadowBolt()
-    local gr = GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))
-    local enemy = GetUnitInArea(gr)
+    local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
+    local enemy_loc
+    local enemy_point
+    local sb
+    local sb_loc
+    local sb_point
 
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
-    local damage = GetRandomReal(9200., 12000.)
-    --UnitDamageTarget(LADY_DEATHWHISPER, target_enemy, damage, true, false,
-    --                 ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+    local effect
+
     IssueTargetOrder(LADY_DEATHWHISPER, "absorb", enemy)
 
     local function shadow_bolt()
-        local temp = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, GetUnitLoc(GetTriggerUnit()))
+        local temp = Unit(GetTriggerPlayer(),
+                          SPELL_DUMMY,
+                          GetUnitLoc(GetTriggerUnit()),
+                          GetUnitFacing(GetTriggerUnit()))
         SetUnitMoveSpeed(temp, 500.)
         return temp
     end
 
-    IssuePointOrderLoc(shadow_bolt(), "move", GetUnitLoc(enemy))
+    sb = shadow_bolt()
+    while true do
+        effect = AddSpecialEffectTarget(model_name, sb, "overhead")
+        BlzSetSpecialEffectScale(effect, 0.3)
+        enemy_loc = GetUnitLoc(enemy)
+        enemy_point = Point:new(GetLocationX(enemy_loc), GetLocationY(enemy_loc))
+        IssuePointOrderLoc(sb, "move", enemy_loc)
+        TriggerSleepAction(0.3)
+        sb_loc = GetUnitLoc(sb)
+        sb_point = Point:new(GetLocationX(sb_loc), GetLocationY(sb_loc))
+        if AtPoint(enemy_point, sb_point) then
+            local damage = GetRandomReal(9200., 12000.)
+            UnitDamageTarget(LADY_DEATHWHISPER, enemy, damage, true, false,
+                             ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+            DestroyEffect(effect)
+            RemoveUnit(sb)
+            break
+        end
+        DestroyEffect(effect)
+    end
+    RemoveUnit(sb)
 end
 
 function Init_ShadowBolt()
@@ -1987,9 +2010,9 @@ function AvengersShield()
     local dd_loc
     local dd_point
     local dd_unit
-    local modelName = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
+    local model_name = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
     --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
-    local model
+    local effect
 
     local exclude_targets = {}
 
@@ -2021,7 +2044,7 @@ function AvengersShield()
     end
 
     local function shield(location)
-        local temp = Unit(GetTriggerPlayer(), DYNAMIC_DUMMY, location)
+        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit()))
         SetUnitMoveSpeed(temp, 500.)
         return temp
     end
@@ -2029,8 +2052,8 @@ function AvengersShield()
     local i = 0
     dd_unit = shield(pal_loc)
     while i < 3 do
-        model = AddSpecialEffectLoc(modelName, GetUnitLoc(dd_unit))
-        BlzSetSpecialEffectScale(model, 0.3)
+        effect = AddSpecialEffectTarget(model_name, dd_unit, "overhead")
+        BlzSetSpecialEffectScale(effect, 0.3)
         --находим положения цели
         target_loc = GetUnitLoc(target)
         target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
@@ -2057,10 +2080,10 @@ function AvengersShield()
             if target == 0 then break end
             i = i + 1
         end
-        DestroyEffect(model)
+        DestroyEffect(effect)
     end
     RemoveUnit(dd_unit)
-    DestroyEffect(model)
+    DestroyEffect(effect)
 end
 
 function IsAvengersShield()
@@ -2313,7 +2336,7 @@ end
 function CastJudgementOfLight()
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(PALADIN))
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
@@ -2351,7 +2374,7 @@ function IsJudgementOfWisdomDebuff()
 end
 
 function CastJudgementOfWisdom()
-    local jow_unit = Unit(GetTriggerPlayer(), STATIC_DUMMY, GetUnitLoc(PALADIN))
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(PALADIN))
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
