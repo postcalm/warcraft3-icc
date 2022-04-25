@@ -7,11 +7,13 @@ function Line:new(point1, point2)
     local obj = {}
     setmetatable(obj, self)
     self.__index = self
-    self.point1 = point1 or nil
-    self.point2 = point2 or nil
+    self.point1 = point1 or 0
+    self.point2 = point2 or 0
     return obj
 end
 
+--- Возвращает количество точек на линии
+---@param quantity integer
 function Line:getPoints(quantity)
     local new_points = {}
     local points = {}

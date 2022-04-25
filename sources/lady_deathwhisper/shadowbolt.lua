@@ -31,8 +31,9 @@ function ShadowBolt()
         TriggerSleepAction(0.3)
         sb_loc = GetUnitLoc(sb)
         sb_point = Point:new(GetLocationX(sb_loc), GetLocationY(sb_loc))
-        if AtPoint(enemy_point, sb_point) then
+        if enemy_point:atPoint(sb_point) then
             local damage = GetRandomReal(9200., 12000.)
+            --TODO: разобраться с типами урона
             UnitDamageTarget(LADY_DEATHWHISPER, enemy, damage, true, false,
                              ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
             DestroyEffect(effect)

@@ -27,7 +27,7 @@ function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
--- абсолютно две бессмысленные обёртки над методами родителя
+-- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
 --- Добавляет условие для события

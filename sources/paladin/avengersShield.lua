@@ -11,9 +11,9 @@ function AvengersShield()
     local target_point
 
     local damage = 0
-    local dd_loc
-    local dd_point
-    local dd_unit
+    local shield_loc
+    local shield_point
+    local shield_unit
     local model_name = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
     --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
     local effect
@@ -54,39 +54,39 @@ function AvengersShield()
     end
 
     local i = 0
-    dd_unit = shield(pal_loc)
+    shield_unit = shield(pal_loc)
     while i < 3 do
-        effect = AddSpecialEffectTarget(model_name, dd_unit, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.3)
+        effect = AddSpecialEffectTarget(model_name, shield_unit, "overhead")
+        BlzSetSpecialEffectScale(effect, 0.5)
         --находим положения цели
         target_loc = GetUnitLoc(target)
         target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
         --направляем юнита к месту цели
-        IssuePointOrderLoc(dd_unit, "move", target_loc)
+        IssuePointOrderLoc(shield_unit, "move", target_loc)
         TriggerSleepAction(0.3)
-        dd_loc = GetUnitLoc(dd_unit)
-        dd_point = Point:new(GetLocationX(dd_loc), GetLocationY(dd_loc))
+        shield_loc = GetUnitLoc(shield_unit)
+        shield_point = Point:new(GetLocationX(shield_loc), GetLocationY(shield_loc))
         if GetDyingUnit() == target then
             target = GetTarget(target, exclude_targets)
-            KillUnit(dd_unit)
-            dd_unit = shield(target_loc)
+            KillUnit(shield_unit)
+            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
-        if AtPoint(target_point, dd_point) then
+        if target_point:atPoint(shield_point) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
             --AddSpecialEffectTarget(arrow, target, "overhead")
             UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            RemoveUnit(dd_unit)
-            dd_unit = shield(target_loc)
+            RemoveUnit(shield_unit)
+            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
         DestroyEffect(effect)
     end
-    RemoveUnit(dd_unit)
+    RemoveUnit(shield_unit)
     DestroyEffect(effect)
 end
 

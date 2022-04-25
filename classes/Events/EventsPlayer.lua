@@ -37,7 +37,7 @@ function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH)
 end
 
--- абсолютно две бессмысленные обёртки над методами родителя
+-- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
 --- Добавляет условие для события

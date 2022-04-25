@@ -1,10 +1,11 @@
 
 --Lord Marrowgar
-COLDFLAME = FourCC("A001")
-WHIRLWIND = FourCC("A005")
+COLDFLAME               = FourCC("A001")
+WHIRLWIND               = FourCC("A005")
 
 --Lady Deathwhisper
-SHADOW_BOLT = FourCC("A00V")
+SHADOW_BOLT             = FourCC("A00V")
+DEATH_AND_DECAY         = FourCC("A00X")
 
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")

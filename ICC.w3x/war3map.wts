@@ -620,3 +620,21 @@ STRING 194
 dummy
 }
 
+STRING 195
+// Предметы: I006 (add_mp), Name (Название)
+{
+add_mp
+}
+
+STRING 197
+// Способности: A00W (mp_50k), Name (Название)
+{
+mp_50k
+}
+
+STRING 198
+// Способности: A00X (Death And Decay), Name (Название)
+{
+Death And Decay
+}
+
