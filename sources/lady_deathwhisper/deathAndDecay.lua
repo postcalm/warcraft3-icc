@@ -7,10 +7,8 @@ function DeathAndDecay()
     if DEATH_AND_DECAY_EXIST then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        print(IssuePointOrderLoc(LADY_DEATHWHISPER, "acidbomb", loc))
         UnitDamagePointLoc(LADY_DEATHWHISPER, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
-
-        TriggerSleepAction(12.)
+        TriggerSleepAction(10.)
         DEATH_AND_DECAY_EXIST = false
         DestroyEffect(effect)
     end

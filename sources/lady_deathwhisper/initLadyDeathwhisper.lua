@@ -11,10 +11,8 @@ function Init_LadyDeathwhisper()
     EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
     EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, {"MP_ITEM"}, 4)
 
-    UnitAddAbility(LADY_DEATHWHISPER, SHADOW_BOLT)
-    UnitAddAbility(LADY_DEATHWHISPER, DEATH_AND_DECAY)
-
     Init_ManaShield()
-    --Init_ShadowBolt()
-    Init_DeathAndDecay()
+    Init_ShadowBolt()
+    --Init_DeathAndDecay()
+    Init_DominateMind()
 end

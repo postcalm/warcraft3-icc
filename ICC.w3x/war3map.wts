@@ -602,12 +602,6 @@ STRING 189
 Blessing of Might
 }
 
-STRING 190
-// Способности: A00V (Shadow bolt), Name (Название)
-{
-Shadow bolt
-}
-
 STRING 191
 // Войска: h001 (spell_dummy), Name (Название)
 {
@@ -630,11 +624,5 @@ STRING 197
 // Способности: A00W (mp_50k), Name (Название)
 {
 mp_50k
-}
-
-STRING 199
-// Способности: A00X (Death and Decay), Name (Название)
-{
-Death and Decay
 }
 

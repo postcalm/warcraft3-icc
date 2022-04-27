@@ -1887,35 +1887,13 @@ function Init_Whirlwind()
 end
 
 
-DEATH_AND_DECAY_EXIST = false
-
 function DeathAndDecay()
-    local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
-    local effect
-    if DEATH_AND_DECAY_EXIST then
-        local loc = GetUnitLoc(GetAttacker())
-        effect = AddSpecialEffectLoc(model, loc)
-        print(IssuePointOrderLoc(LADY_DEATHWHISPER, "acidbomb", loc))
-        UnitDamagePointLoc(LADY_DEATHWHISPER, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
-
-        TriggerSleepAction(12.)
-        DEATH_AND_DECAY_EXIST = false
-        DestroyEffect(effect)
-    end
-end
-
-function DeathAndDecayExist()
-    if not DEATH_AND_DECAY_EXIST then
-        DEATH_AND_DECAY_EXIST = true
-        return true
-    end
-    return false
+    IssuePointOrderLoc(LADY_DEATHWHISPER, "acidbomb", GetUnitLoc(GetAttacker()))
 end
 
 function Init_DeathAndDecay()
     local event = EventsUnit(LADY_DEATHWHISPER)
     event:RegisterAttacked()
-    event:AddCondition(DeathAndDecayExist)
     event:AddAction(DeathAndDecay)
 end
 
@@ -2444,7 +2422,7 @@ end
 
 
 function ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)

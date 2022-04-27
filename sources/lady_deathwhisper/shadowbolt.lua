@@ -10,8 +10,6 @@ function ShadowBolt()
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
     local effect
 
-    IssueTargetOrder(LADY_DEATHWHISPER, "absorb", enemy)
-
     local function shadow_bolt()
         local temp = Unit(GetTriggerPlayer(),
                           SPELL_DUMMY,
