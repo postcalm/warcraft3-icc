@@ -37,7 +37,6 @@ end
 function Init_ManaShield()
     local event = EventsUnit(LADY_DEATHWHISPER)
     event:RegisterAttacked()
-    event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
 end
 

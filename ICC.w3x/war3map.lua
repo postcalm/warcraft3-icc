@@ -134,6 +134,7 @@ Items["HP_ITEM"]                 = FourCC('I002')
 Items["MAGICARMOR_ITEM"]         = FourCC('I003')
 Items["DEC_DMG_ITEM"]            = FourCC('I004')
 Items["BLESSING_OF_WISDOM_ITEM"] = FourCC('I005')
+Items["MP_ITEM"]                 = FourCC('I006')
 
 ItemsSpells = {}
 ItemsSpells["ARMOR_500"]          = { int = FourCC('A008'), str = 'A008' }
@@ -142,6 +143,7 @@ ItemsSpells["HP_90K"]             = { int = FourCC('A00D'), str = 'A00D' }
 ItemsSpells["MAGICARMOR_500"]     = { int = FourCC('A00I'), str = 'A00I' }
 ItemsSpells["DECREASE_DMG"]       = { int = FourCC('A00K'), str = 'A00K' }
 ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
+ItemsSpells["MP_50K"]             = { int = FourCC('A00W'), str = 'A00W' }
 
 
 --Lord Marrowgar
@@ -159,11 +161,12 @@ COMMON_TIMER = FourCC('BTLF')
 
 
 --Lord Marrowgar
-COLDFLAME = FourCC("A001")
-WHIRLWIND = FourCC("A005")
+COLDFLAME               = FourCC("A001")
+WHIRLWIND               = FourCC("A005")
 
 --Lady Deathwhisper
-SHADOW_BOLT = FourCC("A00V")
+SHADOW_BOLT             = FourCC("A00V")
+DEATH_AND_DECAY         = FourCC("A00X")
 
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")
@@ -1853,15 +1856,16 @@ function ResetAnimation()
     DestroyTimer(GetExpiredTimer())
 end
 
-function action()
-    local timer_reset = CreateTimer()
-    IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
-    TimerStart(timer_reset, 5., false, ResetAnimation)
-    DestroyTimer(GetExpiredTimer())
-end
-
 function Whirlwind()
     local whirlwind_timer = CreateTimer()
+
+    local function action()
+        local timer_reset = CreateTimer()
+        IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
+        TimerStart(timer_reset, 5., false, ResetAnimation)
+        DestroyTimer(whirlwind_timer)
+    end
+
     if WHIRLWIND_EXIST then
         TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
     end
@@ -1883,9 +1887,42 @@ function Init_Whirlwind()
 end
 
 
+DEATH_AND_DECAY_EXIST = false
+
+function DeathAndDecay()
+    local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
+    local effect
+    if DEATH_AND_DECAY_EXIST then
+        local loc = GetUnitLoc(GetAttacker())
+        effect = AddSpecialEffectLoc(model, loc)
+        print(IssuePointOrderLoc(LADY_DEATHWHISPER, "acidbomb", loc))
+        UnitDamagePointLoc(LADY_DEATHWHISPER, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+
+        TriggerSleepAction(12.)
+        DEATH_AND_DECAY_EXIST = false
+        DestroyEffect(effect)
+    end
+end
+
+function DeathAndDecayExist()
+    if not DEATH_AND_DECAY_EXIST then
+        DEATH_AND_DECAY_EXIST = true
+        return true
+    end
+    return false
+end
+
+function Init_DeathAndDecay()
+    local event = EventsUnit(LADY_DEATHWHISPER)
+    event:RegisterAttacked()
+    event:AddCondition(DeathAndDecayExist)
+    event:AddAction(DeathAndDecay)
+end
+
+
 function Init_LadyDeathwhisper()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
 
     LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
@@ -1893,11 +1930,14 @@ function Init_LadyDeathwhisper()
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
+    EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, {"MP_ITEM"}, 4)
 
     UnitAddAbility(LADY_DEATHWHISPER, SHADOW_BOLT)
-    
+    UnitAddAbility(LADY_DEATHWHISPER, DEATH_AND_DECAY)
+
     Init_ManaShield()
-    Init_ShadowBolt()
+    --Init_ShadowBolt()
+    Init_DeathAndDecay()
 end
 
 
@@ -1939,7 +1979,6 @@ end
 function Init_ManaShield()
     local event = EventsUnit(LADY_DEATHWHISPER)
     event:RegisterAttacked()
-    event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
 end
 
@@ -2405,7 +2444,7 @@ end
 
 
 function ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                      ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
