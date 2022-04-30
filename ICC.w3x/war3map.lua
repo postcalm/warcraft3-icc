@@ -21,6 +21,7 @@ udg_cache = nil
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
+gg_trg_Battle = nil
 gg_trg_Init_LordMarrowgar = nil
 gg_trg_Init_LadyDeathwhisper = nil
 gg_trg_Init_Priest = nil
@@ -32,7 +33,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_trg_Battle = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -165,6 +165,14 @@ COMMON_TIMER = FourCC('BTLF')
 
 Paladin = {hero = nil}
 Priest  = {hero = nil}
+
+LordMarrowgar    = {unit = nil}
+LadyDeathwhisper = {unit = nil,
+                    mana_shield = false,
+                    mana_is_over = false,
+                    dominate_mind_effect = false,
+                    death_and_decay_effect = false
+}
 
 
 --Lord Marrowgar
@@ -1922,94 +1930,86 @@ function Init_Whirlwind()
 end
 
 
-DEATH_AND_DECAY_EXIST = false
-
-function DeathAndDecay()
+function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
     local effect
-    if DEATH_AND_DECAY_EXIST then
+    if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        UnitDamagePointLoc(LADY_DEATHWHISPER, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+        UnitDamagePointLoc(LadyDeathwhisper.unit, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
         TriggerSleepAction(10.)
-        DEATH_AND_DECAY_EXIST = false
+        LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
     end
 end
 
-function DeathAndDecayExist()
-    if not DEATH_AND_DECAY_EXIST then
-        DEATH_AND_DECAY_EXIST = true
+function LadyDeathwhisper.DeathAndDecayExist()
+    if not LadyDeathwhisper.death_and_decay_effect then
+        LadyDeathwhisper.death_and_decay_effect = true
         return true
     end
     return false
 end
 
-function Init_DeathAndDecay()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitDeathAndDecay()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddCondition(DeathAndDecayExist)
-    event:AddAction(DeathAndDecay)
+    event:AddCondition(LadyDeathwhisper.DeathAndDecayExist)
+    event:AddAction(LadyDeathwhisper.DeathAndDecay)
 end
 
 
---TODO: избавиться от глобалок
-DOMINATE_MIND_EXIST = false
-
-function DominateMind()
+function LadyDeathwhisper.DominateMind()
     --TODO: исправить на нормальную реализацию
     local target = GetAttacker()
     local prev_owner = GetOwningPlayer(target)
-    if DOMINATE_MIND_EXIST then
+    if LadyDeathwhisper.dominate_mind_effect then
         SetUnitOwner(target, LICH_KING, true)
         TriggerSleepAction(5.)
         SetUnitOwner(target, prev_owner, true)
         TriggerSleepAction(20.)
-        DOMINATE_MIND_EXIST = false
+        LadyDeathwhisper.dominate_mind_effect = false
     end
 end
 
-function DominateMindExist()
-    if not DOMINATE_MIND_EXIST then
-        DOMINATE_MIND_EXIST = true
-        return DOMINATE_MIND_EXIST
+function LadyDeathwhisper.DominateMindExist()
+    if not LadyDeathwhisper.dominate_mind_effect then
+        LadyDeathwhisper.dominate_mind_effect = true
+        return true
     end
     return false
 end
 
-function Init_DominateMind()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitDominateMind()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddCondition(DominateMindExist)
-    event:AddAction(DominateMind)
+    event:AddCondition(LadyDeathwhisper.DominateMindExist)
+    event:AddAction(LadyDeathwhisper.DominateMind)
 end
 
 
-function Init_LadyDeathwhisper()
+function LadyDeathwhisper.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
 
-    LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
+    LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
-    SetHeroLevel(LADY_DEATHWHISPER, 83, false)
-    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA, 1000)
+    SetHeroLevel(LadyDeathwhisper.unit, 83, false)
+    SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA, 1000)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
     --EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, {"MP_ITEM"}, 4)
 
-    Init_ManaShield()
-    --Init_ShadowBolt()
-    --Init_DeathAndDecay()
-    --Init_DominateMind()
+    LadyDeathwhisper.InitManaShield()
+    --LadyDeathwhisper.InitShadowBolt()
+    --LadyDeathwhisper.InitDeathAndDecay()
+    --LadyDeathwhisper.InitDominateMind()
 end
 
 
-LD_MANA_SHIELD = false
-LD_MANA_IS_OFF = false
-
-function ManaShield()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.ManaShield()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
     local effect
 
@@ -2017,9 +2017,9 @@ function ManaShield()
 
     print(BattleSystem.Status())
 
-    if not LD_MANA_SHIELD and not LD_MANA_IS_OFF then
-        effect = AddSpecialEffectTarget(model, LADY_DEATHWHISPER, "origin")
-        LD_MANA_SHIELD = true
+    if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
+        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit, "origin")
+        LadyDeathwhisper.mana_shield = true
     end
 
     local function ManaShield()
@@ -2031,18 +2031,18 @@ function ManaShield()
         end
 
         TriggerSleepAction(1.5)
-        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
-                     GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
-        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
-                     GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE,
+                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE) + damage)
+        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA,
+                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) - damage)
         event:DestroyTrigger()
     end
 
     local function UsingManaShield()
-        if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) >= 10. then
+        if GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) >= 10. then
             return true
         end
-        LD_MANA_IS_OFF = true
+        LadyDeathwhisper.mana_is_over = true
         DestroyEffect(effect)
         event:DestroyTrigger()
         return false
@@ -2062,15 +2062,15 @@ function ManaShield()
     --end
 end
 
-function Init_ManaShield()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitManaShield()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddAction(ManaShield)
+    event:AddAction(LadyDeathwhisper.ManaShield)
 end
 
 
 
-function ShadowBolt()
+function LadyDeathwhisper.ShadowBolt()
     local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
     local enemy_loc
     local enemy_point
@@ -2114,10 +2114,10 @@ function ShadowBolt()
     RemoveUnit(sb)
 end
 
-function Init_ShadowBolt()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitShadowBolt()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddAction(ShadowBolt)
+    event:AddAction(LadyDeathwhisper.ShadowBolt)
 end
 
 
@@ -2218,7 +2218,7 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
     event:AddAction(Paladin.AvengersShield)
@@ -2266,7 +2266,7 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
     event:AddAction(Paladin.BlessingOfKings)
@@ -2303,7 +2303,7 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)
@@ -2347,7 +2347,7 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
     event:AddAction(Paladin.BlessingOfSanctuary)
@@ -2386,7 +2386,7 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
     event:AddAction(Paladin.BlessingOfWisdom)
@@ -2414,7 +2414,7 @@ end
 function Paladin.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    Paladin.hero = Unit(Player(0), PALADIN, Location(3800., 200.), 90.)
+    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(3800., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(PALADIN, items_list)
@@ -2475,8 +2475,8 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    local event_ability = EventsPlayer(Player(0))
-    local event_jol = EventsPlayer(Player(0))
+    local event_ability = EventsPlayer(PLAYER_1)
+    local event_jol = EventsPlayer(PLAYER_1)
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -2513,8 +2513,8 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    local event_ability = EventsPlayer(Player(0))
-    local event_jow = EventsPlayer(Player(0))
+    local event_ability = EventsPlayer(PLAYER_1)
+    local event_jow = EventsPlayer(PLAYER_1)
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -2529,7 +2529,7 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
-    local event = EventsPlayer(Player(0))
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
 
     local function ShieldOfRighteousness()
@@ -2671,7 +2671,7 @@ function InitTrig_Init_LordMarrowgar()
 end
 
 function Trig_Init_LadyDeathwhisper_Actions()
-        Init_LadyDeathwhisper()
+        LadyDeathwhisper.Init()
 end
 
 function InitTrig_Init_LadyDeathwhisper()

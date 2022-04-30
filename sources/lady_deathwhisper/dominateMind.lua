@@ -1,31 +1,28 @@
 
---TODO: избавиться от глобалок
-DOMINATE_MIND_EXIST = false
-
-function DominateMind()
+function LadyDeathwhisper.DominateMind()
     --TODO: исправить на нормальную реализацию
     local target = GetAttacker()
     local prev_owner = GetOwningPlayer(target)
-    if DOMINATE_MIND_EXIST then
+    if LadyDeathwhisper.dominate_mind_effect then
         SetUnitOwner(target, LICH_KING, true)
         TriggerSleepAction(5.)
         SetUnitOwner(target, prev_owner, true)
         TriggerSleepAction(20.)
-        DOMINATE_MIND_EXIST = false
+        LadyDeathwhisper.dominate_mind_effect = false
     end
 end
 
-function DominateMindExist()
-    if not DOMINATE_MIND_EXIST then
-        DOMINATE_MIND_EXIST = true
-        return DOMINATE_MIND_EXIST
+function LadyDeathwhisper.DominateMindExist()
+    if not LadyDeathwhisper.dominate_mind_effect then
+        LadyDeathwhisper.dominate_mind_effect = true
+        return true
     end
     return false
 end
 
-function Init_DominateMind()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitDominateMind()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddCondition(DominateMindExist)
-    event:AddAction(DominateMind)
+    event:AddCondition(LadyDeathwhisper.DominateMindExist)
+    event:AddAction(LadyDeathwhisper.DominateMind)
 end

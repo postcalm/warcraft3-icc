@@ -1,5 +1,5 @@
 
-function ShadowBolt()
+function LadyDeathwhisper.ShadowBolt()
     local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
     local enemy_loc
     local enemy_point
@@ -43,9 +43,9 @@ function ShadowBolt()
     RemoveUnit(sb)
 end
 
-function Init_ShadowBolt()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitShadowBolt()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddAction(ShadowBolt)
+    event:AddAction(LadyDeathwhisper.ShadowBolt)
 end
 

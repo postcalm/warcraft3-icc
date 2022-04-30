@@ -1,9 +1,6 @@
 
-LD_MANA_SHIELD = false
-LD_MANA_IS_OFF = false
-
-function ManaShield()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.ManaShield()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
     local effect
 
@@ -11,9 +8,9 @@ function ManaShield()
 
     print(BattleSystem.Status())
 
-    if not LD_MANA_SHIELD and not LD_MANA_IS_OFF then
-        effect = AddSpecialEffectTarget(model, LADY_DEATHWHISPER, "origin")
-        LD_MANA_SHIELD = true
+    if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
+        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit, "origin")
+        LadyDeathwhisper.mana_shield = true
     end
 
     local function ManaShield()
@@ -25,18 +22,18 @@ function ManaShield()
         end
 
         TriggerSleepAction(1.5)
-        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE,
-                     GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_LIFE) + damage)
-        SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA,
-                     GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) - damage)
+        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE,
+                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE) + damage)
+        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA,
+                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) - damage)
         event:DestroyTrigger()
     end
 
     local function UsingManaShield()
-        if GetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA) >= 10. then
+        if GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) >= 10. then
             return true
         end
-        LD_MANA_IS_OFF = true
+        LadyDeathwhisper.mana_is_over = true
         DestroyEffect(effect)
         event:DestroyTrigger()
         return false
@@ -56,9 +53,9 @@ function ManaShield()
     --end
 end
 
-function Init_ManaShield()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitManaShield()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddAction(ManaShield)
+    event:AddAction(LadyDeathwhisper.ManaShield)
 end
 
