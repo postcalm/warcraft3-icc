@@ -34,6 +34,7 @@ local param = {
         [[\libs\SaveSystem]],
         [[\libs\EquipmentSystem]],
         [[\libs\BuffSystem.lua]],
+        [[\libs\BattleSystem.lua]],
         [[\libs\Wrappers.lua]],
         [[\libs\AbilityWrappers.lua]],
         [[\sources\lord_marrowgar]],

@@ -1,5 +1,5 @@
 
-function RemoveBlessingOfMight(unit)
+function Paladin.RemoveBlessingOfMight(unit)
     if BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
         BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
@@ -7,7 +7,7 @@ function RemoveBlessingOfMight(unit)
     DestroyTimer(GetExpiredTimer())
 end
 
-function BlessingOfMight()
+function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
@@ -15,7 +15,7 @@ function BlessingOfMight()
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
 
-        local remove_buff = function() RemoveBlessingOfMight(unit) end
+        local remove_buff = function() Paladin.RemoveBlessingOfMight(unit) end
         local timer = CreateTimer()
 
         BuffSystem.AddBuffToHero(unit, "BlessingOfMight", remove_buff)
@@ -24,14 +24,14 @@ function BlessingOfMight()
     end
 end
 
-function IsBlessingOfMight()
+function Paladin.IsBlessingOfMight()
     return GetSpellAbilityId() == BLESSING_OF_MIGHT
 end
 
-function Init_BlessingOfMight()
-    local event = EventsPlayer(Player(0))
+function Paladin.InitBlessingOfMight()
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
-    event:AddCondition(IsBlessingOfMight)
-    event:AddAction(BlessingOfMight)
+    event:AddCondition(Paladin.IsBlessingOfMight)
+    event:AddAction(Paladin.BlessingOfMight)
 end
     

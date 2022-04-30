@@ -1,38 +1,38 @@
 
-function Init_Paladin()
+function Paladin.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    PALADIN = Unit(Player(0), PALADIN, Location(3800., 200.), 90.)
+    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(3800., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(PALADIN, items_list)
 
-    SetHeroLevel(PALADIN, 80, false)
-    SetUnitState(PALADIN, UNIT_STATE_MANA, 800)
+    SetHeroLevel(Paladin.hero, 80, false)
+    SetUnitState(Paladin.hero, UNIT_STATE_MANA, 800)
 
-    UnitAddAbility(PALADIN, DEVOTION_AURA)
-    UnitAddAbility(PALADIN, DIVINE_SHIELD)
-    UnitAddAbility(PALADIN, CONSECRATION)
-    UnitAddAbility(PALADIN, CONSECRATION_TR)
-    UnitAddAbility(PALADIN, HAMMER_RIGHTEOUS)
-    UnitAddAbility(PALADIN, JUDGEMENT_OF_LIGHT_TR)
-    UnitAddAbility(PALADIN, JUDGEMENT_OF_WISDOM_TR)
-    UnitAddAbility(PALADIN, SHIELD_OF_RIGHTEOUSNESS)
-    UnitAddAbility(PALADIN, AVENGERS_SHIELD)
+    UnitAddAbility(Paladin.hero, DEVOTION_AURA)
+    UnitAddAbility(Paladin.hero, DIVINE_SHIELD)
+    UnitAddAbility(Paladin.hero, CONSECRATION)
+    UnitAddAbility(Paladin.hero, CONSECRATION_TR)
+    UnitAddAbility(Paladin.hero, HAMMER_RIGHTEOUS)
+    UnitAddAbility(Paladin.hero, JUDGEMENT_OF_LIGHT_TR)
+    UnitAddAbility(Paladin.hero, JUDGEMENT_OF_WISDOM_TR)
+    UnitAddAbility(Paladin.hero, SHIELD_OF_RIGHTEOUSNESS)
+    UnitAddAbility(Paladin.hero, AVENGERS_SHIELD)
 
     --даём паладину книжку с бафами и пассивками
-    UnitAddAbility(PALADIN, SPELLBOOK_PALADIN)
-    UnitMakeAbilityPermanent(PALADIN, true, SPELLBOOK_PALADIN)
-    SetPlayerAbilityAvailable(Player(0), SPELLBOOK_PALADIN, true)
-    
-    Init_Consecration()
-    Init_BlessingOfKings()
-    Init_BlessingOfMight()
-    Init_BlessingOfSanctuary()
-    Init_BlessingOfWisdom()
-    Init_JudgementOfLight()
-    Init_JudgementOfWisdom()
-    Init_ShieldOfRighteousness()
-    Init_AvengersShield()
+    UnitAddAbility(Paladin.hero, SPELLBOOK_PALADIN)
+    UnitMakeAbilityPermanent(Paladin.hero, true, SPELLBOOK_PALADIN)
+    SetPlayerAbilityAvailable(PLAYER_1, SPELLBOOK_PALADIN, true)
+
+    Paladin.InitConsecration()
+    Paladin.InitBlessingOfKings()
+    Paladin.InitBlessingOfMight()
+    Paladin.InitBlessingOfSanctuary()
+    Paladin.InitBlessingOfWisdom()
+    Paladin.InitJudgementOfLight()
+    Paladin.InitJudgementOfWisdom()
+    Paladin.InitShieldOfRighteousness()
+    Paladin.InitAvengersShield()
 end
 

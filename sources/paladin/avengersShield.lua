@@ -1,5 +1,5 @@
 
-function AvengersShield()
+function Paladin.AvengersShield()
     local target = GetSpellTargetUnit()
     local light_magic_damage = 1
     local factor = 0.07
@@ -38,7 +38,7 @@ function AvengersShield()
             TriggerSleepAction(0.)
             temp = GroupPickRandomUnit(group)
             if not TargetTookDamage(temp, exc) and
-                    not IsUnitAlly(temp, GetOwningPlayer(PALADIN)) then
+                    not IsUnitAlly(temp, GetOwningPlayer(Paladin.hero)) then
                 return temp
             end
             GroupRemoveUnit(group, temp)
@@ -76,7 +76,7 @@ function AvengersShield()
         if target_point:atPoint(shield_point) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
             --AddSpecialEffectTarget(arrow, target, "overhead")
-            UnitDamageTargetBJ(PALADIN, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            UnitDamageTargetBJ(Paladin.hero, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             RemoveUnit(shield_unit)
@@ -90,13 +90,13 @@ function AvengersShield()
     DestroyEffect(effect)
 end
 
-function IsAvengersShield()
+function Paladin.IsAvengersShield()
     return GetSpellAbilityId() == AVENGERS_SHIELD
 end
 
-function Init_AvengersShield()
-    local event = EventsPlayer(Player(0))
+function Paladin.InitAvengersShield()
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
-    event:AddCondition(IsAvengersShield)
-    event:AddAction(AvengersShield)
+    event:AddCondition(Paladin.IsAvengersShield)
+    event:AddAction(Paladin.AvengersShield)
 end

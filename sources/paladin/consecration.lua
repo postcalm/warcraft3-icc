@@ -1,15 +1,16 @@
 
-function Consecration()
-    IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
-end
-
-function IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION_TR
-end
-
-function Init_Consecration()
-    local event = EventsPlayer(Player(0))
+function Paladin.InitConsecration()
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
+
+    local function Consecration()
+        IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
+    end
+
+    local function IsConsecration()
+        return GetSpellAbilityId() == CONSECRATION_TR
+    end
+
     event:AddCondition(IsConsecration)
     event:AddAction(Consecration)
 end

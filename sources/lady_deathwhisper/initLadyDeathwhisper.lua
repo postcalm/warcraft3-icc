@@ -6,13 +6,14 @@ function Init_LadyDeathwhisper()
     LADY_DEATHWHISPER = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     SetHeroLevel(LADY_DEATHWHISPER, 83, false)
+    SetUnitState(LADY_DEATHWHISPER, UNIT_STATE_MANA, 1000)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, items_list)
-    EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, {"MP_ITEM"}, 4)
+    --EquipSystem.AddItemsToUnit(LADY_DEATHWHISPER, {"MP_ITEM"}, 4)
 
     Init_ManaShield()
-    Init_ShadowBolt()
+    --Init_ShadowBolt()
     --Init_DeathAndDecay()
-    Init_DominateMind()
+    --Init_DominateMind()
 end
