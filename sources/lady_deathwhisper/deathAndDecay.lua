@@ -1,30 +1,28 @@
 
-DEATH_AND_DECAY_EXIST = false
-
-function DeathAndDecay()
+function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
     local effect
-    if DEATH_AND_DECAY_EXIST then
+    if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        UnitDamagePointLoc(LADY_DEATHWHISPER, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+        UnitDamagePointLoc(LadyDeathwhisper.unit, 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
         TriggerSleepAction(10.)
-        DEATH_AND_DECAY_EXIST = false
+        LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
     end
 end
 
-function DeathAndDecayExist()
-    if not DEATH_AND_DECAY_EXIST then
-        DEATH_AND_DECAY_EXIST = true
+function LadyDeathwhisper.DeathAndDecayExist()
+    if not LadyDeathwhisper.death_and_decay_effect then
+        LadyDeathwhisper.death_and_decay_effect = true
         return true
     end
     return false
 end
 
-function Init_DeathAndDecay()
-    local event = EventsUnit(LADY_DEATHWHISPER)
+function LadyDeathwhisper.InitDeathAndDecay()
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
-    event:AddCondition(DeathAndDecayExist)
-    event:AddAction(DeathAndDecay)
+    event:AddCondition(LadyDeathwhisper.DeathAndDecayExist)
+    event:AddAction(LadyDeathwhisper.DeathAndDecay)
 end

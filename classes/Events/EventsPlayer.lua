@@ -17,6 +17,10 @@ function EventsPlayer:_init(player)
     self.player = player or 0
 end
 
+function EventsPlayer:RegisterUnitAttacked()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_ATTACKED, nil)
+end
+
 --- Регистриует событие каста способности юнитом игрока
 function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
@@ -24,17 +28,17 @@ end
 
 --- Регистриует событие нанесения урона юнитом игрока
 function EventsPlayer:RegisterUnitDamaging()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
 --- Регистриует событие получения урона юнитом игрока
 function EventsPlayer:RegisterUnitDamaged()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
 end
 
 --- Регистриует событие смерти юнита игрока
 function EventsPlayer:RegisterUnitDeath()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH)
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
 -- далее идут бессмысленные обёртки над методами родителя

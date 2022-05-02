@@ -1,5 +1,5 @@
 
-function RemoveBlessingOfKings(unit, stat)
+function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
@@ -9,7 +9,7 @@ function RemoveBlessingOfKings(unit, stat)
     DestroyTimer(GetExpiredTimer())
 end
 
-function BlessingOfKings()
+function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
@@ -25,7 +25,7 @@ function BlessingOfKings()
         SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
 
         --создаем лямбду для снятия бафа
-        local remove_buff = function() RemoveBlessingOfKings(unit, stat) end
+        local remove_buff = function() Paladin.RemoveBlessingOfKings(unit, stat) end
         local timer = CreateTimer()
 
         BuffSystem.AddBuffToHero(unit, "BlessingOfKings", remove_buff)
@@ -35,13 +35,13 @@ function BlessingOfKings()
     end
 end
 
-function IsBlessingOfKings()
+function Paladin.IsBlessingOfKings()
     return GetSpellAbilityId() == BLESSING_OF_KINGS
 end
 
-function Init_BlessingOfKings()
-    local event = EventsPlayer(Player(0))
+function Paladin.InitBlessingOfKings()
+    local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
-    event:AddCondition(IsBlessingOfKings)
-    event:AddAction(BlessingOfKings)
+    event:AddCondition(Paladin.IsBlessingOfKings)
+    event:AddAction(Paladin.BlessingOfKings)
 end
