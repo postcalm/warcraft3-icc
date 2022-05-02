@@ -1,20 +1,20 @@
---- Created by meiso.
 
-function CastFlashHeal()
+function Priest.CastFlashHeal()
     local target = GetSpellTargetUnit()
     local heal = GetRandomInt(1887, 2193)
-    local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.18
-    SetUnitState(PRIEST, UNIT_STATE_MANA, GetUnitState(PRIEST, UNIT_STATE_MANA) - mana)
+    local priest = Priest.hero:GetUnit()
+    local mana = GetManaCost(priest, 0.18)
+    SetUnitState(priest, UNIT_STATE_MANA, GetUnitState(priest, UNIT_STATE_MANA) - mana)
     SetUnitState(target, UNIT_STATE_LIFE, GetUnitState(target, UNIT_STATE_LIFE) + heal)
 end
 
-function IsFlashHeal()
+function Priest.IsFlashHeal()
     return GetSpellAbilityId() == FLASH_HEAL
 end
 
-function Init_FlashHeal()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsFlashHeal))
-    TriggerAddAction(trigger_ability, CastFlashHeal)
+function Priest.InitFlashHeal()
+    local event = EventsPlayer(PLAYER_1)
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsFlashHeal)
+    event:AddAction(Priest.CastFlashHeal)
 end

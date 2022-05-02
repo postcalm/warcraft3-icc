@@ -2533,7 +2533,7 @@ function Paladin.InitShieldOfRighteousness()
     event:RegisterUnitSpellCast()
 
     local function ShieldOfRighteousness()
-        -- 42 от силы + 520 ед. урона дополнительно
+        -- 42от силы + 520 ед. урона дополнительно
         local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
         UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
                 ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
@@ -2680,7 +2680,7 @@ function InitTrig_Init_LadyDeathwhisper()
 end
 
 function Trig_Init_Priest_Actions()
-        Init_Priest()
+        Priest.Init()
 end
 
 function InitTrig_Init_Priest()
@@ -2689,6 +2689,26 @@ function InitTrig_Init_Priest()
 end
 
 function Trig_Init_Paladin_Actions()
+    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_ENHANCED)
+    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_MELEE, DAMAGE_TYPE_COLD)
+    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_SIEGE, DAMAGE_TYPE_LIGHTNING)
+    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_MAGIC, DAMAGE_TYPE_POISON)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_DISEASE)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DIVINE)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_MAGIC)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SONIC)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_ACID)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_FORCE)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEATH)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_MIND)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_PLANT)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEFENSIVE)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEMOLITION)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SLOW_POISON)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SPIRIT_LINK)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SHADOW_STRIKE)
+    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_UNIVERSAL)
         Paladin.Init()
 end
 

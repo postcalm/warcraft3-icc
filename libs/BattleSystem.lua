@@ -12,7 +12,7 @@ function BattleSystem.Init()
 
     local function check_combat()
         local damage = GetEventDamage()
-        print(GetEventDamageSource(), GetEventDamage())
+        --print(GetEventDamageSource(), GetEventDamage())
         if damage then
             BattleSystem.is_fight = true
         else

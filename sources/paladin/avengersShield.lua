@@ -14,7 +14,7 @@ function Paladin.AvengersShield()
     local shield_loc
     local shield_point
     local shield_unit
-    local model_name = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
+    local model_name = "Aegis.mdl"
     --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
     local effect
 
@@ -38,7 +38,7 @@ function Paladin.AvengersShield()
             TriggerSleepAction(0.)
             temp = GroupPickRandomUnit(group)
             if not TargetTookDamage(temp, exc) and
-                    not IsUnitAlly(temp, GetOwningPlayer(Paladin.hero)) then
+                    not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
                 return temp
             end
             GroupRemoveUnit(group, temp)
@@ -49,21 +49,21 @@ function Paladin.AvengersShield()
 
     local function shield(location)
         local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit()))
-        SetUnitMoveSpeed(temp, 500.)
-        return temp
+        SetUnitMoveSpeed(temp:GetUnit(), 522.)
+        return temp:GetUnit()
     end
 
     local i = 0
     shield_unit = shield(pal_loc)
     while i < 3 do
         effect = AddSpecialEffectTarget(model_name, shield_unit, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.5)
+        BlzSetSpecialEffectScale(effect, 0.7)
         --находим положения цели
         target_loc = GetUnitLoc(target)
         target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
         --направляем юнита к месту цели
         IssuePointOrderLoc(shield_unit, "move", target_loc)
-        TriggerSleepAction(0.3)
+        TriggerSleepAction(0.)
         shield_loc = GetUnitLoc(shield_unit)
         shield_point = Point:new(GetLocationX(shield_loc), GetLocationY(shield_loc))
         if GetDyingUnit() == target then
@@ -76,7 +76,8 @@ function Paladin.AvengersShield()
         if target_point:atPoint(shield_point) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
             --AddSpecialEffectTarget(arrow, target, "overhead")
-            UnitDamageTargetBJ(Paladin.hero, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            --UnitDamageTargetBJ(Paladin.hero, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            Paladin.hero:PhysicalDamage(target, damage)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             RemoveUnit(shield_unit)

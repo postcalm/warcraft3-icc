@@ -21,7 +21,7 @@ function Point:get3DPoint()
 end
 
 function Point:atPoint(point)
-    local inaccuracy = 50.
+    local inaccuracy = 20.
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true

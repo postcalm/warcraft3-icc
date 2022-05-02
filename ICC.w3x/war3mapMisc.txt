@@ -12,6 +12,7 @@ IntManaBonus=0.0
 MagicImmunesResistDamage=0
 MaxHeroLevel=83
 MaxUnitLevel=83
+MaxUnitSpeed=522.0
 StrAttackBonus=2.0
 StrHitPointBonus=10.0
 

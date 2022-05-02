@@ -9,3 +9,7 @@ function SetCooldown(unit, ability, cooldown)
     BlzSetUnitAbilityCooldown(unit, ability, level, cooldown)
 end
 
+function GetManaCost(unit, percent)
+    return GetUnitState(unit, UNIT_STATE_MAX_MANA) * percent
+end
+

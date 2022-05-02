@@ -2,7 +2,8 @@
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7  then
         local HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-        SetUnitState(Paladin.hero, UNIT_STATE_LIFE, GetUnitState(Paladin.hero, UNIT_STATE_LIFE) + HP)
+        local hero = Paladin.hero:GetUnit()
+        SetUnitState(hero, UNIT_STATE_LIFE, GetUnitState(hero, UNIT_STATE_LIFE) + HP)
     end
 end
 
@@ -13,7 +14,7 @@ end
 function Paladin.CastJudgementOfLight()
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(PALADIN))
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit()))
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
