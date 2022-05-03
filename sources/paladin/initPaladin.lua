@@ -2,29 +2,24 @@
 function Paladin.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+
     Paladin.hero = Unit(PLAYER_1, PALADIN, Location(3800., 200.), 90.)
-    local hero = Paladin.hero:GetUnit()
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(hero, items_list)
+    --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
 
-    SetHeroLevel(hero, 80, false)
-    SetUnitState(hero, UNIT_STATE_MANA, 800)
+    Paladin.hero:SetLevel(80)
+    Paladin.hero:SetStateMana(800)
 
-    UnitAddAbility(hero, DEVOTION_AURA)
-    UnitAddAbility(hero, DIVINE_SHIELD)
-    UnitAddAbility(hero, CONSECRATION)
-    UnitAddAbility(hero, CONSECRATION_TR)
-    UnitAddAbility(hero, HAMMER_RIGHTEOUS)
-    UnitAddAbility(hero, JUDGEMENT_OF_LIGHT_TR)
-    UnitAddAbility(hero, JUDGEMENT_OF_WISDOM_TR)
-    UnitAddAbility(hero, SHIELD_OF_RIGHTEOUSNESS)
-    UnitAddAbility(hero, AVENGERS_SHIELD)
+    Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
+            CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,
+            JUDGEMENT_OF_LIGHT_TR, JUDGEMENT_OF_WISDOM_TR,
+            SHIELD_OF_RIGHTEOUSNESS, AVENGERS_SHIELD,
+            SPELLBOOK_PALADIN
+    )
 
     --даём паладину книжку с бафами и пассивками
-    UnitAddAbility(hero, SPELLBOOK_PALADIN)
-    UnitMakeAbilityPermanent(hero, true, SPELLBOOK_PALADIN)
-    SetPlayerAbilityAvailable(PLAYER_1, SPELLBOOK_PALADIN, true)
+    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -36,4 +31,3 @@ function Paladin.Init()
     Paladin.InitShieldOfRighteousness()
     Paladin.InitAvengersShield()
 end
-

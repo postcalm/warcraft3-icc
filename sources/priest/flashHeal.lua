@@ -1,11 +1,10 @@
 
 function Priest.CastFlashHeal()
-    local target = GetSpellTargetUnit()
+    local target = Unit(GetSpellTargetUnit())
+    --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-    local priest = Priest.hero:GetUnit()
-    local mana = GetManaCost(priest, 0.18)
-    SetUnitState(priest, UNIT_STATE_MANA, GetUnitState(priest, UNIT_STATE_MANA) - mana)
-    SetUnitState(target, UNIT_STATE_LIFE, GetUnitState(target, UNIT_STATE_LIFE) + heal)
+    Priest.hero:LoseMana{percent=18}
+    target:GainLife{life=heal}
 end
 
 function Priest.IsFlashHeal()

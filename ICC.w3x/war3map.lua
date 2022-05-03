@@ -161,12 +161,18 @@ PLAYER_2   = Player(1)
 LICH_KING = Player(10)
 
 COMMON_TIMER = FourCC('BTLF')
+ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
 Paladin = {hero = nil}
 Priest  = {hero = nil}
 
-LordMarrowgar    = {unit = nil}
+LordMarrowgar    = {unit = nil,
+                    coldflame = nil,
+                    coldflame_effect = false,
+                    bonespike_effect = false,
+                    whirlwind_effect = false
+}
 LadyDeathwhisper = {unit = nil,
                     mana_shield = false,
                     mana_is_over = false,
@@ -505,7 +511,7 @@ function Point:get3DPoint()
 end
 
 function Point:atPoint(point)
-    local inaccuracy = 50.
+    local inaccuracy = 20.
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true
@@ -521,8 +527,12 @@ Unit.__index = Unit
 setmetatable(Unit, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
-        self:_init(...)
-        return self.unit
+        if #table.pack(...) == 1 then
+            self.unit = ...
+        else
+            self:_init(...)
+        end
+        return self
     end,
 })
 
@@ -533,8 +543,124 @@ setmetatable(Unit, {
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    self.face = face or 0
-    self.unit = CreateUnit(player, unit_id, x, y, self.face)
+    local face_ = face or 0
+    self.unit = CreateUnit(player, unit_id, x, y, face_)
+end
+
+function Unit:DealPhysicalDamage(target, damage)
+    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+end
+
+function Unit:DealUniversalDamage(target, damage)
+    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+end
+
+--- Выдать юниту переданные способности
+---@param ability ability
+function Unit:AddAbilities(...)
+    local abilities = table.pack(...)
+    for _, ability in ipairs(abilities) do
+        UnitAddAbility(self.unit, ability)
+    end
+end
+
+--- Выдать книгу заклинаний
+---@param spellbook spellbook
+function Unit:AddSpellbook(spellbook)
+    local p = GetOwningPlayer(self.unit)
+    UnitAddAbility(self.unit, spellbook)
+    UnitMakeAbilityPermanent(self.unit, true, spellbook)
+    SetPlayerAbilityAvailable(p, spellbook, true)
+end
+
+--- Установить уровень юнита
+function Unit:SetLevel(lvl)
+    SetHeroLevel(self.unit, lvl, false)
+end
+
+--- Потратить указанное количество маны
+---@param mana real
+---@param percent real
+---@return boolean
+function Unit:LoseMana(arg)
+    local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
+    if m > self:GetCurrentMana() then
+        --TODO: печатать отдельно игроку
+        print("Недостаточно маны")
+        return false
+    end
+    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() - m)
+    return true
+end
+
+--- Потратить указанное количество хп
+---@param life real
+---@param percent real
+function Unit:LoseLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() - l)
+end
+
+--- Получить ману количественно или в процентах от максимума
+---@param mana real
+---@param percent real
+function Unit:GainMana(arg)
+    local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
+    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() + m)
+end
+
+--- Получить хп количественно или в процентах от максимума
+---@param life real
+---@param percent real
+function Unit:GainLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() + l)
+end
+
+--- Получить процент маны от максимума
+---@param percent real
+---@return real
+function Unit:GetPercentManaOfMax(percent)
+    if percent == nil then return nil end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / 100)
+end
+
+--- Получить процент хп от максимума
+---@param percent real
+---@return real
+function Unit:GetPercentLifeOfMax(percent)
+    if percent == nil then return nil end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / 100)
+end
+
+--- Установить текущее количество маны
+---@param value real
+function Unit:SetStateMana(value)
+    SetUnitState(self.unit, UNIT_STATE_MANA, value)
+end
+
+--- Установить текущее количество хп
+---@param value real
+function Unit:SetStateLife(value)
+    SetUnitState(self.unit, UNIT_STATE_LIFE, value)
+end
+
+--- Получить текущее количество маны юнита
+---@return real
+function Unit:GetCurrentMana()
+    return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+--- Получить текущее количество хп юнита
+---@return real
+function Unit:GetCurrentLife()
+    return GetUnitState(self.unit, UNIT_STATE_LIFE)
+end
+
+--- Получить идентификатор созданного юнита
+---@return unitid
+function Unit:GetUnit()
+    return self.unit
 end
 
 ---@author Vlod | WWW.XGM.RU
@@ -1685,7 +1811,7 @@ function BattleSystem.Init()
 
     local function check_combat()
         local damage = GetEventDamage()
-        print(GetEventDamageSource(), GetEventDamage())
+        --print(GetEventDamageSource(), GetEventDamage())
         if damage then
             BattleSystem.is_fight = true
         else
@@ -1757,19 +1883,21 @@ function SetCooldown(unit, ability, cooldown)
     BlzSetUnitAbilityCooldown(unit, ability, level, cooldown)
 end
 
+function GetManaCost(unit, percent)
+    return GetUnitState(unit, UNIT_STATE_MAX_MANA) * percent
+end
 
 
-BONE_SPIKE_EXIST = false
 
-function BoneSpike()
+function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
-    if BONE_SPIKE_EXIST then
+    if LordMarrowgar.bonespike_effect then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetUnit()
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)
@@ -1791,12 +1919,12 @@ function BoneSpike()
                 SetUnitFlyHeight(target_enemy, 0., 0.)
                 PauseUnit(target_enemy, false)
                 RemoveUnit(bone_spike_obj)
-                BONE_SPIKE_EXIST = false
+                LordMarrowgar.bonespike_effect = false
                 break
             -- если игрок умер - сбрасываем шип
             elseif GetUnitState(target_enemy, UNIT_STATE_LIFE) <= 0 then
                 RemoveUnit(bone_spike_obj)
-                BONE_SPIKE_EXIST = false
+                LordMarrowgar.bonespike_effect = false
                 break
             end
         end
@@ -1804,36 +1932,34 @@ function BoneSpike()
 end
 
 -- если шип не призван
-function StartBoneSpike()
-    if not BONE_SPIKE_EXIST then
-        BONE_SPIKE_EXIST = true
-        return BONE_SPIKE_EXIST
+function LordMarrowgar.StartBoneSpike()
+    if not LordMarrowgar.bonespike_effect then
+        LordMarrowgar.bonespike_effect = true
+        return true
     end
     return false
 end
 
-function Init_BoneSpike()
-    local event = EventsUnit(LORD_MARROWGAR)
+function LordMarrowgar.InitBoneSpike()
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
-    event:AddCondition(StartBoneSpike)
-    event:AddAction(BoneSpike)
+    event:AddCondition(LordMarrowgar.StartBoneSpike)
+    event:AddAction(LordMarrowgar.BoneSpike)
 end
 
 
 
-COLDFLAME_EXIST = false
-
-function Coldflame()
+function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
     local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
-    local lord_location = GetUnitLoc(LORD_MARROWGAR)
+    local lord_location = GetUnitLoc(LordMarrowgar.unit)
     local target_location = GetUnitLoc(target)
 
-    if COLDFLAME_EXIST then
+    if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetUnit()
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)
@@ -1844,89 +1970,87 @@ function Coldflame()
 
         while true do
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(COLDFLAME_DUMMY, "flamestrike", coldflame_obj)
+            IssueTargetOrder(LordMarrowgar.coldflame, "flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
             if GetUnitState(coldflame_obj, UNIT_STATE_LIFE) <= 0 then break end
         end
 
-        COLDFLAME_EXIST = false
+        LordMarrowgar.coldflame_effect = false
     end
 end
 
-function StartColdflame()
-    if not COLDFLAME_EXIST then
-        COLDFLAME_EXIST = true
-        return COLDFLAME_EXIST
+function LordMarrowgar.StartColdflame()
+    if not LordMarrowgar.coldflame_effect then
+        LordMarrowgar.coldflame_effect = true
+        return true
     end
     return false
 end
 
-function Init_Coldflame()
+function LordMarrowgar.InitColdflame()
     local event = EventsUnit(LORD_MARROWGAR)
     event:RegisterAttacked()
-    event:AddCondition(StartColdflame)
-    event:AddAction(Coldflame)
+    event:AddCondition(LordMarrowgar.StartColdflame)
+    event:AddAction(LordMarrowgar.Coldflame)
 end
 
 
-function Init_LordMarrowgar()
+function LordMarrowgar.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    LORD_MARROWGAR = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    COLDFLAME_DUMMY = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
-
-    SetHeroLevel(LORD_MARROWGAR, 83, false)
-
-    UnitAddAbility(COLDFLAME_DUMMY, COLDFLAME)
-    --UnitAddAbility(LORD_MARROWGAR, WHIRLWIND)
+    LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
+    LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LORD_MARROWGAR, items_list)
+    EquipSystem.AddItemsToUnit(LordMarrowgar.unit:GetUnit(), items_list)
 
-    Init_Coldflame()
-    --Init_BoneSpike()
-    --Init_Whirlwind()
+    LordMarrowgar.unit:SetLevel(83)
+
+    LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
+    --LordMarrowgar.unit:AddAbilities(WHIRLWIND)
+
+    LordMarrowgar.InitColdflame()
+    --LordMarrowgar.InitBoneSpike()
+    --LordMarrowgar.InitWhirlwind()
 end
 
 
-WHIRLWIND_EXIST = false
-
-function ResetAnimation()
-    if WHIRLWIND_EXIST then
-        WHIRLWIND_EXIST = false
+function LordMarrowgar.ResetAnimation()
+    if LordMarrowgar.whirlwind_effect then
+        LordMarrowgar.whirlwind_effect = false
     end
     DestroyTimer(GetExpiredTimer())
 end
 
-function Whirlwind()
+function LordMarrowgar.Whirlwind()
     local whirlwind_timer = CreateTimer()
 
     local function action()
         local timer_reset = CreateTimer()
-        IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
-        TimerStart(timer_reset, 5., false, ResetAnimation)
+        IssueImmediateOrder(LordMarrowgar.unit, "whirlwind")
+        TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
         DestroyTimer(whirlwind_timer)
     end
 
-    if WHIRLWIND_EXIST then
+    if LordMarrowgar.whirlwind_effect then
         TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
     end
 end
 
-function StartWhirlwind()
-    if not WHIRLWIND_EXIST then
-        WHIRLWIND_EXIST = true
-        return WHIRLWIND_EXIST
+function LordMarrowgar.StartWhirlwind()
+    if not LordMarrowgar.whirlwind_effect then
+        LordMarrowgar.whirlwind_effect = true
+        return true
     end
     return false
 end
 
-function Init_Whirlwind()
-    local event = EventsUnit(LORD_MARROWGAR)
+function LordMarrowgar.InitWhirlwind()
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
-    event:AddCondition(StartWhirlwind)
-    event:AddAction(Whirlwind)
+    event:AddCondition(LordMarrowgar.StartWhirlwind)
+    event:AddAction(LordMarrowgar.Whirlwind)
 end
 
 
@@ -2137,11 +2261,12 @@ function Paladin.AvengersShield()
     local shield_loc
     local shield_point
     local shield_unit
-    local model_name = "Abilities\\Spells\\Orc\\Shockwave\\ShockwaveMissile.mdl"
-    --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
+    local model_name = "Aegis.mdl"
     local effect
 
     local exclude_targets = {}
+
+    Paladin.hero:LoseMana{percent=26}
 
     local function AddTarget(target_, exc)
         table.insert(exc, target_)
@@ -2161,7 +2286,7 @@ function Paladin.AvengersShield()
             TriggerSleepAction(0.)
             temp = GroupPickRandomUnit(group)
             if not TargetTookDamage(temp, exc) and
-                    not IsUnitAlly(temp, GetOwningPlayer(Paladin.hero)) then
+                    not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
                 return temp
             end
             GroupRemoveUnit(group, temp)
@@ -2171,8 +2296,8 @@ function Paladin.AvengersShield()
     end
 
     local function shield(location)
-        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit()))
-        SetUnitMoveSpeed(temp, 500.)
+        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit())):GetUnit()
+        SetUnitMoveSpeed(temp, 522.)
         return temp
     end
 
@@ -2180,13 +2305,13 @@ function Paladin.AvengersShield()
     shield_unit = shield(pal_loc)
     while i < 3 do
         effect = AddSpecialEffectTarget(model_name, shield_unit, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.5)
+        BlzSetSpecialEffectScale(effect, 0.7)
         --находим положения цели
         target_loc = GetUnitLoc(target)
         target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
         --направляем юнита к месту цели
         IssuePointOrderLoc(shield_unit, "move", target_loc)
-        TriggerSleepAction(0.3)
+        TriggerSleepAction(0.)
         shield_loc = GetUnitLoc(shield_unit)
         shield_point = Point:new(GetLocationX(shield_loc), GetLocationY(shield_loc))
         if GetDyingUnit() == target then
@@ -2198,8 +2323,7 @@ function Paladin.AvengersShield()
         end
         if target_point:atPoint(shield_point) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
-            --AddSpecialEffectTarget(arrow, target, "overhead")
-            UnitDamageTargetBJ(Paladin.hero, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
+            Paladin.hero:DealPhysicalDamage(target, damage)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             RemoveUnit(shield_unit)
@@ -2238,6 +2362,8 @@ end
 function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
+
+    Paladin.hero:LoseMana{percent=6}
 
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
         --массив с доп. статами
@@ -2285,6 +2411,8 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
+    Paladin.hero:LoseMana{percent=5}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
@@ -2328,6 +2456,8 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
+    Paladin.hero:LoseMana{percent=7}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
         EquipSystem.AddItemsToUnit(unit, items_list)
         local stat = R2I(GetHeroStr(unit, false) * 0.1)
@@ -2370,6 +2500,8 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
+    Paladin.hero:LoseMana{percent=5}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
         EquipSystem.AddItemsToUnit(unit, items_list)
 
@@ -2394,48 +2526,45 @@ end
     
 
 
+function Paladin.Consecration()
+    Paladin.hero:LoseMana{percent=22}
+    IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
+end
+
+function Paladin.IsConsecration()
+    return GetSpellAbilityId() == CONSECRATION_TR
+end
+
+
 function Paladin.InitConsecration()
     local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
-
-    local function Consecration()
-        IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
-    end
-
-    local function IsConsecration()
-        return GetSpellAbilityId() == CONSECRATION_TR
-    end
-
-    event:AddCondition(IsConsecration)
-    event:AddAction(Consecration)
+    event:AddCondition(Paladin.IsConsecration)
+    event:AddAction(Paladin.Consecration)
 end
 
 
 function Paladin.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+
     Paladin.hero = Unit(PLAYER_1, PALADIN, Location(3800., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(PALADIN, items_list)
+    --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
 
-    SetHeroLevel(Paladin.hero, 80, false)
-    SetUnitState(Paladin.hero, UNIT_STATE_MANA, 800)
+    Paladin.hero:SetLevel(80)
+    Paladin.hero:SetStateMana(800)
 
-    UnitAddAbility(Paladin.hero, DEVOTION_AURA)
-    UnitAddAbility(Paladin.hero, DIVINE_SHIELD)
-    UnitAddAbility(Paladin.hero, CONSECRATION)
-    UnitAddAbility(Paladin.hero, CONSECRATION_TR)
-    UnitAddAbility(Paladin.hero, HAMMER_RIGHTEOUS)
-    UnitAddAbility(Paladin.hero, JUDGEMENT_OF_LIGHT_TR)
-    UnitAddAbility(Paladin.hero, JUDGEMENT_OF_WISDOM_TR)
-    UnitAddAbility(Paladin.hero, SHIELD_OF_RIGHTEOUSNESS)
-    UnitAddAbility(Paladin.hero, AVENGERS_SHIELD)
+    Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
+            CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,
+            JUDGEMENT_OF_LIGHT_TR, JUDGEMENT_OF_WISDOM_TR,
+            SHIELD_OF_RIGHTEOUSNESS, AVENGERS_SHIELD,
+            SPELLBOOK_PALADIN
+    )
 
     --даём паладину книжку с бафами и пассивками
-    UnitAddAbility(Paladin.hero, SPELLBOOK_PALADIN)
-    UnitMakeAbilityPermanent(Paladin.hero, true, SPELLBOOK_PALADIN)
-    SetPlayerAbilityAvailable(PLAYER_1, SPELLBOOK_PALADIN, true)
+    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -2449,11 +2578,9 @@ function Paladin.Init()
 end
 
 
-
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7  then
-        local HP = GetUnitState(PALADIN, UNIT_STATE_MAX_LIFE) * 0.02
-        SetUnitState(Paladin.hero, UNIT_STATE_LIFE, GetUnitState(Paladin.hero, UNIT_STATE_LIFE) + HP)
+        Paladin.hero:GainLife{percent=2}
     end
 end
 
@@ -2462,9 +2589,10 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
+    Paladin.hero:LoseMana{percent=5}
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(PALADIN))
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
@@ -2492,8 +2620,7 @@ end
 
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
-        local MP = GetUnitState(PALADIN, UNIT_STATE_MAX_MANA) * 0.02
-        SetUnitState(Paladin.hero, UNIT_STATE_MANA, GetUnitState(Paladin.hero, UNIT_STATE_MANA) + MP)
+        Paladin.hero:GainMana{percent=2}
     end
 end
 
@@ -2502,7 +2629,8 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(PALADIN))
+    Paladin.hero:LoseMana{percent=5}
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
@@ -2528,127 +2656,110 @@ function Paladin.InitJudgementOfWisdom()
 end
 
 
+function Paladin.ShieldOfRighteousness()
+    Paladin.hero:LoseMana{percent=6}
+    -- 42от силы + 520 ед. урона дополнительно
+    local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
+    UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
+            ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
+end
+
+function Paladin.IsShieldOfRighteousness()
+    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+end
+
+
 function Paladin.InitShieldOfRighteousness()
     local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
-
-    local function ShieldOfRighteousness()
-        -- 42от силы + 520 ед. урона дополнительно
-        local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
-        UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
-                ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
-    end
-
-    local function IsShieldOfRighteousness()
-        return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
-    end
-
-    event:AddCondition(IsShieldOfRighteousness)
-    event:AddAction(ShieldOfRighteousness)
+    event:AddCondition(Paladin.IsShieldOfRighteousness)
+    event:AddAction(Paladin.ShieldOfRighteousness)
 end
 
----
---- Generated by EmmyLua(https://github.com/EmmyLua)
---- Created by Kodpi.
---- DateTime: 02.04.2022 20:48
----
-function CastCircleOfHealing()
-    local target = GetSpellTargetUnit()
 
-    local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.21
-    SetUnitState(PRIEST, UNIT_STATE_MANA, GetUnitState(PRIEST, UNIT_STATE_MANA) - mana)
+function Priest.CastCircleOfHealing()
+    local target = Unit(GetSpellTargetUnit())
+
+    Priest.hero:LoseMana{percent=21}
 
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
-    SetUnitState(target, UNIT_STATE_LIFE, GetUnitState(target, UNIT_STATE_LIFE) + heal)
-    print(heal)
+    target:GainLife{life=heal}
 end
 
-function IsCircleOfHealing()
+function Priest.IsCircleOfHealing()
     return GetSpellAbilityId() == CIRCLE_OF_HEALING
 end
 
-function Init_CircleOfHealing()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsCircleOfHealing))
-    TriggerAddAction(trigger_ability, CastCircleOfHealing)
+function Priest.InitCircleOfHealing()
+    local event = EventsPlayer(PLAYER_1)
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsCircleOfHealing)
+    event:AddAction(Priest.CastCircleOfHealing)
 end
 
---- Created by meiso.
 
-function CastFlashHeal()
-    local target = GetSpellTargetUnit()
+function Priest.CastFlashHeal()
+    local target = Unit(GetSpellTargetUnit())
+    --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-    local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.18
-    SetUnitState(PRIEST, UNIT_STATE_MANA, GetUnitState(PRIEST, UNIT_STATE_MANA) - mana)
-    SetUnitState(target, UNIT_STATE_LIFE, GetUnitState(target, UNIT_STATE_LIFE) + heal)
+    Priest.hero:LoseMana{percent=18}
+    target:GainLife{life=heal}
 end
 
-function IsFlashHeal()
+function Priest.IsFlashHeal()
     return GetSpellAbilityId() == FLASH_HEAL
 end
 
-function Init_FlashHeal()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsFlashHeal))
-    TriggerAddAction(trigger_ability, CastFlashHeal)
+function Priest.InitFlashHeal()
+    local event = EventsPlayer(PLAYER_1)
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsFlashHeal)
+    event:AddAction(Priest.CastFlashHeal)
 end
 
---- Created by meiso.
 
-function Init_Priest()
+function Priest.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    PRIEST = Unit(Player(0), PRIEST, Location(3950., -3040.), 90.)
+    Priest.hero = Unit(PLAYER_1, PRIEST, Location(3950., -3040.), 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(PRIEST, items_list)
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(hero, items_list)
 
-    SetHeroLevel(PRIEST, 80, false)
-    SetUnitState(PRIEST, UNIT_STATE_MANA, 2000)
+    Priest.hero:SetLevel(80)
+    Priest.hero:SetStateMana(2000)
 
-    UnitAddAbility(PRIEST, FLASH_HEAL)
-    UnitAddAbility(PRIEST, RENEW)
-    UnitAddAbility(PRIEST, CIRCLE_OF_HEALING)
+    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
 
-    Init_FlashHeal()
-    Init_Renew()
-    Init_CircleOfHealing()
+    Priest.InitFlashHeal()
+    Priest.InitRenew()
+    Priest.InitCircleOfHealing()
 end
 
 --- Created by Kodpi.
 
-function RemoveHeal(unit,HP)
-    print("heal", HP)
-    SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) + HP)
-end
-
-function CastRenew()
+function Priest.CastRenew()
     --Прибавка каждые 3 секунды
     local HP = 280
+    local unit = Unit(GetSpellTargetUnit())
 
-    local unit = GetSpellTargetUnit()
+    Priest.hero:LoseMana{percent=17}
     for _ = 1, 5 do
-        RemoveHeal(unit, HP)
+        unit:GainLife{life=HP}
         TriggerSleepAction(3.)
     end
-
-    local mana = GetUnitState(PRIEST, UNIT_STATE_MANA) * 0.17
-    SetUnitState(PRIEST, UNIT_STATE_MANA, GetUnitState(PRIEST, UNIT_STATE_MANA) - mana)
-    print("mana = ", mana)
 end
 
-function IsRenew()
+function Priest.IsRenew()
     return GetSpellAbilityId() == RENEW
 end
 
-function Init_Renew()
-    local trigger_ability = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(trigger_ability, Player(0), EVENT_PLAYER_UNIT_SPELL_CAST, nil)
-    TriggerAddCondition(trigger_ability, Condition(IsRenew))
-    TriggerAddAction(trigger_ability, CastRenew)
+function Priest.InitRenew()
+    local event = EventsPlayer(PLAYER_1)
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsRenew)
+    event:AddAction(Priest.CastRenew)
 end
 
 --CUSTOM_CODE
@@ -2662,7 +2773,7 @@ function InitTrig_Battle()
 end
 
 function Trig_Init_LordMarrowgar_Actions()
-        Init_LordMarrowgar()
+        LordMarrowgar.Init()
 end
 
 function InitTrig_Init_LordMarrowgar()
@@ -2689,26 +2800,6 @@ function InitTrig_Init_Priest()
 end
 
 function Trig_Init_Paladin_Actions()
-    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_PIERCE, DAMAGE_TYPE_ENHANCED)
-    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
-    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_MELEE, DAMAGE_TYPE_COLD)
-    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_SIEGE, DAMAGE_TYPE_LIGHTNING)
-    UnitDamageTargetBJ(nil, GetTriggerUnit(), 500, ATTACK_TYPE_MAGIC, DAMAGE_TYPE_POISON)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_DISEASE)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DIVINE)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_MAGIC)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SONIC)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_ACID)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_FORCE)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEATH)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_MIND)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_PLANT)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEFENSIVE)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_DEMOLITION)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SLOW_POISON)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SPIRIT_LINK)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_SHADOW_STRIKE)
-    UnitDamageTargetBJ(GetTriggerUnit(), GetTriggerUnit(), 500, ATTACK_TYPE_HERO, DAMAGE_TYPE_UNIVERSAL)
         Paladin.Init()
 end
 

@@ -22,15 +22,13 @@ function LadyDeathwhisper.ManaShield()
         end
 
         TriggerSleepAction(1.5)
-        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE,
-                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_LIFE) + damage)
-        SetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA,
-                     GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) - damage)
+        LadyDeathwhisper.unit:GainLife{life=damage}
+        LadyDeathwhisper.unit:LoseMana{mana=damage}
         event:DestroyTrigger()
     end
 
     local function UsingManaShield()
-        if GetUnitState(LadyDeathwhisper.unit, UNIT_STATE_MANA) >= 10. then
+        if LadyDeathwhisper.unit:GetCurrentMana() >= 10. then
             return true
         end
         LadyDeathwhisper.mana_is_over = true

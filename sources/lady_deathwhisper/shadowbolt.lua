@@ -14,7 +14,7 @@ function LadyDeathwhisper.ShadowBolt()
         local temp = Unit(GetTriggerPlayer(),
                           SPELL_DUMMY,
                           GetUnitLoc(GetTriggerUnit()),
-                          GetUnitFacing(GetTriggerUnit()))
+                          GetUnitFacing(GetTriggerUnit())):GetUnit()
         SetUnitMoveSpeed(temp, 500.)
         return temp
     end
@@ -32,8 +32,7 @@ function LadyDeathwhisper.ShadowBolt()
         if enemy_point:atPoint(sb_point) then
             local damage = GetRandomReal(9200., 12000.)
             --TODO: разобраться с типами урона
-            UnitDamageTarget(LADY_DEATHWHISPER, enemy, damage, true, false,
-                             ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+            LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
             DestroyEffect(effect)
             RemoveUnit(sb)
             break

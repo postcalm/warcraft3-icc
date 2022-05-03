@@ -13,6 +13,8 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
+    Paladin.hero:LoseMana{percent=6}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
         --массив с доп. статами
         local stat = {

@@ -6,7 +6,11 @@ Unit.__index = Unit
 setmetatable(Unit, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
-        self:_init(...)
+        if #table.pack(...) == 1 then
+            self.unit = ...
+        else
+            self:_init(...)
+        end
         return self
     end,
 })
@@ -22,18 +26,148 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, face_)
 end
 
-function Unit:PhysicalDamage(target, damage)
+--- Нанести физический урон.
+--- Урон снижает как от количества, так и от типа защиты
+function Unit:DealPhysicalDamage(target, damage, type)
+    local t = type or ATTACK_TYPE_MELEE
+    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_NORMAL)
+end
+
+--- Нанести физический урон, проходящий через защиту.
+--- Урон снижается только от типа защиты
+function Unit:DealUniversalDamage(target, damage, type)
+    local t = type or ATTACK_TYPE_MELEE
+    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_UNIVERSAL)
+end
+
+--- Нанести магической урон.
+--- Урон снижается "сопротивлением от магии"
+function Unit:DealMagicDamage(target, damage)
+    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+end
+
+--- Нанести магический урон, проходящий через иммунитет к магии.
+--- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
+function Unit:DealUniversalMagicDamage(target, damage)
+    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
+end
+
+--- Нанести смешанный урон.
+--- Урон снижается и от защиты, и от сопротивления к магии
+function Unit:DealMixedDamage(target, damage)
     UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
-function Unit:SpendMana(mana)
-    SetUnitState(self.unit, UNIT_STATE_MANA, GetUnitState(self.unit, UNIT_STATE_MANA) - mana)
+--- Нанести чистый урон.
+--- Не снижается защитой
+function Unit:DealCleanDamage(target, damage)
+    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
-function Unit:GetManaCost(percent)
-    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * percent
+--- Выдать юниту указанные способности
+---@param ability ability
+function Unit:AddAbilities(...)
+    local abilities = table.pack(...)
+    for _, ability in ipairs(abilities) do
+        UnitAddAbility(self.unit, ability)
+    end
 end
 
+--- Выдать книгу заклинаний
+---@param spellbook spellbook
+function Unit:AddSpellbook(spellbook)
+    local p = GetOwningPlayer(self.unit)
+    UnitAddAbility(self.unit, spellbook)
+    UnitMakeAbilityPermanent(self.unit, true, spellbook)
+    SetPlayerAbilityAvailable(p, spellbook, true)
+end
+
+--- Установить уровень юнита
+function Unit:SetLevel(lvl)
+    SetHeroLevel(self.unit, lvl, false)
+end
+
+--- Потратить указанное количество маны
+---@param mana real
+---@param percent real
+---@return boolean
+function Unit:LoseMana(arg)
+    local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
+    if m > self:GetCurrentMana() then
+        --TODO: печатать отдельно игроку
+        print("Недостаточно маны")
+        return false
+    end
+    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() - m)
+    return true
+end
+
+--- Потратить указанное количество хп
+---@param life real
+---@param percent real
+function Unit:LoseLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() - l)
+end
+
+--- Получить ману количественно или в процентах от максимума
+---@param mana real
+---@param percent real
+function Unit:GainMana(arg)
+    local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
+    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() + m)
+end
+
+--- Получить хп количественно или в процентах от максимума
+---@param life real
+---@param percent real
+function Unit:GainLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() + l)
+end
+
+--- Получить процент маны от максимума
+---@param percent real
+---@return real
+function Unit:GetPercentManaOfMax(percent)
+    if percent == nil then return nil end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / 100)
+end
+
+--- Получить процент хп от максимума
+---@param percent real
+---@return real
+function Unit:GetPercentLifeOfMax(percent)
+    if percent == nil then return nil end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / 100)
+end
+
+--- Установить текущее количество маны
+---@param value real
+function Unit:SetStateMana(value)
+    SetUnitState(self.unit, UNIT_STATE_MANA, value)
+end
+
+--- Установить текущее количество хп
+---@param value real
+function Unit:SetStateLife(value)
+    SetUnitState(self.unit, UNIT_STATE_LIFE, value)
+end
+
+--- Получить текущее количество маны юнита
+---@return real
+function Unit:GetCurrentMana()
+    return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+--- Получить текущее количество хп юнита
+---@return real
+function Unit:GetCurrentLife()
+    return GetUnitState(self.unit, UNIT_STATE_LIFE)
+end
+
+--- Получить идентификатор созданного юнита
+---@return unitid
 function Unit:GetUnit()
     return self.unit
 end

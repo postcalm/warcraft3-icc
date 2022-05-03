@@ -15,10 +15,11 @@ function Paladin.AvengersShield()
     local shield_point
     local shield_unit
     local model_name = "Aegis.mdl"
-    --local arrow = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
     local effect
 
     local exclude_targets = {}
+
+    Paladin.hero:LoseMana{percent=26}
 
     local function AddTarget(target_, exc)
         table.insert(exc, target_)
@@ -48,9 +49,9 @@ function Paladin.AvengersShield()
     end
 
     local function shield(location)
-        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit()))
-        SetUnitMoveSpeed(temp:GetUnit(), 522.)
-        return temp:GetUnit()
+        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit())):GetUnit()
+        SetUnitMoveSpeed(temp, 522.)
+        return temp
     end
 
     local i = 0
@@ -75,9 +76,7 @@ function Paladin.AvengersShield()
         end
         if target_point:atPoint(shield_point) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
-            --AddSpecialEffectTarget(arrow, target, "overhead")
-            --UnitDamageTargetBJ(Paladin.hero, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_DIVINE)
-            Paladin.hero:PhysicalDamage(target, damage)
+            Paladin.hero:DealPhysicalDamage(target, damage)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             RemoveUnit(shield_unit)

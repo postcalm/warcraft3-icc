@@ -2,7 +2,12 @@
 Paladin = {hero = nil}
 Priest  = {hero = nil}
 
-LordMarrowgar    = {unit = nil}
+LordMarrowgar    = {unit = nil,
+                    coldflame = nil,
+                    coldflame_effect = false,
+                    bonespike_effect = false,
+                    whirlwind_effect = false
+}
 LadyDeathwhisper = {unit = nil,
                     mana_shield = false,
                     mana_is_over = false,

@@ -16,6 +16,8 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
+    Paladin.hero:LoseMana{percent=7}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
         EquipSystem.AddItemsToUnit(unit, items_list)
         local stat = R2I(GetHeroStr(unit, false) * 0.1)

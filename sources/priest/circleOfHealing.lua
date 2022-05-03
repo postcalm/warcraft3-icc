@@ -1,13 +1,12 @@
 
 function Priest.CastCircleOfHealing()
-    local target = GetSpellTargetUnit()
-    local priest = Priest.hero:GetUnit()
-    local mana = GetManaCost(priest, 0.21)
-    SetUnitState(priest, UNIT_STATE_MANA, GetUnitState(priest, UNIT_STATE_MANA) - mana)
+    local target = Unit(GetSpellTargetUnit())
+
+    Priest.hero:LoseMana{percent=21}
 
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
-    SetUnitState(target, UNIT_STATE_LIFE, GetUnitState(target, UNIT_STATE_LIFE) + heal)
+    target:GainLife{life=heal}
 end
 
 function Priest.IsCircleOfHealing()

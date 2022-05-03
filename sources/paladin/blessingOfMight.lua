@@ -11,6 +11,8 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
+    Paladin.hero:LoseMana{percent=5}
+
     if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
         -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
         SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)

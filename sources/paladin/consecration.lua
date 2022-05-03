@@ -1,5 +1,6 @@
 
 function Paladin.Consecration()
+    Paladin.hero:LoseMana{percent=22}
     IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
 end
 

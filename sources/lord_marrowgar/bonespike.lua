@@ -1,15 +1,13 @@
 
-BONE_SPIKE_EXIST = false
-
-function BoneSpike()
+function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
-    if BONE_SPIKE_EXIST then
+    if LordMarrowgar.bonespike_effect then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy))
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetUnit()
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)
@@ -31,12 +29,12 @@ function BoneSpike()
                 SetUnitFlyHeight(target_enemy, 0., 0.)
                 PauseUnit(target_enemy, false)
                 RemoveUnit(bone_spike_obj)
-                BONE_SPIKE_EXIST = false
+                LordMarrowgar.bonespike_effect = false
                 break
             -- если игрок умер - сбрасываем шип
             elseif GetUnitState(target_enemy, UNIT_STATE_LIFE) <= 0 then
                 RemoveUnit(bone_spike_obj)
-                BONE_SPIKE_EXIST = false
+                LordMarrowgar.bonespike_effect = false
                 break
             end
         end
@@ -44,18 +42,18 @@ function BoneSpike()
 end
 
 -- если шип не призван
-function StartBoneSpike()
-    if not BONE_SPIKE_EXIST then
-        BONE_SPIKE_EXIST = true
-        return BONE_SPIKE_EXIST
+function LordMarrowgar.StartBoneSpike()
+    if not LordMarrowgar.bonespike_effect then
+        LordMarrowgar.bonespike_effect = true
+        return true
     end
     return false
 end
 
-function Init_BoneSpike()
-    local event = EventsUnit(LORD_MARROWGAR)
+function LordMarrowgar.InitBoneSpike()
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
-    event:AddCondition(StartBoneSpike)
-    event:AddAction(BoneSpike)
+    event:AddCondition(LordMarrowgar.StartBoneSpike)
+    event:AddAction(LordMarrowgar.BoneSpike)
 end
 

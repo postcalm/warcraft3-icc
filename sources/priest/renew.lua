@@ -1,19 +1,13 @@
 --- Created by Kodpi.
 
-function Priest.RenewHOT(unit, HP)
-    SetUnitState(unit, UNIT_STATE_LIFE, GetUnitState(unit, UNIT_STATE_LIFE) + HP)
-end
-
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды
     local HP = 280
-    local unit = GetSpellTargetUnit()
-    local mana = Priest.hero:GetManaCost(0.17)
+    local unit = Unit(GetSpellTargetUnit())
 
-    Priest.hero:SpendMana(mana)
+    Priest.hero:LoseMana{percent=17}
     for _ = 1, 5 do
-        print(unit)
-        Priest.RenewHOT(unit, HP)
+        unit:GainLife{life=HP}
         TriggerSleepAction(3.)
     end
 end

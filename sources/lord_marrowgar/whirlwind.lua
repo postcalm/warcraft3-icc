@@ -1,39 +1,37 @@
 
-WHIRLWIND_EXIST = false
-
-function ResetAnimation()
-    if WHIRLWIND_EXIST then
-        WHIRLWIND_EXIST = false
+function LordMarrowgar.ResetAnimation()
+    if LordMarrowgar.whirlwind_effect then
+        LordMarrowgar.whirlwind_effect = false
     end
     DestroyTimer(GetExpiredTimer())
 end
 
-function Whirlwind()
+function LordMarrowgar.Whirlwind()
     local whirlwind_timer = CreateTimer()
 
     local function action()
         local timer_reset = CreateTimer()
-        IssueImmediateOrder(LORD_MARROWGAR, "whirlwind")
-        TimerStart(timer_reset, 5., false, ResetAnimation)
+        IssueImmediateOrder(LordMarrowgar.unit, "whirlwind")
+        TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
         DestroyTimer(whirlwind_timer)
     end
 
-    if WHIRLWIND_EXIST then
+    if LordMarrowgar.whirlwind_effect then
         TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
     end
 end
 
-function StartWhirlwind()
-    if not WHIRLWIND_EXIST then
-        WHIRLWIND_EXIST = true
-        return WHIRLWIND_EXIST
+function LordMarrowgar.StartWhirlwind()
+    if not LordMarrowgar.whirlwind_effect then
+        LordMarrowgar.whirlwind_effect = true
+        return true
     end
     return false
 end
 
-function Init_Whirlwind()
-    local event = EventsUnit(LORD_MARROWGAR)
+function LordMarrowgar.InitWhirlwind()
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
-    event:AddCondition(StartWhirlwind)
-    event:AddAction(Whirlwind)
+    event:AddCondition(LordMarrowgar.StartWhirlwind)
+    event:AddAction(LordMarrowgar.Whirlwind)
 end

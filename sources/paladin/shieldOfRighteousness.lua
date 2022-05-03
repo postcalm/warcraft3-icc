@@ -1,9 +1,9 @@
 
 function Paladin.ShieldOfRighteousness()
+    Paladin.hero:LoseMana{percent=6}
     -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
-    UnitDamageTarget(GetTriggerUnit(), GetSpellTargetUnit(), damage, true, false,
-            ATTACK_TYPE_MAGIC, DAMAGE_TYPE_LIGHTNING, WEAPON_TYPE_WHOKNOWS)
+    Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
 
 function Paladin.IsShieldOfRighteousness()
