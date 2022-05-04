@@ -1,29 +1,26 @@
 
 function LadyDeathwhisper.ManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit)
+    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
     local effect
 
     event:RegisterDamaged()
 
-    print(BattleSystem.Status())
+    --print(BattleSystem.Status())
 
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
-        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit, "origin")
+        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetUnit(), "origin")
         LadyDeathwhisper.mana_shield = true
     end
 
     local function ManaShield()
         local damage = GetEventDamage()
 
-        if damage == 0 then
-            event:DestroyTrigger()
-            return
-        end
+        if damage == 0 then event:DestroyTrigger() return end
 
-        TriggerSleepAction(1.5)
+        TriggerSleepAction(0.7)
         LadyDeathwhisper.unit:GainLife{life=damage}
-        LadyDeathwhisper.unit:LoseMana{mana=damage}
+        LadyDeathwhisper.unit:LoseMana{mana=damage, check=false}
         event:DestroyTrigger()
     end
 
@@ -32,6 +29,7 @@ function LadyDeathwhisper.ManaShield()
             return true
         end
         LadyDeathwhisper.mana_is_over = true
+        LadyDeathwhisper.phase = 2
         DestroyEffect(effect)
         event:DestroyTrigger()
         return false
@@ -51,9 +49,17 @@ function LadyDeathwhisper.ManaShield()
     --end
 end
 
+function LadyDeathwhisper.MSCheckPhase()
+    if LadyDeathwhisper.phase == 1 then
+        return true
+    end
+    return false
+end
+
 function LadyDeathwhisper.InitManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit)
+    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
     event:RegisterAttacked()
+    event:AddCondition(LadyDeathwhisper.MSCheckPhase)
     event:AddAction(LadyDeathwhisper.ManaShield)
 end
 

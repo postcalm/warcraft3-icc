@@ -4,7 +4,7 @@ function LordMarrowgar.Coldflame()
 
     local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
-    local lord_location = GetUnitLoc(LordMarrowgar.unit)
+    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetUnit())
     local target_location = GetUnitLoc(target)
 
     if LordMarrowgar.coldflame_effect then
@@ -38,7 +38,7 @@ function LordMarrowgar.StartColdflame()
 end
 
 function LordMarrowgar.InitColdflame()
-    local event = EventsUnit(LORD_MARROWGAR)
+    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartColdflame)
     event:AddAction(LordMarrowgar.Coldflame)

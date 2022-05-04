@@ -36,7 +36,6 @@ local param = {
         [[\libs\BuffSystem.lua]],
         [[\libs\BattleSystem.lua]],
         [[\libs\Wrappers.lua]],
-        [[\libs\AbilityWrappers.lua]],
         [[\sources\lord_marrowgar]],
         [[\sources\lady_deathwhisper]],
         [[\sources\paladin]],

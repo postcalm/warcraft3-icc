@@ -51,7 +51,7 @@ function LordMarrowgar.StartBoneSpike()
 end
 
 function LordMarrowgar.InitBoneSpike()
-    local event = EventsUnit(LordMarrowgar.unit)
+    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartBoneSpike)
     event:AddAction(LordMarrowgar.BoneSpike)

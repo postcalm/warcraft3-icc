@@ -9,7 +9,7 @@ function Paladin.Init()
     --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
 
     Paladin.hero:SetLevel(80)
-    Paladin.hero:SetStateMana(800)
+    Paladin.hero:SetMana(800)
 
     Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
             CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,

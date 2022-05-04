@@ -8,7 +8,7 @@ function Priest.Init()
     --EquipSystem.AddItemsToUnit(hero, items_list)
 
     Priest.hero:SetLevel(80)
-    Priest.hero:SetStateMana(2000)
+    Priest.hero:SetMana(2000)
 
     Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
 

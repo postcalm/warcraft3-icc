@@ -11,7 +11,7 @@ function LordMarrowgar.Whirlwind()
 
     local function action()
         local timer_reset = CreateTimer()
-        IssueImmediateOrder(LordMarrowgar.unit, "whirlwind")
+        IssueImmediateOrder(LordMarrowgar.unit:GetUnit(), "whirlwind")
         TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
         DestroyTimer(whirlwind_timer)
     end
@@ -30,7 +30,7 @@ function LordMarrowgar.StartWhirlwind()
 end
 
 function LordMarrowgar.InitWhirlwind()
-    local event = EventsUnit(LordMarrowgar.unit)
+    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartWhirlwind)
     event:AddAction(LordMarrowgar.Whirlwind)

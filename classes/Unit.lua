@@ -87,18 +87,27 @@ function Unit:SetLevel(lvl)
     SetHeroLevel(self.unit, lvl, false)
 end
 
+--function Unit:SetManaCost(ability, manacost)
+--    local lvl = GetUnitAbilityLevel(self.unit, ability)
+--    local m = self:GetPercentManaOfMax(manacost)
+--    print(lvl, m)
+--    BlzSetUnitAbilityManaCost(self.unit, ability, lvl, m)
+--end
+
 --- Потратить указанное количество маны
 ---@param mana real
 ---@param percent real
+---@param check boolean Проверять ли текущее количество маны
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
-    if m > self:GetCurrentMana() then
+    if arg.check == nil then arg.check = true end
+    if m > self:GetCurrentMana() and arg.check then
         --TODO: печатать отдельно игроку
         print("Недостаточно маны")
         return false
     end
-    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() - m)
+    self:SetMana(self:GetCurrentMana() - m)
     return true
 end
 
@@ -107,7 +116,7 @@ end
 ---@param percent real
 function Unit:LoseLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() - l)
+    self:SetLife(self:GetCurrentLife() - l)
 end
 
 --- Получить ману количественно или в процентах от максимума
@@ -115,7 +124,7 @@ end
 ---@param percent real
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
-    SetUnitState(self.unit, UNIT_STATE_MANA, self:GetCurrentMana() + m)
+    self:SetMana(self:GetCurrentMana() + m)
 end
 
 --- Получить хп количественно или в процентах от максимума
@@ -123,7 +132,7 @@ end
 ---@param percent real
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    SetUnitState(self.unit, UNIT_STATE_LIFE, self:GetCurrentLife() + l)
+    self:SetLife(self:GetCurrentLife() + l)
 end
 
 --- Получить процент маны от максимума
@@ -144,13 +153,13 @@ end
 
 --- Установить текущее количество маны
 ---@param value real
-function Unit:SetStateMana(value)
+function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
 --- Установить текущее количество хп
 ---@param value real
-function Unit:SetStateLife(value)
+function Unit:SetLife(value)
     SetUnitState(self.unit, UNIT_STATE_LIFE, value)
 end
 
