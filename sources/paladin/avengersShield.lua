@@ -1,28 +1,20 @@
 
 function Paladin.AvengersShield()
-    local target = GetSpellTargetUnit()
+    local target = Unit(GetSpellTargetUnit())
     local light_magic_damage = 1
     local factor = 0.07
-    --т.к. силы атаки так таковой нет, считается она, как сила героя помноженная на 2
+    --т.к. силы атаки так таковой нет, то считается она, как сила героя помноженная на 2
     local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
 
-    local pal_loc = GetUnitLoc(GetTriggerUnit())
-    local target_loc
-    local target_point
-
     local damage = 0
-    local shield_loc
-    local shield_point
-    local shield_unit
     local model_name = "Aegis.mdl"
-    local effect
 
     local exclude_targets = {}
 
-    Paladin.hero:LoseMana{percent=26}
+    if not Paladin.hero:LoseMana{percent=26} then return end
 
     local function AddTarget(target_, exc)
-        table.insert(exc, target_)
+        table.insert(exc, target_:GetUnit())
     end
 
     local function TargetTookDamage(target_, exc)
@@ -34,13 +26,13 @@ function Paladin.AvengersShield()
 
     local function GetTarget(target_, exc)
         local temp
-        local group = GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target_))
+        local group = GroupUnitsInRangeOfLocUnit(200, target_:GetLoc())
         for _ = 1, CountUnitsInGroup(group) do
             TriggerSleepAction(0.)
             temp = GroupPickRandomUnit(group)
             if not TargetTookDamage(temp, exc) and
                     not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
-                return temp
+                return Unit(temp)
             end
             GroupRemoveUnit(group, temp)
         end
@@ -48,46 +40,28 @@ function Paladin.AvengersShield()
         return 0
     end
 
-    local function shield(location)
-        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 522.)
-        return temp
-    end
-
     local i = 0
-    shield_unit = shield(pal_loc)
+    local shield = UnitSpell(Paladin.hero:GetUnit())
+    local effect = Effect(shield, model_name, 0.7)
     while i < 3 do
-        effect = AddSpecialEffectTarget(model_name, shield_unit, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.7)
-        --находим положения цели
-        target_loc = GetUnitLoc(target)
-        target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-        --направляем юнита к месту цели
-        IssuePointOrderLoc(shield_unit, "move", target_loc)
         TriggerSleepAction(0.)
-        shield_loc = GetUnitLoc(shield_unit)
-        shield_point = Point:new(GetLocationX(shield_loc), GetLocationY(shield_loc))
-        if GetDyingUnit() == target then
+        shield:MoveToUnit(target)
+        if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            KillUnit(shield_unit)
-            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
-        if target_point:atPoint(shield_point) then
+        if shield:NearTarget(target) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
             Paladin.hero:DealPhysicalDamage(target, damage)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            RemoveUnit(shield_unit)
-            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
-        DestroyEffect(effect)
     end
-    RemoveUnit(shield_unit)
-    DestroyEffect(effect)
+    effect:Destroy()
+    shield:Remove()
 end
 
 function Paladin.IsAvengersShield()

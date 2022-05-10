@@ -41,6 +41,11 @@ function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
+--- Регистриует собыие призыва юнита игрока
+function EventsPlayer:RegisterUnitSummon()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SUMMON, nil)
+end
+
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
@@ -67,6 +72,6 @@ function EventsPlayer:EnableTrigger()
 end
 
 --- Уничтожает триггер
-function EventsPlayer:DestroyTrigger()
-    Events.DestroyTrigger(self)
+function EventsPlayer:Destroy()
+    Events.Destroy(self)
 end

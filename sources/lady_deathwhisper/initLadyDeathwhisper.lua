@@ -8,8 +8,8 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(2000)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
     --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), {"MP_ITEM"}, 4)
 
     -- both phase

@@ -1,4 +1,3 @@
---- Created by meiso.
 
 Unit = {}
 Unit.__index = Unit
@@ -28,40 +27,52 @@ end
 
 --- Нанести физический урон.
 --- Урон снижает как от количества, так и от типа защиты
-function Unit:DealPhysicalDamage(target, damage, type)
-    local t = type or ATTACK_TYPE_MELEE
-    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_NORMAL)
+function Unit:DealPhysicalDamage(target, damage, attack_type)
+    local t = attack_type or ATTACK_TYPE_MELEE
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
-function Unit:DealUniversalDamage(target, damage, type)
-    local t = type or ATTACK_TYPE_MELEE
-    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_UNIVERSAL)
+function Unit:DealUniversalDamage(target, damage, attack_type)
+    local t = attack_type or ATTACK_TYPE_MELEE
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
 function Unit:DealMagicDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
 function Unit:DealUniversalMagicDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
 function Unit:DealMixedDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
 function Unit:DealCleanDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Выдать юниту указанные способности
@@ -86,13 +97,6 @@ end
 function Unit:SetLevel(lvl)
     SetHeroLevel(self.unit, lvl, false)
 end
-
---function Unit:SetManaCost(ability, manacost)
---    local lvl = GetUnitAbilityLevel(self.unit, ability)
---    local m = self:GetPercentManaOfMax(manacost)
---    print(lvl, m)
---    BlzSetUnitAbilityManaCost(self.unit, ability, lvl, m)
---end
 
 --- Потратить указанное количество маны
 ---@param mana real
@@ -175,8 +179,68 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
+--- Вернуть ближайших врагов
+---@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@return group
+function Unit:GetNearbyEnemies(radius, filter)
+    local group = CreateGroup()
+    local r = radius or 500
+    local location = self:GetLoc()
+    local f = Condition(filter) or nil
+    GroupEnumUnitsInRangeOfLoc(group, location, r, f)
+    DestroyBoolExpr(f)
+    return group
+end
+
+--- Получить текущее местоположение юнита
+---@return location
+function Unit:GetLoc()
+    return GetUnitLoc(self.unit)
+end
+
+--- Проверяет мертв ли юнит
+---@return boolean
+function Unit:IsDied()
+    return GetDyingUnit() == self.unit
+end
+
 --- Получить идентификатор созданного юнита
 ---@return unitid
 function Unit:GetUnit()
     return self.unit
+end
+
+--- Получить игрока, владеющего юнитом
+function Unit:GetOwner()
+    return GetOwningPlayer(self.unit)
+end
+
+--- Установить скорость передвижения юнита
+---@param movespeed real
+function Unit:SetMoveSpeed(movespeed)
+    SetUnitMoveSpeed(self.unit, movespeed)
+end
+
+--- Получить скорость передвижения юнита
+function Unit:GetMoveSpeed()
+    return GetUnitMoveSpeed(self.unit)
+end
+
+--- Проверяет является ли юнит союзником
+---@param unit Unit Юнит от класса Unit
+---@return boolean
+function Unit:IsAlly(unit)
+    return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+end
+
+--- Проверяет является ли юнит противником
+---@param unit Unit Юнит от класса Unit
+---@return boolean
+function Unit:IsEnemy(unit)
+    return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+end
+
+--- Удалить юнита
+function Unit:Remove()
+    RemoveUnit(self.unit)
 end

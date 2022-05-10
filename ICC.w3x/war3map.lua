@@ -95,6 +95,9 @@ function CreateUnitsForPlayer10()
     local unitID
     local t
     local life
+    u = CreateUnit(p, FourCC("ugho"), 3156.8, 32.8, 49.649)
+    u = CreateUnit(p, FourCC("ugho"), 3273.6, -75.0, 73.424)
+    u = CreateUnit(p, FourCC("ugho"), 3427.4, -101.2, 268.250)
     u = CreateUnit(p, FourCC("ugho"), 3227.7, -3737.3, 12.610)
     u = CreateUnit(p, FourCC("ugho"), 3214.7, -3584.5, 263.720)
     u = CreateUnit(p, FourCC("ugho"), 3371.0, -3728.6, 246.840)
@@ -263,6 +266,40 @@ DRIUD        = nil
 SHAMAN       = nil
 PRIEST       = FourCC("Hblm")
 
+
+---@param unit unitid
+---@param model string
+---@param scale real
+Effect = {}
+Effect.__index = Effect
+
+setmetatable(Effect, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@param unit unitid
+---@param model string
+---@param scale real
+function Effect:_init(unit, model, scale)
+    local u = unit
+    if type(unit) == "table" then u = unit:GetUnit() end
+    self.effect = AddSpecialEffectTarget(model, u, "overhead")
+    if scale then BlzSetSpecialEffectScale(self.effect, scale) end
+end
+
+function Effect:SetTimedLife(time)
+    TriggerSleepAction(time)
+    self:Destroy()
+end
+
+function Effect:Destroy()
+    DestroyEffect(self.effect)
+end
+
 --- Created by meiso.
 
 Events = {}
@@ -305,7 +342,7 @@ function Events:EnableTrigger()
 end
 
 --- Уничтожает триггер
-function Events:DestroyTrigger()
+function Events:Destroy()
     DestroyTrigger(self.trigger)
 end
 
@@ -352,6 +389,11 @@ function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
+--- Регистриует собыие призыва юнита игрока
+function EventsPlayer:RegisterUnitSummon()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SUMMON, nil)
+end
+
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
@@ -378,8 +420,8 @@ function EventsPlayer:EnableTrigger()
 end
 
 --- Уничтожает триггер
-function EventsPlayer:DestroyTrigger()
-    Events.DestroyTrigger(self)
+function EventsPlayer:Destroy()
+    Events.Destroy(self)
 end
 
 --- Created by meiso.
@@ -404,6 +446,11 @@ end
 --- Регистриует событие получения урона юнитом
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
+end
+
+--- Регистриует событие нанесения урона юнитом
+function EventsUnit:RegisterDamaging()
+    TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
 --- Регистриует событие, когда юнита атакуют или он атакует
@@ -437,22 +484,27 @@ function EventsUnit:EnableTrigger()
 end
 
 --- Уничтожает триггер
-function EventsUnit:DestroyTrigger()
-    Events.DestroyTrigger(self)
+function EventsUnit:Destroy()
+    Events.Destroy(self)
 end
 
 --- Created by meiso.
 
 Line = {}
-setmetatable(Line, {__index = Point})
+Line.__index = Line
 
-function Line:new(point1, point2)
-    local obj = {}
-    setmetatable(obj, self)
-    self.__index = self
+setmetatable(Line, {
+    __index = Point,
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function Line:_init(point1, point2)
     self.point1 = point1 or 0
     self.point2 = point2 or 0
-    return obj
 end
 
 --- Возвращает количество точек на линии
@@ -473,8 +525,8 @@ function Line:getPoints(quantity)
         if slope == 0 then x = xdiff * (i / quantity)
         else x = y / slope end
 
-        points = Point:new(Round(x) + self.point1.X,
-                           Round(y) + self.point1.Y)
+        points = Point(Round(x) + self.point1.X,
+                       Round(y) + self.point1.Y)
         table.insert(new_points, i, points:get2DPoint())
     end
     table.insert(new_points, 1, self.point1:get2DPoint())
@@ -492,15 +544,20 @@ end
 --- Created by meiso.
 
 Point = {}
+Point.__index = Point
 
-function Point:new(X, Y, Z)
-    local obj = {}
-    obj.X = X or 0
-    obj.Y = Y or 0
-    obj.Z = Z or 0
-    setmetatable(obj, self)
-    self.__index = self
-    return obj
+setmetatable(Point, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function Point:_init(X, Y, Z)
+    self.X = X or 0
+    self.Y = Y or 0
+    self.Z = Z or 0
 end
 
 function Point:get2DPoint()
@@ -512,7 +569,7 @@ function Point:get3DPoint()
 end
 
 function Point:atPoint(point)
-    local inaccuracy = 20.
+    local inaccuracy = 30.
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true
@@ -520,7 +577,36 @@ function Point:atPoint(point)
     return false
 end
 
---- Created by meiso.
+
+Timer = {}
+Timer.__index = Timer
+
+setmetatable(Timer, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@param timeout real
+---@param func function
+function Timer:_init(timeout, func)
+    self.timer = CreateTimer()
+    self.timeout = timeout
+    self.func = function() func() end
+end
+
+--- Запустить таймер
+function Timer:Start()
+    TimerStart(self.timer, self.timeout, false, self.func())
+end
+
+--- Уничтожить таймер
+function Timer:Destroy()
+    DestroyTimer(self.timer)
+end
+
 
 Unit = {}
 Unit.__index = Unit
@@ -550,40 +636,52 @@ end
 
 --- Нанести физический урон.
 --- Урон снижает как от количества, так и от типа защиты
-function Unit:DealPhysicalDamage(target, damage, type)
-    local t = type or ATTACK_TYPE_MELEE
-    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_NORMAL)
+function Unit:DealPhysicalDamage(target, damage, attack_type)
+    local t = attack_type or ATTACK_TYPE_MELEE
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
-function Unit:DealUniversalDamage(target, damage, type)
-    local t = type or ATTACK_TYPE_MELEE
-    UnitDamageTargetBJ(self.unit, target, damage, t, DAMAGE_TYPE_UNIVERSAL)
+function Unit:DealUniversalDamage(target, damage, attack_type)
+    local t = attack_type or ATTACK_TYPE_MELEE
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
 function Unit:DealMagicDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
 function Unit:DealUniversalMagicDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
 function Unit:DealMixedDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
 function Unit:DealCleanDamage(target, damage)
-    UnitDamageTargetBJ(self.unit, target, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
+    local u = target
+    if type(target) == "table" then u = target:GetUnit() end
+    UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
 --- Выдать юниту указанные способности
@@ -608,13 +706,6 @@ end
 function Unit:SetLevel(lvl)
     SetHeroLevel(self.unit, lvl, false)
 end
-
---function Unit:SetManaCost(ability, manacost)
---    local lvl = GetUnitAbilityLevel(self.unit, ability)
---    local m = self:GetPercentManaOfMax(manacost)
---    print(lvl, m)
---    BlzSetUnitAbilityManaCost(self.unit, ability, lvl, m)
---end
 
 --- Потратить указанное количество маны
 ---@param mana real
@@ -697,10 +788,101 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
+--- Вернуть ближайших врагов
+---@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@return group
+function Unit:GetNearbyEnemies(radius, filter)
+    local group = CreateGroup()
+    local r = radius or 500
+    local location = self:GetLoc()
+    local f = Condition(filter) or nil
+    GroupEnumUnitsInRangeOfLoc(group, location, r, f)
+    DestroyBoolExpr(f)
+    return group
+end
+
+--- Получить текущее местоположение юнита
+---@return location
+function Unit:GetLoc()
+    return GetUnitLoc(self.unit)
+end
+
+--- Проверяет мертв ли юнит
+---@return boolean
+function Unit:IsDied()
+    return GetDyingUnit() == self.unit
+end
+
 --- Получить идентификатор созданного юнита
 ---@return unitid
 function Unit:GetUnit()
     return self.unit
+end
+
+--- Получить игрока, владеющего юнитом
+function Unit:GetOwner()
+    return GetOwningPlayer(self.unit)
+end
+
+--- Установить скорость передвижения юнита
+---@param movespeed real
+function Unit:SetMoveSpeed(movespeed)
+    SetUnitMoveSpeed(self.unit, movespeed)
+end
+
+--- Получить скорость передвижения юнита
+function Unit:GetMoveSpeed()
+    return GetUnitMoveSpeed(self.unit)
+end
+
+function Unit:IsAlly(unit)
+    return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+end
+
+function Unit:IsEnemy(unit)
+    return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+end
+
+--- Удалить юнита
+function Unit:Remove()
+    RemoveUnit(self.unit)
+end
+
+
+UnitSpell = {}
+UnitSpell.__index = UnitSpell
+
+setmetatable(UnitSpell, {
+    __index = Unit,
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function UnitSpell:_init(owner, location)
+    local loc = location or GetUnitLoc(owner)
+    local face = GetUnitFacing(owner)
+    self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetUnit()
+    SetUnitMoveSpeed(self.unit, 512.)
+end
+
+function UnitSpell:MoveToUnit(unit)
+    local loc
+    if type(unit) == "table" then loc = unit:GetLoc()
+    else loc = GetUnitLoc(unit) end
+    IssuePointOrderLoc(self.unit, "move", loc)
+end
+
+function UnitSpell:NearTarget(target)
+    local loc
+    if type(target) == "table" then loc = target:GetLoc()
+    else loc = GetUnitLoc(target) end
+    local target_point = Point(GetLocationX(loc), GetLocationY(loc))
+    local unit_loc = self:GetLoc()
+    local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))
+    return target_point:atPoint(unit_point)
 end
 
 ---@author Vlod | WWW.XGM.RU
@@ -1873,6 +2055,10 @@ function GroupHeroesInArea(area, which_player)
     return GetUnitsInRectOfPlayer(area, which_player)
 end
 
+function GroupUnitsInRect(rect, boolexpr)
+    return GetUnitsInRectMatching(rect, Condition(boolexpr))
+end
+
 function GroupHeroesInRangeOnSpell(loc, radius, expr, which_player)
     local group_heroes = CreateGroup()
     bj_groupEnumOwningPlayer = which_player
@@ -2137,55 +2323,27 @@ end
 
 
 function LadyDeathwhisper.FrostBolt()
-    TriggerSleepAction(10.)
-    local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
-    local enemy_loc
-    local enemy_point
-    local enemy_movespeed = GetUnitMoveSpeed(enemy)
-    local fb
-    local fb_loc
-    local fb_point
+    --TriggerSleepAction(10.)
+    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
+    local enemy_movespeed = enemy:GetMoveSpeed()
 
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
-    local effect
 
-    local function frost_bolt()
-        local temp = Unit(GetTriggerPlayer(),
-                          SPELL_DUMMY,
-                          GetUnitLoc(GetTriggerUnit()),
-                          GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 500.)
-        return temp
-    end
-    
-    local function recover_movespeed()
-        SetUnitMoveSpeed(enemy, enemy_movespeed)
-        DestroyTimer(GetExpiredTimer())
-    end
-
-    fb = frost_bolt()
+    local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local effect = Effect(fb, model_name, 0.7)
     while true do
-        effect = AddSpecialEffectTarget(model_name, fb, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.5)
-        enemy_loc = GetUnitLoc(enemy)
-        enemy_point = Point:new(GetLocationX(enemy_loc), GetLocationY(enemy_loc))
-        IssuePointOrderLoc(fb, "move", enemy_loc)
         TriggerSleepAction(0.)
-        fb_loc = GetUnitLoc(fb)
-        fb_point = Point:new(GetLocationX(fb_loc), GetLocationY(fb_loc))
-        if enemy_point:atPoint(fb_point) then
-            local damage = GetRandomReal(45000., 47000.)
+        fb:MoveToUnit(enemy)
+        if fb:NearTarget(enemy) then
+            local damage = GetRandomInt(100., 120.)
+            print("FrostBolt", damage)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
-            SetUnitMoveSpeed(enemy, enemy_movespeed / 2)
-            local timer = CreateTimer()
-            TimerStart(timer, 7, false, recover_movespeed)
-            DestroyEffect(effect)
-            RemoveUnit(fb)
+            enemy:SetMoveSpeed(enemy_movespeed / 2)
             break
         end
-        DestroyEffect(effect)
     end
-    RemoveUnit(fb)
+    effect:Destroy()
+    fb:Remove()
 end
 
 function LadyDeathwhisper.FBCheckPhase()
@@ -2205,65 +2363,49 @@ end
 
 
 function LadyDeathwhisper.FrostBoltVolley()
-    TriggerSleepAction(10.)
-    local enemy --= GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
-    local enemy_loc
-    local enemy_point
-    local enemy_movespeed = GetUnitMoveSpeed(enemy)
-    local fb
-    local fb_loc
-    local fb_point
-    local fbv
-
+    TriggerSleepAction(5.)
+    print("it's time to cast")
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
-    local effect
 
-    local function frost_bolt()
-        local temp = Unit(GetTriggerPlayer(),
-                SPELL_DUMMY,
-                GetUnitLoc(GetTriggerUnit()),
-                GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 500.)
-        return temp
-    end
-
-    local function recover_movespeed()
-        SetUnitMoveSpeed(enemy, enemy_movespeed)
-        DestroyTimer(GetExpiredTimer())
-    end
-
-    local function frostbolt()
-        fb = frost_bolt()
+    local function frostbolt(enemy)
+        local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+        local enemy_movespeed = enemy:GetMoveSpeed()
+        local effect = Effect(fb, model_name, 0.7)
         while true do
-            enemy = GetEnumUnit()
-            effect = AddSpecialEffectTarget(model_name, fb, "overhead")
-            BlzSetSpecialEffectScale(effect, 0.5)
-            enemy_loc = GetUnitLoc(enemy)
-            enemy_point = Point:new(GetLocationX(enemy_loc), GetLocationY(enemy_loc))
-            IssuePointOrderLoc(fb, "move", enemy_loc)
             TriggerSleepAction(0.)
-            fb_loc = GetUnitLoc(fb)
-            fb_point = Point:new(GetLocationX(fb_loc), GetLocationY(fb_loc))
-            if enemy_point:atPoint(fb_point) then
-                local damage = GetRandomReal(10000., 12000.)
+            fb:MoveToUnit(enemy)
+            if fb:NearTarget(enemy) then
+                local damage = GetRandomInt(10., 12.)
                 LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
-                SetUnitMoveSpeed(enemy, enemy_movespeed / 2)
-                local timer = CreateTimer()
-                TimerStart(timer, 7, false, recover_movespeed)
-                DestroyEffect(effect)
-                RemoveUnit(fb)
+                print("FrostBoltVolley", damage)
+                enemy:SetMoveSpeed(enemy_movespeed / 2)
                 break
             end
-            DestroyEffect(effect)
         end
-        RemoveUnit(fb)
+        effect:Destroy()
+        fb:Remove()
     end
 
-    ForGroup(GetUnitsInRangeOfLocAll(512, GetUnitLoc(LadyDeathwhisper.unit:GetUnit())), frostbolt)
+    -- проверяем, чтобы Лэди не считалась союзником
+    local function checker()
+        return LadyDeathwhisper.unit:IsEnemy(Unit(GetAttacker()))
+    end
+
+    local enemies = LadyDeathwhisper.unit:GetNearbyEnemies(500, checker)
+    local count = CountUnitsInGroup(enemies)
+    for _ = 1, count do
+        local enemy = Unit(GroupPickRandomUnit(enemies))
+        GroupRemoveUnit(enemies, enemy:GetUnit())
+        if LadyDeathwhisper.unit:IsEnemy(enemy) then
+            print("count", CountUnitsInGroup(enemies))
+            print("enemy", enemy:GetUnit())
+            StartThread(frostbolt(enemy))
+        end
+    end
 end
 
 function LadyDeathwhisper.FBVCheckPhase()
-    if LadyDeathwhisper.phase == 1 then
+    if LadyDeathwhisper.phase <= 2 then
         return true
     end
     return false
@@ -2286,8 +2428,8 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(2000)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
     --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), {"MP_ITEM"}, 4)
 
     -- both phase
@@ -2322,12 +2464,12 @@ function LadyDeathwhisper.ManaShield()
     local function ManaShield()
         local damage = GetEventDamage()
 
-        if damage == 0 then event:DestroyTrigger() return end
+        if damage == 0 then event:Destroy() return end
 
         TriggerSleepAction(0.7)
         LadyDeathwhisper.unit:GainLife{life=damage}
         LadyDeathwhisper.unit:LoseMana{mana=damage, check=false}
-        event:DestroyTrigger()
+        event:Destroy()
     end
 
     local function UsingManaShield()
@@ -2336,8 +2478,9 @@ function LadyDeathwhisper.ManaShield()
         end
         LadyDeathwhisper.mana_is_over = true
         LadyDeathwhisper.phase = 2
+        --TODO: не удаляется эффект
         DestroyEffect(effect)
-        event:DestroyTrigger()
+        event:Destroy()
         return false
     end
 
@@ -2374,44 +2517,22 @@ end
 function LadyDeathwhisper.ShadowBolt()
     TriggerSleepAction(10.)
     local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
-    local enemy_loc
-    local enemy_point
-    local sb
-    local sb_loc
-    local sb_point
 
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
-    local effect
 
-    local function shadow_bolt()
-        local temp = Unit(GetTriggerPlayer(),
-                          SPELL_DUMMY,
-                          GetUnitLoc(GetTriggerUnit()),
-                          GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 500.)
-        return temp
-    end
-
-    sb = shadow_bolt()
+    local sb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local effect = Effect(sb, model_name, 0.7)
     while true do
-        effect = AddSpecialEffectTarget(model_name, sb, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.5)
-        enemy_loc = GetUnitLoc(enemy)
-        enemy_point = Point:new(GetLocationX(enemy_loc), GetLocationY(enemy_loc))
-        IssuePointOrderLoc(sb, "move", enemy_loc)
         TriggerSleepAction(0.)
-        sb_loc = GetUnitLoc(sb)
-        sb_point = Point:new(GetLocationX(sb_loc), GetLocationY(sb_loc))
-        if enemy_point:atPoint(sb_point) then
+        sb:MoveToUnit(enemy)
+        if sb:NearTarget(enemy) then
             local damage = GetRandomReal(9200., 12000.)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
-            DestroyEffect(effect)
-            RemoveUnit(sb)
             break
         end
-        DestroyEffect(effect)
     end
-    RemoveUnit(sb)
+    effect:Destroy()
+    sb:Remove()
 end
 
 function LadyDeathwhisper.SBCheckPhase()
@@ -2431,29 +2552,21 @@ end
 
 
 function Paladin.AvengersShield()
-    local target = GetSpellTargetUnit()
+    local target = Unit(GetSpellTargetUnit())
     local light_magic_damage = 1
     local factor = 0.07
-    --т.к. силы атаки так таковой нет, считается она, как сила героя помноженная на 2
+    --т.к. силы атаки так таковой нет, то считается она, как сила героя помноженная на 2
     local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
 
-    local pal_loc = GetUnitLoc(GetTriggerUnit())
-    local target_loc
-    local target_point
-
     local damage = 0
-    local shield_loc
-    local shield_point
-    local shield_unit
     local model_name = "Aegis.mdl"
-    local effect
 
     local exclude_targets = {}
 
-    Paladin.hero:LoseMana{percent=26}
+    if not Paladin.hero:LoseMana{percent=26} then return end
 
     local function AddTarget(target_, exc)
-        table.insert(exc, target_)
+        table.insert(exc, target_:GetUnit())
     end
 
     local function TargetTookDamage(target_, exc)
@@ -2465,13 +2578,13 @@ function Paladin.AvengersShield()
 
     local function GetTarget(target_, exc)
         local temp
-        local group = GroupUnitsInRangeOfLocUnit(200, GetUnitLoc(target_))
+        local group = GroupUnitsInRangeOfLocUnit(200, target_:GetLoc())
         for _ = 1, CountUnitsInGroup(group) do
             TriggerSleepAction(0.)
             temp = GroupPickRandomUnit(group)
             if not TargetTookDamage(temp, exc) and
                     not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
-                return temp
+                return Unit(temp)
             end
             GroupRemoveUnit(group, temp)
         end
@@ -2479,46 +2592,28 @@ function Paladin.AvengersShield()
         return 0
     end
 
-    local function shield(location)
-        local temp = Unit(GetTriggerPlayer(), SPELL_DUMMY, location, GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 522.)
-        return temp
-    end
-
     local i = 0
-    shield_unit = shield(pal_loc)
+    local shield = UnitSpell(Paladin.hero:GetUnit())
+    local effect = Effect(shield, model_name, 0.7)
     while i < 3 do
-        effect = AddSpecialEffectTarget(model_name, shield_unit, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.7)
-        --находим положения цели
-        target_loc = GetUnitLoc(target)
-        target_point = Point:new(GetLocationX(target_loc), GetLocationY(target_loc))
-        --направляем юнита к месту цели
-        IssuePointOrderLoc(shield_unit, "move", target_loc)
         TriggerSleepAction(0.)
-        shield_loc = GetUnitLoc(shield_unit)
-        shield_point = Point:new(GetLocationX(shield_loc), GetLocationY(shield_loc))
-        if GetDyingUnit() == target then
+        shield:MoveToUnit(target)
+        if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            KillUnit(shield_unit)
-            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
-        if target_point:atPoint(shield_point) then
+        if shield:NearTarget(target) then
             damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
             Paladin.hero:DealPhysicalDamage(target, damage)
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            RemoveUnit(shield_unit)
-            shield_unit = shield(target_loc)
             if target == 0 then break end
             i = i + 1
         end
-        DestroyEffect(effect)
     end
-    RemoveUnit(shield_unit)
-    DestroyEffect(effect)
+    effect:Destroy()
+    shield:Remove()
 end
 
 function Paladin.IsAvengersShield()
@@ -2732,7 +2827,7 @@ function Paladin.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(3800., 200.), 90.)
+    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
@@ -2905,10 +3000,10 @@ end
 function Priest.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
-    Priest.hero = Unit(PLAYER_1, PRIEST, Location(3950., -3040.), 90.)
+    Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(hero, items_list)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(Priest.hero:GetUnit(), items_list)
 
     Priest.hero:SetLevel(80)
     Priest.hero:SetMana(2000)
@@ -2982,7 +3077,16 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
+function Trig_Init_Paladin_Func001001003()
+    return (IsPlayerEnemy(GetTriggerPlayer(), Player(0)) == false)
+end
+
+function Trig_Init_Paladin_Func001002()
+    DoNothing()
+end
+
 function Trig_Init_Paladin_Actions()
+    ForGroupBJ(GetUnitsInRangeOfLocMatching(512, GetUnitLoc(GetTriggerUnit()), Condition(Trig_Init_Paladin_Func001001003)), Trig_Init_Paladin_Func001002)
         Paladin.Init()
 end
 

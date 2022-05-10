@@ -5,6 +5,10 @@ function GroupHeroesInArea(area, which_player)
     return GetUnitsInRectOfPlayer(area, which_player)
 end
 
+function GroupUnitsInRect(rect, boolexpr)
+    return GetUnitsInRectMatching(rect, Condition(boolexpr))
+end
+
 function GroupHeroesInRangeOnSpell(loc, radius, expr, which_player)
     local group_heroes = CreateGroup()
     bj_groupEnumOwningPlayer = which_player

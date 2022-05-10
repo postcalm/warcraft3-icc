@@ -40,6 +40,6 @@ function Events:EnableTrigger()
 end
 
 --- Уничтожает триггер
-function Events:DestroyTrigger()
+function Events:Destroy()
     DestroyTrigger(self.trigger)
 end

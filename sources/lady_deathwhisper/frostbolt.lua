@@ -1,54 +1,26 @@
 
 function LadyDeathwhisper.FrostBolt()
-    TriggerSleepAction(10.)
-    local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
-    local enemy_loc
-    local enemy_point
-    local enemy_movespeed = GetUnitMoveSpeed(enemy)
-    local fb
-    local fb_loc
-    local fb_point
+    --TriggerSleepAction(10.)
+    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
+    local enemy_movespeed = enemy:GetMoveSpeed()
 
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
-    local effect
 
-    local function frost_bolt()
-        local temp = Unit(GetTriggerPlayer(),
-                          SPELL_DUMMY,
-                          GetUnitLoc(GetTriggerUnit()),
-                          GetUnitFacing(GetTriggerUnit())):GetUnit()
-        SetUnitMoveSpeed(temp, 500.)
-        return temp
-    end
-    
-    local function recover_movespeed()
-        SetUnitMoveSpeed(enemy, enemy_movespeed)
-        DestroyTimer(GetExpiredTimer())
-    end
-
-    fb = frost_bolt()
+    local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local effect = Effect(fb, model_name, 0.7)
     while true do
-        effect = AddSpecialEffectTarget(model_name, fb, "overhead")
-        BlzSetSpecialEffectScale(effect, 0.5)
-        enemy_loc = GetUnitLoc(enemy)
-        enemy_point = Point:new(GetLocationX(enemy_loc), GetLocationY(enemy_loc))
-        IssuePointOrderLoc(fb, "move", enemy_loc)
         TriggerSleepAction(0.)
-        fb_loc = GetUnitLoc(fb)
-        fb_point = Point:new(GetLocationX(fb_loc), GetLocationY(fb_loc))
-        if enemy_point:atPoint(fb_point) then
-            local damage = GetRandomReal(45000., 47000.)
+        fb:MoveToUnit(enemy)
+        if fb:NearTarget(enemy) then
+            local damage = GetRandomInt(100., 120.)
+            print("FrostBolt", damage)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
-            SetUnitMoveSpeed(enemy, enemy_movespeed / 2)
-            local timer = CreateTimer()
-            TimerStart(timer, 7, false, recover_movespeed)
-            DestroyEffect(effect)
-            RemoveUnit(fb)
+            enemy:SetMoveSpeed(enemy_movespeed / 2)
             break
         end
-        DestroyEffect(effect)
     end
-    RemoveUnit(fb)
+    effect:Destroy()
+    fb:Remove()
 end
 
 function LadyDeathwhisper.FBCheckPhase()

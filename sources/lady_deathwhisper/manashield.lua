@@ -16,12 +16,12 @@ function LadyDeathwhisper.ManaShield()
     local function ManaShield()
         local damage = GetEventDamage()
 
-        if damage == 0 then event:DestroyTrigger() return end
+        if damage == 0 then event:Destroy() return end
 
         TriggerSleepAction(0.7)
         LadyDeathwhisper.unit:GainLife{life=damage}
         LadyDeathwhisper.unit:LoseMana{mana=damage, check=false}
-        event:DestroyTrigger()
+        event:Destroy()
     end
 
     local function UsingManaShield()
@@ -30,8 +30,9 @@ function LadyDeathwhisper.ManaShield()
         end
         LadyDeathwhisper.mana_is_over = true
         LadyDeathwhisper.phase = 2
+        --TODO: не удаляется эффект
         DestroyEffect(effect)
-        event:DestroyTrigger()
+        event:Destroy()
         return false
     end
 
