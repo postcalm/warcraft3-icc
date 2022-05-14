@@ -36,10 +36,10 @@ local param = {
         [[\libs\BuffSystem.lua]],
         [[\libs\BattleSystem.lua]],
         [[\libs\Wrappers.lua]],
-        [[\sources\lord_marrowgar]],
-        [[\sources\lady_deathwhisper]],
-        [[\sources\paladin]],
-        [[\sources\priest]],
+        [[\src\lord_marrowgar]],
+        [[\src\lady_deathwhisper]],
+        [[\src\paladin]],
+        [[\src\priest]],
     },
     tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
     current    = lfs.currentdir() -- текущая папка проекта
