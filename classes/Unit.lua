@@ -181,6 +181,7 @@ end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@param filter function
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()

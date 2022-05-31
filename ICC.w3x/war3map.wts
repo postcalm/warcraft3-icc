@@ -626,3 +626,9 @@ STRING 197
 mp_50k
 }
 
+STRING 198
+// Войска: u002 (Cult Adherent), Name (Название)
+{
+Cult Adherent
+}
+

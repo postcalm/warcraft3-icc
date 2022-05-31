@@ -6,7 +6,7 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
-    LadyDeathwhisper.unit:SetMana(2000)
+    LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
@@ -14,6 +14,7 @@ function LadyDeathwhisper.Init()
 
     -- both phase
     --LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitSummoning()
     -- только в 25-ке
     --LadyDeathwhisper.InitDominateMind()
 
@@ -23,5 +24,5 @@ function LadyDeathwhisper.Init()
 
     -- second phase
     --LadyDeathwhisper.InitFrostBolt()
-    LadyDeathwhisper.InitFrostBoltVolley()
+    --LadyDeathwhisper.InitFrostBoltVolley()
 end

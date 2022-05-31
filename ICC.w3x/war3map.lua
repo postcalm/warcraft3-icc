@@ -167,8 +167,8 @@ COMMON_TIMER = FourCC('BTLF')
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
-Paladin = {hero = nil}
-Priest  = {hero = nil}
+Paladin          = {hero = nil}
+Priest           = {hero = nil}
 
 LordMarrowgar    = {unit = nil,
                     coldflame = nil,
@@ -183,6 +183,8 @@ LadyDeathwhisper = {unit = nil,
                     death_and_decay_effect = false,
                     phase = 1
 }
+
+CultAdherent     = {unit = nil}
 
 
 --Lord Marrowgar
@@ -248,23 +250,26 @@ function convertLength(len)
 end
 
 
---enemies
+--Bosses
 LORD_MARROWGAR    = FourCC("U001")
 LADY_DEATHWHISPER = FourCC("U000")
+--mobs
+--adds
+CULT_ADHERENT     = FourCC("u002")
 
 --tanks
-PALADIN      = FourCC("Hpal")
-DEATH_KNIGHT = nil
-WARRIOR      = nil
+PALADIN           = FourCC("Hpal")
+DEATH_KNIGHT      = nil
+WARRIOR           = nil
 --damage dealers
-WARLOCK      = nil
-HUNTER       = nil
-ROGUE        = nil
-MAGE         = nil
+WARLOCK           = nil
+HUNTER            = nil
+ROGUE             = nil
+MAGE              = nil
 --healers
-DRIUD        = nil
-SHAMAN       = nil
-PRIEST       = FourCC("Hblm")
+DRIUD             = nil
+SHAMAN            = nil
+PRIEST            = FourCC("Hblm")
 
 
 ---@param unit unitid
@@ -790,6 +795,7 @@ end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@param filter function
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()
@@ -835,10 +841,16 @@ function Unit:GetMoveSpeed()
     return GetUnitMoveSpeed(self.unit)
 end
 
+--- Проверяет является ли юнит союзником
+---@param unit Unit Юнит от класса Unit
+---@return boolean
 function Unit:IsAlly(unit)
     return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
 end
 
+--- Проверяет является ли юнит противником
+---@param unit Unit Юнит от класса Unit
+---@return boolean
 function Unit:IsEnemy(unit)
     return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
 end
@@ -2363,8 +2375,7 @@ end
 
 
 function LadyDeathwhisper.FrostBoltVolley()
-    TriggerSleepAction(5.)
-    print("it's time to cast")
+    TriggerSleepAction(15.)
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
     local function frostbolt(enemy)
@@ -2375,9 +2386,9 @@ function LadyDeathwhisper.FrostBoltVolley()
             TriggerSleepAction(0.)
             fb:MoveToUnit(enemy)
             if fb:NearTarget(enemy) then
+                --TODO: выставить правильный урон
                 local damage = GetRandomInt(10., 12.)
                 LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
-                print("FrostBoltVolley", damage)
                 enemy:SetMoveSpeed(enemy_movespeed / 2)
                 break
             end
@@ -2386,19 +2397,12 @@ function LadyDeathwhisper.FrostBoltVolley()
         fb:Remove()
     end
 
-    -- проверяем, чтобы Лэди не считалась союзником
-    local function checker()
-        return LadyDeathwhisper.unit:IsEnemy(Unit(GetAttacker()))
-    end
-
-    local enemies = LadyDeathwhisper.unit:GetNearbyEnemies(500, checker)
+    local enemies = LadyDeathwhisper.unit:GetNearbyEnemies()
     local count = CountUnitsInGroup(enemies)
     for _ = 1, count do
         local enemy = Unit(GroupPickRandomUnit(enemies))
         GroupRemoveUnit(enemies, enemy:GetUnit())
         if LadyDeathwhisper.unit:IsEnemy(enemy) then
-            print("count", CountUnitsInGroup(enemies))
-            print("enemy", enemy:GetUnit())
             StartThread(frostbolt(enemy))
         end
     end
@@ -2438,12 +2442,12 @@ function LadyDeathwhisper.Init()
     --LadyDeathwhisper.InitDominateMind()
 
     -- first phase
-    LadyDeathwhisper.InitManaShield()
+    --LadyDeathwhisper.InitManaShield()
     --LadyDeathwhisper.InitShadowBolt()
 
     -- second phase
     --LadyDeathwhisper.InitFrostBolt()
-    LadyDeathwhisper.InitFrostBoltVolley()
+    --LadyDeathwhisper.InitFrostBoltVolley()
 end
 
 
@@ -2937,7 +2941,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end

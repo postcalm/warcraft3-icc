@@ -1,6 +1,6 @@
 
 function LadyDeathwhisper.FrostBoltVolley()
-    TriggerSleepAction(5.)
+    TriggerSleepAction(15.)
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
     local function frostbolt(enemy)
@@ -22,12 +22,7 @@ function LadyDeathwhisper.FrostBoltVolley()
         fb:Remove()
     end
 
-    -- проверяем, чтобы Лэди не считалась союзником
-    local function checker()
-        return LadyDeathwhisper.unit:IsEnemy(Unit(GetAttacker()))
-    end
-
-    local enemies = LadyDeathwhisper.unit:GetNearbyEnemies(500, checker)
+    local enemies = LadyDeathwhisper.unit:GetNearbyEnemies()
     local count = CountUnitsInGroup(enemies)
     for _ = 1, count do
         local enemy = Unit(GroupPickRandomUnit(enemies))
@@ -39,7 +34,7 @@ function LadyDeathwhisper.FrostBoltVolley()
 end
 
 function LadyDeathwhisper.FBVCheckPhase()
-    if LadyDeathwhisper.phase == 2 then
+    if LadyDeathwhisper.phase <= 2 then
         return true
     end
     return false

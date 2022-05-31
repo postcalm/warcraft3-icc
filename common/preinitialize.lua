@@ -1,6 +1,6 @@
 
-Paladin = {hero = nil}
-Priest  = {hero = nil}
+Paladin          = {hero = nil}
+Priest           = {hero = nil}
 
 LordMarrowgar    = {unit = nil,
                     coldflame = nil,
@@ -14,4 +14,8 @@ LadyDeathwhisper = {unit = nil,
                     dominate_mind_effect = false,
                     death_and_decay_effect = false,
                     phase = 1
+}
+
+CultAdherent     = {unit = nil,
+                    summoned = false
 }
