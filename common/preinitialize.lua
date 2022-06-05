@@ -17,5 +17,6 @@ LadyDeathwhisper = {unit = nil,
 }
 
 CultAdherent     = {unit = nil,
-                    summoned = false
+                    summoned = false,
+                    target = nil
 }

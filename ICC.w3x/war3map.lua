@@ -33,6 +33,8 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
+gg_unit_ugho_0021 = nil
+gg_unit_ugho_0018 = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -82,7 +84,7 @@ function CreateUnitsForPlayer0()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("Hpal"), 4482.6, 329.9, 110.510)
+    u = CreateUnit(p, FourCC("Hpal"), 4454.3, 139.3, 110.510)
     u = CreateUnit(p, FourCC("Hpal"), 4291.2, -2880.6, 52.820)
     SetHeroLevel(u, 80, false)
     u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
@@ -184,7 +186,9 @@ LadyDeathwhisper = {unit = nil,
                     phase = 1
 }
 
-CultAdherent     = {unit = nil}
+CultAdherent     = {unit = nil,
+                    summoned = false
+}
 
 
 --Lord Marrowgar
@@ -429,7 +433,6 @@ function EventsPlayer:Destroy()
     Events.Destroy(self)
 end
 
---- Created by meiso.
 
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -445,7 +448,8 @@ setmetatable(EventsUnit, {
 
 function EventsUnit:_init(unit)
     Events._init(self)
-    self.unit = unit or 0
+    self.unit = unit
+    if type(unit) == "table" then self.unit = unit:GetUnit() end
 end
 
 --- Регистриует событие получения урона юнитом
@@ -665,6 +669,12 @@ function Unit:DealMagicDamage(target, damage)
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
+--- Нанести магической урон по площади.
+--- Урон снижается "сопротивлением от магии"
+function Unit:DealMagicDamageLoc(damage, location, radius)
+    UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+end
+
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
 function Unit:DealUniversalMagicDamage(target, damage)
@@ -775,10 +785,22 @@ function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
+--- Установить максимальное значение маны
+---@param value real
+function Unit:SetMaxMana(value)
+    SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
+end
+
 --- Установить текущее количество хп
 ---@param value real
 function Unit:SetLife(value)
     SetUnitState(self.unit, UNIT_STATE_LIFE, value)
+end
+
+--- Установить максимальное значение хп
+---@param value real
+function Unit:SetMaxLife(value)
+    SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
 end
 
 --- Получить текущее количество маны юнита
@@ -2111,6 +2133,80 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
+function CultAdherent.DeathchillBolt()
+    TriggerSleepAction(3.)
+    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
+    local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
+
+    local bolt = UnitSpell(CultAdherent.unit:GetUnit())
+    local effect = Effect(bolt, model_name, 0.7)
+    while true do
+        TriggerSleepAction(0.)
+        bolt:MoveToUnit(enemy)
+        if bolt:NearTarget(enemy) then
+            local damage = 1254.
+            CultAdherent.unit:DealMagicDamageLoc(damage, enemy:GetLoc(), 200)
+            break
+        end
+    end
+    effect:Destroy()
+    bolt:Remove()
+end
+
+function CultAdherent.InitDeathchillBolt()
+    local event = EventsUnit(CultAdherent.unit:GetUnit())
+    event:RegisterDamaging()
+    event:AddAction(CultAdherent.DeathchillBolt)
+end
+
+
+function CultAdherent.DeathchillBolt()
+    TriggerSleepAction(3.)
+    --local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
+    local enemy = GetEventDamageSource()
+    local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
+
+    local bolt = UnitSpell(CultAdherent.unit:GetUnit())
+    local effect = Effect(bolt, model_name, 0.7)
+    while true do
+        TriggerSleepAction(0.)
+        bolt:MoveToUnit(enemy)
+        if bolt:NearTarget(enemy) then
+            local damage = 940.
+            CultAdherent.unit:DealMagicDamage(enemy, damage)
+            break
+        end
+    end
+    effect:Destroy()
+    bolt:Remove()
+end
+
+function CultAdherent.InitDeathchillBolt()
+    local event = EventsUnit(CultAdherent.unit:GetUnit())
+    event:RegisterDamaging()
+    event:AddAction(CultAdherent.DeathchillBolt)
+end
+
+
+function CultAdherent.Init(location, face)
+    CultAdherent.summoned = true
+
+    local items_list = {"ARMOR_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "HP_50K"}
+
+    CultAdherent.unit = Unit(LICH_KING, CULT_ADHERENT, location, face)
+
+    --CultAdherent.unit:SetLevel(83)
+    CultAdherent.unit:SetMaxLife(2000)
+    CultAdherent.unit:SetMaxMana(2000)
+    print(1)
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(CultAdherent.unit:GetUnit(), items_list)
+    print(2)
+    CultAdherent.InitDeathchillBolt()
+end
+
+
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
@@ -2430,7 +2526,7 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
-    LadyDeathwhisper.unit:SetMana(2000)
+    LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
@@ -2438,11 +2534,12 @@ function LadyDeathwhisper.Init()
 
     -- both phase
     --LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitSummoning()
     -- только в 25-ке
     --LadyDeathwhisper.InitDominateMind()
 
     -- first phase
-    --LadyDeathwhisper.InitManaShield()
+    LadyDeathwhisper.InitManaShield()
     --LadyDeathwhisper.InitShadowBolt()
 
     -- second phase
@@ -2553,6 +2650,27 @@ function LadyDeathwhisper.InitShadowBolt()
     event:AddAction(LadyDeathwhisper.ShadowBolt)
 end
 
+
+
+function LadyDeathwhisper.Summoning()
+    if not CultAdherent.summoned then
+        CultAdherent.Init(Location(4671., 1483.), 350.)
+    end
+end
+
+function LadyDeathwhisper.SummonCheckPhase()
+    if LadyDeathwhisper.phase == 2 then
+        return true
+    end
+    return false
+end
+
+function LadyDeathwhisper.InitSummoning()
+    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    event:RegisterAttacked()
+    event:AddCondition(LadyDeathwhisper.SummonCheckPhase)
+    event:AddAction(LadyDeathwhisper.Summoning)
+end
 
 
 function Paladin.AvengersShield()
@@ -3081,16 +3199,7 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
-function Trig_Init_Paladin_Func001001003()
-    return (IsPlayerEnemy(GetTriggerPlayer(), Player(0)) == false)
-end
-
-function Trig_Init_Paladin_Func001002()
-    DoNothing()
-end
-
 function Trig_Init_Paladin_Actions()
-    ForGroupBJ(GetUnitsInRangeOfLocMatching(512, GetUnitLoc(GetTriggerUnit()), Condition(Trig_Init_Paladin_Func001001003)), Trig_Init_Paladin_Func001002)
         Paladin.Init()
 end
 

@@ -1,4 +1,3 @@
---- Created by meiso.
 
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -14,7 +13,8 @@ setmetatable(EventsUnit, {
 
 function EventsUnit:_init(unit)
     Events._init(self)
-    self.unit = unit or 0
+    self.unit = unit
+    if type(unit) == "table" then self.unit = unit:GetUnit() end
 end
 
 --- Регистриует событие получения урона юнитом

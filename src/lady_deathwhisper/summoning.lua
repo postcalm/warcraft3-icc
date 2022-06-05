@@ -1,7 +1,9 @@
 
 function LadyDeathwhisper.Summoning()
+    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
     if not CultAdherent.summoned then
-        CultAdherent.Init()
+        CultAdherent.target = enemy
+        CultAdherent.Init(Location(4671., 1483.), 350.)
     end
 end
 

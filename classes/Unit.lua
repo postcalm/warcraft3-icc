@@ -25,6 +25,14 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, face_)
 end
 
+-- Damage
+
+--- Выставить базовый урон
+---@param value integer
+function Unit:SetBaseDamage(value)
+    BlzSetUnitBaseDamage(self.unit, value, 0)
+end
+
 --- Нанести физический урон.
 --- Урон снижает как от количества, так и от типа защиты
 function Unit:DealPhysicalDamage(target, damage, attack_type)
@@ -51,6 +59,12 @@ function Unit:DealMagicDamage(target, damage)
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
+--- Нанести магической урон по площади.
+--- Урон снижается "сопротивлением от магии"
+function Unit:DealMagicDamageLoc(damage, location, radius)
+    UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+end
+
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
 function Unit:DealUniversalMagicDamage(target, damage)
@@ -75,6 +89,8 @@ function Unit:DealCleanDamage(target, damage)
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
+-- Ability
+
 --- Выдать юниту указанные способности
 ---@param ability ability
 function Unit:AddAbilities(...)
@@ -93,10 +109,7 @@ function Unit:AddSpellbook(spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
 end
 
---- Установить уровень юнита
-function Unit:SetLevel(lvl)
-    SetHeroLevel(self.unit, lvl, false)
-end
+-- MANA
 
 --- Потратить указанное количество маны
 ---@param mana real
@@ -115,28 +128,12 @@ function Unit:LoseMana(arg)
     return true
 end
 
---- Потратить указанное количество хп
----@param life real
----@param percent real
-function Unit:LoseLife(arg)
-    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    self:SetLife(self:GetCurrentLife() - l)
-end
-
 --- Получить ману количественно или в процентах от максимума
 ---@param mana real
 ---@param percent real
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     self:SetMana(self:GetCurrentMana() + m)
-end
-
---- Получить хп количественно или в процентах от максимума
----@param life real
----@param percent real
-function Unit:GainLife(arg)
-    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    self:SetLife(self:GetCurrentLife() + l)
 end
 
 --- Получить процент маны от максимума
@@ -147,6 +144,51 @@ function Unit:GetPercentManaOfMax(percent)
     return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / 100)
 end
 
+--- Установить текущее количество маны
+---@param value real
+function Unit:SetMana(value)
+    SetUnitState(self.unit, UNIT_STATE_MANA, value)
+end
+
+--- Установить максимальное значение маны
+---@param value real
+function Unit:SetMaxMana(value, full)
+    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
+    local f = full or false
+    BlzSetUnitMaxMana(self.unit, value)
+    if f then self:SetMana(self:GetMaxLife()) end
+end
+
+--- Получить максимальное количество маны юнита
+---@return real
+function Unit:GetMaxMana()
+    return BlzGetUnitMaxMana(self.unit)
+end
+
+--- Получить текущее количество маны юнита
+---@return real
+function Unit:GetCurrentMana()
+    return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+-- HEALTH
+
+--- Потратить указанное количество хп
+---@param life real
+---@param percent real
+function Unit:LoseLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    self:SetLife(self:GetCurrentLife() - l)
+end
+
+--- Получить хп количественно или в процентах от максимума
+---@param life real
+---@param percent real
+function Unit:GainLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    self:SetLife(self:GetCurrentLife() + l)
+end
+
 --- Получить процент хп от максимума
 ---@param percent real
 ---@return real
@@ -155,22 +197,25 @@ function Unit:GetPercentLifeOfMax(percent)
     return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / 100)
 end
 
---- Установить текущее количество маны
----@param value real
-function Unit:SetMana(value)
-    SetUnitState(self.unit, UNIT_STATE_MANA, value)
-end
-
 --- Установить текущее количество хп
 ---@param value real
 function Unit:SetLife(value)
     SetUnitState(self.unit, UNIT_STATE_LIFE, value)
 end
 
---- Получить текущее количество маны юнита
+--- Установить максимальное значение хп
+---@param value real
+function Unit:SetMaxLife(value, full)
+    --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
+    local f = full or false
+    BlzSetUnitMaxHP(self.unit, value)
+    if f then self:SetLife(self:GetMaxLife()) end
+end
+
+--- Получить максимальное количество хп юнита
 ---@return real
-function Unit:GetCurrentMana()
-    return GetUnitState(self.unit, UNIT_STATE_MANA)
+function Unit:GetMaxLife()
+    return BlzGetUnitMaxHP(self.unit)
 end
 
 --- Получить текущее количество хп юнита
@@ -214,6 +259,11 @@ end
 --- Получить игрока, владеющего юнитом
 function Unit:GetOwner()
     return GetOwningPlayer(self.unit)
+end
+
+--- Установить уровень юнита
+function Unit:SetLevel(lvl)
+    SetHeroLevel(self.unit, lvl, false)
 end
 
 --- Установить скорость передвижения юнита
