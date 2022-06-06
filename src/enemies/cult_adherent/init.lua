@@ -1,11 +1,23 @@
 
 function CultAdherent.Init(location, face)
-    CultAdherent.summoned = true
+    --определяем кого суммонить
+    local adherent = CULT_ADHERENT
+    if CultAdherent.morphed then adherent = CULT_ADHERENT_MORPH end
 
-    CultAdherent.unit = Unit(LICH_KING, CULT_ADHERENT, location, face)
+    --если уже призван - уберём
+    if CultAdherent.unit then
+        CultAdherent.unit:Remove()
+    end
 
-    CultAdherent.unit:SetBaseDamage(940)
-    CultAdherent.unit:SetMaxLife(100000, true)
-    CultAdherent.unit:SetMaxMana(200000, true)
+    CultAdherent.unit = Unit(LICH_KING, adherent, location, face)
 
+    if CultAdherent.summoned then
+        CultAdherent.unit:SetBaseDamage(940)
+    end
+    if CultAdherent.morphed then
+        CultAdherent.unit:SetBaseDamage(1254)
+    end
+
+    CultAdherent.unit:SetMaxLife(51720, true)
+    CultAdherent.unit:SetMaxMana(65250, true)
 end

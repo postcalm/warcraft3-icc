@@ -33,8 +33,6 @@ gg_trg_Init = nil
 gg_trg_Save_unit_hero_ability = nil
 gg_trg_SaveUnit_load = nil
 gg_trg_SaveUnit_save = nil
-gg_unit_ugho_0021 = nil
-gg_unit_ugho_0018 = nil
 function InitGlobals()
     local i = 0
     i = 0
@@ -176,18 +174,19 @@ LordMarrowgar    = {unit = nil,
                     coldflame = nil,
                     coldflame_effect = false,
                     bonespike_effect = false,
-                    whirlwind_effect = false
+                    whirlwind_effect = false,
 }
 LadyDeathwhisper = {unit = nil,
                     mana_shield = false,
                     mana_is_over = false,
                     dominate_mind_effect = false,
                     death_and_decay_effect = false,
-                    phase = 1
+                    phase = 1,
 }
 
 CultAdherent     = {unit = nil,
-                    summoned = false
+                    summoned = false,
+                    morphed = false,
 }
 
 
@@ -255,25 +254,26 @@ end
 
 
 --Bosses
-LORD_MARROWGAR    = FourCC("U001")
-LADY_DEATHWHISPER = FourCC("U000")
+LORD_MARROWGAR      = FourCC("U001")
+LADY_DEATHWHISPER   = FourCC("U000")
 --mobs
 --adds
-CULT_ADHERENT     = FourCC("u002")
+CULT_ADHERENT       = FourCC("u002")
+CULT_ADHERENT_MORPH = FourCC("u003")
 
 --tanks
-PALADIN           = FourCC("Hpal")
-DEATH_KNIGHT      = nil
-WARRIOR           = nil
+PALADIN             = FourCC("Hpal")
+DEATH_KNIGHT        = nil
+WARRIOR             = nil
 --damage dealers
-WARLOCK           = nil
-HUNTER            = nil
-ROGUE             = nil
-MAGE              = nil
+WARLOCK             = nil
+HUNTER              = nil
+ROGUE               = nil
+MAGE                = nil
 --healers
-DRIUD             = nil
-SHAMAN            = nil
-PRIEST            = FourCC("Hblm")
+DRIUD               = nil
+SHAMAN              = nil
+PRIEST              = FourCC("Hblm")
 
 
 ---@param unit unitid
@@ -639,12 +639,25 @@ setmetatable(Unit, {
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    local face_ = face or 0
-    self.unit = CreateUnit(player, unit_id, x, y, face_)
+    local f = face or 0
+    self.unit = CreateUnit(player, unit_id, x, y, f)
+end
+
+-- Damage
+
+--- Выставить базовый урон
+---@param value integer Урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+function Unit:SetBaseDamage(value, index)
+    local i = index or 0
+    BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
 --- Нанести физический урон.
 --- Урон снижает как от количества, так и от типа защиты
+---@param target unit
+---@param damage real
+---@param attack_type attacktype
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -654,6 +667,9 @@ end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
+---@param target unit
+---@param damage real
+---@param attack_type attacktype
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -663,6 +679,8 @@ end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
+---@param target unit
+---@param damage real
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -671,12 +689,17 @@ end
 
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
+---@param damage real
+---@param location location
+---@param radius real
 function Unit:DealMagicDamageLoc(damage, location, radius)
     UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
+---@param target unit
+---@param damage real
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -685,6 +708,8 @@ end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
+---@param target unit
+---@param damage real
 function Unit:DealMixedDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -693,11 +718,15 @@ end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
+---@param target unit
+---@param damage real
 function Unit:DealCleanDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
+
+-- Ability
 
 --- Выдать юниту указанные способности
 ---@param ability ability
@@ -717,21 +746,24 @@ function Unit:AddSpellbook(spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
 end
 
---- Установить уровень юнита
-function Unit:SetLevel(lvl)
-    SetHeroLevel(self.unit, lvl, false)
+--- Применить способность
+---@param ability string
+function Unit:UseAbility(ability)
+    IssueImmediateOrder(self.unit, ability)
 end
 
+-- MANA
+
 --- Потратить указанное количество маны
----@param mana real
----@param percent real
+---@param mana real Количество маны в абсолютных единицах
+---@param percent real Количество маны в процентах
 ---@param check boolean Проверять ли текущее количество маны
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     if arg.check == nil then arg.check = true end
     if m > self:GetCurrentMana() and arg.check then
-        --TODO: печатать отдельно игроку
+        --TODO: печатать конкретному игроку
         print("Недостаточно маны")
         return false
     end
@@ -739,44 +771,22 @@ function Unit:LoseMana(arg)
     return true
 end
 
---- Потратить указанное количество хп
----@param life real
----@param percent real
-function Unit:LoseLife(arg)
-    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    self:SetLife(self:GetCurrentLife() - l)
-end
-
 --- Получить ману количественно или в процентах от максимума
----@param mana real
----@param percent real
+---@param mana real Количество маны в абсолютных единицах
+---@param percent real Количество маны в процентах
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     self:SetMana(self:GetCurrentMana() + m)
 end
 
---- Получить хп количественно или в процентах от максимума
----@param life real
----@param percent real
-function Unit:GainLife(arg)
-    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
-    self:SetLife(self:GetCurrentLife() + l)
-end
-
 --- Получить процент маны от максимума
----@param percent real
+---@param percent real Количество маны в процентах
 ---@return real
 function Unit:GetPercentManaOfMax(percent)
     if percent == nil then return nil end
-    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / 100)
-end
-
---- Получить процент хп от максимума
----@param percent real
----@return real
-function Unit:GetPercentLifeOfMax(percent)
-    if percent == nil then return nil end
-    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / 100)
+    local factor = 100
+    if percent <= 1 then factor = 1 end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / factor)
 end
 
 --- Установить текущее количество маны
@@ -787,8 +797,51 @@ end
 
 --- Установить максимальное значение маны
 ---@param value real
-function Unit:SetMaxMana(value)
-    SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
+function Unit:SetMaxMana(value, full)
+    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
+    local f = full or false
+    BlzSetUnitMaxMana(self.unit, value)
+    if f then self:SetMana(self:GetMaxLife()) end
+end
+
+--- Получить максимальное количество маны юнита
+---@return real
+function Unit:GetMaxMana()
+    return BlzGetUnitMaxMana(self.unit)
+end
+
+--- Получить текущее количество маны юнита
+---@return real
+function Unit:GetCurrentMana()
+    return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+-- Health
+
+--- Потратить указанное количество хп
+---@param life real Количество хп в абсолютных единицах
+---@param percent real Количество хп в процентах
+function Unit:LoseLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    self:SetLife(self:GetCurrentLife() - l)
+end
+
+--- Получить хп количественно или в процентах от максимума
+---@param life real Количество хп в абсолютных единицах
+---@param percent real Количество хп в процентах
+function Unit:GainLife(arg)
+    local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
+    self:SetLife(self:GetCurrentLife() + l)
+end
+
+--- Получить процент хп от максимума
+---@param percent real Количество хп в процентах
+---@return real
+function Unit:GetPercentLifeOfMax(percent)
+    if percent == nil then return nil end
+    local factor = 100
+    if percent <= 1 then factor = 1 end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / factor)
 end
 
 --- Установить текущее количество хп
@@ -799,14 +852,17 @@ end
 
 --- Установить максимальное значение хп
 ---@param value real
-function Unit:SetMaxLife(value)
-    SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
+function Unit:SetMaxLife(value, full)
+    --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
+    local f = full or false
+    BlzSetUnitMaxHP(self.unit, value)
+    if f then self:SetLife(self:GetMaxLife()) end
 end
 
---- Получить текущее количество маны юнита
+--- Получить максимальное количество хп юнита
 ---@return real
-function Unit:GetCurrentMana()
-    return GetUnitState(self.unit, UNIT_STATE_MANA)
+function Unit:GetMaxLife()
+    return BlzGetUnitMaxHP(self.unit)
 end
 
 --- Получить текущее количество хп юнита
@@ -835,6 +891,10 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
+function Unit:GetFacing()
+    return GetUnitFacing(self.unit)
+end
+
 --- Проверяет мертв ли юнит
 ---@return boolean
 function Unit:IsDied()
@@ -850,6 +910,11 @@ end
 --- Получить игрока, владеющего юнитом
 function Unit:GetOwner()
     return GetOwningPlayer(self.unit)
+end
+
+--- Установить уровень юнита
+function Unit:SetLevel(lvl)
+    SetHeroLevel(self.unit, lvl, false)
 end
 
 --- Установить скорость передвижения юнита
@@ -2133,77 +2198,27 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
-function CultAdherent.DeathchillBolt()
-    TriggerSleepAction(3.)
-    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
-    local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
-
-    local bolt = UnitSpell(CultAdherent.unit:GetUnit())
-    local effect = Effect(bolt, model_name, 0.7)
-    while true do
-        TriggerSleepAction(0.)
-        bolt:MoveToUnit(enemy)
-        if bolt:NearTarget(enemy) then
-            local damage = 1254.
-            CultAdherent.unit:DealMagicDamageLoc(damage, enemy:GetLoc(), 200)
-            break
-        end
-    end
-    effect:Destroy()
-    bolt:Remove()
-end
-
-function CultAdherent.InitDeathchillBolt()
-    local event = EventsUnit(CultAdherent.unit:GetUnit())
-    event:RegisterDamaging()
-    event:AddAction(CultAdherent.DeathchillBolt)
-end
-
-
-function CultAdherent.DeathchillBolt()
-    TriggerSleepAction(3.)
-    --local enemy = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker())))
-    local enemy = GetEventDamageSource()
-    local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
-
-    local bolt = UnitSpell(CultAdherent.unit:GetUnit())
-    local effect = Effect(bolt, model_name, 0.7)
-    while true do
-        TriggerSleepAction(0.)
-        bolt:MoveToUnit(enemy)
-        if bolt:NearTarget(enemy) then
-            local damage = 940.
-            CultAdherent.unit:DealMagicDamage(enemy, damage)
-            break
-        end
-    end
-    effect:Destroy()
-    bolt:Remove()
-end
-
-function CultAdherent.InitDeathchillBolt()
-    local event = EventsUnit(CultAdherent.unit:GetUnit())
-    event:RegisterDamaging()
-    event:AddAction(CultAdherent.DeathchillBolt)
-end
-
-
 function CultAdherent.Init(location, face)
-    CultAdherent.summoned = true
+    --определяем кого суммонить
+    local adherent = CULT_ADHERENT
+    if CultAdherent.morphed then adherent = CULT_ADHERENT_MORPH end
 
-    local items_list = {"ARMOR_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "HP_50K"}
+    --если уже призван - уберём
+    if CultAdherent.unit then
+        CultAdherent.unit:Remove()
+    end
 
-    CultAdherent.unit = Unit(LICH_KING, CULT_ADHERENT, location, face)
+    CultAdherent.unit = Unit(LICH_KING, adherent, location, face)
 
-    --CultAdherent.unit:SetLevel(83)
-    CultAdherent.unit:SetMaxLife(2000)
-    CultAdherent.unit:SetMaxMana(2000)
-    print(1)
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(CultAdherent.unit:GetUnit(), items_list)
-    print(2)
-    CultAdherent.InitDeathchillBolt()
+    if CultAdherent.summoned then
+        CultAdherent.unit:SetBaseDamage(940)
+    end
+    if CultAdherent.morphed then
+        CultAdherent.unit:SetBaseDamage(1254)
+    end
+
+    CultAdherent.unit:SetMaxLife(51720, true)
+    CultAdherent.unit:SetMaxMana(65250, true)
 end
 
 
@@ -2654,7 +2669,14 @@ end
 
 function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned then
+        CultAdherent.summoned = true
         CultAdherent.Init(Location(4671., 1483.), 350.)
+    end
+    if not CultAdherent.morphed and CultAdherent.summoned and GetRandomReal(0., 1.) >= 0.7 then
+        CultAdherent.morphed = true
+        local loc = CultAdherent.unit:GetLoc()
+        local face = CultAdherent.unit:GetFacing()
+        CultAdherent.Init(loc, face)
     end
 end
 

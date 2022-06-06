@@ -21,20 +21,25 @@ setmetatable(Unit, {
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    local face_ = face or 0
-    self.unit = CreateUnit(player, unit_id, x, y, face_)
+    local f = face or 0
+    self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
 -- Damage
 
 --- Выставить базовый урон
----@param value integer
-function Unit:SetBaseDamage(value)
-    BlzSetUnitBaseDamage(self.unit, value, 0)
+---@param value integer Урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+function Unit:SetBaseDamage(value, index)
+    local i = index or 0
+    BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
 --- Нанести физический урон.
 --- Урон снижает как от количества, так и от типа защиты
+---@param target unit
+---@param damage real
+---@param attack_type attacktype
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -44,6 +49,9 @@ end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
+---@param target unit
+---@param damage real
+---@param attack_type attacktype
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -53,6 +61,8 @@ end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
+---@param target unit
+---@param damage real
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -61,12 +71,17 @@ end
 
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
+---@param damage real
+---@param location location
+---@param radius real
 function Unit:DealMagicDamageLoc(damage, location, radius)
     UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
+---@param target unit
+---@param damage real
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -75,6 +90,8 @@ end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
+---@param target unit
+---@param damage real
 function Unit:DealMixedDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -83,6 +100,8 @@ end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
+---@param target unit
+---@param damage real
 function Unit:DealCleanDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetUnit() end
@@ -109,18 +128,24 @@ function Unit:AddSpellbook(spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
 end
 
+--- Применить способность
+---@param ability string
+function Unit:UseAbility(ability)
+    IssueImmediateOrder(self.unit, ability)
+end
+
 -- MANA
 
 --- Потратить указанное количество маны
----@param mana real
----@param percent real
+---@param mana real Количество маны в абсолютных единицах
+---@param percent real Количество маны в процентах
 ---@param check boolean Проверять ли текущее количество маны
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     if arg.check == nil then arg.check = true end
     if m > self:GetCurrentMana() and arg.check then
-        --TODO: печатать отдельно игроку
+        --TODO: печатать конкретному игроку
         print("Недостаточно маны")
         return false
     end
@@ -129,19 +154,21 @@ function Unit:LoseMana(arg)
 end
 
 --- Получить ману количественно или в процентах от максимума
----@param mana real
----@param percent real
+---@param mana real Количество маны в абсолютных единицах
+---@param percent real Количество маны в процентах
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     self:SetMana(self:GetCurrentMana() + m)
 end
 
 --- Получить процент маны от максимума
----@param percent real
+---@param percent real Количество маны в процентах
 ---@return real
 function Unit:GetPercentManaOfMax(percent)
     if percent == nil then return nil end
-    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / 100)
+    local factor = 100
+    if percent <= 1 then factor = 1 end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / factor)
 end
 
 --- Установить текущее количество маны
@@ -171,30 +198,32 @@ function Unit:GetCurrentMana()
     return GetUnitState(self.unit, UNIT_STATE_MANA)
 end
 
--- HEALTH
+-- Health
 
 --- Потратить указанное количество хп
----@param life real
----@param percent real
+---@param life real Количество хп в абсолютных единицах
+---@param percent real Количество хп в процентах
 function Unit:LoseLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() - l)
 end
 
 --- Получить хп количественно или в процентах от максимума
----@param life real
----@param percent real
+---@param life real Количество хп в абсолютных единицах
+---@param percent real Количество хп в процентах
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
 end
 
 --- Получить процент хп от максимума
----@param percent real
+---@param percent real Количество хп в процентах
 ---@return real
 function Unit:GetPercentLifeOfMax(percent)
     if percent == nil then return nil end
-    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / 100)
+    local factor = 100
+    if percent <= 1 then factor = 1 end
+    return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / factor)
 end
 
 --- Установить текущее количество хп
@@ -242,6 +271,10 @@ end
 ---@return location
 function Unit:GetLoc()
     return GetUnitLoc(self.unit)
+end
+
+function Unit:GetFacing()
+    return GetUnitFacing(self.unit)
 end
 
 --- Проверяет мертв ли юнит

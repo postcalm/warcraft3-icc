@@ -1,9 +1,14 @@
 
 function LadyDeathwhisper.Summoning()
-    local enemy = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLD, GetOwningPlayer(GetAttacker()))))
     if not CultAdherent.summoned then
-        CultAdherent.target = enemy
+        CultAdherent.summoned = true
         CultAdherent.Init(Location(4671., 1483.), 350.)
+    end
+    if not CultAdherent.morphed and CultAdherent.summoned and GetRandomReal(0., 1.) >= 0.7 then
+        CultAdherent.morphed = true
+        local loc = CultAdherent.unit:GetLoc()
+        local face = CultAdherent.unit:GetFacing()
+        CultAdherent.Init(loc, face)
     end
 end
 

@@ -632,3 +632,21 @@ STRING 198
 Cult Adherent
 }
 
+STRING 199
+// Войска: u003 (Cult Adherent), Name (Название)
+{
+Cult Adherent
+}
+
+STRING 200
+// Войска: u003 (Cult Adherent), EditorSuffix (Название: суффикс редактора)
+{
+(morphed)
+}
+
+STRING 203
+// Войска: h003 (Cult Fanatic), Name (Название)
+{
+Cult Fanatic
+}
+
