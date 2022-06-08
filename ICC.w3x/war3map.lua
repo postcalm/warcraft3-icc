@@ -190,6 +190,8 @@ CultAdherent     = {unit = nil,
                     morphed = false,
 }
 CultFanatic      = {unit = nil,
+                    summoned = false,
+                    morphed = false,
 }
 
 
@@ -268,6 +270,8 @@ LADY_DEATHWHISPER   = FourCC("U000")
 --adds
 CULT_ADHERENT       = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
+CULT_FANATIC        = FourCC("h003")
+CULT_FANATIC_MORPH  = FourCC("h004")
 
 --tanks
 PALADIN             = FourCC("Hpal")
@@ -2231,7 +2235,7 @@ end
 
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
-    print("DarkMartyrdom")
+    --TODO: добавить эффект и паузу
     CultAdherent.unit:DealMagicDamageLoc(
             1504, CultAdherent.unit:GetLoc(), 8)
     CultAdherent.summoned = false
@@ -2239,10 +2243,8 @@ function CultAdherent.DarkMartyrdom()
 end
 
 function CultAdherent.LowHP()
-    print(CultAdherent.unit:GetCurrentLife() <=
-            CultAdherent.unit:GetPercentLifeOfMax(30))
     if CultAdherent.unit:GetCurrentLife() <=
-            CultAdherent.unit:GetPercentLifeOfMax(30) then
+            CultAdherent.unit:GetPercentLifeOfMax(20) then
         return true
     end
     return false
@@ -2284,6 +2286,58 @@ function CultAdherent.Init(location, face)
     end
 
     CultAdherent.InitDarkMartyrdom()
+end
+
+
+function CultFanatic.DarkMartyrdom()
+    -- взрывается нанося урон в радиусе 8 метров
+    --TODO: добавить эффект и паузу
+    CultFanatic.unit:DealMagicDamageLoc(
+            1504, CultFanatic.unit:GetLoc(), 8)
+    CultFanatic.summoned = false
+    CultFanatic.morphed = false
+end
+
+function CultFanatic.LowHP()
+    if CultFanatic.unit:GetCurrentLife() <=
+            CultFanatic.unit:GetPercentLifeOfMax(20) then
+        return true
+    end
+    return false
+end
+
+function CultFanatic.InitDarkMartyrdom()
+    local event = EventsUnit(CultFanatic.unit)
+    event:RegisterAttacked()
+    event:AddCondition(CultFanatic.LowHP)
+    event:AddAction(CultFanatic.DarkMartyrdom)
+end
+
+
+function CultFanatic.Init(location, face)
+    local current_hp
+    --определяем кого суммонить
+    local fanatic = CULT_FANATIC
+    if CultFanatic.morphed then fanatic = CULT_FANATIC_MORPH end
+
+    --если уже призван - уберём и сохраним хп
+    if CultFanatic.unit then
+        current_hp = CultFanatic.unit:GetCurrentLife()
+        CultFanatic.unit:Remove()
+    end
+
+    CultFanatic.unit = Unit(LICH_KING, fanatic, location, face)
+
+    if CultFanatic.summoned then
+        CultFanatic.unit:SetBaseDamage(940)
+        CultFanatic.unit:SetMaxLife(64650, true)
+    end
+    if CultFanatic.morphed then
+        CultFanatic.unit:SetBaseDamage(1254)
+        CultFanatic.unit:SetLife(current_hp)
+    end
+    
+    CultFanatic.InitDarkMartyrdom()
 end
 
 
@@ -2735,13 +2789,21 @@ end
 function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned then
         CultAdherent.summoned = true
-        CultAdherent.Init(Location(4671., 1483.), 350.)
+        CultFanatic.summoned = true
+        --CultAdherent.Init(Location(4671., 1483.), 350.)
+        CultFanatic.Init(Location(4671., 1483.), 350.)
     end
     if not CultAdherent.morphed and CultAdherent.summoned and GetRandomReal(0., 1.) >= 0.7 then
         CultAdherent.morphed = true
         local loc = CultAdherent.unit:GetLoc()
         local face = CultAdherent.unit:GetFacing()
         CultAdherent.Init(loc, face)
+    end
+    if not CultFanatic.morphed and CultFanatic.summoned and GetRandomReal(0., 1.) >= 0.7 then
+        CultFanatic.morphed = true
+        local loc = CultFanatic.unit:GetLoc()
+        local face = CultFanatic.unit:GetFacing()
+        CultFanatic.Init(loc, face)
     end
 end
 
@@ -3146,7 +3208,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end

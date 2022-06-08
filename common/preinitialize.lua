@@ -21,4 +21,6 @@ CultAdherent     = {unit = nil,
                     morphed = false,
 }
 CultFanatic      = {unit = nil,
+                    summoned = false,
+                    morphed = false,
 }

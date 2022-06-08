@@ -650,3 +650,15 @@ STRING 203
 Cult Fanatic
 }
 
+STRING 204
+// Войска: h004 (Cult Fanatic), Name (Название)
+{
+Cult Fanatic
+}
+
+STRING 205
+// Войска: h004 (Cult Fanatic), EditorSuffix (Название: суффикс редактора)
+{
+(morphed)
+}
+

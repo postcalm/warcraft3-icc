@@ -1,6 +1,7 @@
 
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
+    --TODO: добавить эффект и паузу
     CultAdherent.unit:DealMagicDamageLoc(
             1504, CultAdherent.unit:GetLoc(), 8)
     CultAdherent.summoned = false
@@ -8,10 +9,8 @@ function CultAdherent.DarkMartyrdom()
 end
 
 function CultAdherent.LowHP()
-    print(CultAdherent.unit:GetCurrentLife() <=
-            CultAdherent.unit:GetPercentLifeOfMax(30))
     if CultAdherent.unit:GetCurrentLife() <=
-            CultAdherent.unit:GetPercentLifeOfMax(30) then
+            CultAdherent.unit:GetPercentLifeOfMax(20) then
         return true
     end
     return false

@@ -6,6 +6,8 @@ LADY_DEATHWHISPER   = FourCC("U000")
 --adds
 CULT_ADHERENT       = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
+CULT_FANATIC        = FourCC("h003")
+CULT_FANATIC_MORPH  = FourCC("h004")
 
 --tanks
 PALADIN             = FourCC("Hpal")
