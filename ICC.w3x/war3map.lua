@@ -164,6 +164,7 @@ PLAYER_2   = Player(1)
 LICH_KING = Player(10)
 
 COMMON_TIMER = FourCC('BTLF')
+METER = 20
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
@@ -220,7 +221,7 @@ FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
 
---- Created by meiso.
+-- Copyright (c) 2022 meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -244,14 +245,19 @@ function zip(...)
     return array
 end
 
+function meters()
+    
+end
+
+--- Округляет число
 ---@param number number
 ---@return number
-function Round(number)
+function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
 function convertLength(len)
-    return Round(Round(len) / 100)
+    return round(round(len) / 100)
 end
 
 
@@ -273,7 +279,7 @@ HUNTER              = nil
 ROGUE               = nil
 MAGE                = nil
 --healers
-DRIUD               = nil
+DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
 
@@ -536,8 +542,8 @@ function Line:getPoints(quantity)
         if slope == 0 then x = xdiff * (i / quantity)
         else x = y / slope end
 
-        points = Point(Round(x) + self.point1.X,
-                       Round(y) + self.point1.Y)
+        points = Point(round(x) + self.point1.X,
+                       round(y) + self.point1.Y)
         table.insert(new_points, i, points:get2DPoint())
     end
     table.insert(new_points, 1, self.point1:get2DPoint())
@@ -693,9 +699,10 @@ end
 --- Урон снижается "сопротивлением от магии"
 ---@param damage real
 ---@param location location
----@param radius real
+---@param radius real Радиус в метрах
 function Unit:DealMagicDamageLoc(damage, location, radius)
-    UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local meters = METER * radius
+    UnitDamagePointLoc(self.unit, 0, meters, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -754,6 +761,15 @@ function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
 end
 
+--- Использовать заклинание по цели
+---@param spell string Id приказа
+---@param target unitid
+function Unit:CastToTarget(spell, target)
+    local u = target
+    if type(target) == "table" then u = target:GetId() end
+    IssueTargetOrder(self.unit, spell, u)
+end
+
 -- Mana
 
 --- Потратить указанное количество маны
@@ -799,6 +815,7 @@ end
 
 --- Установить максимальное значение маны
 ---@param value real
+---@param full boolean
 function Unit:SetMaxMana(value, full)
     --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
@@ -854,6 +871,7 @@ end
 
 --- Установить максимальное значение хп
 ---@param value real
+---@param full boolean
 function Unit:SetMaxLife(value, full)
     --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
     local f = full or false
@@ -873,16 +891,18 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
+--
+
 --- Вернуть ближайших врагов
----@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
 ---@param filter function
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()
-    local r = radius or 500
+    local r = radius or 25
     local location = self:GetLoc()
     local f = Condition(filter) or nil
-    GroupEnumUnitsInRangeOfLoc(group, location, r, f)
+    GroupEnumUnitsInRangeOfLoc(group, location, r * METER, f)
     DestroyBoolExpr(f)
     return group
 end
@@ -944,6 +964,10 @@ end
 ---@return boolean
 function Unit:IsEnemy(unit)
     return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+end
+
+function Unit:ApplyTimedLife(time)
+    UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end
 
 --- Удалить юнита
@@ -1092,7 +1116,7 @@ function GetUserKey()
 end
 
 --- Генерирует ключ игрока
----@param salt int
+---@param salt int "Соль" для ключа
 ---@param val int Значение для генерации ключа
 ---@return int Ключ игрока
 function CreateUserKey(salt, val)
@@ -1108,8 +1132,8 @@ function CreateUserKey(salt, val)
 end
 
 --- Возвращает итератор на следующую область для считывания данных
----@param index int Tекущее значение итератора
----@param current_scope int Tекущая область
+---@param index int Текущее значение итератора
+---@param current_scope int Текущая область
 ---@return int Положение следующей области
 function scopeSaveUnitLoad___next(index, current_scope)
     if current_scope == SCOPE_MAP then
@@ -1744,8 +1768,7 @@ function Save()
     end
 end
 
---- Created by meiso.
---- DateTime: 23.02.2022 21:29
+-- Copyright (c) 2022 meiso
 
 EquipSystem = {}
 
@@ -1762,24 +1785,28 @@ function EquipSystem.RegisterItems(items, items_spells)
 end
 
 --- Добавляет юниту некоторое количество предметов
----@param unit unit Id юнита
+---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.AddItemsToUnit(unit, items, count)
-    count = count or 1
+    local c = count or 1
+    local u = unit
+    if type(unit) == "table" then u = unit:GetId() end
     for _, item in pairs(items) do
-        equip_items_id(unit, Items[item], count)
+        equip_items_id(u, Items[item], c)
     end
 end
 
 --- Удаляет у юнита некоторое количество предметов
----@param unit unit Id юнита
+---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
-    count = count or 1
+    local c = count or 1
+    local u = unit
+    if type(unit) == "table" then u = unit:GetId() end
     for _, item in pairs(items) do
-        unequip_item_id(unit, Items[item], count)
+        unequip_item_id(u, Items[item], c)
     end
 end
 
@@ -2202,18 +2229,44 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
-function CultAdherent.InitMartyrdom()
+function CultAdherent.DarkMartyrdom()
+    -- взрывается нанося урон в радиусе 8 метров
+    print("DarkMartyrdom")
+    CultAdherent.unit:DealMagicDamageLoc(
+            1504, CultAdherent.unit:GetLoc(), 8)
+    CultAdherent.summoned = false
+    CultAdherent.morphed = false
+end
+
+function CultAdherent.LowHP()
+    print(CultAdherent.unit:GetCurrentLife() <=
+            CultAdherent.unit:GetPercentLifeOfMax(30))
+    if CultAdherent.unit:GetCurrentLife() <=
+            CultAdherent.unit:GetPercentLifeOfMax(30) then
+        return true
+    end
+    return false
+end
+
+function CultAdherent.InitDarkMartyrdom()
     local event = EventsUnit(CultAdherent.unit)
+    event:RegisterAttacked()
+    event:AddCondition(CultAdherent.LowHP)
+    event:AddAction(CultAdherent.DarkMartyrdom)
 end
 
 
 function CultAdherent.Init(location, face)
+    local current_hp
+    local current_mp
     --определяем кого суммонить
     local adherent = CULT_ADHERENT
     if CultAdherent.morphed then adherent = CULT_ADHERENT_MORPH end
 
-    --если уже призван - уберём
+    --если уже призван - уберём и сохраним хп и мп
     if CultAdherent.unit then
+        current_hp = CultAdherent.unit:GetCurrentLife()
+        current_mp = CultAdherent.unit:GetCurrentMana()
         CultAdherent.unit:Remove()
     end
 
@@ -2221,13 +2274,16 @@ function CultAdherent.Init(location, face)
 
     if CultAdherent.summoned then
         CultAdherent.unit:SetBaseDamage(940)
+        CultAdherent.unit:SetMaxLife(51720, true)
+        CultAdherent.unit:SetMaxMana(65250, true)
     end
     if CultAdherent.morphed then
         CultAdherent.unit:SetBaseDamage(1254)
+        CultAdherent.unit:SetLife(current_hp)
+        CultAdherent.unit:SetMana(current_mp)
     end
 
-    CultAdherent.unit:SetMaxLife(51720, true)
-    CultAdherent.unit:SetMaxMana(65250, true)
+    CultAdherent.InitDarkMartyrdom()
 end
 
 
@@ -2402,7 +2458,7 @@ function LadyDeathwhisper.DeathAndDecay()
     if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        UnitDamagePointLoc(LadyDeathwhisper.unit:GetId(), 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+        LadyDeathwhisper.unit:DealMagicDamageLoc(450., loc, 15)
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
@@ -2554,7 +2610,7 @@ function LadyDeathwhisper.Init()
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetId(), {"MP_ITEM"}, 4)
+    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
 
     -- both phase
     --LadyDeathwhisper.InitDeathAndDecay()
@@ -2983,7 +3039,7 @@ function Paladin.Init()
     Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(Paladin.hero:GetId(), items_list)
+    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)
@@ -3024,10 +3080,10 @@ function Paladin.CastJudgementOfLight()
     Paladin.hero:LoseMana{percent=5}
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetId())):GetId()
-    UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
-    IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
-    UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+    jol_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
+    jol_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfLight()
@@ -3062,10 +3118,10 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetId())):GetId()
-    UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
-    IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
-    UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
+    jow_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
+    jow_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfWisdom()
@@ -3156,7 +3212,7 @@ function Priest.Init()
     Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero:GetId(), items_list)
+    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
 
     Priest.hero:SetLevel(80)
     Priest.hero:SetMana(2000)

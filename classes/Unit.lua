@@ -73,9 +73,10 @@ end
 --- Урон снижается "сопротивлением от магии"
 ---@param damage real
 ---@param location location
----@param radius real
+---@param radius real Радиус в метрах
 function Unit:DealMagicDamageLoc(damage, location, radius)
-    UnitDamagePointLoc(self.unit, 0, radius, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local meters = METER * radius
+    UnitDamagePointLoc(self.unit, 0, meters, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -188,6 +189,7 @@ end
 
 --- Установить максимальное значение маны
 ---@param value real
+---@param full boolean
 function Unit:SetMaxMana(value, full)
     --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
@@ -243,6 +245,7 @@ end
 
 --- Установить максимальное значение хп
 ---@param value real
+---@param full boolean
 function Unit:SetMaxLife(value, full)
     --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
     local f = full or false
@@ -262,16 +265,18 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
+--
+
 --- Вернуть ближайших врагов
----@param radius real Радиус, в котором выбираются враги. Необязательный аргумент
+---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
 ---@param filter function
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()
-    local r = radius or 500
+    local r = radius or 25
     local location = self:GetLoc()
     local f = Condition(filter) or nil
-    GroupEnumUnitsInRangeOfLoc(group, location, r, f)
+    GroupEnumUnitsInRangeOfLoc(group, location, r * METER, f)
     DestroyBoolExpr(f)
     return group
 end

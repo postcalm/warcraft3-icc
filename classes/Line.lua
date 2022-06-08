@@ -35,8 +35,8 @@ function Line:getPoints(quantity)
         if slope == 0 then x = xdiff * (i / quantity)
         else x = y / slope end
 
-        points = Point(Round(x) + self.point1.X,
-                       Round(y) + self.point1.Y)
+        points = Point(round(x) + self.point1.X,
+                       round(y) + self.point1.Y)
         table.insert(new_points, i, points:get2DPoint())
     end
     table.insert(new_points, 1, self.point1:get2DPoint())

@@ -17,6 +17,6 @@ HUNTER              = nil
 ROGUE               = nil
 MAGE                = nil
 --healers
-DRIUD               = nil
+DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")

@@ -1,4 +1,4 @@
---- Created by meiso.
+-- Copyright (c) 2022 meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -22,12 +22,17 @@ function zip(...)
     return array
 end
 
+function meters()
+    
+end
+
+--- Округляет число
 ---@param number number
 ---@return number
-function Round(number)
+function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
 function convertLength(len)
-    return Round(Round(len) / 100)
+    return round(round(len) / 100)
 end
