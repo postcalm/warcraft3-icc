@@ -102,7 +102,7 @@ function GetUserKey()
 end
 
 --- Генерирует ключ игрока
----@param salt int
+---@param salt int "Соль" для ключа
 ---@param val int Значение для генерации ключа
 ---@return int Ключ игрока
 function CreateUserKey(salt, val)
@@ -118,8 +118,8 @@ function CreateUserKey(salt, val)
 end
 
 --- Возвращает итератор на следующую область для считывания данных
----@param index int Tекущее значение итератора
----@param current_scope int Tекущая область
+---@param index int Текущее значение итератора
+---@param current_scope int Текущая область
 ---@return int Положение следующей области
 function scopeSaveUnitLoad___next(index, current_scope)
     if current_scope == SCOPE_MAP then

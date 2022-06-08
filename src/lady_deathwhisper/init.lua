@@ -9,8 +9,8 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), {"MP_ITEM"}, 4)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
+    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
 
     -- both phase
     --LadyDeathwhisper.InitDeathAndDecay()

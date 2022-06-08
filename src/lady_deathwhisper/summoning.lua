@@ -20,7 +20,7 @@ function LadyDeathwhisper.SummonCheckPhase()
 end
 
 function LadyDeathwhisper.InitSummoning()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SummonCheckPhase)
     event:AddAction(LadyDeathwhisper.Summoning)

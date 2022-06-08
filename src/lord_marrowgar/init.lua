@@ -7,7 +7,7 @@ function LordMarrowgar.Init()
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LordMarrowgar.unit:GetUnit(), items_list)
+    EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
     LordMarrowgar.unit:SetLevel(83)
 

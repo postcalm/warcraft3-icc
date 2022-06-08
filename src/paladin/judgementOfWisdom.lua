@@ -11,10 +11,10 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
-    UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
-    IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
-    UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
+    jow_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
+    jow_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfWisdom()

@@ -4,7 +4,7 @@ function LadyDeathwhisper.FrostBoltVolley()
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
     local function frostbolt(enemy)
-        local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+        local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
         local enemy_movespeed = enemy:GetMoveSpeed()
         local effect = Effect(fb, model_name, 0.7)
         while true do
@@ -26,7 +26,7 @@ function LadyDeathwhisper.FrostBoltVolley()
     local count = CountUnitsInGroup(enemies)
     for _ = 1, count do
         local enemy = Unit(GroupPickRandomUnit(enemies))
-        GroupRemoveUnit(enemies, enemy:GetUnit())
+        GroupRemoveUnit(enemies, enemy:GetId())
         if LadyDeathwhisper.unit:IsEnemy(enemy) then
             StartThread(frostbolt(enemy))
         end
@@ -41,7 +41,7 @@ function LadyDeathwhisper.FBVCheckPhase()
 end
 
 function LadyDeathwhisper.InitFrostBoltVolley()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.FBVCheckPhase)
     event:AddAction(LadyDeathwhisper.FrostBoltVolley)

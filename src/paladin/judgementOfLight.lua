@@ -13,10 +13,10 @@ function Paladin.CastJudgementOfLight()
     Paladin.hero:LoseMana{percent=5}
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
-    UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
-    IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
-    UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+    jol_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
+    jol_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfLight()

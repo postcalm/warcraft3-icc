@@ -18,7 +18,7 @@ setmetatable(Effect, {
 ---@param scale real
 function Effect:_init(unit, model, scale)
     local u = unit
-    if type(unit) == "table" then u = unit:GetUnit() end
+    if type(unit) == "table" then u = unit:GetId() end
     self.effect = AddSpecialEffectTarget(model, u, "overhead")
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end

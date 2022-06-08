@@ -43,7 +43,7 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
@@ -55,7 +55,7 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -65,7 +65,7 @@ end
 ---@param damage real
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
@@ -84,7 +84,7 @@ end
 ---@param damage real
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -94,7 +94,7 @@ end
 ---@param damage real
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
@@ -104,7 +104,7 @@ end
 ---@param damage real
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -134,7 +134,16 @@ function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
 end
 
--- MANA
+--- Использовать заклинание по цели
+---@param spell string Id приказа
+---@param target unitid
+function Unit:CastToTarget(spell, target)
+    local u = target
+    if type(target) == "table" then u = target:GetId() end
+    IssueTargetOrder(self.unit, spell, u)
+end
+
+-- Mana
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -273,6 +282,8 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
+--- Получить градус поворота юнита
+---@return real
 function Unit:GetFacing()
     return GetUnitFacing(self.unit)
 end
@@ -285,7 +296,7 @@ end
 
 --- Получить идентификатор созданного юнита
 ---@return unitid
-function Unit:GetUnit()
+function Unit:GetId()
     return self.unit
 end
 
@@ -322,6 +333,10 @@ end
 ---@return boolean
 function Unit:IsEnemy(unit)
     return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+end
+
+function Unit:ApplyTimedLife(time)
+    UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end
 
 --- Удалить юнита

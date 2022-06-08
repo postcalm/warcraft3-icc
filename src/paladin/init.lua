@@ -6,7 +6,7 @@ function Paladin.Init()
     Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
+    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)

@@ -14,7 +14,7 @@ function Paladin.AvengersShield()
     if not Paladin.hero:LoseMana{percent=26} then return end
 
     local function AddTarget(target_, exc)
-        table.insert(exc, target_:GetUnit())
+        table.insert(exc, target_:GetId())
     end
 
     local function TargetTookDamage(target_, exc)
@@ -41,7 +41,7 @@ function Paladin.AvengersShield()
     end
 
     local i = 0
-    local shield = UnitSpell(Paladin.hero:GetUnit())
+    local shield = UnitSpell(Paladin.hero:GetId())
     local effect = Effect(shield, model_name, 0.7)
     while i < 3 do
         TriggerSleepAction(0.)

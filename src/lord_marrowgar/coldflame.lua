@@ -4,12 +4,12 @@ function LordMarrowgar.Coldflame()
 
     local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
-    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetUnit())
+    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetId())
     local target_location = GetUnitLoc(target)
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetUnit()
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetId()
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)
@@ -38,7 +38,7 @@ function LordMarrowgar.StartColdflame()
 end
 
 function LordMarrowgar.InitColdflame()
-    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartColdflame)
     event:AddAction(LordMarrowgar.Coldflame)

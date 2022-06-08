@@ -7,7 +7,7 @@ function LordMarrowgar.BoneSpike()
 
     if LordMarrowgar.bonespike_effect then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetUnit()
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetId()
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)
@@ -51,7 +51,7 @@ function LordMarrowgar.StartBoneSpike()
 end
 
 function LordMarrowgar.InitBoneSpike()
-    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartBoneSpike)
     event:AddAction(LordMarrowgar.BoneSpike)

@@ -6,7 +6,7 @@ function LadyDeathwhisper.FrostBolt()
 
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
-    local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
     local effect = Effect(fb, model_name, 0.7)
     while true do
         TriggerSleepAction(0.)
@@ -31,7 +31,7 @@ function LadyDeathwhisper.FBCheckPhase()
 end
 
 function LadyDeathwhisper.InitFrostBolt()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.FBCheckPhase)
     event:AddAction(LadyDeathwhisper.FrostBolt)

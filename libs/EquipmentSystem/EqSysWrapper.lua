@@ -1,5 +1,4 @@
---- Created by meiso.
---- DateTime: 23.02.2022 21:29
+-- Copyright (c) 2022 meiso
 
 EquipSystem = {}
 
@@ -16,23 +15,27 @@ function EquipSystem.RegisterItems(items, items_spells)
 end
 
 --- Добавляет юниту некоторое количество предметов
----@param unit unit Id юнита
+---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.AddItemsToUnit(unit, items, count)
-    count = count or 1
+    local c = count or 1
+    local u = unit
+    if type(unit) == "table" then u = unit:GetId() end
     for _, item in pairs(items) do
-        equip_items_id(unit, Items[item], count)
+        equip_items_id(u, Items[item], c)
     end
 end
 
 --- Удаляет у юнита некоторое количество предметов
----@param unit unit Id юнита
+---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
-    count = count or 1
+    local c = count or 1
+    local u = unit
+    if type(unit) == "table" then u = unit:GetId() end
     for _, item in pairs(items) do
-        unequip_item_id(unit, Items[item], count)
+        unequip_item_id(u, Items[item], c)
     end
 end

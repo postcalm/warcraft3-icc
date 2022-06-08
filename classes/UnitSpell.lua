@@ -14,7 +14,7 @@ setmetatable(UnitSpell, {
 function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
-    self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetUnit()
+    self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetId()
     SetUnitMoveSpeed(self.unit, 512.)
 end
 

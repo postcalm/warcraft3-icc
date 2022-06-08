@@ -5,7 +5,7 @@ function LadyDeathwhisper.ShadowBolt()
 
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
 
-    local sb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local sb = UnitSpell(LadyDeathwhisper.unit:GetId())
     local effect = Effect(sb, model_name, 0.7)
     while true do
         TriggerSleepAction(0.)
@@ -28,7 +28,7 @@ function LadyDeathwhisper.SBCheckPhase()
 end
 
 function LadyDeathwhisper.InitShadowBolt()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SBCheckPhase)
     event:AddAction(LadyDeathwhisper.ShadowBolt)

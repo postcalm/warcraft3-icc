@@ -188,6 +188,8 @@ CultAdherent     = {unit = nil,
                     summoned = false,
                     morphed = false,
 }
+CultFanatic      = {unit = nil,
+}
 
 
 --Lord Marrowgar
@@ -295,7 +297,7 @@ setmetatable(Effect, {
 ---@param scale real
 function Effect:_init(unit, model, scale)
     local u = unit
-    if type(unit) == "table" then u = unit:GetUnit() end
+    if type(unit) == "table" then u = unit:GetId() end
     self.effect = AddSpecialEffectTarget(model, u, "overhead")
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end
@@ -449,7 +451,7 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then self.unit = unit:GetUnit() end
+    if type(unit) == "table" then self.unit = unit:GetId() end
 end
 
 --- Регистриует событие получения урона юнитом
@@ -661,7 +663,7 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
@@ -673,7 +675,7 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -683,7 +685,7 @@ end
 ---@param damage real
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
@@ -702,7 +704,7 @@ end
 ---@param damage real
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -712,7 +714,7 @@ end
 ---@param damage real
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
@@ -722,7 +724,7 @@ end
 ---@param damage real
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetUnit() end
+    if type(target) == "table" then u = target:GetId() end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -752,7 +754,7 @@ function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
 end
 
--- MANA
+-- Mana
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -891,6 +893,8 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
+--- Получить градус поворота юнита
+---@return real
 function Unit:GetFacing()
     return GetUnitFacing(self.unit)
 end
@@ -903,7 +907,7 @@ end
 
 --- Получить идентификатор созданного юнита
 ---@return unitid
-function Unit:GetUnit()
+function Unit:GetId()
     return self.unit
 end
 
@@ -963,7 +967,7 @@ setmetatable(UnitSpell, {
 function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
-    self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetUnit()
+    self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetId()
     SetUnitMoveSpeed(self.unit, 512.)
 end
 
@@ -2198,6 +2202,11 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
+function CultAdherent.InitMartyrdom()
+    local event = EventsUnit(CultAdherent.unit)
+end
+
+
 function CultAdherent.Init(location, face)
     --определяем кого суммонить
     local adherent = CULT_ADHERENT
@@ -2230,7 +2239,7 @@ function LordMarrowgar.BoneSpike()
 
     if LordMarrowgar.bonespike_effect then
         -- призываем шип в позиции атакованной цели
-        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetUnit()
+        local bone_spike_obj = Unit(LICH_KING, BONE_SPIKE_OBJ, GetUnitLoc(target_enemy)):GetId()
 
         SetUnitAnimation(bone_spike_obj, "Stand Lumber")
         SetUnitFlyHeight(target_enemy, 150., 0.)
@@ -2274,7 +2283,7 @@ function LordMarrowgar.StartBoneSpike()
 end
 
 function LordMarrowgar.InitBoneSpike()
-    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartBoneSpike)
     event:AddAction(LordMarrowgar.BoneSpike)
@@ -2287,12 +2296,12 @@ function LordMarrowgar.Coldflame()
 
     local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
 
-    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetUnit())
+    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetId())
     local target_location = GetUnitLoc(target)
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetUnit()
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetId()
 
         SetUnitMoveSpeed(coldflame_obj, 0.6)
         SetUnitPathing(coldflame_obj, false)
@@ -2321,7 +2330,7 @@ function LordMarrowgar.StartColdflame()
 end
 
 function LordMarrowgar.InitColdflame()
-    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartColdflame)
     event:AddAction(LordMarrowgar.Coldflame)
@@ -2336,7 +2345,7 @@ function LordMarrowgar.Init()
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LordMarrowgar.unit:GetUnit(), items_list)
+    EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
     LordMarrowgar.unit:SetLevel(83)
 
@@ -2361,7 +2370,7 @@ function LordMarrowgar.Whirlwind()
 
     local function action()
         local timer_reset = CreateTimer()
-        IssueImmediateOrder(LordMarrowgar.unit:GetUnit(), "whirlwind")
+        IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
         TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
         DestroyTimer(whirlwind_timer)
     end
@@ -2380,7 +2389,7 @@ function LordMarrowgar.StartWhirlwind()
 end
 
 function LordMarrowgar.InitWhirlwind()
-    local event = EventsUnit(LordMarrowgar.unit:GetUnit())
+    local event = EventsUnit(LordMarrowgar.unit)
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartWhirlwind)
     event:AddAction(LordMarrowgar.Whirlwind)
@@ -2393,7 +2402,7 @@ function LadyDeathwhisper.DeathAndDecay()
     if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        UnitDamagePointLoc(LadyDeathwhisper.unit:GetUnit(), 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
+        UnitDamagePointLoc(LadyDeathwhisper.unit:GetId(), 0, 300, loc, 450., ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
@@ -2409,7 +2418,7 @@ function LadyDeathwhisper.DeathAndDecayExist()
 end
 
 function LadyDeathwhisper.InitDeathAndDecay()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.DeathAndDecayExist)
     event:AddAction(LadyDeathwhisper.DeathAndDecay)
@@ -2452,7 +2461,7 @@ function LadyDeathwhisper.FrostBolt()
 
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
-    local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
     local effect = Effect(fb, model_name, 0.7)
     while true do
         TriggerSleepAction(0.)
@@ -2477,7 +2486,7 @@ function LadyDeathwhisper.FBCheckPhase()
 end
 
 function LadyDeathwhisper.InitFrostBolt()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.FBCheckPhase)
     event:AddAction(LadyDeathwhisper.FrostBolt)
@@ -2490,7 +2499,7 @@ function LadyDeathwhisper.FrostBoltVolley()
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
     local function frostbolt(enemy)
-        local fb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+        local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
         local enemy_movespeed = enemy:GetMoveSpeed()
         local effect = Effect(fb, model_name, 0.7)
         while true do
@@ -2512,7 +2521,7 @@ function LadyDeathwhisper.FrostBoltVolley()
     local count = CountUnitsInGroup(enemies)
     for _ = 1, count do
         local enemy = Unit(GroupPickRandomUnit(enemies))
-        GroupRemoveUnit(enemies, enemy:GetUnit())
+        GroupRemoveUnit(enemies, enemy:GetId())
         if LadyDeathwhisper.unit:IsEnemy(enemy) then
             StartThread(frostbolt(enemy))
         end
@@ -2527,7 +2536,7 @@ function LadyDeathwhisper.FBVCheckPhase()
 end
 
 function LadyDeathwhisper.InitFrostBoltVolley()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.FBVCheckPhase)
     event:AddAction(LadyDeathwhisper.FrostBoltVolley)
@@ -2544,8 +2553,8 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetUnit(), {"MP_ITEM"}, 4)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
+    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit:GetId(), {"MP_ITEM"}, 4)
 
     -- both phase
     --LadyDeathwhisper.InitDeathAndDecay()
@@ -2564,7 +2573,7 @@ end
 
 
 function LadyDeathwhisper.ManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
     local effect
 
@@ -2573,7 +2582,7 @@ function LadyDeathwhisper.ManaShield()
     --print(BattleSystem.Status())
 
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
-        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetUnit(), "origin")
+        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetId(), "origin")
         LadyDeathwhisper.mana_shield = true
     end
 
@@ -2622,7 +2631,7 @@ function LadyDeathwhisper.MSCheckPhase()
 end
 
 function LadyDeathwhisper.InitManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.MSCheckPhase)
     event:AddAction(LadyDeathwhisper.ManaShield)
@@ -2636,7 +2645,7 @@ function LadyDeathwhisper.ShadowBolt()
 
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
 
-    local sb = UnitSpell(LadyDeathwhisper.unit:GetUnit())
+    local sb = UnitSpell(LadyDeathwhisper.unit:GetId())
     local effect = Effect(sb, model_name, 0.7)
     while true do
         TriggerSleepAction(0.)
@@ -2659,7 +2668,7 @@ function LadyDeathwhisper.SBCheckPhase()
 end
 
 function LadyDeathwhisper.InitShadowBolt()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SBCheckPhase)
     event:AddAction(LadyDeathwhisper.ShadowBolt)
@@ -2688,7 +2697,7 @@ function LadyDeathwhisper.SummonCheckPhase()
 end
 
 function LadyDeathwhisper.InitSummoning()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SummonCheckPhase)
     event:AddAction(LadyDeathwhisper.Summoning)
@@ -2710,7 +2719,7 @@ function Paladin.AvengersShield()
     if not Paladin.hero:LoseMana{percent=26} then return end
 
     local function AddTarget(target_, exc)
-        table.insert(exc, target_:GetUnit())
+        table.insert(exc, target_:GetId())
     end
 
     local function TargetTookDamage(target_, exc)
@@ -2737,7 +2746,7 @@ function Paladin.AvengersShield()
     end
 
     local i = 0
-    local shield = UnitSpell(Paladin.hero:GetUnit())
+    local shield = UnitSpell(Paladin.hero:GetId())
     local effect = Effect(shield, model_name, 0.7)
     while i < 3 do
         TriggerSleepAction(0.)
@@ -2974,7 +2983,7 @@ function Paladin.Init()
     Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(Paladin.hero:GetUnit(), items_list)
+    --EquipSystem.AddItemsToUnit(Paladin.hero:GetId(), items_list)
 
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)
@@ -3015,7 +3024,7 @@ function Paladin.CastJudgementOfLight()
     Paladin.hero:LoseMana{percent=5}
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetId())):GetId()
     UnitAddAbility(jol_unit, JUDGEMENT_OF_LIGHT)
     IssueTargetOrder(jol_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jol_unit, COMMON_TIMER, 2.)
@@ -3053,7 +3062,7 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetUnit())):GetUnit()
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, GetUnitLoc(Paladin.hero:GetId())):GetId()
     UnitAddAbility(jow_unit, JUDGEMENT_OF_WISDOM)
     IssueTargetOrder(jow_unit, "shadowstrike", GetSpellTargetUnit())
     UnitApplyTimedLife(jow_unit, COMMON_TIMER, 2.)
@@ -3081,7 +3090,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -3147,7 +3156,7 @@ function Priest.Init()
     Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero:GetUnit(), items_list)
+    EquipSystem.AddItemsToUnit(Priest.hero:GetId(), items_list)
 
     Priest.hero:SetLevel(80)
     Priest.hero:SetMana(2000)

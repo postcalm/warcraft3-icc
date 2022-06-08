@@ -1,6 +1,6 @@
 
 function LadyDeathwhisper.ManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
     local effect
 
@@ -9,7 +9,7 @@ function LadyDeathwhisper.ManaShield()
     --print(BattleSystem.Status())
 
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
-        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetUnit(), "origin")
+        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetId(), "origin")
         LadyDeathwhisper.mana_shield = true
     end
 
@@ -58,7 +58,7 @@ function LadyDeathwhisper.MSCheckPhase()
 end
 
 function LadyDeathwhisper.InitManaShield()
-    local event = EventsUnit(LadyDeathwhisper.unit:GetUnit())
+    local event = EventsUnit(LadyDeathwhisper.unit)
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.MSCheckPhase)
     event:AddAction(LadyDeathwhisper.ManaShield)

@@ -5,7 +5,7 @@ function Priest.Init()
     Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero:GetUnit(), items_list)
+    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
 
     Priest.hero:SetLevel(80)
     Priest.hero:SetMana(2000)
