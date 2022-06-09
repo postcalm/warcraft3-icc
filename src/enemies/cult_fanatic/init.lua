@@ -23,6 +23,7 @@ function CultFanatic.Init(location, face)
     end
 
     --CultFanatic.unit:SetBaseDamage(1881, 1)
+    CultFanatic.unit:SetArmor(300)
 
     CultFanatic.InitDarkMartyrdom()
 end

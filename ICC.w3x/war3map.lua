@@ -178,7 +178,7 @@ LordMarrowgar    = {unit = nil,
                     whirlwind_effect = false,
 }
 LadyDeathwhisper = {unit = nil,
-                    mana_shield = false,
+                    mana_shield = nil,
                     mana_is_over = false,
                     dominate_mind_effect = false,
                     death_and_decay_effect = false,
@@ -302,13 +302,15 @@ setmetatable(Effect, {
     end,
 })
 
----@param unit unitid
----@param model string
----@param scale real
-function Effect:_init(unit, model, scale)
+---@param unit unitid Id юнита
+---@param model string Название модели
+---@param attach_point string Точка к которой крепится эффект
+---@param scale real Размер эффекта
+function Effect:_init(unit, model, attach_point,scale)
     local u = unit
+    local point = attach_point or "overhead"
     if type(unit) == "table" then u = unit:GetId() end
-    self.effect = AddSpecialEffectTarget(model, u, "overhead")
+    self.effect = AddSpecialEffectTarget(model, u, point)
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end
 
@@ -941,8 +943,15 @@ function Unit:GetOwner()
 end
 
 --- Установить уровень юнита
+---@param lvl integer
 function Unit:SetLevel(lvl)
     SetHeroLevel(self.unit, lvl, false)
+end
+
+--- Установить количество брони
+---@param value real
+function Unit:SetArmor(value)
+    BlzSetUnitArmor(self.unit, value)
 end
 
 --- Установить скорость передвижения юнита
@@ -2285,6 +2294,8 @@ function CultAdherent.Init(location, face)
         CultAdherent.unit:SetMana(current_mp)
     end
 
+    CultAdherent.unit:SetArmor(300)
+
     CultAdherent.InitDarkMartyrdom()
 end
 
@@ -2336,7 +2347,10 @@ function CultFanatic.Init(location, face)
         CultFanatic.unit:SetBaseDamage(1254)
         CultFanatic.unit:SetLife(current_hp)
     end
-    
+
+    --CultFanatic.unit:SetBaseDamage(1881, 1)
+    CultFanatic.unit:SetArmor(300)
+
     CultFanatic.InitDarkMartyrdom()
 end
 
@@ -2685,15 +2699,13 @@ end
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
-    local effect
 
     event:RegisterDamaged()
 
     --print(BattleSystem.Status())
 
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
-        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetId(), "origin")
-        LadyDeathwhisper.mana_shield = true
+        LadyDeathwhisper.mana_shield = Effect(LadyDeathwhisper.unit, model, "origin")
     end
 
     local function ManaShield()
@@ -2714,7 +2726,8 @@ function LadyDeathwhisper.ManaShield()
         LadyDeathwhisper.mana_is_over = true
         LadyDeathwhisper.phase = 2
         --TODO: не удаляется эффект
-        DestroyEffect(effect)
+        print(LadyDeathwhisper.mana_shield)
+        LadyDeathwhisper.mana_shield:Destroy()
         event:Destroy()
         return false
     end
@@ -2790,7 +2803,7 @@ function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned then
         CultAdherent.summoned = true
         CultFanatic.summoned = true
-        --CultAdherent.Init(Location(4671., 1483.), 350.)
+        CultAdherent.Init(Location(4671., 1483.), 350.)
         CultFanatic.Init(Location(4671., 1483.), 350.)
     end
     if not CultAdherent.morphed and CultAdherent.summoned and GetRandomReal(0., 1.) >= 0.7 then
@@ -3208,7 +3221,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end

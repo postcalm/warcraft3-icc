@@ -311,8 +311,15 @@ function Unit:GetOwner()
 end
 
 --- Установить уровень юнита
+---@param lvl integer
 function Unit:SetLevel(lvl)
     SetHeroLevel(self.unit, lvl, false)
+end
+
+--- Установить количество брони
+---@param value real
+function Unit:SetArmor(value)
+    BlzSetUnitArmor(self.unit, value)
 end
 
 --- Установить скорость передвижения юнита

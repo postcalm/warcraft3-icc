@@ -2,15 +2,13 @@
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
-    local effect
 
     event:RegisterDamaged()
 
     --print(BattleSystem.Status())
 
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
-        effect = AddSpecialEffectTarget(model, LadyDeathwhisper.unit:GetId(), "origin")
-        LadyDeathwhisper.mana_shield = true
+        LadyDeathwhisper.mana_shield = Effect(LadyDeathwhisper.unit, model, "origin")
     end
 
     local function ManaShield()
@@ -30,8 +28,7 @@ function LadyDeathwhisper.ManaShield()
         end
         LadyDeathwhisper.mana_is_over = true
         LadyDeathwhisper.phase = 2
-        --TODO: не удаляется эффект
-        DestroyEffect(effect)
+        LadyDeathwhisper.mana_shield:Destroy()
         event:Destroy()
         return false
     end

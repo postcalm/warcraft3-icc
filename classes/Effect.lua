@@ -13,13 +13,15 @@ setmetatable(Effect, {
     end,
 })
 
----@param unit unitid
----@param model string
----@param scale real
-function Effect:_init(unit, model, scale)
+---@param unit unitid Id юнита
+---@param model string Название модели
+---@param attach_point string Точка к которой крепится эффект
+---@param scale real Размер эффекта
+function Effect:_init(unit, model, attach_point,scale)
     local u = unit
+    local point = attach_point or "overhead"
     if type(unit) == "table" then u = unit:GetId() end
-    self.effect = AddSpecialEffectTarget(model, u, "overhead")
+    self.effect = AddSpecialEffectTarget(model, u, point)
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end
 

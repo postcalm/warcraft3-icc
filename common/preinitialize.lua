@@ -9,7 +9,7 @@ LordMarrowgar    = {unit = nil,
                     whirlwind_effect = false,
 }
 LadyDeathwhisper = {unit = nil,
-                    mana_shield = false,
+                    mana_shield = nil,
                     mana_is_over = false,
                     dominate_mind_effect = false,
                     death_and_decay_effect = false,
