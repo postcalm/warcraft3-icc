@@ -5,8 +5,6 @@ function LadyDeathwhisper.ManaShield()
 
     event:RegisterDamaged()
 
-    --print(BattleSystem.Status())
-
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
         LadyDeathwhisper.mana_shield = Effect(LadyDeathwhisper.unit, model, "origin")
     end
@@ -35,16 +33,6 @@ function LadyDeathwhisper.ManaShield()
 
     event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
-
-    --local function destroy_effect()
-    --    DestroyEffect(effect)
-    --    DestroyTimer(GetExpiredTimer())
-    --end
-    --
-    --if not BattleSystem.Status() then
-    --    local timer = CreateTimer()
-    --    TimerStart(timer, 5., false, destroy_effect)
-    --end
 end
 
 function LadyDeathwhisper.MSCheckPhase()

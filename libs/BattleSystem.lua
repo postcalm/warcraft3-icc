@@ -1,28 +1,43 @@
 
-BattleSystem = {is_fight = false}
+AttackSystem = {target = nil,
+                target_event = nil,
+}
 
-function BattleSystem.Init()
-    local combat = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_1, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_1, EVENT_PLAYER_UNIT_DAMAGED, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_2, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_2, EVENT_PLAYER_UNIT_DAMAGED, nil)
-    TriggerRegisterPlayerUnitEvent(combat, LICH_KING, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, LICH_KING, EVENT_PLAYER_UNIT_DAMAGED, nil)
+function AttackSystem.Init()
+    local damaged = EventsPlayer()
+    local gettarget = EventsPlayer()
+    damaged:RegisterUnitDamaged()
+    gettarget:RegisterPlayerMouseDown()
 
-    local function check_combat()
-        local damage = GetEventDamage()
-        --print(GetEventDamageSource(), GetEventDamage())
-        if damage then
-            BattleSystem.is_fight = true
-        else
-            BattleSystem.is_fight = false
-        end
-    end
-
-    TriggerAddAction(combat, check_combat)
+    damaged:AddAction(AttackSystem.ShowDamage)
+    gettarget:AddCondition(AttackSystem.IsRightButton)
+    gettarget:AddAction(AttackSystem.SetTarget)
 end
 
-function BattleSystem.Status()
-    return BattleSystem.is_fight
+function AttackSystem.IsRightButton()
+    return BlzGetTriggerPlayerMouseButton() == MOUSE_BUTTON_TYPE_RIGHT
+end
+
+function AttackSystem.SetTarget()
+    if BlzGetMouseFocusUnit() then
+        AttackSystem.target = Unit(BlzGetMouseFocusUnit())
+    end
+    if AttackSystem.target_event then
+        AttackSystem.target_event:Destroy()
+    end
+    if IsPlayerEnemy(GetLocalPlayer(), AttackSystem.target:GetOwner()) then
+        AttackSystem.target_event = EventsUnit(AttackSystem.target)
+        AttackSystem.target_event:RegisterDamaged()
+        AttackSystem.target_event:AddAction(AttackSystem.ShowDamage)
+    end
+end
+
+function AttackSystem.ShowDamage()
+    local unit = GetTriggerUnit()
+    local damage = I2S(R2I(GetEventDamage()))
+    local zOffset = GetRandomInt(20, 40)
+    local text = TextTag(damage, unit, zOffset, 10, 255, 0, 0, 20)
+    text:Permanent(false)
+    text:SetVelocity(50, GetRandomInt(50, 130))
+    text:SetLifespan(2.)
 end

@@ -288,9 +288,11 @@ SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
 
 
----@param unit unitid
----@param model string
----@param scale real
+--- Класс для создания эффектов на юнитах
+---@param unit unitid Id юнита
+---@param model string Название модели
+---@param attach_point string Точка к которой крепится эффект
+---@param scale real Размер эффекта
 Effect = {}
 Effect.__index = Effect
 
@@ -302,10 +304,6 @@ setmetatable(Effect, {
     end,
 })
 
----@param unit unitid Id юнита
----@param model string Название модели
----@param attach_point string Точка к которой крепится эффект
----@param scale real Размер эффекта
 function Effect:_init(unit, model, attach_point,scale)
     local u = unit
     local point = attach_point or "overhead"
@@ -342,7 +340,7 @@ function Events:_init()
     self.trigger = CreateTrigger()
 end
 
---- Добавляет условие для события
+--- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 function Events:AddCondition(func)
     TriggerAddCondition(self.trigger, Condition(func))
@@ -385,7 +383,11 @@ setmetatable(EventsPlayer, {
 
 function EventsPlayer:_init(player)
     Events._init(self)
-    self.player = player or 0
+    self.player = player or GetLocalPlayer()
+end
+
+function EventsPlayer:RegisterPlayerMouseDown()
+    TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
 
 function EventsPlayer:RegisterUnitAttacked()
@@ -420,7 +422,7 @@ end
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
---- Добавляет условие для события
+--- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 function EventsPlayer:AddCondition(func)
     Events.AddCondition(self, func)
@@ -484,7 +486,7 @@ end
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
---- Добавляет условие для события
+--- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 function EventsUnit:AddCondition(func)
     Events.AddCondition(self, func)
@@ -601,6 +603,60 @@ function Point:atPoint(point)
 end
 
 
+--- Класс для создания "плавающего" текста
+---@param text string Текст
+---@param unit unitid Id юнита, относительно которого крепится текст
+---@param zoffset real Расположение относительно оси Z
+---@param size real Размер текста
+---@param red integer Интенсивность красного цвета
+---@param green integer Интенсивность зеленого цвета
+---@param blue integer Интенсивность синего цвета
+---@param transparency integer Прозрачность
+TextTag = {}
+TextTag.__index = TextTag
+
+setmetatable(TextTag, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end
+})
+
+function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency)
+    self.texttag = CreateTextTag()
+    local textHeight = TextTagSize2Height(size)
+
+    SetTextTagText(self.texttag, text, textHeight)
+    SetTextTagPosUnit(self.texttag, unit, zoffset)
+    SetTextTagColor(self.texttag, red, green, blue, PercentTo255(100.0 - transparency))
+end
+
+--- Установить время жизни текста
+---@param lifespan real
+function TextTag:SetLifespan(lifespan)
+    SetTextTagLifespan(self.texttag, lifespan)
+end
+
+--- Установить направление перемещения текста
+---@param speed real Скорость перемещения
+---@param angle real Угол направления
+function TextTag:SetVelocity(speed, angle)
+    SetTextTagVelocityBJ(self.texttag, speed, angle)
+end
+
+--- Установить или снять перманентность
+---@param flag boolean
+function TextTag:Permanent(flag)
+    SetTextTagPermanent(self.texttag, flag)
+end
+
+--- Уничтожить текст
+function TextTag:Destroy()
+    DestroyTextTag(self.texttag)
+end
+
+
 Timer = {}
 Timer.__index = Timer
 
@@ -631,6 +687,11 @@ function Timer:Destroy()
 end
 
 
+--- Класс для создания юнита
+---@param player player Игрок-владелец
+---@param unit_id unit Raw-code, создаваемого юнита
+---@param location location Позиция, в которой требуется создать юнита
+---@param face real Угол поворота, создаваемого юнита
 Unit = {}
 Unit.__index = Unit
 
@@ -646,10 +707,6 @@ setmetatable(Unit, {
     end,
 })
 
----@param player player
----@param unit_id unit
----@param location location
----@param face real
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
@@ -2163,32 +2220,47 @@ function BuffSystem.CheckingDebuffsExceptions()
 end
 
 
-BattleSystem = {is_fight = false}
+AttackSystem = {target = nil,
+                target_event = nil,
+}
 
-function BattleSystem.Init()
-    local combat = CreateTrigger()
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_1, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_1, EVENT_PLAYER_UNIT_DAMAGED, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_2, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, PLAYER_2, EVENT_PLAYER_UNIT_DAMAGED, nil)
-    TriggerRegisterPlayerUnitEvent(combat, LICH_KING, EVENT_PLAYER_UNIT_DAMAGING, nil)
-    TriggerRegisterPlayerUnitEvent(combat, LICH_KING, EVENT_PLAYER_UNIT_DAMAGED, nil)
+function AttackSystem.Init()
+    local damaged = EventsPlayer()
+    local gettarget = EventsPlayer()
+    damaged:RegisterUnitDamaged()
+    gettarget:RegisterPlayerMouseDown()
 
-    local function check_combat()
-        local damage = GetEventDamage()
-        --print(GetEventDamageSource(), GetEventDamage())
-        if damage then
-            BattleSystem.is_fight = true
-        else
-            BattleSystem.is_fight = false
-        end
-    end
-
-    TriggerAddAction(combat, check_combat)
+    damaged:AddAction(AttackSystem.ShowDamage)
+    gettarget:AddCondition(AttackSystem.IsRightButton)
+    gettarget:AddAction(AttackSystem.SetTarget)
 end
 
-function BattleSystem.Status()
-    return BattleSystem.is_fight
+function AttackSystem.IsRightButton()
+    return BlzGetTriggerPlayerMouseButton() == MOUSE_BUTTON_TYPE_RIGHT
+end
+
+function AttackSystem.SetTarget()
+    if BlzGetMouseFocusUnit() then
+        AttackSystem.target = Unit(BlzGetMouseFocusUnit())
+    end
+    if AttackSystem.target_event then
+        AttackSystem.target_event:Destroy()
+    end
+    if IsPlayerEnemy(GetLocalPlayer(), AttackSystem.target:GetOwner()) then
+        AttackSystem.target_event = EventsUnit(AttackSystem.target)
+        AttackSystem.target_event:RegisterDamaged()
+        AttackSystem.target_event:AddAction(AttackSystem.ShowDamage)
+    end
+end
+
+function AttackSystem.ShowDamage()
+    local unit = GetTriggerUnit()
+    local damage = I2S(R2I(GetEventDamage()))
+    local zOffset = GetRandomInt(20, 40)
+    local text = TextTag(damage, unit, zOffset, 10, 255, 0, 0, 20)
+    text:Permanent(false)
+    text:SetVelocity(50, GetRandomInt(50, 130))
+    text:SetLifespan(2.)
 end
 
 
@@ -2294,7 +2366,7 @@ function CultAdherent.Init(location, face)
         CultAdherent.unit:SetMana(current_mp)
     end
 
-    CultAdherent.unit:SetArmor(300)
+    CultAdherent.unit:SetArmor(220)
 
     CultAdherent.InitDarkMartyrdom()
 end
@@ -2349,7 +2421,7 @@ function CultFanatic.Init(location, face)
     end
 
     --CultFanatic.unit:SetBaseDamage(1881, 1)
-    CultFanatic.unit:SetArmor(300)
+    CultFanatic.unit:SetArmor(220)
 
     CultFanatic.InitDarkMartyrdom()
 end
@@ -2702,8 +2774,6 @@ function LadyDeathwhisper.ManaShield()
 
     event:RegisterDamaged()
 
-    --print(BattleSystem.Status())
-
     if not LadyDeathwhisper.mana_shield and not LadyDeathwhisper.mana_is_over then
         LadyDeathwhisper.mana_shield = Effect(LadyDeathwhisper.unit, model, "origin")
     end
@@ -2725,8 +2795,6 @@ function LadyDeathwhisper.ManaShield()
         end
         LadyDeathwhisper.mana_is_over = true
         LadyDeathwhisper.phase = 2
-        --TODO: не удаляется эффект
-        print(LadyDeathwhisper.mana_shield)
         LadyDeathwhisper.mana_shield:Destroy()
         event:Destroy()
         return false
@@ -2734,16 +2802,6 @@ function LadyDeathwhisper.ManaShield()
 
     event:AddCondition(UsingManaShield)
     event:AddAction(ManaShield)
-
-    --local function destroy_effect()
-    --    DestroyEffect(effect)
-    --    DestroyTimer(GetExpiredTimer())
-    --end
-    --
-    --if not BattleSystem.Status() then
-    --    local timer = CreateTimer()
-    --    TimerStart(timer, 5., false, destroy_effect)
-    --end
 end
 
 function LadyDeathwhisper.MSCheckPhase()
@@ -3326,7 +3384,7 @@ end
 
 --CUSTOM_CODE
 function Trig_Battle_Actions()
-        BattleSystem.Init()
+        AttackSystem.Init()
 end
 
 function InitTrig_Battle()

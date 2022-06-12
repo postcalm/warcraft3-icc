@@ -26,7 +26,7 @@ function CultAdherent.Init(location, face)
         CultAdherent.unit:SetMana(current_mp)
     end
 
-    CultAdherent.unit:SetArmor(300)
+    CultAdherent.unit:SetArmor(220)
 
     CultAdherent.InitDarkMartyrdom()
 end

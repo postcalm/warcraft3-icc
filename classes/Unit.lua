@@ -1,4 +1,9 @@
 
+--- Класс для создания юнита
+---@param player player Игрок-владелец
+---@param unit_id unit Raw-code, создаваемого юнита
+---@param location location Позиция, в которой требуется создать юнита
+---@param face real Угол поворота, создаваемого юнита
 Unit = {}
 Unit.__index = Unit
 
@@ -14,10 +19,6 @@ setmetatable(Unit, {
     end,
 })
 
----@param player player
----@param unit_id unit
----@param location location
----@param face real
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)

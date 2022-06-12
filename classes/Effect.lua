@@ -1,7 +1,9 @@
 
----@param unit unitid
----@param model string
----@param scale real
+--- Класс для создания эффектов на юнитах
+---@param unit unitid Id юнита
+---@param model string Название модели
+---@param attach_point string Точка к которой крепится эффект
+---@param scale real Размер эффекта
 Effect = {}
 Effect.__index = Effect
 
@@ -13,10 +15,6 @@ setmetatable(Effect, {
     end,
 })
 
----@param unit unitid Id юнита
----@param model string Название модели
----@param attach_point string Точка к которой крепится эффект
----@param scale real Размер эффекта
 function Effect:_init(unit, model, attach_point,scale)
     local u = unit
     local point = attach_point or "overhead"

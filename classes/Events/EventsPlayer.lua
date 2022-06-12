@@ -14,7 +14,11 @@ setmetatable(EventsPlayer, {
 
 function EventsPlayer:_init(player)
     Events._init(self)
-    self.player = player or 0
+    self.player = player or GetLocalPlayer()
+end
+
+function EventsPlayer:RegisterPlayerMouseDown()
+    TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
 
 function EventsPlayer:RegisterUnitAttacked()
@@ -49,7 +53,7 @@ end
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
---- Добавляет условие для события
+--- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 function EventsPlayer:AddCondition(func)
     Events.AddCondition(self, func)

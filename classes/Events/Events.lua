@@ -17,7 +17,7 @@ function Events:_init()
     self.trigger = CreateTrigger()
 end
 
---- Добавляет условие для события
+--- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 function Events:AddCondition(func)
     TriggerAddCondition(self.trigger, Condition(func))
