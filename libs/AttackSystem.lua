@@ -5,13 +5,13 @@ AttackSystem = {target = nil,
 
 function AttackSystem.Init()
     local damaged = EventsPlayer()
-    local gettarget = EventsPlayer()
+    local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-    gettarget:RegisterPlayerMouseDown()
+    settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(AttackSystem.ShowDamage)
-    gettarget:AddCondition(AttackSystem.IsRightButton)
-    gettarget:AddAction(AttackSystem.SetTarget)
+    settarget:AddCondition(AttackSystem.IsRightButton)
+    settarget:AddAction(AttackSystem.SetTarget)
 end
 
 function AttackSystem.IsRightButton()
