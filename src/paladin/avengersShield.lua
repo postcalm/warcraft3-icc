@@ -42,7 +42,7 @@ function Paladin.AvengersShield()
 
     local i = 0
     local shield = UnitSpell(Paladin.hero:GetId())
-    local effect = Effect(shield, model_name, 0.7)
+    local effect = Effect(shield, model_name, "overhead")
     while i < 3 do
         TriggerSleepAction(0.)
         shield:MoveToUnit(target)
@@ -52,8 +52,9 @@ function Paladin.AvengersShield()
             i = i + 1
         end
         if shield:NearTarget(target) then
-            damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
+            damage = R2I(GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power))
             Paladin.hero:DealPhysicalDamage(target, damage)
+            TextTag(I2S(damage), target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             if target == 0 then break end

@@ -7,6 +7,7 @@ function Priest.CastCircleOfHealing()
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
     target:GainLife{life=heal}
+    TextTag(I2S(heal), target):Preset("heal")
 end
 
 function Priest.IsCircleOfHealing()

@@ -15,7 +15,7 @@ setmetatable(Effect, {
     end,
 })
 
-function Effect:_init(unit, model, attach_point,scale)
+function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
     if type(unit) == "table" then u = unit:GetId() end

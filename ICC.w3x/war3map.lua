@@ -304,7 +304,7 @@ setmetatable(Effect, {
     end,
 })
 
-function Effect:_init(unit, model, attach_point,scale)
+function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
     if type(unit) == "table" then u = unit:GetId() end
@@ -625,11 +625,42 @@ setmetatable(TextTag, {
 
 function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency)
     self.texttag = CreateTextTag()
-    local textHeight = TextTagSize2Height(size)
+    self.text_height = 0
+    self.zoffset = 0
+    self.text = text
+    self.unit = unit
+    if type(unit) == "table" then self.unit = unit:GetId() end
 
-    SetTextTagText(self.texttag, text, textHeight)
-    SetTextTagPosUnit(self.texttag, unit, zoffset)
-    SetTextTagColor(self.texttag, red, green, blue, PercentTo255(100.0 - transparency))
+    if size then
+        self:SetSize(size)
+    end
+
+    if zoffset then
+        self:SetPosition(zoffset)
+    end
+
+    if red and green and blue and transparency then
+        self:SetColor(red, green, blue, transparency)
+    end
+end
+
+--- Установить предопределенные настройки для текста
+---@param preset string Варианты: "damage", "heal", "spell", "mana"
+function TextTag:Preset(preset)
+    if preset == "damage" then
+        self:SetColor(255, 0, 0, 20)
+    elseif preset == "heal" then
+        self:SetColor(0, 255, 0, 20)
+    elseif preset == "spell" then
+        self:SetColor(255, 180, 0, 20)
+    elseif preset == "mana" then
+        self:SetColor(0, 100, 255, 20)
+    end
+    self:SetPosition(GetRandomInt(20, 40))
+    self:SetSize(10)
+    self:Permanent(false)
+    self:SetVelocity(50, GetRandomInt(50, 130))
+    self:SetLifespan(3.)
 end
 
 --- Установить время жизни текста
@@ -643,6 +674,19 @@ end
 ---@param angle real Угол направления
 function TextTag:SetVelocity(speed, angle)
     SetTextTagVelocityBJ(self.texttag, speed, angle)
+end
+
+function TextTag:SetColor(red, green, blue, transparency)
+    SetTextTagColor(self.texttag, red, green, blue, PercentTo255(100.0 - transparency))
+end
+
+function TextTag:SetSize(size)
+    self.text_height = TextTagSize2Height(size)
+    SetTextTagText(self.texttag, self.text, self.text_height)
+end
+
+function TextTag:SetPosition(zoffset)
+    SetTextTagPosUnit(self.texttag, self.unit, zoffset)
 end
 
 --- Установить или снять перманентность
@@ -2220,47 +2264,44 @@ function BuffSystem.CheckingDebuffsExceptions()
 end
 
 
-AttackSystem = {target = nil,
+BattleSystem = {target = nil,
                 target_event = nil,
 }
 
-function AttackSystem.Init()
+function BattleSystem.Init()
     local damaged = EventsPlayer()
-    local gettarget = EventsPlayer()
+    local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-    gettarget:RegisterPlayerMouseDown()
 
-    damaged:AddAction(AttackSystem.ShowDamage)
-    gettarget:AddCondition(AttackSystem.IsRightButton)
-    gettarget:AddAction(AttackSystem.SetTarget)
+    settarget:RegisterPlayerMouseDown()
+
+    damaged:AddAction(BattleSystem.ShowDamage)
+    settarget:AddCondition(BattleSystem.IsRightButton)
+    settarget:AddAction(BattleSystem.SetTarget)
 end
 
-function AttackSystem.IsRightButton()
+function BattleSystem.IsRightButton()
     return BlzGetTriggerPlayerMouseButton() == MOUSE_BUTTON_TYPE_RIGHT
 end
 
-function AttackSystem.SetTarget()
+function BattleSystem.SetTarget()
     if BlzGetMouseFocusUnit() then
-        AttackSystem.target = Unit(BlzGetMouseFocusUnit())
+        BattleSystem.target = Unit(BlzGetMouseFocusUnit())
     end
-    if AttackSystem.target_event then
-        AttackSystem.target_event:Destroy()
+    if BattleSystem.target_event then
+        BattleSystem.target_event:Destroy()
     end
-    if IsPlayerEnemy(GetLocalPlayer(), AttackSystem.target:GetOwner()) then
-        AttackSystem.target_event = EventsUnit(AttackSystem.target)
-        AttackSystem.target_event:RegisterDamaged()
-        AttackSystem.target_event:AddAction(AttackSystem.ShowDamage)
+    if IsPlayerEnemy(GetLocalPlayer(), BattleSystem.target:GetOwner()) then
+        BattleSystem.target_event = EventsUnit(BattleSystem.target)
+        BattleSystem.target_event:RegisterDamaged()
+        BattleSystem.target_event:AddAction(BattleSystem.ShowDamage)
     end
 end
 
-function AttackSystem.ShowDamage()
+function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = I2S(R2I(GetEventDamage()))
-    local zOffset = GetRandomInt(20, 40)
-    local text = TextTag(damage, unit, zOffset, 10, 255, 0, 0, 20)
-    text:Permanent(false)
-    text:SetVelocity(50, GetRandomInt(50, 130))
-    text:SetLifespan(2.)
+    TextTag(damage, unit):Preset("damage")
 end
 
 
@@ -2936,7 +2977,7 @@ function Paladin.AvengersShield()
 
     local i = 0
     local shield = UnitSpell(Paladin.hero:GetId())
-    local effect = Effect(shield, model_name, 0.7)
+    local effect = Effect(shield, model_name, "overhead")
     while i < 3 do
         TriggerSleepAction(0.)
         shield:MoveToUnit(target)
@@ -2946,8 +2987,9 @@ function Paladin.AvengersShield()
             i = i + 1
         end
         if shield:NearTarget(target) then
-            damage = GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power)
+            damage = R2I(GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power))
             Paladin.hero:DealPhysicalDamage(target, damage)
+            TextTag(I2S(damage), target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             if target == 0 then break end
@@ -3202,6 +3244,7 @@ end
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7  then
         Paladin.hero:GainLife{percent=2}
+        TextTag(I2S(Paladin.hero:GetPercentLifeOfMax(2)), Paladin.hero):Preset("heal")
     end
 end
 
@@ -3242,6 +3285,7 @@ end
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
         Paladin.hero:GainMana{percent=2}
+        TextTag(I2S(Paladin.hero:GetPercentManaOfMax(2)), Paladin.hero):Preset("mana")
     end
 end
 
@@ -3305,6 +3349,7 @@ function Priest.CastCircleOfHealing()
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
     target:GainLife{life=heal}
+    TextTag(I2S(heal), target):Preset("heal")
 end
 
 function Priest.IsCircleOfHealing()
@@ -3325,6 +3370,7 @@ function Priest.CastFlashHeal()
     local heal = GetRandomInt(1887, 2193)
     Priest.hero:LoseMana{percent=18}
     target:GainLife{life=heal}
+    TextTag(I2S(heal), target):Preset("heal")
 end
 
 function Priest.IsFlashHeal()
@@ -3367,6 +3413,7 @@ function Priest.CastRenew()
     Priest.hero:LoseMana{percent=17}
     for _ = 1, 5 do
         unit:GainLife{life=HP}
+        TextTag(I2S(HP), unit):Preset("heal")
         TriggerSleepAction(3.)
     end
 end
@@ -3384,7 +3431,7 @@ end
 
 --CUSTOM_CODE
 function Trig_Battle_Actions()
-        AttackSystem.Init()
+        BattleSystem.Init()
 end
 
 function InitTrig_Battle()

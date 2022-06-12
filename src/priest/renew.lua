@@ -8,6 +8,7 @@ function Priest.CastRenew()
     Priest.hero:LoseMana{percent=17}
     for _ = 1, 5 do
         unit:GainLife{life=HP}
+        TextTag(I2S(HP), unit):Preset("heal")
         TriggerSleepAction(3.)
     end
 end
