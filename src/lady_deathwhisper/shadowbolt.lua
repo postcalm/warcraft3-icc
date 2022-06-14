@@ -6,7 +6,7 @@ function LadyDeathwhisper.ShadowBolt()
     local model_name = "Abilities\\Spells\\Other\\BlackArrow\\BlackArrowMissile.mdl"
 
     local sb = UnitSpell(LadyDeathwhisper.unit:GetId())
-    local effect = Effect(sb, model_name, 0.7)
+    local effect = Effect(sb, model_name)
     while true do
         TriggerSleepAction(0.)
         sb:MoveToUnit(enemy)

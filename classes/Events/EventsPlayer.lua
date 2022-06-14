@@ -1,5 +1,6 @@
 --- Created by meiso.
 
+---@param player playerid Id игрока. По умолчанию - локальный игрока
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
 
@@ -17,8 +18,17 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
+--- Регистриует событие нажатия кнопки мыши
 function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
+end
+
+--- Регистриует событие, написания в чат
+---@param text string Сообщение, которое необходимо отследить
+---@param exact boolean Проверять как точное вхождение
+function EventsPlayer:RegisterChatEvent(text, exact)
+    local e = exact or false
+    TriggerRegisterPlayerChatEvent(self.trigger, self.player, text, e)
 end
 
 function EventsPlayer:RegisterUnitAttacked()

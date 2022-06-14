@@ -31,7 +31,10 @@ local param = {
     files      = { -- порядок сборки файлов
         [[\common]],
         [[\classes]],
-        [[\libs\SaveSystem]],
+        [[\libs\SaveSystem\SaveSystem.lua]],
+        [[\libs\SaveSystem\NewHero.lua]],
+        [[\libs\SaveSystem\LoadHero.lua]],
+        [[\libs\SaveSystem\SaveHero.lua]],
         [[\libs\EquipmentSystem]],
         [[\libs\BuffSystem.lua]],
         [[\libs\BattleSystem.lua]],

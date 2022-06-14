@@ -1,4 +1,4 @@
---- Created by Kodpi.
+-- Copyright (c) 2022 Kodpi
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды
@@ -8,7 +8,7 @@ function Priest.CastRenew()
     Priest.hero:LoseMana{percent=17}
     for _ = 1, 5 do
         unit:GainLife{life=HP}
-        TextTag(I2S(HP), unit):Preset("heal")
+        TextTag(HP, unit):Preset("heal")
         TriggerSleepAction(3.)
     end
 end

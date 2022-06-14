@@ -6,7 +6,7 @@ function LadyDeathwhisper.FrostBoltVolley()
     local function frostbolt(enemy)
         local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
         local enemy_movespeed = enemy:GetMoveSpeed()
-        local effect = Effect(fb, model_name, 0.7)
+        local effect = Effect(fb, model_name)
         while true do
             TriggerSleepAction(0.)
             fb:MoveToUnit(enemy)

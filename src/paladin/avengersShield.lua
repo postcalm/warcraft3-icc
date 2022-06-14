@@ -54,7 +54,7 @@ function Paladin.AvengersShield()
         if shield:NearTarget(target) then
             damage = R2I(GetRandomInt(1100, 1344) + (factor * light_magic_damage) + (factor * attack_power))
             Paladin.hero:DealPhysicalDamage(target, damage)
-            TextTag(I2S(damage), target):Preset("spell")
+            TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
             if target == 0 then break end

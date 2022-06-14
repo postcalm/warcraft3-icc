@@ -22,10 +22,6 @@ function zip(...)
     return array
 end
 
-function meters()
-    
-end
-
 --- Округляет число
 ---@param number number
 ---@return number

@@ -2,7 +2,7 @@
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
         Paladin.hero:GainMana{percent=2}
-        TextTag(I2S(Paladin.hero:GetPercentManaOfMax(2)), Paladin.hero):Preset("mana")
+        TextTag(Paladin.hero:GetPercentManaOfMax(2), Paladin.hero):Preset("mana")
     end
 end
 

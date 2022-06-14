@@ -35,6 +35,6 @@ end
 
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
-    local damage = I2S(R2I(GetEventDamage()))
+    local damage = GetEventDamage()
     TextTag(damage, unit):Preset("damage")
 end

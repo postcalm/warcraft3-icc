@@ -1,34 +1,39 @@
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
---- Область, за которой следует номер карты
-SCOPE_MAP        = 2
---- Область, за которой следуют данные о ресурсах игрока
-SCOPE_RESOURCES  = 3
---- Область, за которой следуют данные о юните (положение, хп, мана)
-SCOPE_HERO_DATA  = 4
---- Область, за которой следуют данные о количестве skill points
-SCOPE_HERO_SKILL = 5
---- Область, за которой следуют данные о характеристиках
-SCOPE_STATE      = 6
---- Область, за которой следуют данные о способностях героя
-SCOPE_ABILITIES  = 7
---- Область, за которой следуют данные об имеющихся предметах
-SCOPE_ITEMS      = 8
-
--- Числа, расшифровать смысл которых, так и не получилось
-MAGIC_NUMBER_ONE   = 18259200
-MAGIC_NUMBER_TWO   = 44711
-MAGIC_NUMBER_THREE = 259183
-MAGIC_NUMBER_FOUR  = 129593
-MAGIC_NUMBER_FIVE  = 259200
-MAGIC_NUMBER_SIX   = 54773
-MAGIC_NUMBER_SEVEN = 7141
-MAGIC_NUMBER_EIGHT = 421
-MAGIC_NUMBER_NINE  = 259199
+SaveSystem = {
+    scope = {
+        --- Область, за которой следует номер карты
+        map        = 2,
+        --- Область, за которой следуют данные о ресурсах игрока
+        resources  = 3,
+        --- Область, за которой следуют данные о юните (положение, хп, мана)
+        hero_data  = 4,
+        --- Область, за которой следуют данные о количестве skill points
+        hero_skill = 5,
+        --- Область, за которой следуют данные о характеристиках
+        state      = 6,
+        --- Область, за которой следуют данные о способностях героя
+        abilities  = 7,
+        --- Область, за которой следуют данные об имеющихся предметах
+        items      = 8,
+    },
+    -- Числа, расшифровать смысл которых, так и не получилось
+    magic_number = {
+        one   = 18259200,
+        two   = 44711,
+        three = 259183,
+        four  = 129593,
+        five  = 259200,
+        six   = 54773,
+        seven = 7141,
+        eight = 421,
+        nine  = 259199,
+    },
+}
 
 --- Возрождает юнита
-function UnitsRespawn()
+function SaveSystem.UnitsRespawn()
     local u = GetTriggerUnit()
     if IsUnitType(u, UNIT_TYPE_HERO) == true then
         TriggerSleepAction(5)
@@ -36,8 +41,16 @@ function UnitsRespawn()
     end
 end
 
---- Сохраняет способности героя
-function SaveHeroAbilities()
+function SaveSystem.InitHeroAbilities(class)
+    if class == CLASSES["paladin"] then
+        SaveSystem.InitHeroAbilitiesPaladin()
+    elseif class == CLASSES["priest"] then
+        SaveSystem.InitHeroAbilitiesPriest()
+    end
+end
+
+--- Инициализирует способности паладина
+function SaveSystem.InitHeroAbilitiesPaladin()
     udg_SaveUnit_hero_ability[1] = DEVOTION_AURA
     udg_SaveUnit_hero_ability[2] = DIVINE_SHIELD
     udg_SaveUnit_hero_ability[3] = CONSECRATION
@@ -49,36 +62,40 @@ function SaveHeroAbilities()
     udg_SaveUnit_hero_ability[9] = SPELLBOOK_PALADIN
 end
 
+--- Инициализирует способности приста
+function SaveSystem.InitHeroAbilitiesPriest()
+    udg_SaveUnit_hero_ability[1] = FLASH_HEAL
+    udg_SaveUnit_hero_ability[2] = RENEW
+    udg_SaveUnit_hero_ability[3] = CIRCLE_OF_HEALING
+end
+
 --- Выдает герою способности
-function AddHeroAbilities()
-    SaveHeroAbilities()
-    local hero_s = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
-    for i = 1, 9 do
-        UnitAddAbility(hero_s, udg_SaveUnit_hero_ability[i])
-    end
-    UnitAddAbility(hero_s, SPELLBOOK_PALADIN)
-    UnitMakeAbilityPermanent(hero_s, true, SPELLBOOK_PALADIN)
-    SetPlayerAbilityAvailable(GetTriggerPlayer(), SPELLBOOK_PALADIN, true)
-    SetHeroLevel(hero_s, 80, false)
+function SaveSystem.AddHeroAbilities(class)
+    udg_SaveUnit_class = CLASSES[class]
+    SaveSystem.InitHeroAbilities(udg_SaveUnit_class)
+    local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
+    hero:AddAbilities(table.unpack(udg_SaveUnit_hero_ability))
+    hero:AddSpellbook(udg_SaveUnit_spellbook)
+    hero:SetLevel(80)
 end
 
 ---
-function generation1()
-    udg_SaveUnit_g1 = udg_SaveUnit_g1 * MAGIC_NUMBER_SEVEN + MAGIC_NUMBER_SIX
-    udg_SaveUnit_g1 = math.fmod(udg_SaveUnit_g1, MAGIC_NUMBER_FIVE)
+function SaveSystem.generation1()
+    udg_SaveUnit_g1 = udg_SaveUnit_g1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
+    udg_SaveUnit_g1 = math.fmod(udg_SaveUnit_g1, SaveSystem.magic_number.five)
     return udg_SaveUnit_g1
 end
 
 ---
-function generation2()
-    udg_SaveUnit_g2 = udg_SaveUnit_g2 * MAGIC_NUMBER_EIGHT + MAGIC_NUMBER_SIX
-    udg_SaveUnit_g2 = math.fmod(udg_SaveUnit_g2, MAGIC_NUMBER_FIVE)
+function SaveSystem.generation2()
+    udg_SaveUnit_g2 = udg_SaveUnit_g2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
+    udg_SaveUnit_g2 = math.fmod(udg_SaveUnit_g2, SaveSystem.magic_number.five)
     return udg_SaveUnit_g2
 end
 
 --- Получает ключ игрока
 ---@return int Ключ игрока
-function GetUserKey()
+function SaveSystem.GetUserKey()
     if udg_SaveUnit_author > 0 then
         Preloader("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
@@ -86,13 +103,13 @@ function GetUserKey()
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key/8286 > MAGIC_NUMBER_NINE then
+        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
             return 0
         end
 
         udg_SaveUnit_g1 = public_key
 
-        secret_key = secret_key - generation1()
+        secret_key = secret_key - SaveSystem.generation1()
         if secret_key <= 0 then
             return 0
         end
@@ -105,12 +122,12 @@ end
 ---@param salt int "Соль" для ключа
 ---@param val int Значение для генерации ключа
 ---@return int Ключ игрока
-function CreateUserKey(salt, val)
+function SaveSystem.CreateUserKey(salt, val)
     if udg_SaveUnit_author > 0 then
         udg_SaveUnit_g1 = salt
         PreloadGenClear()
         Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + generation1())..") //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
         PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
         return val
     end
@@ -121,29 +138,29 @@ end
 ---@param index int Текущее значение итератора
 ---@param current_scope int Текущая область
 ---@return int Положение следующей области
-function scopeSaveUnitLoad___next(index, current_scope)
-    if current_scope == SCOPE_MAP then
+function SaveSystem.next_scope(index, current_scope)
+    if current_scope == SaveSystem.scope.map then
         return index + 2
     end
-    if current_scope == SCOPE_RESOURCES then
+    if current_scope == SaveSystem.scope.resources then
         return index + 3
     end
-    if current_scope == SCOPE_HERO_DATA then
+    if current_scope == SaveSystem.scope.hero_data then
         return index + 7
     end
-    if current_scope == SCOPE_HERO_SKILL then
+    if current_scope == SaveSystem.scope.hero_skill then
         return index + udg_SaveUnit_data[index + 1] * 2 + 2
     end
     -- блок со статами
-    if current_scope == SCOPE_STATE then
+    if current_scope == SaveSystem.scope.state then
         return index + 5
     end
     -- блок со способностями
-    if current_scope == SCOPE_ABILITIES then
+    if current_scope == SaveSystem.scope.abilities then
         return index + udg_SaveUnit_data[index + 1] * 2 + 2
     end
     -- блок с предметами
-    if current_scope == SCOPE_ITEMS then
+    if current_scope == SaveSystem.scope.items then
         return index + udg_SaveUnit_data[index + 1] * 2 + 2
     end
 
@@ -152,7 +169,7 @@ function scopeSaveUnitLoad___next(index, current_scope)
 end
 
 ---
-function scopeSaveUnitLoad___load_userdata()
+function SaveSystem.LoadUserData()
     if udg_SaveUnit_data[1] > 0 then
         local case = -1
         local i = 2
@@ -167,13 +184,13 @@ function scopeSaveUnitLoad___load_userdata()
                 end
                 udg_SaveUnit_user_data[1] = max_count_data
             end
-            i = scopeSaveUnitLoad___next(i, case)
+            i = SaveSystem.next_scope(i, case)
         end
     end
 end
 
 ---
-function scopeSaveUnitLoad___load_forunit()
+function SaveSystem.LoadUnitData()
     if udg_SaveUnit_unit ~= nil then
         local current_unit = udg_SaveUnit_unit
         local unit_loc_x = GetUnitX(current_unit)
@@ -184,7 +201,7 @@ function scopeSaveUnitLoad___load_forunit()
         while i < maximum_data do
             current_case = udg_SaveUnit_data[i]
             -- выдаем предметы
-            if current_case == SCOPE_ITEMS then
+            if current_case == SaveSystem.scope.items then
                 local max_count_data = udg_SaveUnit_data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
@@ -197,7 +214,7 @@ function scopeSaveUnitLoad___load_forunit()
             end
 
             -- проставляем статы
-            if current_case == SCOPE_STATE then
+            if current_case == SaveSystem.scope.state then
                 SetHeroXP(current_unit, udg_SaveUnit_data[i + 1], false)
                 if GetHeroStr(current_unit, false) < udg_SaveUnit_data[i + 2] then
                     SetHeroStr(current_unit, udg_SaveUnit_data[i + 2], false)
@@ -211,7 +228,7 @@ function scopeSaveUnitLoad___load_forunit()
             end
 
             -- выдаем юниту его навыки
-            if current_case == SCOPE_HERO_SKILL then
+            if current_case == SaveSystem.scope.hero_skill then
                 local max_count_data = udg_SaveUnit_data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
@@ -226,7 +243,7 @@ function scopeSaveUnitLoad___load_forunit()
             end
 
             -- выдаем способности
-            if current_case == SCOPE_ABILITIES then
+            if current_case == SaveSystem.scope.abilities then
                 -- сколько всего способностей было сохранено
                 local max_count_data = udg_SaveUnit_data[i + 1]
                 -- индекс, по которому лежит способность
@@ -238,17 +255,17 @@ function scopeSaveUnitLoad___load_forunit()
                     max_count_data = max_count_data - 1
                 end
             end
-            i = scopeSaveUnitLoad___next(i, current_case)
+            i = SaveSystem.next_scope(i, current_case)
         end
     end
 end
 
 --- Загрузка общих данных об игроке и его юните
----@param pl player Локальный игрок
-function LoadGeneralState(pl)
+---@param pl playerid Локальный игрок
+function SaveSystem.LoadBaseState(pl)
     local unit_x
     local unit_y
-    local unit_rotate
+    local unit_face
     local count_gold
     local count_lumber
     local unit_id
@@ -269,25 +286,26 @@ function LoadGeneralState(pl)
 
         while i < n do
             case = udg_SaveUnit_data[i]
-            if case == SCOPE_MAP then
+            if case == SaveSystem.scope.map then
                 map_number = udg_SaveUnit_data[i + 1]
             end
 
-            if case == SCOPE_RESOURCES then
+            if case == SaveSystem.scope.resources then
                 count_gold = udg_SaveUnit_data[i + 1]
                 count_lumber = udg_SaveUnit_data[i + 2]
             end
 
-            if case == SCOPE_HERO_DATA then
+            if case == SaveSystem.scope.hero_data then
                 unit_id = udg_SaveUnit_data[i + 1]
                 -- местоположение игрока в месте, где он сохранялся
-                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(udg_SaveUnit_data[i + 2]) / MAGIC_NUMBER_ONE)
-                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(udg_SaveUnit_data[i + 3]) / MAGIC_NUMBER_ONE)
-                unit_rotate = 360. * (I2R(udg_SaveUnit_data[i + 4]) / MAGIC_NUMBER_ONE)
+                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(udg_SaveUnit_data[i + 2]) / SaveSystem.magic_number.one)
+                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(udg_SaveUnit_data[i + 3]) / SaveSystem.magic_number.one)
+                unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
                 health = udg_SaveUnit_data[i + 5]
                 mana = udg_SaveUnit_data[i + 6]
+                --udg_SaveUnit_class = udg_SaveUnit_data[i + 7]
             end
-            i = scopeSaveUnitLoad___next(i, case)
+            i = SaveSystem.next_scope(i, case)
         end
 
         if map_number ~= udg_SaveUnit_map_number then
@@ -295,12 +313,13 @@ function LoadGeneralState(pl)
             unit_y = udg_SaveUnit_y
         end
 
-        local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_rotate)
+        --SaveSystem.AddHeroAbilities(udg_SaveUnit_class)
+        local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
         udg_SaveUnit_unit = unit_obj
 
         if unit_obj ~= nil then
-            SetUnitState(unit_obj, UNIT_STATE_LIFE, GetUnitState(unit_obj, UNIT_STATE_MAX_LIFE) * (I2R(health) / MAGIC_NUMBER_ONE))
-            SetUnitState(unit_obj, UNIT_STATE_MANA, GetUnitState(unit_obj, UNIT_STATE_MAX_MANA) * (I2R(mana) / MAGIC_NUMBER_ONE))
+            SetUnitState(unit_obj, UNIT_STATE_LIFE, GetUnitState(unit_obj, UNIT_STATE_MAX_LIFE) * (I2R(health) / SaveSystem.magic_number.one))
+            SetUnitState(unit_obj, UNIT_STATE_MANA, GetUnitState(unit_obj, UNIT_STATE_MAX_MANA) * (I2R(mana) / SaveSystem.magic_number.one))
             SetPlayerState(pl, PLAYER_STATE_RESOURCE_GOLD, count_gold)
             SetPlayerState(pl, PLAYER_STATE_RESOURCE_LUMBER, count_lumber)
         end
@@ -308,7 +327,7 @@ function LoadGeneralState(pl)
 end
 
 --
-function scopeSaveUnitLoad___creature(gc, pl)
+function SaveSystem.creature(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
         for i = 1, count do
@@ -317,7 +336,7 @@ function scopeSaveUnitLoad___creature(gc, pl)
         TriggerSleepAction(0.)
 
         -- загружаем общее состояние игрока
-        LoadGeneralState(pl)
+        SaveSystem.LoadBaseState(pl)
 
         if udg_SaveUnit_unit == nil then
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error data")
@@ -325,15 +344,15 @@ function scopeSaveUnitLoad___creature(gc, pl)
         end
 
         TriggerSleepAction(0.)
-        scopeSaveUnitLoad___load_forunit()
+        SaveSystem.LoadUnitData()
         TriggerSleepAction(0.)
-        scopeSaveUnitLoad___load_userdata()
+        SaveSystem.LoadUserData()
         DisplayTextToPlayer(pl, 0, 0, "load complite")
     end
 end
 
 --- Синхронизирует данные между игроками
-function scopeSaveUnitLoad___load_syncing(gc, is_player)
+function SaveSystem.Syncing(gc, is_player)
     if is_player then
         local count = udg_SaveUnit_data[1]
         for i = 1, count do
@@ -346,7 +365,7 @@ function scopeSaveUnitLoad___load_syncing(gc, is_player)
 end
 
 ---
-function scopeSaveUnitLoad___load_uploading(author, user)
+function SaveSystem.load_uploading(author, user)
     local encrypted_data
     if author > 0 and user > 0 then
         local player_s = Player(25)
@@ -355,31 +374,31 @@ function scopeSaveUnitLoad___load_uploading(author, user)
         udg_SaveUnit_g1 = saved_encrypted_key
         udg_SaveUnit_g2 = saved_encrypted_key
 
-        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, generation2())
-        local check_max_count_data = cjlocgn_00000005 - generation1()
+        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+        local check_max_count_data = cjlocgn_00000005 - SaveSystem.generation1()
 
         if max_count_data == check_max_count_data then
             -- дешифруем
             for i = 2, max_count_data do
-                encrypted_data = GetPlayerTechMaxAllowed(player_s, generation2())
-                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, MAGIC_NUMBER_THREE)
+                encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, SaveSystem.magic_number.three)
 
-                encrypted_data = encrypted_data - generation1()
-                check_max_count_data = math.fmod(check_max_count_data + encrypted_data, MAGIC_NUMBER_FOUR)
+                encrypted_data = encrypted_data - SaveSystem.generation1()
+                check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
 
                 udg_SaveUnit_data[i] = encrypted_data
             end
             udg_SaveUnit_data[1] = max_count_data
 
-            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, generation2()) - generation1() then
+            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
                 return false
             end
 
-            local result = math.fmod(math.fmod(math.fmod(math.fmod(author, MAGIC_NUMBER_TWO) *
-                               math.fmod(check_max_count_data, MAGIC_NUMBER_TWO), MAGIC_NUMBER_TWO) *
-                               math.fmod(saved_encrypted_key, MAGIC_NUMBER_TWO), MAGIC_NUMBER_TWO) *
-                               math.fmod(user, MAGIC_NUMBER_TWO), MAGIC_NUMBER_TWO)
+            local result = math.fmod(math.fmod(math.fmod(math.fmod(author, SaveSystem.magic_number.two) *
+                               math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                               math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                               math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
             if GetPlayerTechMaxAllowed(player_s, -3) == result then
                 return true
             end
@@ -390,7 +409,7 @@ function scopeSaveUnitLoad___load_uploading(author, user)
 end
 
 ---
-function scopeSaveUnitLoad___afa(gc, pl, file_name)
+function SaveSystem.afa(gc, pl, file_name)
     local is_player_author = false
     local user_key
     local id_player
@@ -404,7 +423,7 @@ function scopeSaveUnitLoad___afa(gc, pl, file_name)
         end
 
         if is_player_author then
-            user_key = GetUserKey()
+            user_key = SaveSystem.GetUserKey()
             if user_key == 0 then
                 is_player_author = false
             end
@@ -420,17 +439,17 @@ function scopeSaveUnitLoad___afa(gc, pl, file_name)
         TriggerSleepAction(0.)
 
         if is_player_author then
-            is_player_author = scopeSaveUnitLoad___load_uploading(id_player, user_key)
+            is_player_author = SaveSystem.load_uploading(id_player, user_key)
         end
 
         TriggerSleepAction(0.)
         TriggerSyncStart()
-        scopeSaveUnitLoad___load_syncing(gc, is_player_author)
+        SaveSystem.Syncing(gc, is_player_author)
         TriggerSleepAction(2.)
         TriggerSyncReady()
 
         if GetStoredInteger(gc, "bool", "bool") == 1 then
-            scopeSaveUnitLoad___creature(gc, pl)
+            SaveSystem.creature(gc, pl)
         end
 
         StoreInteger(gc, "bool", "bool", 0)
@@ -438,7 +457,7 @@ function scopeSaveUnitLoad___afa(gc, pl, file_name)
 end
 
 ---
-function Load()
+function SaveSystem.Load()
     local save_file
     local full_command_from_chat
 
@@ -452,7 +471,7 @@ function Load()
             save_file = "default.txt"
         end
 
-        scopeSaveUnitLoad___afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
+        SaveSystem.afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, udg_SaveUnit_data[1] do
             Preload(I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load")
@@ -466,21 +485,21 @@ function Load()
 end
 
 ---
-function scopeSaveUnitSave__save_userdata(i)
+function SaveSystem.SaveUserData(i)
     if i > 0 then
         local n = udg_SaveUnit_user_data[1]
         --Preload(I2S(n))
         if n > 0 then
 
             udg_SaveUnit_data[i] = 1
-            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata")
+            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData")
             i = i + 1
             udg_SaveUnit_data[i] = n
-            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata")
+            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData")
             i = i + 1
             for j = 2, n do
                 udg_SaveUnit_data[i] = udg_SaveUnit_user_data[j]
-                --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < save_userdata cycle")
+                --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData cycle")
                 i = i + 1
             end
         end
@@ -491,7 +510,7 @@ function scopeSaveUnitSave__save_userdata(i)
 end
 
 ---
-function SaveGeneralState(i, u, world)
+function SaveSystem.SaveBaseState(i, u, world)
     local ability_iter = 1
     local max_count_abilities = 0
 
@@ -503,19 +522,19 @@ function SaveGeneralState(i, u, world)
         local map_number = udg_SaveUnit_map_number
         local unit_type_id = GetUnitTypeId(u)
 
-        local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(MAGIC_NUMBER_ONE)/(rect_max_x - rect_min_x)))
-        local hero_position_y = R2I((GetUnitY(u) - rect_min_y) * (I2R(MAGIC_NUMBER_ONE)/(rect_max_y - rect_min_y)))
-        local hero_facing = R2I(GetUnitFacing(u) * (MAGIC_NUMBER_ONE/360.))
+        local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(SaveSystem.magic_number.one) / (rect_max_x - rect_min_x)))
+        local hero_position_y = R2I((GetUnitY(u) - rect_min_y) * (I2R(SaveSystem.magic_number.one) / (rect_max_y - rect_min_y)))
+        local hero_facing = R2I(GetUnitFacing(u) * (SaveSystem.magic_number.one / 360.))
 
-        local health = R2I(GetUnitState(u, UNIT_STATE_LIFE) * (MAGIC_NUMBER_ONE/GetUnitState(u, UNIT_STATE_MAX_LIFE)))
-        local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (MAGIC_NUMBER_ONE/GetUnitState(u, UNIT_STATE_MAX_MANA)))
+        local health = R2I(GetUnitState(u, UNIT_STATE_LIFE) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_LIFE)))
+        local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_MANA)))
         local count_gold = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_GOLD)
         local count_lumber = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_LUMBER)
-        udg_SaveUnit_data[i] = SCOPE_MAP
+        udg_SaveUnit_data[i] = SaveSystem.scope.map
         i = i + 1
         udg_SaveUnit_data[i] = map_number
         i = i + 1
-        udg_SaveUnit_data[i] = SCOPE_HERO_DATA
+        udg_SaveUnit_data[i] = SaveSystem.scope.hero_data
         i = i + 1
         udg_SaveUnit_data[i] = unit_type_id
         i = i + 1
@@ -529,13 +548,15 @@ function SaveGeneralState(i, u, world)
         i = i + 1
         udg_SaveUnit_data[i] = mana
         i = i + 1
-        udg_SaveUnit_data[i] = SCOPE_RESOURCES
+        --udg_SaveUnit_data[i] = udg_SaveUnit_class
+        --i = i + 1
+        udg_SaveUnit_data[i] = SaveSystem.scope.resources
         i = i + 1
         udg_SaveUnit_data[i] = count_gold
         i = i + 1
         udg_SaveUnit_data[i] = count_lumber
         i = i + 1
-        udg_SaveUnit_data[i] = SCOPE_HERO_SKILL
+        udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
         i = i + 1
         local scope_ability = i
         i = i + 1
@@ -557,7 +578,7 @@ function SaveGeneralState(i, u, world)
 end
 
 --
-function scopeSaveUnitSave__save_hero(i, u)
+function SaveSystem.save_hero(i, u)
     local ability_iter = 1
     local ability_count = 0
     local item_count = 0
@@ -565,7 +586,7 @@ function scopeSaveUnitSave__save_hero(i, u)
 
     if IsUnitType(u, UNIT_TYPE_HERO) == true then
         -- сохраняем инфу: опыт, сила, ловкость, интеллект
-        udg_SaveUnit_data[i] = SCOPE_STATE
+        udg_SaveUnit_data[i] = SaveSystem.scope.state
         i = i + 1
         udg_SaveUnit_data[i] = GetHeroXP(u)
         i = i + 1
@@ -575,7 +596,7 @@ function scopeSaveUnitSave__save_hero(i, u)
         i = i + 1
         udg_SaveUnit_data[i] = GetHeroInt(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = SCOPE_ABILITIES
+        udg_SaveUnit_data[i] = SaveSystem.scope.abilities
         i = i + 1
         local ability_index = i
         i = i + 1
@@ -593,7 +614,7 @@ function scopeSaveUnitSave__save_hero(i, u)
             ability_iter = ability_iter + 1
         end
         udg_SaveUnit_data[ability_index] = ability_count
-        udg_SaveUnit_data[i] = SCOPE_ITEMS
+        udg_SaveUnit_data[i] = SaveSystem.scope.items
         i = i + 1
         local item_index = i
         i = i + 1
@@ -614,13 +635,13 @@ function scopeSaveUnitSave__save_hero(i, u)
 end
 
 --
-function scopeSaveUnitSave__ada(is_player, file_name, u)
+function SaveSystem.ada(is_player, file_name, u)
     local user_key
     local id_author = udg_SaveUnit_author
     local handle_world
-    local encrypted_key = GetRandomInt(1, MAGIC_NUMBER_NINE)
-    local cjlocgn_00000004 = GetRandomInt(1, MAGIC_NUMBER_NINE)
-    local salt = GetRandomInt(1, MAGIC_NUMBER_NINE)
+    local encrypted_key = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local cjlocgn_00000004 = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local salt = GetRandomInt(1, SaveSystem.magic_number.nine)
     local value_for_key = GetRandomInt(1, 2000000000)
     local cjlocgn_00000007 = {}
     local item_data = 2
@@ -638,24 +659,24 @@ function scopeSaveUnitSave__ada(is_player, file_name, u)
         end
 
         if is_player then
-            user_key = GetUserKey()
+            user_key = SaveSystem.GetUserKey()
             if user_key == 0 then
-                user_key = CreateUserKey(salt, value_for_key)
+                user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
         end
 
         if is_player then
-            item_data = scopeSaveUnitSave__save_hero(item_data, u)
+            item_data = SaveSystem.save_hero(item_data, u)
         end
 
         if is_player then
-            item_data = SaveGeneralState(item_data, u, handle_world)
+            item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
         end
 
         if udg_SaveUnit_user_data[1] > 0 then
             if is_player then
                 if udg_SaveUnit_user_data[1] + item_data < 1200 then
-                    item_data = scopeSaveUnitSave__save_userdata(item_data)
+                    item_data = SaveSystem.SaveUserData(item_data)
                 else
                     DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "too much data")
                     is_player = false
@@ -673,17 +694,17 @@ function scopeSaveUnitSave__ada(is_player, file_name, u)
             for i = 1, item_data do
                 -- получаем данные
                 encrypted_data = udg_SaveUnit_data[i]
-                cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, MAGIC_NUMBER_FOUR)
+                cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
                 -- шифруем
-                encrypted_data = encrypted_data + generation1()
-                cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, MAGIC_NUMBER_THREE)
+                encrypted_data = encrypted_data + SaveSystem.generation1()
+                cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
                 -- записываем
                 udg_SaveUnit_data[i] = encrypted_data
-                cjlocgn_00000007[i] = generation2()
+                cjlocgn_00000007[i] = SaveSystem.generation2()
             end
 
-            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + generation1()
-            cjlocgn_00000007[item_data + 1] = generation2()
+            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
+            cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
         end
 
         TriggerSleepAction(0.)
@@ -692,7 +713,7 @@ function scopeSaveUnitSave__ada(is_player, file_name, u)
             udg_SaveUnit_g1 = cjlocgn_00000004
             n = item_data + 1
             for i = 1, n do
-                cjlocgn_0000000e = R2I((I2R(generation1())/MAGIC_NUMBER_NINE) * n)
+                cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = udg_SaveUnit_data[i]
                 udg_SaveUnit_data[i] = udg_SaveUnit_data[cjlocgn_0000000e]
                 udg_SaveUnit_data[cjlocgn_0000000e] = encrypted_data
@@ -715,10 +736,10 @@ function scopeSaveUnitSave__ada(is_player, file_name, u)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(encrypted_key)..") \n //")
             -- смысл этих вычислений скрыт от мира сего
-            local a = math.fmod(user_key, MAGIC_NUMBER_TWO) * math.fmod(cjlocgn_0000000c, MAGIC_NUMBER_TWO)
-            local b = math.fmod(a, MAGIC_NUMBER_TWO) * math.fmod(encrypted_key, MAGIC_NUMBER_TWO)
-            local c = math.fmod(b, MAGIC_NUMBER_TWO) * math.fmod(id_author, MAGIC_NUMBER_TWO)
-            encrypted_data = math.fmod(c, MAGIC_NUMBER_TWO)
+            local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(cjlocgn_0000000c, SaveSystem.magic_number.two)
+            local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(encrypted_key, SaveSystem.magic_number.two)
+            local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
+            encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
             PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\"..file_name)
             PreloadGenClear()
@@ -729,7 +750,7 @@ function scopeSaveUnitSave__ada(is_player, file_name, u)
 end
 
 --
-function Save()
+function SaveSystem.Save()
     local file
     if udg_SaveUnit_bool then
         udg_SaveUnit_bool = false
@@ -749,7 +770,7 @@ function Save()
             file = "default.txt"
         end
 
-        scopeSaveUnitSave__ada((GetLocalPlayer() == handle_player), file, udg_SaveUnit_unit)
+        SaveSystem.ada((GetLocalPlayer() == handle_player), file, udg_SaveUnit_unit)
         udg_SaveUnit_bool = true
     end
 end

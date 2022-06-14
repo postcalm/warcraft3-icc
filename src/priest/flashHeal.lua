@@ -1,3 +1,4 @@
+-- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
     local target = Unit(GetSpellTargetUnit())
@@ -5,7 +6,7 @@ function Priest.CastFlashHeal()
     local heal = GetRandomInt(1887, 2193)
     Priest.hero:LoseMana{percent=18}
     target:GainLife{life=heal}
-    TextTag(I2S(heal), target):Preset("heal")
+    TextTag(heal, target):Preset("heal")
 end
 
 function Priest.IsFlashHeal()

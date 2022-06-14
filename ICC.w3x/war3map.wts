@@ -493,7 +493,6 @@ STRING 166
 {
 Введите -save _название_ для сохранения персонажа
 Введите -load _название_ для загрузки персонажа
-Введите -new  для создания персонажа
 }
 
 STRING 167
@@ -660,5 +659,10 @@ STRING 205
 // Войска: h004 (Cult Fanatic), EditorSuffix (Название: суффикс редактора)
 {
 (morphed)
+}
+
+STRING 206
+{
+Enter -new "class name", e.c. -new paladin
 }
 

@@ -7,7 +7,7 @@ function LadyDeathwhisper.FrostBolt()
     local model_name = "Abilities\\Spells\\Other\\FrostBolt\\FrostBoltMissile.mdl"
 
     local fb = UnitSpell(LadyDeathwhisper.unit:GetId())
-    local effect = Effect(fb, model_name, 0.7)
+    local effect = Effect(fb, model_name)
     while true do
         TriggerSleepAction(0.)
         fb:MoveToUnit(enemy)
