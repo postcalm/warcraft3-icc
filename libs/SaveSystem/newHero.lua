@@ -15,13 +15,6 @@ function SaveSystem.AddNewHero()
     end
 end
 
-function SaveSystem.IsHeroNotCreated()
-    if not udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] then
-        return true
-    end
-    return false
-end
-
 function SaveSystem.InitNewHeroEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-new")

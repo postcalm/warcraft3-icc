@@ -22,7 +22,3 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
-
-CLASSES = {paladin = 1,
-           priest  = 2,
-}

@@ -29,16 +29,28 @@ local param = {
     customCode = [[\custom-code.lua]], -- файл, в который собирается весь код
     patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
     files      = { -- порядок сборки файлов
+        -- различные алиасы и тулсеты
         [[\common]],
+        -- кастомные классы для работы с юнитами, эффектами и т.д.
         [[\classes]],
+        -- система сохранений
+        [[\libs\SaveSystem\init.lua]],
+        [[\libs\SaveSystem\modules]],
+        [[\libs\SaveSystem\userData.lua]],
+        [[\libs\SaveSystem\heroData.lua]],
         [[\libs\SaveSystem\saveSystem.lua]],
+        [[\libs\SaveSystem\heroes.lua]],
         [[\libs\SaveSystem\newHero.lua]],
-        [[\libs\SaveSystem\loadHero.lua]],
         [[\libs\SaveSystem\saveHero.lua]],
+        [[\libs\SaveSystem\loadHero.lua]],
+        -- система экипировки
         [[\libs\EquipmentSystem]],
+        -- система бафов/дебафов
         [[\libs\buffSystem.lua]],
+        -- система отображения урона автоатак
         [[\libs\battleSystem.lua]],
         [[\libs\wrappers.lua]],
+        -- исходники реализации боссов, героев и прочих существ
         [[\src\enemies]],
         [[\src\lord_marrowgar]],
         [[\src\lady_deathwhisper]],

@@ -5,8 +5,6 @@ udg_My_x = __jarray(0.0)
 udg_My_type = __jarray(0)
 udg_SaveUnit_ability = __jarray(0)
 udg_SaveUnit_y = 0.0
-udg_SaveUnit_g1 = 0
-udg_SaveUnit_g2 = 0
 udg_SaveUnit_gamecache = nil
 udg_SaveUnit_map_number = 0
 udg_SaveUnit_hero_ability = __jarray(0)
@@ -18,7 +16,6 @@ udg_SaveUnit_author = 0
 udg_SaveUnit_data = __jarray(0)
 udg_SaveUnit_directory = ""
 udg_cache = nil
-udg_SaveUnit_class = 0
 udg_SaveUnit_spellbook = 0
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
@@ -56,8 +53,6 @@ function InitGlobals()
         i = i + 1
     end
     udg_SaveUnit_y = 0.0
-    udg_SaveUnit_g1 = 0
-    udg_SaveUnit_g2 = 0
     udg_SaveUnit_map_number = 0
     i = 0
     while (true) do
@@ -75,7 +70,6 @@ function InitGlobals()
         i = i + 1
     end
     udg_SaveUnit_directory = ""
-    udg_SaveUnit_class = 0
 end
 
 function CreateUnitsForPlayer0()
@@ -284,10 +278,6 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
-
-CLASSES = {paladin = 1,
-           priest  = 2,
-}
 
 
 --- Класс для создания эффектов на юнитах
@@ -1142,6 +1132,7 @@ end
 ---@author Vlod | WWW.XGM.RU
 ---@author meiso | WWW.XGM.RU
 
+--- Система сохранений
 SaveSystem = {
     scope = {
         --- Область, за которой следует номер карты
@@ -1173,107 +1164,20 @@ SaveSystem = {
     },
 }
 
---- Возрождает юнита
-function SaveSystem.UnitsRespawn()
-    local u = GetTriggerUnit()
-    if IsUnitType(u, UNIT_TYPE_HERO) == true then
-        TriggerSleepAction(5)
-        ReviveHero(u, udg_SaveUnit_x, udg_SaveUnit_y, false)
+CLASSES = {paladin = 1,
+           priest  = 2,
+}
+
+
+--- Проверяет создан ли герой для игрока
+---@return boolean
+function SaveSystem.IsHeroNotCreated()
+    if not udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] then
+        return true
     end
+    return false
 end
 
-function SaveSystem.InitHeroAbilities(class)
-    if class == CLASSES["paladin"] then
-        SaveSystem.InitHeroAbilitiesPaladin()
-    elseif class == CLASSES["priest"] then
-        SaveSystem.InitHeroAbilitiesPriest()
-    end
-end
-
---- Инициализирует способности паладина
-function SaveSystem.InitHeroAbilitiesPaladin()
-    udg_SaveUnit_hero_ability[1] = DEVOTION_AURA
-    udg_SaveUnit_hero_ability[2] = DIVINE_SHIELD
-    udg_SaveUnit_hero_ability[3] = CONSECRATION
-    udg_SaveUnit_hero_ability[4] = CONSECRATION_TR
-    udg_SaveUnit_hero_ability[5] = HAMMER_RIGHTEOUS
-    udg_SaveUnit_hero_ability[6] = JUDGEMENT_OF_LIGHT_TR
-    udg_SaveUnit_hero_ability[7] = JUDGEMENT_OF_WISDOM_TR
-    udg_SaveUnit_hero_ability[8] = SHIELD_OF_RIGHTEOUSNESS
-    udg_SaveUnit_hero_ability[9] = SPELLBOOK_PALADIN
-end
-
---- Инициализирует способности приста
-function SaveSystem.InitHeroAbilitiesPriest()
-    udg_SaveUnit_hero_ability[1] = FLASH_HEAL
-    udg_SaveUnit_hero_ability[2] = RENEW
-    udg_SaveUnit_hero_ability[3] = CIRCLE_OF_HEALING
-end
-
---- Выдает герою способности
-function SaveSystem.AddHeroAbilities(class)
-    udg_SaveUnit_class = CLASSES[class]
-    SaveSystem.InitHeroAbilities(udg_SaveUnit_class)
-    local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
-    hero:AddAbilities(table.unpack(udg_SaveUnit_hero_ability))
-    hero:AddSpellbook(udg_SaveUnit_spellbook)
-    hero:SetLevel(80)
-end
-
----
-function SaveSystem.generation1()
-    udg_SaveUnit_g1 = udg_SaveUnit_g1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
-    udg_SaveUnit_g1 = math.fmod(udg_SaveUnit_g1, SaveSystem.magic_number.five)
-    return udg_SaveUnit_g1
-end
-
----
-function SaveSystem.generation2()
-    udg_SaveUnit_g2 = udg_SaveUnit_g2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
-    udg_SaveUnit_g2 = math.fmod(udg_SaveUnit_g2, SaveSystem.magic_number.five)
-    return udg_SaveUnit_g2
-end
-
---- Получает ключ игрока
----@return int Ключ игрока
-function SaveSystem.GetUserKey()
-    if udg_SaveUnit_author > 0 then
-        Preloader("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
-        local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
-        local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
-        if public_key == nil then
-            return 0
-        end
-        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
-            return 0
-        end
-
-        udg_SaveUnit_g1 = public_key
-
-        secret_key = secret_key - SaveSystem.generation1()
-        if secret_key <= 0 then
-            return 0
-        end
-        return secret_key
-    end
-    return 0
-end
-
---- Генерирует ключ игрока
----@param salt int "Соль" для ключа
----@param val int Значение для генерации ключа
----@return int Ключ игрока
-function SaveSystem.CreateUserKey(salt, val)
-    if udg_SaveUnit_author > 0 then
-        udg_SaveUnit_g1 = salt
-        PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
-        return val
-    end
-    return 0
-end
 
 --- Возвращает итератор на следующую область для считывания данных
 ---@param index int Текущее значение итератора
@@ -1310,11 +1214,67 @@ function SaveSystem.next_scope(index, current_scope)
 end
 
 ---
+function SaveSystem.hash1()
+    udg_SaveUnit_g1 = udg_SaveUnit_g1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
+    udg_SaveUnit_g1 = math.fmod(udg_SaveUnit_g1, SaveSystem.magic_number.five)
+    return udg_SaveUnit_g1
+end
+
+---
+function SaveSystem.hash2()
+    udg_SaveUnit_g2 = udg_SaveUnit_g2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
+    udg_SaveUnit_g2 = math.fmod(udg_SaveUnit_g2, SaveSystem.magic_number.five)
+    return udg_SaveUnit_g2
+end
+
+--- Получить ключ игрока
+---@return int Ключ игрока
+function SaveSystem.get_user_key()
+    if udg_SaveUnit_author > 0 then
+        Preloader("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+        local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
+        local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
+        if public_key == nil then
+            return 0
+        end
+        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
+            return 0
+        end
+
+        udg_SaveUnit_g1 = public_key
+
+        secret_key = secret_key - SaveSystem.hash1()
+        if secret_key <= 0 then
+            return 0
+        end
+        return secret_key
+    end
+    return 0
+end
+
+
+--- Генерирует ключ игрока
+---@param salt int "Соль" для ключа
+---@param val int Значение для генерации ключа
+---@return int Ключ игрока
+function SaveSystem.CreateUserKey(salt, val)
+    if udg_SaveUnit_author > 0 then
+        udg_SaveUnit_g1 = salt
+        PreloadGenClear()
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.hash1())..") //")
+        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+        return val
+    end
+    return 0
+end
+
+---
 function SaveSystem.LoadUserData()
     if udg_SaveUnit_data[1] > 0 then
-        local case = -1
-        local i = 2
+        local case
         local count = udg_SaveUnit_data[1]
+        local i = 2
         while i < count do
             case = udg_SaveUnit_data[i]
             if case == 1 then
@@ -1329,6 +1289,9 @@ function SaveSystem.LoadUserData()
         end
     end
 end
+
+
+
 
 ---
 function SaveSystem.LoadUnitData()
@@ -1515,23 +1478,23 @@ function SaveSystem.load_uploading(author, user)
         udg_SaveUnit_g1 = saved_encrypted_key
         udg_SaveUnit_g2 = saved_encrypted_key
 
-        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-        local check_max_count_data = cjlocgn_00000005 - SaveSystem.generation1()
+        local key = GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2())
+        local check_max_count_data = key - SaveSystem.hash1()
 
         if max_count_data == check_max_count_data then
             -- дешифруем
             for i = 2, max_count_data do
-                encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, SaveSystem.magic_number.three)
+                encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2())
+                key = math.fmod(key + encrypted_data, SaveSystem.magic_number.three)
 
-                encrypted_data = encrypted_data - SaveSystem.generation1()
+                encrypted_data = encrypted_data - SaveSystem.hash1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
 
                 udg_SaveUnit_data[i] = encrypted_data
             end
             udg_SaveUnit_data[1] = max_count_data
 
-            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
+            if key ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2()) - SaveSystem.hash1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
                 return false
             end
@@ -1564,7 +1527,7 @@ function SaveSystem.afa(gc, pl, file_name)
         end
 
         if is_player_author then
-            user_key = SaveSystem.GetUserKey()
+            user_key = SaveSystem.get_user_key()
             if user_key == 0 then
                 is_player_author = false
             end
@@ -1788,8 +1751,8 @@ function SaveSystem.ada(is_player, file_name, u)
     local item_data = 2
     local n
     local encrypted_data
-    local cjlocgn_0000000c = 0
-    local cjlocgn_0000000d = 0
+    local cjlocgn_0000000c
+    local cjlocgn_0000000d
     local cjlocgn_0000000e
 
     if u ~= nil then
@@ -1800,7 +1763,7 @@ function SaveSystem.ada(is_player, file_name, u)
         end
 
         if is_player then
-            user_key = SaveSystem.GetUserKey()
+            user_key = SaveSystem.get_user_key()
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
@@ -1837,15 +1800,15 @@ function SaveSystem.ada(is_player, file_name, u)
                 encrypted_data = udg_SaveUnit_data[i]
                 cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
                 -- шифруем
-                encrypted_data = encrypted_data + SaveSystem.generation1()
+                encrypted_data = encrypted_data + SaveSystem.hash1()
                 cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
                 -- записываем
                 udg_SaveUnit_data[i] = encrypted_data
-                cjlocgn_00000007[i] = SaveSystem.generation2()
+                cjlocgn_00000007[i] = SaveSystem.hash2()
             end
 
-            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
-            cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
+            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.hash1()
+            cjlocgn_00000007[item_data + 1] = SaveSystem.hash2()
         end
 
         TriggerSleepAction(0.)
@@ -1854,7 +1817,7 @@ function SaveSystem.ada(is_player, file_name, u)
             udg_SaveUnit_g1 = cjlocgn_00000004
             n = item_data + 1
             for i = 1, n do
-                cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                cjlocgn_0000000e = R2I((I2R(SaveSystem.hash1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = udg_SaveUnit_data[i]
                 udg_SaveUnit_data[i] = udg_SaveUnit_data[cjlocgn_0000000e]
                 udg_SaveUnit_data[cjlocgn_0000000e] = encrypted_data
@@ -1890,7 +1853,7 @@ function SaveSystem.ada(is_player, file_name, u)
     end
 end
 
---
+--- Сохранение
 function SaveSystem.Save()
     local file
     if udg_SaveUnit_bool then
@@ -1931,13 +1894,6 @@ function SaveSystem.AddNewHero()
         udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
         SaveSystem.AddHeroAbilities("priest")
     end
-end
-
-function SaveSystem.IsHeroNotCreated()
-    if not udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] then
-        return true
-    end
-    return false
 end
 
 function SaveSystem.InitNewHeroEvent()
@@ -3418,7 +3374,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -3613,11 +3569,8 @@ function Trig_Init_Actions()
         udg_SaveUnit_gamecache = InitGameCache("cache")
     udg_SaveUnit_bool = true
     udg_SaveUnit_data[1] = 0
-    udg_SaveUnit_g1 = 0
-    udg_SaveUnit_g2 = 0
     udg_SaveUnit_gamecache = udg_SaveUnit_gamecache
     udg_SaveUnit_unit = nil
-    udg_SaveUnit_class = 0
     udg_SaveUnit_user_data[1] = 0
     udg_SaveUnit_author = 1546
     udg_SaveUnit_directory = "test"
