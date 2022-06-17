@@ -1,22 +1,11 @@
-udg_My_hero = {}
-udg_My_y = __jarray(0.0)
-udg_My_index = 0
-udg_My_x = __jarray(0.0)
-udg_My_type = __jarray(0)
-udg_SaveUnit_ability = __jarray(0)
 udg_SaveUnit_y = 0.0
 udg_SaveUnit_gamecache = nil
 udg_SaveUnit_map_number = 0
-udg_SaveUnit_hero_ability = __jarray(0)
-udg_SaveUnit_unit = nil
-udg_SaveUnit_user_data = __jarray(0)
 udg_SaveUnit_x = 0.0
 udg_SaveUnit_bool = false
-udg_SaveUnit_author = 0
 udg_SaveUnit_data = __jarray(0)
-udg_SaveUnit_directory = ""
 udg_cache = nil
-udg_SaveUnit_spellbook = 0
+udg_My_hero = {}
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
@@ -33,43 +22,16 @@ gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
 function InitGlobals()
     local i = 0
-    i = 0
-    while (true) do
-        if ((i > 1)) then break end
-        udg_My_y[i] = 0.0
-        i = i + 1
-    end
-    udg_My_index = 0
-    i = 0
-    while (true) do
-        if ((i > 1)) then break end
-        udg_My_x[i] = 0.0
-        i = i + 1
-    end
-    i = 0
-    while (true) do
-        if ((i > 1)) then break end
-        udg_My_type[i] = 0
-        i = i + 1
-    end
     udg_SaveUnit_y = 0.0
     udg_SaveUnit_map_number = 0
-    i = 0
-    while (true) do
-        if ((i > 1)) then break end
-        udg_SaveUnit_user_data[i] = 0
-        i = i + 1
-    end
     udg_SaveUnit_x = 0.0
     udg_SaveUnit_bool = false
-    udg_SaveUnit_author = 0
     i = 0
     while (true) do
         if ((i > 1)) then break end
         udg_SaveUnit_data[i] = 0
         i = i + 1
     end
-    udg_SaveUnit_directory = ""
 end
 
 function CreateUnitsForPlayer0()
@@ -1138,7 +1100,7 @@ SaveSystem = {
     --- Юнит, которого требуется сохранить
     unit = nil,
     --- Идентификатор класса
-    class = 0,
+    classid = 0,
     --- Список способностей юнита
     abilities = {},
     --- Книга заклинаний юнита
@@ -1149,6 +1111,16 @@ SaveSystem = {
     author = 1546,
     --- Пользовательские данные
     user_data = {},
+    --- Данные игрока и его юнита
+    data = {
+        map = {},
+        resources = {},
+        hero_data = {},
+        hero_skill = {},
+        state = {},
+        abilities = {},
+        items = {},
+    },
     hash1 = 0,
     hash2 = 0,
     -- автор данного творения запихал все данные в один массив
@@ -1294,14 +1266,14 @@ end
 ---@return integer
 function SaveSystem.SaveUserData(i)
     if i > 0 then
-        local n = udg_SaveUnit_user_data[1]
+        local n = SaveSystem.user_data[1]
         if n > 0 then
             udg_SaveUnit_data[i] = 1
             i = i + 1
             udg_SaveUnit_data[i] = n
             i = i + 1
             for j = 2, n do
-                udg_SaveUnit_data[i] = udg_SaveUnit_user_data[j]
+                udg_SaveUnit_data[i] = SaveSystem.user_data[j]
                 i = i + 1
             end
         end
@@ -1321,9 +1293,9 @@ function SaveSystem.LoadUserData()
                 local max_count_data = udg_SaveUnit_data[i + 1]
                 local cjlocgn_00000004 = i + 1
                 for j = 2, max_count_data do
-                    udg_SaveUnit_user_data[j] = udg_SaveUnit_data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = udg_SaveUnit_data[cjlocgn_00000004 + j]
                 end
-                udg_SaveUnit_user_data[1] = max_count_data
+                SaveSystem.user_data[1] = max_count_data
             end
             i = SaveSystem.next_scope(i, case)
         end
@@ -1431,7 +1403,7 @@ function SaveSystem.SaveBaseState(i, u, world)
         i = i + 1
         udg_SaveUnit_data[i] = mana
         i = i + 1
-        --udg_SaveUnit_data[i] = SaveSystem.class
+        --udg_SaveUnit_data[i] = SaveSystem.classid
         --i = i + 1
         udg_SaveUnit_data[i] = SaveSystem.scope.resources
         i = i + 1
@@ -1559,7 +1531,7 @@ function SaveSystem.LoadBaseState(pl)
                 unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
                 health = udg_SaveUnit_data[i + 5]
                 mana = udg_SaveUnit_data[i + 6]
-                --SaveSystem.class = udg_SaveUnit_data[i + 7]
+                --SaveSystem.classid = udg_SaveUnit_data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
@@ -1569,7 +1541,7 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = udg_SaveUnit_y
         end
 
-        --SaveSystem.AddHeroAbilities(SaveSystem.class)
+        --SaveSystem.AddHeroAbilities(SaveSystem.classid)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
         SaveSystem.unit = unit_obj
 
@@ -1733,8 +1705,8 @@ function SaveSystem.Load()
         for i = 1, udg_SaveUnit_data[1] do
             Preload(I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load")
         end
-        for i = 1, udg_SaveUnit_user_data[1] do
-            Preload(I2S(udg_SaveUnit_user_data[i]).." user_data["..I2S(i).."] < load")
+        for i = 1, SaveSystem.user_data[1] do
+            Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
         end
         PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
         PreloadGenClear()
@@ -1780,9 +1752,9 @@ function SaveSystem.ada(is_player, file_name, u)
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
         end
 
-        if udg_SaveUnit_user_data[1] > 0 then
+        if SaveSystem.user_data[1] > 0 then
             if is_player then
-                if udg_SaveUnit_user_data[1] + item_data < 1200 then
+                if SaveSystem.user_data[1] + item_data < 1200 then
                     item_data = SaveSystem.SaveUserData(item_data)
                 else
                     DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "too much data")
@@ -1892,6 +1864,8 @@ function SaveSystem.UnitsRespawn()
     end
 end
 
+--- Определяет способности выбранного класса
+---@param class classid
 function SaveSystem.DefineAbilities(class)
     if class == CLASSES["paladin"] then
         SaveSystem.DefineAbilitiesPaladin()
@@ -1900,7 +1874,7 @@ function SaveSystem.DefineAbilities(class)
     end
 end
 
---- Инициализирует способности паладина
+--- Определяет способности паладина
 function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {DEVOTION_AURA,
                             DIVINE_SHIELD,
@@ -1910,20 +1884,24 @@ function SaveSystem.DefineAbilitiesPaladin()
                             JUDGEMENT_OF_LIGHT_TR,
                             JUDGEMENT_OF_WISDOM_TR,
                             SHIELD_OF_RIGHTEOUSNESS,
+                            SPELLBOOK_PALADIN
     }
     SaveSystem.spellbook = SPELLBOOK_PALADIN
 end
 
---- Инициализирует способности приста
+--- Определяет способности приста
 function SaveSystem.DefineAbilitiesPriest()
-    SaveSystem.abilities = {FLASH_HEAL, RENEW, CIRCLE_OF_HEALING}
+    SaveSystem.abilities = {FLASH_HEAL,
+                            RENEW,
+                            CIRCLE_OF_HEALING,
+    }
     SaveSystem.spellbook = nil
 end
 
 --- Выдает герою способности
 function SaveSystem.AddHeroAbilities(class)
-    SaveSystem.class = CLASSES[class]
-    SaveSystem.DefineAbilities(SaveSystem.class)
+    SaveSystem.classid = CLASSES[class]
+    SaveSystem.DefineAbilities(SaveSystem.classid)
     local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)
@@ -1935,13 +1913,14 @@ end
 function SaveSystem.AddNewHero()
     local text = GetEventPlayerChatString()
     local unit
+    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
-        udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
+        udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
-        udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
+        udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("priest")
     end
 end
@@ -1957,7 +1936,7 @@ end
 
 function SaveSystem.SaveHero()
     SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
-    udg_SaveUnit_user_data[1] = 1
+    SaveSystem.user_data[1] = 1
     SaveSystem.Save()
 end
 
@@ -1972,8 +1951,7 @@ end
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
     SaveSystem.Load()
-    udg_My_index = i
-    udg_My_hero[udg_My_index] = SaveSystem.unit
+    udg_My_hero[i] = SaveSystem.unit
 end
 
 function SaveSystem.InitLoadEvent()
@@ -3579,9 +3557,6 @@ function InitTrig_Init_Paladin()
 end
 
 function Trig_Reinitialize_Actions()
-    udg_My_type[1] = 0
-    udg_My_x[1] = 0.00
-    udg_My_y[1] = 0.00
     TriggerSleepAction(0.00)
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
@@ -3620,10 +3595,6 @@ function Trig_Init_Actions()
     udg_SaveUnit_bool = true
     udg_SaveUnit_data[1] = 0
     udg_SaveUnit_gamecache = udg_SaveUnit_gamecache
-    udg_SaveUnit_unit = nil
-    udg_SaveUnit_user_data[1] = 0
-    udg_SaveUnit_author = 1546
-    udg_SaveUnit_directory = "test"
     udg_SaveUnit_map_number = 1
     udg_SaveUnit_x = 4100.00
     udg_SaveUnit_y = -3080.00

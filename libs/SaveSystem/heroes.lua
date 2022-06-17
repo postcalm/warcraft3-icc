@@ -8,6 +8,8 @@ function SaveSystem.UnitsRespawn()
     end
 end
 
+--- Определяет способности выбранного класса
+---@param class classid
 function SaveSystem.DefineAbilities(class)
     if class == CLASSES["paladin"] then
         SaveSystem.DefineAbilitiesPaladin()
@@ -16,7 +18,7 @@ function SaveSystem.DefineAbilities(class)
     end
 end
 
---- Инициализирует способности паладина
+--- Определяет способности паладина
 function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {DEVOTION_AURA,
                             DIVINE_SHIELD,
@@ -26,14 +28,15 @@ function SaveSystem.DefineAbilitiesPaladin()
                             JUDGEMENT_OF_LIGHT_TR,
                             JUDGEMENT_OF_WISDOM_TR,
                             SHIELD_OF_RIGHTEOUSNESS,
+                            SPELLBOOK_PALADIN
     }
     SaveSystem.spellbook = SPELLBOOK_PALADIN
 end
 
---- Инициализирует способности приста
+--- Определяет способности приста
 function SaveSystem.DefineAbilitiesPriest()
     SaveSystem.abilities = {FLASH_HEAL,
-                            RENEW, 
+                            RENEW,
                             CIRCLE_OF_HEALING,
     }
     SaveSystem.spellbook = nil
@@ -41,8 +44,8 @@ end
 
 --- Выдает герою способности
 function SaveSystem.AddHeroAbilities(class)
-    SaveSystem.class = CLASSES[class]
-    SaveSystem.DefineAbilities(SaveSystem.class)
+    SaveSystem.classid = CLASSES[class]
+    SaveSystem.DefineAbilities(SaveSystem.classid)
     local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)

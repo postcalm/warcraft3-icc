@@ -3,13 +3,14 @@
 function SaveSystem.AddNewHero()
     local text = GetEventPlayerChatString()
     local unit
+    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
-        udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
+        udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
-        udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
+        udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("priest")
     end
 end

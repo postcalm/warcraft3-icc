@@ -3,8 +3,7 @@
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
     SaveSystem.Load()
-    udg_My_index = i
-    udg_My_hero[udg_My_index] = SaveSystem.unit
+    udg_My_hero[i] = SaveSystem.unit
 end
 
 function SaveSystem.InitLoadEvent()

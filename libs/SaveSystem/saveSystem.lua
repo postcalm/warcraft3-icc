@@ -149,8 +149,8 @@ function SaveSystem.Load()
         for i = 1, udg_SaveUnit_data[1] do
             Preload(I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load")
         end
-        for i = 1, udg_SaveUnit_user_data[1] do
-            Preload(I2S(udg_SaveUnit_user_data[i]).." user_data["..I2S(i).."] < load")
+        for i = 1, SaveSystem.user_data[1] do
+            Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
         end
         PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
         PreloadGenClear()
@@ -196,9 +196,9 @@ function SaveSystem.ada(is_player, file_name, u)
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
         end
 
-        if udg_SaveUnit_user_data[1] > 0 then
+        if SaveSystem.user_data[1] > 0 then
             if is_player then
-                if udg_SaveUnit_user_data[1] + item_data < 1200 then
+                if SaveSystem.user_data[1] + item_data < 1200 then
                     item_data = SaveSystem.SaveUserData(item_data)
                 else
                     DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "too much data")

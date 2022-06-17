@@ -98,7 +98,7 @@ function SaveSystem.SaveBaseState(i, u, world)
         i = i + 1
         udg_SaveUnit_data[i] = mana
         i = i + 1
-        --udg_SaveUnit_data[i] = SaveSystem.class
+        --udg_SaveUnit_data[i] = SaveSystem.classid
         --i = i + 1
         udg_SaveUnit_data[i] = SaveSystem.scope.resources
         i = i + 1
@@ -226,7 +226,7 @@ function SaveSystem.LoadBaseState(pl)
                 unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
                 health = udg_SaveUnit_data[i + 5]
                 mana = udg_SaveUnit_data[i + 6]
-                --SaveSystem.class = udg_SaveUnit_data[i + 7]
+                --SaveSystem.classid = udg_SaveUnit_data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
@@ -236,7 +236,7 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = udg_SaveUnit_y
         end
 
-        --SaveSystem.AddHeroAbilities(SaveSystem.class)
+        --SaveSystem.AddHeroAbilities(SaveSystem.classid)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
         SaveSystem.unit = unit_obj
 
