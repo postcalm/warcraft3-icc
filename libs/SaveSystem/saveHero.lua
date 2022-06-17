@@ -1,7 +1,7 @@
 -- Copyright (c) 2022 meiso
 
 function SaveSystem.SaveHero()
-    udg_SaveUnit_unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
+    SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
     udg_SaveUnit_user_data[1] = 1
     SaveSystem.Save()
 end

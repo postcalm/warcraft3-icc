@@ -860,6 +860,7 @@ end
 ---@param spellbook spellbook
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
+    if not spellbook then return end
     UnitAddAbility(self.unit, spellbook)
     UnitMakeAbilityPermanent(self.unit, true, spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
@@ -1129,11 +1130,30 @@ function UnitSpell:NearTarget(target)
     return target_point:atPoint(unit_point)
 end
 
----@author Vlod | WWW.XGM.RU
----@author meiso | WWW.XGM.RU
+-- Copyright (c) Vlod www.xgm.ru
+-- Copyright (c) meiso
 
 --- Система сохранений
 SaveSystem = {
+    --- Юнит, которого требуется сохранить
+    unit = nil,
+    --- Идентификатор класса
+    class = 0,
+    --- Список способностей юнита
+    abilities = {},
+    --- Книга заклинаний юнита
+    spellbook = nil,
+    --- Директория, где будут лежать сохранения
+    directory = "test",
+    --- Идентификатор автора
+    author = 1546,
+    --- Пользовательские данные
+    user_data = {},
+    hash1 = 0,
+    hash2 = 0,
+    -- автор данного творения запихал все данные в один массив
+    -- и дабы как-то различать что находится внутри него,
+    -- добавил специальные числа, разграничиваниющие области эти данных
     scope = {
         --- Область, за которой следует номер карты
         map        = 2,
@@ -1214,24 +1234,25 @@ function SaveSystem.next_scope(index, current_scope)
 end
 
 ---
-function SaveSystem.hash1()
-    udg_SaveUnit_g1 = udg_SaveUnit_g1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
-    udg_SaveUnit_g1 = math.fmod(udg_SaveUnit_g1, SaveSystem.magic_number.five)
-    return udg_SaveUnit_g1
+function SaveSystem.generation1()
+    SaveSystem.hash1 = SaveSystem.hash1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
+    SaveSystem.hash1 = math.fmod(SaveSystem.hash1, SaveSystem.magic_number.five)
+    return SaveSystem.hash1
 end
 
 ---
-function SaveSystem.hash2()
-    udg_SaveUnit_g2 = udg_SaveUnit_g2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
-    udg_SaveUnit_g2 = math.fmod(udg_SaveUnit_g2, SaveSystem.magic_number.five)
-    return udg_SaveUnit_g2
+function SaveSystem.generation2()
+    SaveSystem.hash2 = SaveSystem.hash2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
+    SaveSystem.hash2 = math.fmod(SaveSystem.hash2, SaveSystem.magic_number.five)
+    return SaveSystem.hash2
 end
 
---- Получить ключ игрока
+
+--- Возвращает ключ игрока
 ---@return int Ключ игрока
-function SaveSystem.get_user_key()
-    if udg_SaveUnit_author > 0 then
-        Preloader("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+function SaveSystem.GetUserKey()
+    if SaveSystem.author > 0 then
+        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
@@ -1241,9 +1262,9 @@ function SaveSystem.get_user_key()
             return 0
         end
 
-        udg_SaveUnit_g1 = public_key
+        SaveSystem.hash1 = public_key
 
-        secret_key = secret_key - SaveSystem.hash1()
+        secret_key = secret_key - SaveSystem.generation1()
         if secret_key <= 0 then
             return 0
         end
@@ -1252,29 +1273,48 @@ function SaveSystem.get_user_key()
     return 0
 end
 
-
 --- Генерирует ключ игрока
----@param salt int "Соль" для ключа
----@param val int Значение для генерации ключа
----@return int Ключ игрока
+---@param salt integer "Соль" для ключа
+---@param val integer Значение для генерации ключа
+---@return integer Ключ игрока
 function SaveSystem.CreateUserKey(salt, val)
-    if udg_SaveUnit_author > 0 then
-        udg_SaveUnit_g1 = salt
+    if SaveSystem.author > 0 then
+        SaveSystem.hash1 = salt
         PreloadGenClear()
         Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.hash1())..") //")
-        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
+        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
         return val
     end
     return 0
 end
 
----
+--- Сохраняет пользовательские данные
+---@param i integer
+---@return integer
+function SaveSystem.SaveUserData(i)
+    if i > 0 then
+        local n = udg_SaveUnit_user_data[1]
+        if n > 0 then
+            udg_SaveUnit_data[i] = 1
+            i = i + 1
+            udg_SaveUnit_data[i] = n
+            i = i + 1
+            for j = 2, n do
+                udg_SaveUnit_data[i] = udg_SaveUnit_user_data[j]
+                i = i + 1
+            end
+        end
+    end
+    return i
+end
+
+--- Загружает пользовательские данные
 function SaveSystem.LoadUserData()
     if udg_SaveUnit_data[1] > 0 then
-        local case
-        local count = udg_SaveUnit_data[1]
+        local case = -1
         local i = 2
+        local count = udg_SaveUnit_data[1]
         while i < count do
             case = udg_SaveUnit_data[i]
             if case == 1 then
@@ -1292,11 +1332,123 @@ end
 
 
 
+--- Сохранаяет информацию о характеристиках, способностях и предметах
+---@param i integer Текущий итератор
+---@param u unitid Сохраняемый юнит
+---@return integer Следующий итератор
+function SaveSystem.SaveUnitData(i, u)
+    local ability_count = 0
+    local item_count = 0
+    local max_slots = 5
+
+    if IsUnitType(u, UNIT_TYPE_HERO) == true then
+        -- сохраняем инфу: опыт, сила, ловкость, интеллект
+        udg_SaveUnit_data[i] = SaveSystem.scope.state
+        i = i + 1
+        udg_SaveUnit_data[i] = GetHeroXP(u)
+        i = i + 1
+        udg_SaveUnit_data[i] = GetHeroStr(u, false)
+        i = i + 1
+        udg_SaveUnit_data[i] = GetHeroAgi(u, false)
+        i = i + 1
+        udg_SaveUnit_data[i] = GetHeroInt(u, false)
+        i = i + 1
+        udg_SaveUnit_data[i] = SaveSystem.scope.abilities
+        i = i + 1
+        local ability_index = i
+        i = i + 1
+
+        -- сохраняем способности
+        for k = 1, #SaveSystem.abilities do
+            local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
+            if ability_level > 0 then
+                ability_count = ability_count + 1
+                udg_SaveUnit_data[i] = SaveSystem.abilities[k]
+                i = i + 1
+                udg_SaveUnit_data[i] = ability_level
+                i = i + 1
+            end
+        end
+        udg_SaveUnit_data[ability_index] = ability_count
+        udg_SaveUnit_data[i] = SaveSystem.scope.items
+        i = i + 1
+        local item_index = i
+        i = i + 1
+        -- сохраняем предметы
+        for item_iter = 1, max_slots do
+            local item_id = UnitItemInSlot(u, item_iter)
+            if item_id ~= nil then
+                item_count = item_count + 1
+                udg_SaveUnit_data[i] = GetItemTypeId(item_id)
+                i = i + 1
+                udg_SaveUnit_data[i] = GetItemCharges(item_id)
+                i = i + 1
+            end
+        end
+        udg_SaveUnit_data[item_index] = item_count
+    end
+    return i
+end
+
+--- Сохранаяет информацию о местоположении игрока, хп, мп, кол-во вкаченных навыков
+---@param i integer Текущий итератор
+---@param u unitid Сохраняемый юнит
+---@param world rect Текущий игровой мир
+---@return integer Следующий итератор
+function SaveSystem.SaveBaseState(i, u, world)
+
+    if u ~= nil then
+        local rect_min_x = R2I(GetRectMinX(world))
+        local rect_max_x = R2I(GetRectMaxX(world))
+        local rect_min_y = R2I(GetRectMinY(world))
+        local rect_max_y = R2I(GetRectMaxY(world))
+        local map_number = udg_SaveUnit_map_number
+        local unit_type_id = GetUnitTypeId(u)
+
+        local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(SaveSystem.magic_number.one) / (rect_max_x - rect_min_x)))
+        local hero_position_y = R2I((GetUnitY(u) - rect_min_y) * (I2R(SaveSystem.magic_number.one) / (rect_max_y - rect_min_y)))
+        local hero_facing = R2I(GetUnitFacing(u) * (SaveSystem.magic_number.one / 360.))
+
+        local health = R2I(GetUnitState(u, UNIT_STATE_LIFE) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_LIFE)))
+        local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_MANA)))
+        local count_gold = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_GOLD)
+        local count_lumber = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_LUMBER)
+        udg_SaveUnit_data[i] = SaveSystem.scope.map
+        i = i + 1
+        udg_SaveUnit_data[i] = map_number
+        i = i + 1
+        udg_SaveUnit_data[i] = SaveSystem.scope.hero_data
+        i = i + 1
+        udg_SaveUnit_data[i] = unit_type_id
+        i = i + 1
+        udg_SaveUnit_data[i] = hero_position_x
+        i = i + 1
+        udg_SaveUnit_data[i] = hero_position_y
+        i = i + 1
+        udg_SaveUnit_data[i] = hero_facing
+        i = i + 1
+        udg_SaveUnit_data[i] = health
+        i = i + 1
+        udg_SaveUnit_data[i] = mana
+        i = i + 1
+        --udg_SaveUnit_data[i] = SaveSystem.class
+        --i = i + 1
+        udg_SaveUnit_data[i] = SaveSystem.scope.resources
+        i = i + 1
+        udg_SaveUnit_data[i] = count_gold
+        i = i + 1
+        udg_SaveUnit_data[i] = count_lumber
+        i = i + 1
+        udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
+        i = i + 1
+    end
+    return i
+end
 
 ---
 function SaveSystem.LoadUnitData()
-    if udg_SaveUnit_unit ~= nil then
-        local current_unit = udg_SaveUnit_unit
+    if SaveSystem.unit ~= nil then
+        local current_unit = SaveSystem.unit
         local unit_loc_x = GetUnitX(current_unit)
         local unit_loc_y = GetUnitY(current_unit)
         local current_case = -1
@@ -1407,7 +1559,7 @@ function SaveSystem.LoadBaseState(pl)
                 unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
                 health = udg_SaveUnit_data[i + 5]
                 mana = udg_SaveUnit_data[i + 6]
-                --udg_SaveUnit_class = udg_SaveUnit_data[i + 7]
+                --SaveSystem.class = udg_SaveUnit_data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
@@ -1417,9 +1569,9 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = udg_SaveUnit_y
         end
 
-        --SaveSystem.AddHeroAbilities(udg_SaveUnit_class)
+        --SaveSystem.AddHeroAbilities(SaveSystem.class)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
-        udg_SaveUnit_unit = unit_obj
+        SaveSystem.unit = unit_obj
 
         if unit_obj ~= nil then
             SetUnitState(unit_obj, UNIT_STATE_LIFE, GetUnitState(unit_obj, UNIT_STATE_MAX_LIFE) * (I2R(health) / SaveSystem.magic_number.one))
@@ -1430,7 +1582,8 @@ function SaveSystem.LoadBaseState(pl)
     end
 end
 
---
+
+---
 function SaveSystem.creature(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
@@ -1442,7 +1595,7 @@ function SaveSystem.creature(gc, pl)
         -- загружаем общее состояние игрока
         SaveSystem.LoadBaseState(pl)
 
-        if udg_SaveUnit_unit == nil then
+        if SaveSystem.unit == nil then
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error data")
             return
         end
@@ -1475,26 +1628,26 @@ function SaveSystem.load_uploading(author, user)
         local player_s = Player(25)
         local max_count_data = GetPlayerTechMaxAllowed(player_s, -1)
         local saved_encrypted_key = GetPlayerTechMaxAllowed(player_s, -2)
-        udg_SaveUnit_g1 = saved_encrypted_key
-        udg_SaveUnit_g2 = saved_encrypted_key
+        SaveSystem.hash1 = saved_encrypted_key
+        SaveSystem.hash2 = saved_encrypted_key
 
-        local key = GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2())
-        local check_max_count_data = key - SaveSystem.hash1()
+        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+        local check_max_count_data = cjlocgn_00000005 - SaveSystem.generation1()
 
         if max_count_data == check_max_count_data then
             -- дешифруем
             for i = 2, max_count_data do
-                encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2())
-                key = math.fmod(key + encrypted_data, SaveSystem.magic_number.three)
+                encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, SaveSystem.magic_number.three)
 
-                encrypted_data = encrypted_data - SaveSystem.hash1()
+                encrypted_data = encrypted_data - SaveSystem.generation1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
 
                 udg_SaveUnit_data[i] = encrypted_data
             end
             udg_SaveUnit_data[1] = max_count_data
 
-            if key ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.hash2()) - SaveSystem.hash1() then
+            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
                 return false
             end
@@ -1520,14 +1673,14 @@ function SaveSystem.afa(gc, pl, file_name)
 
     if gc ~= nil then
         is_player_author = GetLocalPlayer() == pl
-        id_player = udg_SaveUnit_author
+        id_player = SaveSystem.author
 
         if id_player <= 0 then
             is_player_author = false
         end
 
         if is_player_author then
-            user_key = SaveSystem.get_user_key()
+            user_key = SaveSystem.GetUserKey()
             if user_key == 0 then
                 is_player_author = false
             end
@@ -1537,7 +1690,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\"..udg_SaveUnit_directory.."\\"..file_name)
+            Preloader("save\\"..SaveSystem.directory.."\\"..file_name)
         end
 
         TriggerSleepAction(0.)
@@ -1583,165 +1736,15 @@ function SaveSystem.Load()
         for i = 1, udg_SaveUnit_user_data[1] do
             Preload(I2S(udg_SaveUnit_user_data[i]).." user_data["..I2S(i).."] < load")
         end
-        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."log_load.txt")
+        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
         PreloadGenClear()
     end
 end
 
 ---
-function SaveSystem.SaveUserData(i)
-    if i > 0 then
-        local n = udg_SaveUnit_user_data[1]
-        --Preload(I2S(n))
-        if n > 0 then
-
-            udg_SaveUnit_data[i] = 1
-            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData")
-            i = i + 1
-            udg_SaveUnit_data[i] = n
-            --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData")
-            i = i + 1
-            for j = 2, n do
-                udg_SaveUnit_data[i] = udg_SaveUnit_user_data[j]
-                --Preload(I2S(udg_SaveUnit_data[i]).." udg_SaveUnit_data["..I2S(i).."] < SaveUserData cycle")
-                i = i + 1
-            end
-        end
-    end
-    --Preload(I2S(i))
-    --PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."logs_save.txt")
-    return i
-end
-
----
-function SaveSystem.SaveBaseState(i, u, world)
-    local ability_iter = 1
-    local max_count_abilities = 0
-
-    if u ~= nil then
-        local rect_min_x = R2I(GetRectMinX(world))
-        local rect_max_x = R2I(GetRectMaxX(world))
-        local rect_min_y = R2I(GetRectMinY(world))
-        local rect_max_y = R2I(GetRectMaxY(world))
-        local map_number = udg_SaveUnit_map_number
-        local unit_type_id = GetUnitTypeId(u)
-
-        local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(SaveSystem.magic_number.one) / (rect_max_x - rect_min_x)))
-        local hero_position_y = R2I((GetUnitY(u) - rect_min_y) * (I2R(SaveSystem.magic_number.one) / (rect_max_y - rect_min_y)))
-        local hero_facing = R2I(GetUnitFacing(u) * (SaveSystem.magic_number.one / 360.))
-
-        local health = R2I(GetUnitState(u, UNIT_STATE_LIFE) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_LIFE)))
-        local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_MANA)))
-        local count_gold = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_GOLD)
-        local count_lumber = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_LUMBER)
-        udg_SaveUnit_data[i] = SaveSystem.scope.map
-        i = i + 1
-        udg_SaveUnit_data[i] = map_number
-        i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_data
-        i = i + 1
-        udg_SaveUnit_data[i] = unit_type_id
-        i = i + 1
-        udg_SaveUnit_data[i] = hero_position_x
-        i = i + 1
-        udg_SaveUnit_data[i] = hero_position_y
-        i = i + 1
-        udg_SaveUnit_data[i] = hero_facing
-        i = i + 1
-        udg_SaveUnit_data[i] = health
-        i = i + 1
-        udg_SaveUnit_data[i] = mana
-        i = i + 1
-        --udg_SaveUnit_data[i] = udg_SaveUnit_class
-        --i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.resources
-        i = i + 1
-        udg_SaveUnit_data[i] = count_gold
-        i = i + 1
-        udg_SaveUnit_data[i] = count_lumber
-        i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
-        i = i + 1
-        local scope_ability = i
-        i = i + 1
-
-        while udg_SaveUnit_ability[ability_iter] ~= 0 do
-            local ability_level = GetUnitAbilityLevel(u, udg_SaveUnit_ability[ability_iter])
-            if ability_level > 0 then
-                max_count_abilities = max_count_abilities + 1
-                udg_SaveUnit_data[i] = udg_SaveUnit_ability[ability_iter]
-                i = i + 1
-                udg_SaveUnit_data[i] = ability_level
-                i = i + 1
-            end
-            ability_iter = ability_iter + 1
-        end
-        udg_SaveUnit_data[scope_ability] = max_count_abilities
-    end
-    return i
-end
-
---
-function SaveSystem.save_hero(i, u)
-    local ability_iter = 1
-    local ability_count = 0
-    local item_count = 0
-    local max_slots = 5
-
-    if IsUnitType(u, UNIT_TYPE_HERO) == true then
-        -- сохраняем инфу: опыт, сила, ловкость, интеллект
-        udg_SaveUnit_data[i] = SaveSystem.scope.state
-        i = i + 1
-        udg_SaveUnit_data[i] = GetHeroXP(u)
-        i = i + 1
-        udg_SaveUnit_data[i] = GetHeroStr(u, false)
-        i = i + 1
-        udg_SaveUnit_data[i] = GetHeroAgi(u, false)
-        i = i + 1
-        udg_SaveUnit_data[i] = GetHeroInt(u, false)
-        i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.abilities
-        i = i + 1
-        local ability_index = i
-        i = i + 1
-
-        -- сохраняем способности
-        while udg_SaveUnit_hero_ability[ability_iter] ~= 0 do
-            local ability_level = GetUnitAbilityLevel(u, udg_SaveUnit_hero_ability[ability_iter])
-            if ability_level > 0 then
-                ability_count = ability_count + 1
-                udg_SaveUnit_data[i] = udg_SaveUnit_hero_ability[ability_iter]
-                i = i + 1
-                udg_SaveUnit_data[i] = ability_level
-                i = i + 1
-            end
-            ability_iter = ability_iter + 1
-        end
-        udg_SaveUnit_data[ability_index] = ability_count
-        udg_SaveUnit_data[i] = SaveSystem.scope.items
-        i = i + 1
-        local item_index = i
-        i = i + 1
-        -- сохраняем предметы
-        for item_iter = 1, max_slots do
-            local item_id = UnitItemInSlot(u, item_iter)
-            if item_id ~= nil then
-                item_count = item_count + 1
-                udg_SaveUnit_data[i] = GetItemTypeId(item_id)
-                i = i + 1
-                udg_SaveUnit_data[i] = GetItemCharges(item_id)
-                i = i + 1
-            end
-        end
-        udg_SaveUnit_data[item_index] = item_count
-    end
-    return i
-end
-
---
 function SaveSystem.ada(is_player, file_name, u)
     local user_key
-    local id_author = udg_SaveUnit_author
+    local id_author = SaveSystem.author
     local handle_world
     local encrypted_key = GetRandomInt(1, SaveSystem.magic_number.nine)
     local cjlocgn_00000004 = GetRandomInt(1, SaveSystem.magic_number.nine)
@@ -1751,8 +1754,8 @@ function SaveSystem.ada(is_player, file_name, u)
     local item_data = 2
     local n
     local encrypted_data
-    local cjlocgn_0000000c
-    local cjlocgn_0000000d
+    local cjlocgn_0000000c = 0
+    local cjlocgn_0000000d = 0
     local cjlocgn_0000000e
 
     if u ~= nil then
@@ -1763,14 +1766,14 @@ function SaveSystem.ada(is_player, file_name, u)
         end
 
         if is_player then
-            user_key = SaveSystem.get_user_key()
+            user_key = SaveSystem.GetUserKey()
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
         end
 
         if is_player then
-            item_data = SaveSystem.save_hero(item_data, u)
+            item_data = SaveSystem.SaveUnitData(item_data, u)
         end
 
         if is_player then
@@ -1792,32 +1795,32 @@ function SaveSystem.ada(is_player, file_name, u)
             item_data = item_data - 1
             cjlocgn_00000007[item_data + 1] = 0
             udg_SaveUnit_data[1] = item_data
-            udg_SaveUnit_g1 = encrypted_key
-            udg_SaveUnit_g2 = encrypted_key
+            SaveSystem.hash1 = encrypted_key
+            SaveSystem.hash2 = encrypted_key
 
             for i = 1, item_data do
                 -- получаем данные
                 encrypted_data = udg_SaveUnit_data[i]
                 cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
                 -- шифруем
-                encrypted_data = encrypted_data + SaveSystem.hash1()
+                encrypted_data = encrypted_data + SaveSystem.generation1()
                 cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
                 -- записываем
                 udg_SaveUnit_data[i] = encrypted_data
-                cjlocgn_00000007[i] = SaveSystem.hash2()
+                cjlocgn_00000007[i] = SaveSystem.generation2()
             end
 
-            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.hash1()
-            cjlocgn_00000007[item_data + 1] = SaveSystem.hash2()
+            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
+            cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
         end
 
         TriggerSleepAction(0.)
 
         if is_player then
-            udg_SaveUnit_g1 = cjlocgn_00000004
+            SaveSystem.hash1 = cjlocgn_00000004
             n = item_data + 1
             for i = 1, n do
-                cjlocgn_0000000e = R2I((I2R(SaveSystem.hash1()) / SaveSystem.magic_number.nine) * n)
+                cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = udg_SaveUnit_data[i]
                 udg_SaveUnit_data[i] = udg_SaveUnit_data[cjlocgn_0000000e]
                 udg_SaveUnit_data[cjlocgn_0000000e] = encrypted_data
@@ -1845,7 +1848,7 @@ function SaveSystem.ada(is_player, file_name, u)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
-            PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\"..file_name)
+            PreloadGenEnd("save\\"..SaveSystem.directory.."\\"..file_name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -1853,7 +1856,7 @@ function SaveSystem.ada(is_player, file_name, u)
     end
 end
 
---- Сохранение
+---
 function SaveSystem.Save()
     local file
     if udg_SaveUnit_bool then
@@ -1862,7 +1865,7 @@ function SaveSystem.Save()
         local full_command_from_chat = GetEventPlayerChatString()
 
         -- если не понятно кого сохранять - сообщаем об этом в чат
-        if udg_SaveUnit_unit == nil then
+        if SaveSystem.unit == nil then
             DisplayTextToPlayer(handle_player, 0, 0, "unit is not selected")
             return
         end
@@ -1874,9 +1877,57 @@ function SaveSystem.Save()
             file = "default.txt"
         end
 
-        SaveSystem.ada((GetLocalPlayer() == handle_player), file, udg_SaveUnit_unit)
+        SaveSystem.ada((GetLocalPlayer() == handle_player), file, SaveSystem.unit)
         udg_SaveUnit_bool = true
     end
+end
+
+
+--- Возрождает юнита
+function SaveSystem.UnitsRespawn()
+    local u = GetTriggerUnit()
+    if IsUnitType(u, UNIT_TYPE_HERO) == true then
+        TriggerSleepAction(5)
+        ReviveHero(u, udg_SaveUnit_x, udg_SaveUnit_y, false)
+    end
+end
+
+function SaveSystem.DefineAbilities(class)
+    if class == CLASSES["paladin"] then
+        SaveSystem.DefineAbilitiesPaladin()
+    elseif class == CLASSES["priest"] then
+        SaveSystem.DefineAbilitiesPriest()
+    end
+end
+
+--- Инициализирует способности паладина
+function SaveSystem.DefineAbilitiesPaladin()
+    SaveSystem.abilities = {DEVOTION_AURA,
+                            DIVINE_SHIELD,
+                            CONSECRATION,
+                            CONSECRATION_TR,
+                            HAMMER_RIGHTEOUS,
+                            JUDGEMENT_OF_LIGHT_TR,
+                            JUDGEMENT_OF_WISDOM_TR,
+                            SHIELD_OF_RIGHTEOUSNESS,
+    }
+    SaveSystem.spellbook = SPELLBOOK_PALADIN
+end
+
+--- Инициализирует способности приста
+function SaveSystem.DefineAbilitiesPriest()
+    SaveSystem.abilities = {FLASH_HEAL, RENEW, CIRCLE_OF_HEALING}
+    SaveSystem.spellbook = nil
+end
+
+--- Выдает герою способности
+function SaveSystem.AddHeroAbilities(class)
+    SaveSystem.class = CLASSES[class]
+    SaveSystem.DefineAbilities(SaveSystem.class)
+    local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
+    hero:AddAbilities(table.unpack(SaveSystem.abilities))
+    hero:AddSpellbook(SaveSystem.spellbook)
+    hero:SetLevel(80)
 end
 
 -- Copyright (c) 2022 meiso
@@ -1887,7 +1938,6 @@ function SaveSystem.AddNewHero()
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
         udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] = unit:GetId()
-        udg_SaveUnit_spellbook = SPELLBOOK_PALADIN
         SaveSystem.AddHeroAbilities("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
@@ -1905,24 +1955,8 @@ end
 
 -- Copyright (c) 2022 meiso
 
-function SaveSystem.LoadHero()
-    local i = GetConvertedPlayerId(GetTriggerPlayer())
-    SaveSystem.Load()
-    udg_My_index = i
-    udg_My_hero[udg_My_index] = udg_SaveUnit_unit
-end
-
-function SaveSystem.InitLoadEvent()
-    local event = EventsPlayer()
-    event:RegisterChatEvent("-load")
-    event:AddCondition(SaveSystem.IsHeroNotCreated)
-    event:AddAction(SaveSystem.LoadHero)
-end
-
--- Copyright (c) 2022 meiso
-
 function SaveSystem.SaveHero()
-    udg_SaveUnit_unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
+    SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
     udg_SaveUnit_user_data[1] = 1
     SaveSystem.Save()
 end
@@ -1931,6 +1965,22 @@ function SaveSystem.InitSaveEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-save")
     event:AddAction(SaveSystem.SaveHero)
+end
+
+-- Copyright (c) 2022 meiso
+
+function SaveSystem.LoadHero()
+    local i = GetConvertedPlayerId(GetTriggerPlayer())
+    SaveSystem.Load()
+    udg_My_index = i
+    udg_My_hero[udg_My_index] = SaveSystem.unit
+end
+
+function SaveSystem.InitLoadEvent()
+    local event = EventsPlayer()
+    event:RegisterChatEvent("-load")
+    event:AddCondition(SaveSystem.IsHeroNotCreated)
+    event:AddAction(SaveSystem.LoadHero)
 end
 
 -- Copyright (c) 2022 meiso
@@ -3374,7 +3424,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     Paladin.hero:LoseMana{percent=6}
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end

@@ -125,6 +125,7 @@ end
 ---@param spellbook spellbook
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
+    if not spellbook then return end
     UnitAddAbility(self.unit, spellbook)
     UnitMakeAbilityPermanent(self.unit, true, spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)

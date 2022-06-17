@@ -4,7 +4,6 @@
 ---@param u unitid Сохраняемый юнит
 ---@return integer Следующий итератор
 function SaveSystem.SaveUnitData(i, u)
-    local ability_iter = 1
     local ability_count = 0
     local item_count = 0
     local max_slots = 5
@@ -27,16 +26,15 @@ function SaveSystem.SaveUnitData(i, u)
         i = i + 1
 
         -- сохраняем способности
-        while udg_SaveUnit_hero_ability[ability_iter] ~= 0 do
-            local ability_level = GetUnitAbilityLevel(u, udg_SaveUnit_hero_ability[ability_iter])
+        for k = 1, #SaveSystem.abilities do
+            local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
             if ability_level > 0 then
                 ability_count = ability_count + 1
-                udg_SaveUnit_data[i] = udg_SaveUnit_hero_ability[ability_iter]
+                udg_SaveUnit_data[i] = SaveSystem.abilities[k]
                 i = i + 1
                 udg_SaveUnit_data[i] = ability_level
                 i = i + 1
             end
-            ability_iter = ability_iter + 1
         end
         udg_SaveUnit_data[ability_index] = ability_count
         udg_SaveUnit_data[i] = SaveSystem.scope.items
@@ -65,8 +63,6 @@ end
 ---@param world rect Текущий игровой мир
 ---@return integer Следующий итератор
 function SaveSystem.SaveBaseState(i, u, world)
-    local ability_iter = 1
-    local max_count_abilities = 0
 
     if u ~= nil then
         local rect_min_x = R2I(GetRectMinX(world))
@@ -102,7 +98,7 @@ function SaveSystem.SaveBaseState(i, u, world)
         i = i + 1
         udg_SaveUnit_data[i] = mana
         i = i + 1
-        --udg_SaveUnit_data[i] = udg_SaveUnit_class
+        --udg_SaveUnit_data[i] = SaveSystem.class
         --i = i + 1
         udg_SaveUnit_data[i] = SaveSystem.scope.resources
         i = i + 1
@@ -112,29 +108,14 @@ function SaveSystem.SaveBaseState(i, u, world)
         i = i + 1
         udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
         i = i + 1
-        local scope_ability = i
-        i = i + 1
-
-        while udg_SaveUnit_ability[ability_iter] ~= 0 do
-            local ability_level = GetUnitAbilityLevel(u, udg_SaveUnit_ability[ability_iter])
-            if ability_level > 0 then
-                max_count_abilities = max_count_abilities + 1
-                udg_SaveUnit_data[i] = udg_SaveUnit_ability[ability_iter]
-                i = i + 1
-                udg_SaveUnit_data[i] = ability_level
-                i = i + 1
-            end
-            ability_iter = ability_iter + 1
-        end
-        udg_SaveUnit_data[scope_ability] = max_count_abilities
     end
     return i
 end
 
 ---
 function SaveSystem.LoadUnitData()
-    if udg_SaveUnit_unit ~= nil then
-        local current_unit = udg_SaveUnit_unit
+    if SaveSystem.unit ~= nil then
+        local current_unit = SaveSystem.unit
         local unit_loc_x = GetUnitX(current_unit)
         local unit_loc_y = GetUnitY(current_unit)
         local current_case = -1
@@ -245,7 +226,7 @@ function SaveSystem.LoadBaseState(pl)
                 unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
                 health = udg_SaveUnit_data[i + 5]
                 mana = udg_SaveUnit_data[i + 6]
-                --udg_SaveUnit_class = udg_SaveUnit_data[i + 7]
+                --SaveSystem.class = udg_SaveUnit_data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
@@ -255,9 +236,9 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = udg_SaveUnit_y
         end
 
-        --SaveSystem.AddHeroAbilities(udg_SaveUnit_class)
+        --SaveSystem.AddHeroAbilities(SaveSystem.class)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
-        udg_SaveUnit_unit = unit_obj
+        SaveSystem.unit = unit_obj
 
         if unit_obj ~= nil then
             SetUnitState(unit_obj, UNIT_STATE_LIFE, GetUnitState(unit_obj, UNIT_STATE_MAX_LIFE) * (I2R(health) / SaveSystem.magic_number.one))

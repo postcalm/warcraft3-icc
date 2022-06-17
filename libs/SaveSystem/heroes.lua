@@ -8,40 +8,43 @@ function SaveSystem.UnitsRespawn()
     end
 end
 
-function SaveSystem.InitHeroAbilities(class)
+function SaveSystem.DefineAbilities(class)
     if class == CLASSES["paladin"] then
-        SaveSystem.InitHeroAbilitiesPaladin()
+        SaveSystem.DefineAbilitiesPaladin()
     elseif class == CLASSES["priest"] then
-        SaveSystem.InitHeroAbilitiesPriest()
+        SaveSystem.DefineAbilitiesPriest()
     end
 end
 
 --- Инициализирует способности паладина
-function SaveSystem.InitHeroAbilitiesPaladin()
-    udg_SaveUnit_hero_ability[1] = DEVOTION_AURA
-    udg_SaveUnit_hero_ability[2] = DIVINE_SHIELD
-    udg_SaveUnit_hero_ability[3] = CONSECRATION
-    udg_SaveUnit_hero_ability[4] = CONSECRATION_TR
-    udg_SaveUnit_hero_ability[5] = HAMMER_RIGHTEOUS
-    udg_SaveUnit_hero_ability[6] = JUDGEMENT_OF_LIGHT_TR
-    udg_SaveUnit_hero_ability[7] = JUDGEMENT_OF_WISDOM_TR
-    udg_SaveUnit_hero_ability[8] = SHIELD_OF_RIGHTEOUSNESS
-    udg_SaveUnit_hero_ability[9] = SPELLBOOK_PALADIN
+function SaveSystem.DefineAbilitiesPaladin()
+    SaveSystem.abilities = {DEVOTION_AURA,
+                            DIVINE_SHIELD,
+                            CONSECRATION,
+                            CONSECRATION_TR,
+                            HAMMER_RIGHTEOUS,
+                            JUDGEMENT_OF_LIGHT_TR,
+                            JUDGEMENT_OF_WISDOM_TR,
+                            SHIELD_OF_RIGHTEOUSNESS,
+    }
+    SaveSystem.spellbook = SPELLBOOK_PALADIN
 end
 
 --- Инициализирует способности приста
-function SaveSystem.InitHeroAbilitiesPriest()
-    udg_SaveUnit_hero_ability[1] = FLASH_HEAL
-    udg_SaveUnit_hero_ability[2] = RENEW
-    udg_SaveUnit_hero_ability[3] = CIRCLE_OF_HEALING
+function SaveSystem.DefineAbilitiesPriest()
+    SaveSystem.abilities = {FLASH_HEAL,
+                            RENEW, 
+                            CIRCLE_OF_HEALING,
+    }
+    SaveSystem.spellbook = nil
 end
 
 --- Выдает герою способности
 function SaveSystem.AddHeroAbilities(class)
-    udg_SaveUnit_class = CLASSES[class]
-    SaveSystem.InitHeroAbilities(udg_SaveUnit_class)
+    SaveSystem.class = CLASSES[class]
+    SaveSystem.DefineAbilities(SaveSystem.class)
     local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
-    hero:AddAbilities(table.unpack(udg_SaveUnit_hero_ability))
-    hero:AddSpellbook(udg_SaveUnit_spellbook)
+    hero:AddAbilities(table.unpack(SaveSystem.abilities))
+    hero:AddSpellbook(SaveSystem.spellbook)
     hero:SetLevel(80)
 end

@@ -11,7 +11,7 @@ function SaveSystem.creature(gc, pl)
         -- загружаем общее состояние игрока
         SaveSystem.LoadBaseState(pl)
 
-        if udg_SaveUnit_unit == nil then
+        if SaveSystem.unit == nil then
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error data")
             return
         end
@@ -89,7 +89,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
     if gc ~= nil then
         is_player_author = GetLocalPlayer() == pl
-        id_player = udg_SaveUnit_author
+        id_player = SaveSystem.author
 
         if id_player <= 0 then
             is_player_author = false
@@ -106,7 +106,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\"..udg_SaveUnit_directory.."\\"..file_name)
+            Preloader("save\\"..SaveSystem.directory.."\\"..file_name)
         end
 
         TriggerSleepAction(0.)
@@ -152,7 +152,7 @@ function SaveSystem.Load()
         for i = 1, udg_SaveUnit_user_data[1] do
             Preload(I2S(udg_SaveUnit_user_data[i]).." user_data["..I2S(i).."] < load")
         end
-        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."log_load.txt")
+        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
         PreloadGenClear()
     end
 end
@@ -160,7 +160,7 @@ end
 ---
 function SaveSystem.ada(is_player, file_name, u)
     local user_key
-    local id_author = udg_SaveUnit_author
+    local id_author = SaveSystem.author
     local handle_world
     local encrypted_key = GetRandomInt(1, SaveSystem.magic_number.nine)
     local cjlocgn_00000004 = GetRandomInt(1, SaveSystem.magic_number.nine)
@@ -264,7 +264,7 @@ function SaveSystem.ada(is_player, file_name, u)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
-            PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\"..file_name)
+            PreloadGenEnd("save\\"..SaveSystem.directory.."\\"..file_name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -281,7 +281,7 @@ function SaveSystem.Save()
         local full_command_from_chat = GetEventPlayerChatString()
 
         -- если не понятно кого сохранять - сообщаем об этом в чат
-        if udg_SaveUnit_unit == nil then
+        if SaveSystem.unit == nil then
             DisplayTextToPlayer(handle_player, 0, 0, "unit is not selected")
             return
         end
@@ -293,7 +293,7 @@ function SaveSystem.Save()
             file = "default.txt"
         end
 
-        SaveSystem.ada((GetLocalPlayer() == handle_player), file, udg_SaveUnit_unit)
+        SaveSystem.ada((GetLocalPlayer() == handle_player), file, SaveSystem.unit)
         udg_SaveUnit_bool = true
     end
 end

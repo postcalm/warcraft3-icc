@@ -2,8 +2,8 @@
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
 function SaveSystem.GetUserKey()
-    if udg_SaveUnit_author > 0 then
-        Preloader("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+    if SaveSystem.author > 0 then
+        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
@@ -29,12 +29,12 @@ end
 ---@param val integer Значение для генерации ключа
 ---@return integer Ключ игрока
 function SaveSystem.CreateUserKey(salt, val)
-    if udg_SaveUnit_author > 0 then
+    if SaveSystem.author > 0 then
         SaveSystem.hash1 = salt
         PreloadGenClear()
         Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
         Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..udg_SaveUnit_directory.."\\".."user.txt")
+        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
         return val
     end
     return 0
