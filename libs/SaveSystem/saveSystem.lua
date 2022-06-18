@@ -4,7 +4,7 @@ function SaveSystem.creature(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
         for i = 1, count do
-            udg_SaveUnit_data[i] = GetStoredInteger(gc, I2S(i), I2S(i))
+            SaveSystem.data[i] = GetStoredInteger(gc, I2S(i), I2S(i))
         end
         TriggerSleepAction(0.)
 
@@ -27,9 +27,9 @@ end
 --- Синхронизирует данные между игроками
 function SaveSystem.Syncing(gc, is_player)
     if is_player then
-        local count = udg_SaveUnit_data[1]
+        local count = SaveSystem.data[1]
         for i = 1, count do
-            StoreInteger(gc, I2S(i), I2S(i), udg_SaveUnit_data[i])
+            StoreInteger(gc, I2S(i), I2S(i), SaveSystem.data[i])
             SyncStoredInteger(gc, I2S(i), I2S(i))
         end
         StoreInteger(gc, "bool", "bool", 1)
@@ -59,9 +59,9 @@ function SaveSystem.load_uploading(author, user)
                 encrypted_data = encrypted_data - SaveSystem.generation1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
 
-                udg_SaveUnit_data[i] = encrypted_data
+                SaveSystem.data[i] = encrypted_data
             end
-            udg_SaveUnit_data[1] = max_count_data
+            SaveSystem.data[1] = max_count_data
 
             if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
@@ -134,7 +134,7 @@ function SaveSystem.Load()
     local save_file
     local full_command_from_chat
 
-    if udg_SaveUnit_bool then
+    if not SaveSystem.process then
         full_command_from_chat = GetEventPlayerChatString()
 
         -- определяем имя save-файла
@@ -146,8 +146,8 @@ function SaveSystem.Load()
 
         SaveSystem.afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
 
-        for i = 1, udg_SaveUnit_data[1] do
-            Preload(I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load")
+        for i = 1, SaveSystem.data[1] do
+            Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
         end
         for i = 1, SaveSystem.user_data[1] do
             Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
@@ -210,23 +210,23 @@ function SaveSystem.ada(is_player, file_name, u)
         if is_player then
             item_data = item_data - 1
             cjlocgn_00000007[item_data + 1] = 0
-            udg_SaveUnit_data[1] = item_data
+            SaveSystem.data[1] = item_data
             SaveSystem.hash1 = encrypted_key
             SaveSystem.hash2 = encrypted_key
 
             for i = 1, item_data do
                 -- получаем данные
-                encrypted_data = udg_SaveUnit_data[i]
+                encrypted_data = SaveSystem.data[i]
                 cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
                 -- шифруем
                 encrypted_data = encrypted_data + SaveSystem.generation1()
                 cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
                 -- записываем
-                udg_SaveUnit_data[i] = encrypted_data
+                SaveSystem.data[i] = encrypted_data
                 cjlocgn_00000007[i] = SaveSystem.generation2()
             end
 
-            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
+            SaveSystem.data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
             cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
         end
 
@@ -237,9 +237,9 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
-                encrypted_data = udg_SaveUnit_data[i]
-                udg_SaveUnit_data[i] = udg_SaveUnit_data[cjlocgn_0000000e]
-                udg_SaveUnit_data[cjlocgn_0000000e] = encrypted_data
+                encrypted_data = SaveSystem.data[i]
+                SaveSystem.data[i] = SaveSystem.data[cjlocgn_0000000e]
+                SaveSystem.data[cjlocgn_0000000e] = encrypted_data
                 encrypted_data = cjlocgn_00000007[i]
                 cjlocgn_00000007[i] = cjlocgn_00000007[cjlocgn_0000000e]
                 cjlocgn_00000007[cjlocgn_0000000e] = encrypted_data
@@ -252,7 +252,7 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(udg_SaveUnit_data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
             -- сохранение данных в файл
@@ -275,8 +275,8 @@ end
 ---
 function SaveSystem.Save()
     local file
-    if udg_SaveUnit_bool then
-        udg_SaveUnit_bool = false
+    if not SaveSystem.process then
+        SaveSystem.process = true
         local handle_player = GetTriggerPlayer()
         local full_command_from_chat = GetEventPlayerChatString()
 
@@ -294,6 +294,6 @@ function SaveSystem.Save()
         end
 
         SaveSystem.ada((GetLocalPlayer() == handle_player), file, SaveSystem.unit)
-        udg_SaveUnit_bool = true
+        SaveSystem.process = false
     end
 end

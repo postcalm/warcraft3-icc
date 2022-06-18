@@ -267,7 +267,19 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
---
+-- Movement
+
+--- Установить скорость передвижения юнита
+---@param movespeed real
+function Unit:SetMoveSpeed(movespeed)
+    SetUnitMoveSpeed(self.unit, movespeed)
+end
+
+--- Получить скорость передвижения юнита
+---@return real
+function Unit:GetMoveSpeed()
+    return GetUnitMoveSpeed(self.unit)
+end
 
 --- Установить/снять прохождение через объекты
 ---@param flag boolean
@@ -310,50 +322,12 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
---- Получить градус поворота юнита
----@return real
-function Unit:GetFacing()
-    return GetUnitFacing(self.unit)
-end
+-- Meta
 
---- Проверяет мертв ли юнит
+--- Проверяет является ли юнит героем
 ---@return boolean
-function Unit:IsDied()
-    return GetDyingUnit() == self.unit
-end
-
---- Получить идентификатор созданного юнита
----@return unitid
-function Unit:GetId()
-    return self.unit
-end
-
---- Получить игрока, владеющего юнитом
-function Unit:GetOwner()
-    return GetOwningPlayer(self.unit)
-end
-
---- Установить уровень юнита
----@param lvl integer
-function Unit:SetLevel(lvl)
-    SetHeroLevel(self.unit, lvl, false)
-end
-
---- Установить количество брони
----@param value real
-function Unit:SetArmor(value)
-    BlzSetUnitArmor(self.unit, value)
-end
-
---- Установить скорость передвижения юнита
----@param movespeed real
-function Unit:SetMoveSpeed(movespeed)
-    SetUnitMoveSpeed(self.unit, movespeed)
-end
-
---- Получить скорость передвижения юнита
-function Unit:GetMoveSpeed()
-    return GetUnitMoveSpeed(self.unit)
+function Unit:IsHero()
+    return IsUnitType(self.unit, UNIT_TYPE_HERO) == true
 end
 
 --- Проверяет является ли юнит союзником
@@ -370,11 +344,72 @@ function Unit:IsEnemy(unit)
     return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
 end
 
+--- Получить градус поворота юнита
+---@return real
+function Unit:GetFacing()
+    return GetUnitFacing(self.unit)
+end
+
+--- Проверяет мертв ли юнит
+---@return boolean
+function Unit:IsDied()
+    return GetDyingUnit() == self.unit
+end
+
+--- Установить уровень юнита
+---@param level integer
+function Unit:SetLevel(level)
+    SetHeroLevel(self.unit, level, false)
+end
+
+--- Установить количество брони
+---@param armor real
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Установить время жизни юнита
+---@param time real
 function Unit:ApplyTimedLife(time)
     UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end
 
+--- Воскрешает юнита
+---@param location location Место воскрешения. Опционально
+---@return nil
+function Unit:Revive(location)
+    local loc = location or self:GetLoc()
+    local x = GetLocationX(loc)
+    local y = GetLocationY(loc)
+    ReviveHero(self.unit, x, y, false)
+end
+
+--- Получить идентификатор созданного юнита
+---@return unitid
+function Unit:GetId()
+    return self.unit
+end
+
+--- Получить игрока, владеющего юнитом
+---@return player
+function Unit:GetOwner()
+    return GetOwningPlayer(self.unit)
+end
+
+--- Установить имя юниту
+---@return nil
+function Unit:SetName(name)
+    BlzSetUnitName(self.unit, name)
+end
+
+--- Убить юнита
+---@return nil
+function Unit:Kill()
+    KillUnit(self.unit)
+end
+
 --- Удалить юнита
+---@return nil
 function Unit:Remove()
     RemoveUnit(self.unit)
 end

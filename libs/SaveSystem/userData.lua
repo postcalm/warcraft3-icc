@@ -47,12 +47,12 @@ function SaveSystem.SaveUserData(i)
     if i > 0 then
         local n = SaveSystem.user_data[1]
         if n > 0 then
-            udg_SaveUnit_data[i] = 1
+            SaveSystem.data[i] = 1
             i = i + 1
-            udg_SaveUnit_data[i] = n
+            SaveSystem.data[i] = n
             i = i + 1
             for j = 2, n do
-                udg_SaveUnit_data[i] = SaveSystem.user_data[j]
+                SaveSystem.data[i] = SaveSystem.user_data[j]
                 i = i + 1
             end
         end
@@ -62,17 +62,17 @@ end
 
 --- Загружает пользовательские данные
 function SaveSystem.LoadUserData()
-    if udg_SaveUnit_data[1] > 0 then
+    if SaveSystem.data[1] > 0 then
         local case = -1
         local i = 2
-        local count = udg_SaveUnit_data[1]
+        local count = SaveSystem.data[1]
         while i < count do
-            case = udg_SaveUnit_data[i]
+            case = SaveSystem.data[i]
             if case == 1 then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local cjlocgn_00000004 = i + 1
                 for j = 2, max_count_data do
-                    SaveSystem.user_data[j] = udg_SaveUnit_data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = SaveSystem.data[cjlocgn_00000004 + j]
                 end
                 SaveSystem.user_data[1] = max_count_data
             end

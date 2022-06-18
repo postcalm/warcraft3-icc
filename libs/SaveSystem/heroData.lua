@@ -10,17 +10,17 @@ function SaveSystem.SaveUnitData(i, u)
 
     if IsUnitType(u, UNIT_TYPE_HERO) == true then
         -- сохраняем инфу: опыт, сила, ловкость, интеллект
-        udg_SaveUnit_data[i] = SaveSystem.scope.state
+        SaveSystem.data[i] = SaveSystem.scope.state
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroXP(u)
+        SaveSystem.data[i] = GetHeroXP(u)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroStr(u, false)
+        SaveSystem.data[i] = GetHeroStr(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroAgi(u, false)
+        SaveSystem.data[i] = GetHeroAgi(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroInt(u, false)
+        SaveSystem.data[i] = GetHeroInt(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.abilities
+        SaveSystem.data[i] = SaveSystem.scope.abilities
         i = i + 1
         local ability_index = i
         i = i + 1
@@ -30,14 +30,14 @@ function SaveSystem.SaveUnitData(i, u)
             local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
             if ability_level > 0 then
                 ability_count = ability_count + 1
-                udg_SaveUnit_data[i] = SaveSystem.abilities[k]
+                SaveSystem.data[i] = SaveSystem.abilities[k]
                 i = i + 1
-                udg_SaveUnit_data[i] = ability_level
+                SaveSystem.data[i] = ability_level
                 i = i + 1
             end
         end
-        udg_SaveUnit_data[ability_index] = ability_count
-        udg_SaveUnit_data[i] = SaveSystem.scope.items
+        SaveSystem.data[ability_index] = ability_count
+        SaveSystem.data[i] = SaveSystem.scope.items
         i = i + 1
         local item_index = i
         i = i + 1
@@ -46,13 +46,13 @@ function SaveSystem.SaveUnitData(i, u)
             local item_id = UnitItemInSlot(u, item_iter)
             if item_id ~= nil then
                 item_count = item_count + 1
-                udg_SaveUnit_data[i] = GetItemTypeId(item_id)
+                SaveSystem.data[i] = GetItemTypeId(item_id)
                 i = i + 1
-                udg_SaveUnit_data[i] = GetItemCharges(item_id)
+                SaveSystem.data[i] = GetItemCharges(item_id)
                 i = i + 1
             end
         end
-        udg_SaveUnit_data[item_index] = item_count
+        SaveSystem.data[item_index] = item_count
     end
     return i
 end
@@ -80,33 +80,33 @@ function SaveSystem.SaveBaseState(i, u, world)
         local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_MANA)))
         local count_gold = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_GOLD)
         local count_lumber = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_LUMBER)
-        udg_SaveUnit_data[i] = SaveSystem.scope.map
+        SaveSystem.data[i] = SaveSystem.scope.map
         i = i + 1
-        udg_SaveUnit_data[i] = map_number
+        SaveSystem.data[i] = map_number
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_data
+        SaveSystem.data[i] = SaveSystem.scope.hero_data
         i = i + 1
-        udg_SaveUnit_data[i] = unit_type_id
+        SaveSystem.data[i] = unit_type_id
         i = i + 1
-        udg_SaveUnit_data[i] = hero_position_x
+        SaveSystem.data[i] = hero_position_x
         i = i + 1
-        udg_SaveUnit_data[i] = hero_position_y
+        SaveSystem.data[i] = hero_position_y
         i = i + 1
-        udg_SaveUnit_data[i] = hero_facing
+        SaveSystem.data[i] = hero_facing
         i = i + 1
-        udg_SaveUnit_data[i] = health
+        SaveSystem.data[i] = health
         i = i + 1
-        udg_SaveUnit_data[i] = mana
+        SaveSystem.data[i] = mana
         i = i + 1
-        --udg_SaveUnit_data[i] = SaveSystem.classid
+        --SaveSystem.data[i] = SaveSystem.classid
         --i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.resources
+        SaveSystem.data[i] = SaveSystem.scope.resources
         i = i + 1
-        udg_SaveUnit_data[i] = count_gold
+        SaveSystem.data[i] = count_gold
         i = i + 1
-        udg_SaveUnit_data[i] = count_lumber
+        SaveSystem.data[i] = count_lumber
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
+        SaveSystem.data[i] = SaveSystem.scope.hero_skill
         i = i + 1
     end
     return i
@@ -120,17 +120,17 @@ function SaveSystem.LoadUnitData()
         local unit_loc_y = GetUnitY(current_unit)
         local current_case = -1
         local i = 2
-        local maximum_data = udg_SaveUnit_data[1]
+        local maximum_data = SaveSystem.data[1]
         while i < maximum_data do
-            current_case = udg_SaveUnit_data[i]
+            current_case = SaveSystem.data[i]
             -- выдаем предметы
             if current_case == SaveSystem.scope.items then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local current_item = CreateItem(udg_SaveUnit_data[j], unit_loc_x, unit_loc_y)
+                    local current_item = CreateItem(SaveSystem.data[j], unit_loc_x, unit_loc_y)
                     UnitAddItem(current_unit, current_item)
-                    SetItemCharges(current_item, udg_SaveUnit_data[j + 1])
+                    SetItemCharges(current_item, SaveSystem.data[j + 1])
                     j = j + 2
                     max_count_data = max_count_data - 1
                 end
@@ -138,26 +138,26 @@ function SaveSystem.LoadUnitData()
 
             -- проставляем статы
             if current_case == SaveSystem.scope.state then
-                SetHeroXP(current_unit, udg_SaveUnit_data[i + 1], false)
-                if GetHeroStr(current_unit, false) < udg_SaveUnit_data[i + 2] then
-                    SetHeroStr(current_unit, udg_SaveUnit_data[i + 2], false)
+                SetHeroXP(current_unit, SaveSystem.data[i + 1], false)
+                if GetHeroStr(current_unit, false) < SaveSystem.data[i + 2] then
+                    SetHeroStr(current_unit, SaveSystem.data[i + 2], false)
                 end
-                if GetHeroAgi(current_unit, false) < udg_SaveUnit_data[i + 3] then
-                    SetHeroAgi(current_unit, udg_SaveUnit_data[i + 3], false)
+                if GetHeroAgi(current_unit, false) < SaveSystem.data[i + 3] then
+                    SetHeroAgi(current_unit, SaveSystem.data[i + 3], false)
                 end
-                if GetHeroInt(current_unit, false) < udg_SaveUnit_data[i + 4] then
-                    SetHeroInt(current_unit, udg_SaveUnit_data[i + 4], false)
+                if GetHeroInt(current_unit, false) < SaveSystem.data[i + 4] then
+                    SetHeroInt(current_unit, SaveSystem.data[i + 4], false)
                 end
             end
 
             -- выдаем юниту его навыки
             if current_case == SaveSystem.scope.hero_skill then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local count_level = udg_SaveUnit_data[j + 1]
+                    local count_level = SaveSystem.data[j + 1]
                     while count_level >= 0 do
-                        SelectHeroSkill(current_unit, udg_SaveUnit_data[j])
+                        SelectHeroSkill(current_unit, SaveSystem.data[j])
                         count_level = count_level - 1
                     end
                     j = j + 2
@@ -168,12 +168,12 @@ function SaveSystem.LoadUnitData()
             -- выдаем способности
             if current_case == SaveSystem.scope.abilities then
                 -- сколько всего способностей было сохранено
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 -- индекс, по которому лежит способность
                 local j = i + 2
                 while max_count_data >= 0 do
-                    UnitAddAbility(current_unit, udg_SaveUnit_data[j])
-                    SetUnitAbilityLevel(current_unit, udg_SaveUnit_data[j], udg_SaveUnit_data[j + 1])
+                    UnitAddAbility(current_unit, SaveSystem.data[j])
+                    SetUnitAbilityLevel(current_unit, SaveSystem.data[j], SaveSystem.data[j + 1])
                     j = j + 2
                     max_count_data = max_count_data - 1
                 end
@@ -194,7 +194,7 @@ function SaveSystem.LoadBaseState(pl)
     local unit_id
     local health
     local mana
-    if udg_SaveUnit_data[1] > 0 then
+    if SaveSystem.data[1] > 0 then
         -- размеры карты
         local rect_min_x = R2I(GetRectMinX(GetWorldBounds()))
         local rect_max_x = R2I(GetRectMaxX(GetWorldBounds()))
@@ -205,35 +205,37 @@ function SaveSystem.LoadBaseState(pl)
         local i = 2
         local case = -1
         -- макс. кол-во записанных данных
-        local n = udg_SaveUnit_data[1]
+        local n = SaveSystem.data[1]
 
         while i < n do
-            case = udg_SaveUnit_data[i]
+            case = SaveSystem.data[i]
             if case == SaveSystem.scope.map then
-                map_number = udg_SaveUnit_data[i + 1]
+                map_number = SaveSystem.data[i + 1]
             end
 
             if case == SaveSystem.scope.resources then
-                count_gold = udg_SaveUnit_data[i + 1]
-                count_lumber = udg_SaveUnit_data[i + 2]
+                count_gold = SaveSystem.data[i + 1]
+                count_lumber = SaveSystem.data[i + 2]
             end
 
             if case == SaveSystem.scope.hero_data then
-                unit_id = udg_SaveUnit_data[i + 1]
+                unit_id = SaveSystem.data[i + 1]
                 -- местоположение игрока в месте, где он сохранялся
-                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(udg_SaveUnit_data[i + 2]) / SaveSystem.magic_number.one)
-                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(udg_SaveUnit_data[i + 3]) / SaveSystem.magic_number.one)
-                unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
-                health = udg_SaveUnit_data[i + 5]
-                mana = udg_SaveUnit_data[i + 6]
-                --SaveSystem.classid = udg_SaveUnit_data[i + 7]
+                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(SaveSystem.data[i + 2]) / SaveSystem.magic_number.one)
+                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(SaveSystem.data[i + 3]) / SaveSystem.magic_number.one)
+                unit_face = 360. * (I2R(SaveSystem.data[i + 4]) / SaveSystem.magic_number.one)
+                health = SaveSystem.data[i + 5]
+                mana = SaveSystem.data[i + 6]
+                --SaveSystem.classid = SaveSystem.data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
 
+        -- если карта другая - создаём персонажа в заранее заданном месте
         if map_number ~= udg_SaveUnit_map_number then
-            unit_x = udg_SaveUnit_x
-            unit_y = udg_SaveUnit_y
+            local loc = GetRandomLocInRect(gg_rct_RespawZone)
+            unit_x = GetLocationX(loc)
+            unit_y = GetLocationY(loc)
         end
 
         --SaveSystem.AddHeroAbilities(SaveSystem.classid)

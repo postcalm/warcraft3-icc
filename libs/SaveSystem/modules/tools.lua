@@ -14,7 +14,7 @@ function SaveSystem.next_scope(index, current_scope)
         return index + 7
     end
     if current_scope == SaveSystem.scope.hero_skill then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
     -- блок со статами
     if current_scope == SaveSystem.scope.state then
@@ -22,11 +22,11 @@ function SaveSystem.next_scope(index, current_scope)
     end
     -- блок со способностями
     if current_scope == SaveSystem.scope.abilities then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
     -- блок с предметами
     if current_scope == SaveSystem.scope.items then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
 
     -- вернем что угодно, чтобы выйти из цикла
