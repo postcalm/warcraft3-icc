@@ -269,6 +269,27 @@ end
 
 --
 
+--- Установить/снять прохождение через объекты
+---@param flag boolean
+function Unit:SetPathing(flag)
+    SetUnitPathing(self.unit, flag)
+end
+
+--- Следовать к указанному юниту
+---@param unit unit
+function Unit:MoveToUnit(unit)
+    local loc
+    if type(unit) == "table" then loc = unit:GetLoc()
+    else loc = GetUnitLoc(unit) end
+    IssuePointOrderLoc(self.unit, "move", loc)
+end
+
+--- Следовать к указанной точке
+---@param location location
+function Unit:MoveToLoc(location)
+    IssuePointOrderLoc(self.unit, "move", location)
+end
+
 --- Вернуть ближайших врагов
 ---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
 ---@param filter function

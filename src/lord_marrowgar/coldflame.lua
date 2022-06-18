@@ -2,29 +2,27 @@
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
-
-    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetId())
-    local target_location = GetUnitLoc(target)
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM,
+            GetOwningPlayer(GetAttacker()))))
+    local lord_location = LordMarrowgar.unit:GetLoc()
+    local target_location = target:GetLoc()
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetId()
-
-        SetUnitMoveSpeed(coldflame_obj, 0.6)
-        SetUnitPathing(coldflame_obj, false)
-        IssuePointOrderLoc(coldflame_obj, "move", target_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
+        coldflame_obj:SetMoveSpeed(0.6)
+        coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
-        UnitApplyTimedLife(coldflame_obj, COMMON_TIMER, 9.)
+        coldflame_obj:ApplyTimedLife(9.)
 
         while true do
+            coldflame_obj:MoveToLoc(target_location)
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(LordMarrowgar.coldflame, "flamestrike", coldflame_obj)
+            LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflame_obj, UNIT_STATE_LIFE) <= 0 then break end
+            if coldflame_obj:GetCurrentLife() <= 0 then break end
         end
-
         LordMarrowgar.coldflame_effect = false
     end
 end

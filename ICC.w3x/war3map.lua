@@ -14,7 +14,7 @@ gg_trg_Init_LordMarrowgar = nil
 gg_trg_Init_LadyDeathwhisper = nil
 gg_trg_Init_Priest = nil
 gg_trg_Init_Paladin = nil
-gg_trg_Reinitialize = nil
+gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
 gg_trg_NewHero = nil
 gg_trg_Init = nil
@@ -966,6 +966,27 @@ function Unit:GetCurrentLife()
 end
 
 --
+
+--- Установить/снять прохождение через объекты
+---@param flag boolean
+function Unit:SetPathing(flag)
+    SetUnitPathing(self.unit, flag)
+end
+
+--- Следовать к указанному юниту
+---@param unit unit
+function Unit:MoveToUnit(unit)
+    local loc
+    if type(unit) == "table" then loc = unit:GetLoc()
+    else loc = GetUnitLoc(unit) end
+    IssuePointOrderLoc(self.unit, "move", loc)
+end
+
+--- Следовать к указанной точке
+---@param location location
+function Unit:MoveToLoc(location)
+    IssuePointOrderLoc(self.unit, "move", location)
+end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
@@ -2611,29 +2632,27 @@ end
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
-
-    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetId())
-    local target_location = GetUnitLoc(target)
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM,
+            GetOwningPlayer(GetAttacker()))))
+    local lord_location = LordMarrowgar.unit:GetLoc()
+    local target_location = target:GetLoc()
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetId()
-
-        SetUnitMoveSpeed(coldflame_obj, 0.6)
-        SetUnitPathing(coldflame_obj, false)
-        IssuePointOrderLoc(coldflame_obj, "move", target_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
+        coldflame_obj:SetMoveSpeed(0.6)
+        coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
-        UnitApplyTimedLife(coldflame_obj, COMMON_TIMER, 9.)
+        coldflame_obj:ApplyTimedLife(9.)
 
         while true do
+            coldflame_obj:MoveToLoc(target_location)
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(LordMarrowgar.coldflame, "flamestrike", coldflame_obj)
+            LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflame_obj, UNIT_STATE_LIFE) <= 0 then break end
+            if coldflame_obj:GetCurrentLife() <= 0 then break end
         end
-
         LordMarrowgar.coldflame_effect = false
     end
 end
@@ -3557,7 +3576,7 @@ function InitTrig_Init_Paladin()
     TriggerAddAction(gg_trg_Init_Paladin, Trig_Init_Paladin_Actions)
 end
 
-function Trig_Reinitialize_Actions()
+function Trig_Alert_Actions()
     TriggerSleepAction(0.00)
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
@@ -3566,9 +3585,9 @@ function Trig_Reinitialize_Actions()
     SetForceAllianceStateBJ(bj_FORCE_PLAYER[0], bj_FORCE_PLAYER[0], bj_ALLIANCE_ALLIED)
 end
 
-function InitTrig_Reinitialize()
-    gg_trg_Reinitialize = CreateTrigger()
-    TriggerAddAction(gg_trg_Reinitialize, Trig_Reinitialize_Actions)
+function InitTrig_Alert()
+    gg_trg_Alert = CreateTrigger()
+    TriggerAddAction(gg_trg_Alert, Trig_Alert_Actions)
 end
 
 function Trig_RespawnHero_Actions()
@@ -3630,7 +3649,7 @@ function InitCustomTriggers()
     InitTrig_Init_LadyDeathwhisper()
     InitTrig_Init_Priest()
     InitTrig_Init_Paladin()
-    InitTrig_Reinitialize()
+    InitTrig_Alert()
     InitTrig_RespawnHero()
     InitTrig_NewHero()
     InitTrig_Init()
@@ -3644,7 +3663,7 @@ function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_Init_LadyDeathwhisper)
     ConditionalTriggerExecute(gg_trg_Init_Priest)
     ConditionalTriggerExecute(gg_trg_Init_Paladin)
-    ConditionalTriggerExecute(gg_trg_Reinitialize)
+    ConditionalTriggerExecute(gg_trg_Alert)
     ConditionalTriggerExecute(gg_trg_NewHero)
     ConditionalTriggerExecute(gg_trg_Init)
     ConditionalTriggerExecute(gg_trg_SaveHero)
