@@ -1,26 +1,35 @@
 
-Paladin          = {hero = nil}
-Priest           = {hero = nil}
-
-LordMarrowgar    = {unit = nil,
-                    coldflame = nil,
-                    coldflame_effect = false,
-                    bonespike_effect = false,
-                    whirlwind_effect = false,
+Paladin = {
+    hero = nil,
+    consecration_effect = nil,
 }
-LadyDeathwhisper = {unit = nil,
-                    mana_shield = nil,
-                    mana_is_over = false,
-                    dominate_mind_effect = false,
-                    death_and_decay_effect = false,
-                    phase = 1,
+Priest = {
+    hero = nil,
 }
 
-CultAdherent     = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LordMarrowgar = {
+    unit = nil,
+    coldflame = nil,
+    coldflame_effect = false,
+    bonespike_effect = false,
+    whirlwind_effect = false,
 }
-CultFanatic      = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LadyDeathwhisper = {
+    unit = nil,
+    mana_shield = nil,
+    mana_is_over = false,
+    dominate_mind_effect = false,
+    death_and_decay_effect = false,
+    phase = 1,
+}
+
+CultAdherent = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
+}
+CultFanatic = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
 }

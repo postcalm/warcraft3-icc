@@ -1,9 +1,5 @@
-udg_SaveUnit_y = 0.0
 udg_SaveUnit_gamecache = nil
 udg_SaveUnit_map_number = 0
-udg_SaveUnit_x = 0.0
-udg_SaveUnit_bool = false
-udg_SaveUnit_data = __jarray(0)
 udg_cache = nil
 udg_My_hero = {}
 gg_rct_RespawZone = nil
@@ -14,7 +10,7 @@ gg_trg_Init_LordMarrowgar = nil
 gg_trg_Init_LadyDeathwhisper = nil
 gg_trg_Init_Priest = nil
 gg_trg_Init_Paladin = nil
-gg_trg_Reinitialize = nil
+gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
 gg_trg_NewHero = nil
 gg_trg_Init = nil
@@ -22,16 +18,7 @@ gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
 function InitGlobals()
     local i = 0
-    udg_SaveUnit_y = 0.0
     udg_SaveUnit_map_number = 0
-    udg_SaveUnit_x = 0.0
-    udg_SaveUnit_bool = false
-    i = 0
-    while (true) do
-        if ((i > 1)) then break end
-        udg_SaveUnit_data[i] = 0
-        i = i + 1
-    end
 end
 
 function CreateUnitsForPlayer0()
@@ -76,7 +63,7 @@ end
 
 function CreateRegions()
     local we
-    gg_rct_RespawZone = Rect(3936.0, -3616.0, 4256.0, -3168.0)
+    gg_rct_RespawZone = Rect(3936.0, 0.0, 4256.0, 448.0)
     gg_rct_areaLD = Rect(2944.0, -128.0, 5248.0, 1984.0)
     gg_rct_areaLM = Rect(3040.0, -2688.0, 5184.0, -1056.0)
 end
@@ -126,30 +113,39 @@ METER = 20
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
-Paladin          = {hero = nil}
-Priest           = {hero = nil}
-
-LordMarrowgar    = {unit = nil,
-                    coldflame = nil,
-                    coldflame_effect = false,
-                    bonespike_effect = false,
-                    whirlwind_effect = false,
+Paladin = {
+    hero = nil,
+    consecration_effect = nil,
 }
-LadyDeathwhisper = {unit = nil,
-                    mana_shield = nil,
-                    mana_is_over = false,
-                    dominate_mind_effect = false,
-                    death_and_decay_effect = false,
-                    phase = 1,
+Priest = {
+    hero = nil,
 }
 
-CultAdherent     = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LordMarrowgar = {
+    unit = nil,
+    coldflame = nil,
+    coldflame_effect = false,
+    bonespike_effect = false,
+    whirlwind_effect = false,
 }
-CultFanatic      = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LadyDeathwhisper = {
+    unit = nil,
+    mana_shield = nil,
+    mana_is_over = false,
+    dominate_mind_effect = false,
+    death_and_decay_effect = false,
+    phase = 1,
+}
+
+CultAdherent = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
+}
+CultFanatic = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
 }
 
 
@@ -167,7 +163,6 @@ BLESSING_OF_SANCTUARY   = FourCC("A00H")
 BLESSING_OF_WISDOM      = FourCC("A00G")
 BLESSING_OF_MIGHT       = FourCC("A00M")
 CRUSADER_AURA           = FourCC("A00J")
-DEVOTION_AURA           = FourCC("AHhb")
 JUDGEMENT_OF_LIGHT      = FourCC("A00N")
 JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
 JUDGEMENT_OF_WISDOM     = FourCC("A00O")
@@ -593,7 +588,8 @@ function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency
     self.zoffset = 0
     self.text = text
     self.unit = unit
-    if type(text) == "number" then self.text = I2S(text) end
+    -- неявное приведение к int
+    if type(text) == "number" then self.text = I2S(text // 1) end
     if type(unit) == "table" then self.unit = unit:GetId() end
 
     if size then
@@ -770,11 +766,13 @@ end
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
 ---@param damage real
+---@param overtime real Частота нанесения урона
 ---@param location location
 ---@param radius real Радиус в метрах
-function Unit:DealMagicDamageLoc(damage, location, radius)
-    local meters = METER * radius
-    UnitDamagePointLoc(self.unit, 0, meters, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+function Unit:DealMagicDamageLoc(args)
+    local meters = METER * args.radius
+    local ot = args.overtime or 0
+    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -964,7 +962,40 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
---
+-- Movement
+
+--- Установить скорость передвижения юнита
+---@param movespeed real
+function Unit:SetMoveSpeed(movespeed)
+    SetUnitMoveSpeed(self.unit, movespeed)
+end
+
+--- Получить скорость передвижения юнита
+---@return real
+function Unit:GetMoveSpeed()
+    return GetUnitMoveSpeed(self.unit)
+end
+
+--- Установить/снять прохождение через объекты
+---@param flag boolean
+function Unit:SetPathing(flag)
+    SetUnitPathing(self.unit, flag)
+end
+
+--- Следовать к указанному юниту
+---@param unit unit
+function Unit:MoveToUnit(unit)
+    local loc
+    if type(unit) == "table" then loc = unit:GetLoc()
+    else loc = GetUnitLoc(unit) end
+    IssuePointOrderLoc(self.unit, "move", loc)
+end
+
+--- Следовать к указанной точке
+---@param location location
+function Unit:MoveToLoc(location)
+    IssuePointOrderLoc(self.unit, "move", location)
+end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
@@ -986,50 +1017,28 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
---- Получить градус поворота юнита
----@return real
-function Unit:GetFacing()
-    return GetUnitFacing(self.unit)
+-- Animation
+
+--- Добавить тэг анимации
+---@param tag string
+---@return nil
+function Unit:AddAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, true)
 end
 
---- Проверяет мертв ли юнит
+--- Удалить тэг анимации
+---@param tag string
+---@return nil
+function Unit:RemoveAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, false)
+end
+
+-- Meta
+
+--- Проверяет является ли юнит героем
 ---@return boolean
-function Unit:IsDied()
-    return GetDyingUnit() == self.unit
-end
-
---- Получить идентификатор созданного юнита
----@return unitid
-function Unit:GetId()
-    return self.unit
-end
-
---- Получить игрока, владеющего юнитом
-function Unit:GetOwner()
-    return GetOwningPlayer(self.unit)
-end
-
---- Установить уровень юнита
----@param lvl integer
-function Unit:SetLevel(lvl)
-    SetHeroLevel(self.unit, lvl, false)
-end
-
---- Установить количество брони
----@param value real
-function Unit:SetArmor(value)
-    BlzSetUnitArmor(self.unit, value)
-end
-
---- Установить скорость передвижения юнита
----@param movespeed real
-function Unit:SetMoveSpeed(movespeed)
-    SetUnitMoveSpeed(self.unit, movespeed)
-end
-
---- Получить скорость передвижения юнита
-function Unit:GetMoveSpeed()
-    return GetUnitMoveSpeed(self.unit)
+function Unit:IsHero()
+    return IsUnitType(self.unit, UNIT_TYPE_HERO) == true
 end
 
 --- Проверяет является ли юнит союзником
@@ -1046,11 +1055,72 @@ function Unit:IsEnemy(unit)
     return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
 end
 
+--- Получить градус поворота юнита
+---@return real
+function Unit:GetFacing()
+    return GetUnitFacing(self.unit)
+end
+
+--- Проверяет мертв ли юнит
+---@return boolean
+function Unit:IsDied()
+    return GetDyingUnit() == self.unit
+end
+
+--- Установить уровень юнита
+---@param level integer
+function Unit:SetLevel(level)
+    SetHeroLevel(self.unit, level, false)
+end
+
+--- Установить количество брони
+---@param armor real
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Установить время жизни юнита
+---@param time real
 function Unit:ApplyTimedLife(time)
     UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end
 
+--- Воскрешает юнита
+---@param location location Место воскрешения. Опционально
+---@return nil
+function Unit:Revive(location)
+    local loc = location or self:GetLoc()
+    local x = GetLocationX(loc)
+    local y = GetLocationY(loc)
+    ReviveHero(self.unit, x, y, false)
+end
+
+--- Получить идентификатор созданного юнита
+---@return unitid
+function Unit:GetId()
+    return self.unit
+end
+
+--- Получить игрока, владеющего юнитом
+---@return player
+function Unit:GetOwner()
+    return GetOwningPlayer(self.unit)
+end
+
+--- Установить имя юниту
+---@return nil
+function Unit:SetName(name)
+    BlzSetUnitName(self.unit, name)
+end
+
+--- Убить юнита
+---@return nil
+function Unit:Kill()
+    KillUnit(self.unit)
+end
+
 --- Удалить юнита
+---@return nil
 function Unit:Remove()
     RemoveUnit(self.unit)
 end
@@ -1105,6 +1175,8 @@ SaveSystem = {
     abilities = {},
     --- Книга заклинаний юнита
     spellbook = nil,
+    --- Место воскрешения
+    respawn = nil,
     --- Директория, где будут лежать сохранения
     directory = "test",
     --- Идентификатор автора
@@ -1112,18 +1184,11 @@ SaveSystem = {
     --- Пользовательские данные
     user_data = {},
     --- Данные игрока и его юнита
-    data = {
-        map = {},
-        resources = {},
-        hero_data = {},
-        hero_skill = {},
-        state = {},
-        abilities = {},
-        items = {},
-    },
+    data = {},
+    process = false,
     hash1 = 0,
     hash2 = 0,
-    -- автор данного творения запихал все данные в один массив
+    -- Автор данного творения запихал все данные в один массив
     -- и дабы как-то различать что находится внутри него,
     -- добавил специальные числа, разграничиваниющие области эти данных
     scope = {
@@ -1156,8 +1221,10 @@ SaveSystem = {
     },
 }
 
-CLASSES = {paladin = 1,
-           priest  = 2,
+--- Условные идентификаторы классов для системы сохранений
+CLASSES = {
+    paladin = 1,
+    priest  = 2,
 }
 
 
@@ -1186,7 +1253,7 @@ function SaveSystem.next_scope(index, current_scope)
         return index + 7
     end
     if current_scope == SaveSystem.scope.hero_skill then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
     -- блок со статами
     if current_scope == SaveSystem.scope.state then
@@ -1194,11 +1261,11 @@ function SaveSystem.next_scope(index, current_scope)
     end
     -- блок со способностями
     if current_scope == SaveSystem.scope.abilities then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
     -- блок с предметами
     if current_scope == SaveSystem.scope.items then
-        return index + udg_SaveUnit_data[index + 1] * 2 + 2
+        return index + SaveSystem.data[index + 1] * 2 + 2
     end
 
     -- вернем что угодно, чтобы выйти из цикла
@@ -1268,12 +1335,12 @@ function SaveSystem.SaveUserData(i)
     if i > 0 then
         local n = SaveSystem.user_data[1]
         if n > 0 then
-            udg_SaveUnit_data[i] = 1
+            SaveSystem.data[i] = 1
             i = i + 1
-            udg_SaveUnit_data[i] = n
+            SaveSystem.data[i] = n
             i = i + 1
             for j = 2, n do
-                udg_SaveUnit_data[i] = SaveSystem.user_data[j]
+                SaveSystem.data[i] = SaveSystem.user_data[j]
                 i = i + 1
             end
         end
@@ -1283,17 +1350,17 @@ end
 
 --- Загружает пользовательские данные
 function SaveSystem.LoadUserData()
-    if udg_SaveUnit_data[1] > 0 then
+    if SaveSystem.data[1] > 0 then
         local case = -1
         local i = 2
-        local count = udg_SaveUnit_data[1]
+        local count = SaveSystem.data[1]
         while i < count do
-            case = udg_SaveUnit_data[i]
+            case = SaveSystem.data[i]
             if case == 1 then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local cjlocgn_00000004 = i + 1
                 for j = 2, max_count_data do
-                    SaveSystem.user_data[j] = udg_SaveUnit_data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = SaveSystem.data[cjlocgn_00000004 + j]
                 end
                 SaveSystem.user_data[1] = max_count_data
             end
@@ -1315,17 +1382,17 @@ function SaveSystem.SaveUnitData(i, u)
 
     if IsUnitType(u, UNIT_TYPE_HERO) == true then
         -- сохраняем инфу: опыт, сила, ловкость, интеллект
-        udg_SaveUnit_data[i] = SaveSystem.scope.state
+        SaveSystem.data[i] = SaveSystem.scope.state
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroXP(u)
+        SaveSystem.data[i] = GetHeroXP(u)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroStr(u, false)
+        SaveSystem.data[i] = GetHeroStr(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroAgi(u, false)
+        SaveSystem.data[i] = GetHeroAgi(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = GetHeroInt(u, false)
+        SaveSystem.data[i] = GetHeroInt(u, false)
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.abilities
+        SaveSystem.data[i] = SaveSystem.scope.abilities
         i = i + 1
         local ability_index = i
         i = i + 1
@@ -1335,14 +1402,14 @@ function SaveSystem.SaveUnitData(i, u)
             local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
             if ability_level > 0 then
                 ability_count = ability_count + 1
-                udg_SaveUnit_data[i] = SaveSystem.abilities[k]
+                SaveSystem.data[i] = SaveSystem.abilities[k]
                 i = i + 1
-                udg_SaveUnit_data[i] = ability_level
+                SaveSystem.data[i] = ability_level
                 i = i + 1
             end
         end
-        udg_SaveUnit_data[ability_index] = ability_count
-        udg_SaveUnit_data[i] = SaveSystem.scope.items
+        SaveSystem.data[ability_index] = ability_count
+        SaveSystem.data[i] = SaveSystem.scope.items
         i = i + 1
         local item_index = i
         i = i + 1
@@ -1351,13 +1418,13 @@ function SaveSystem.SaveUnitData(i, u)
             local item_id = UnitItemInSlot(u, item_iter)
             if item_id ~= nil then
                 item_count = item_count + 1
-                udg_SaveUnit_data[i] = GetItemTypeId(item_id)
+                SaveSystem.data[i] = GetItemTypeId(item_id)
                 i = i + 1
-                udg_SaveUnit_data[i] = GetItemCharges(item_id)
+                SaveSystem.data[i] = GetItemCharges(item_id)
                 i = i + 1
             end
         end
-        udg_SaveUnit_data[item_index] = item_count
+        SaveSystem.data[item_index] = item_count
     end
     return i
 end
@@ -1385,33 +1452,33 @@ function SaveSystem.SaveBaseState(i, u, world)
         local mana = R2I(GetUnitState(u, UNIT_STATE_MANA) * (SaveSystem.magic_number.one / GetUnitState(u, UNIT_STATE_MAX_MANA)))
         local count_gold = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_GOLD)
         local count_lumber = GetPlayerState(GetLocalPlayer(), PLAYER_STATE_RESOURCE_LUMBER)
-        udg_SaveUnit_data[i] = SaveSystem.scope.map
+        SaveSystem.data[i] = SaveSystem.scope.map
         i = i + 1
-        udg_SaveUnit_data[i] = map_number
+        SaveSystem.data[i] = map_number
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_data
+        SaveSystem.data[i] = SaveSystem.scope.hero_data
         i = i + 1
-        udg_SaveUnit_data[i] = unit_type_id
+        SaveSystem.data[i] = unit_type_id
         i = i + 1
-        udg_SaveUnit_data[i] = hero_position_x
+        SaveSystem.data[i] = hero_position_x
         i = i + 1
-        udg_SaveUnit_data[i] = hero_position_y
+        SaveSystem.data[i] = hero_position_y
         i = i + 1
-        udg_SaveUnit_data[i] = hero_facing
+        SaveSystem.data[i] = hero_facing
         i = i + 1
-        udg_SaveUnit_data[i] = health
+        SaveSystem.data[i] = health
         i = i + 1
-        udg_SaveUnit_data[i] = mana
+        SaveSystem.data[i] = mana
         i = i + 1
-        --udg_SaveUnit_data[i] = SaveSystem.classid
+        --SaveSystem.data[i] = SaveSystem.classid
         --i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.resources
+        SaveSystem.data[i] = SaveSystem.scope.resources
         i = i + 1
-        udg_SaveUnit_data[i] = count_gold
+        SaveSystem.data[i] = count_gold
         i = i + 1
-        udg_SaveUnit_data[i] = count_lumber
+        SaveSystem.data[i] = count_lumber
         i = i + 1
-        udg_SaveUnit_data[i] = SaveSystem.scope.hero_skill
+        SaveSystem.data[i] = SaveSystem.scope.hero_skill
         i = i + 1
     end
     return i
@@ -1425,17 +1492,17 @@ function SaveSystem.LoadUnitData()
         local unit_loc_y = GetUnitY(current_unit)
         local current_case = -1
         local i = 2
-        local maximum_data = udg_SaveUnit_data[1]
+        local maximum_data = SaveSystem.data[1]
         while i < maximum_data do
-            current_case = udg_SaveUnit_data[i]
+            current_case = SaveSystem.data[i]
             -- выдаем предметы
             if current_case == SaveSystem.scope.items then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local current_item = CreateItem(udg_SaveUnit_data[j], unit_loc_x, unit_loc_y)
+                    local current_item = CreateItem(SaveSystem.data[j], unit_loc_x, unit_loc_y)
                     UnitAddItem(current_unit, current_item)
-                    SetItemCharges(current_item, udg_SaveUnit_data[j + 1])
+                    SetItemCharges(current_item, SaveSystem.data[j + 1])
                     j = j + 2
                     max_count_data = max_count_data - 1
                 end
@@ -1443,26 +1510,26 @@ function SaveSystem.LoadUnitData()
 
             -- проставляем статы
             if current_case == SaveSystem.scope.state then
-                SetHeroXP(current_unit, udg_SaveUnit_data[i + 1], false)
-                if GetHeroStr(current_unit, false) < udg_SaveUnit_data[i + 2] then
-                    SetHeroStr(current_unit, udg_SaveUnit_data[i + 2], false)
+                SetHeroXP(current_unit, SaveSystem.data[i + 1], false)
+                if GetHeroStr(current_unit, false) < SaveSystem.data[i + 2] then
+                    SetHeroStr(current_unit, SaveSystem.data[i + 2], false)
                 end
-                if GetHeroAgi(current_unit, false) < udg_SaveUnit_data[i + 3] then
-                    SetHeroAgi(current_unit, udg_SaveUnit_data[i + 3], false)
+                if GetHeroAgi(current_unit, false) < SaveSystem.data[i + 3] then
+                    SetHeroAgi(current_unit, SaveSystem.data[i + 3], false)
                 end
-                if GetHeroInt(current_unit, false) < udg_SaveUnit_data[i + 4] then
-                    SetHeroInt(current_unit, udg_SaveUnit_data[i + 4], false)
+                if GetHeroInt(current_unit, false) < SaveSystem.data[i + 4] then
+                    SetHeroInt(current_unit, SaveSystem.data[i + 4], false)
                 end
             end
 
             -- выдаем юниту его навыки
             if current_case == SaveSystem.scope.hero_skill then
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local count_level = udg_SaveUnit_data[j + 1]
+                    local count_level = SaveSystem.data[j + 1]
                     while count_level >= 0 do
-                        SelectHeroSkill(current_unit, udg_SaveUnit_data[j])
+                        SelectHeroSkill(current_unit, SaveSystem.data[j])
                         count_level = count_level - 1
                     end
                     j = j + 2
@@ -1473,12 +1540,12 @@ function SaveSystem.LoadUnitData()
             -- выдаем способности
             if current_case == SaveSystem.scope.abilities then
                 -- сколько всего способностей было сохранено
-                local max_count_data = udg_SaveUnit_data[i + 1]
+                local max_count_data = SaveSystem.data[i + 1]
                 -- индекс, по которому лежит способность
                 local j = i + 2
                 while max_count_data >= 0 do
-                    UnitAddAbility(current_unit, udg_SaveUnit_data[j])
-                    SetUnitAbilityLevel(current_unit, udg_SaveUnit_data[j], udg_SaveUnit_data[j + 1])
+                    UnitAddAbility(current_unit, SaveSystem.data[j])
+                    SetUnitAbilityLevel(current_unit, SaveSystem.data[j], SaveSystem.data[j + 1])
                     j = j + 2
                     max_count_data = max_count_data - 1
                 end
@@ -1499,7 +1566,7 @@ function SaveSystem.LoadBaseState(pl)
     local unit_id
     local health
     local mana
-    if udg_SaveUnit_data[1] > 0 then
+    if SaveSystem.data[1] > 0 then
         -- размеры карты
         local rect_min_x = R2I(GetRectMinX(GetWorldBounds()))
         local rect_max_x = R2I(GetRectMaxX(GetWorldBounds()))
@@ -1510,35 +1577,37 @@ function SaveSystem.LoadBaseState(pl)
         local i = 2
         local case = -1
         -- макс. кол-во записанных данных
-        local n = udg_SaveUnit_data[1]
+        local n = SaveSystem.data[1]
 
         while i < n do
-            case = udg_SaveUnit_data[i]
+            case = SaveSystem.data[i]
             if case == SaveSystem.scope.map then
-                map_number = udg_SaveUnit_data[i + 1]
+                map_number = SaveSystem.data[i + 1]
             end
 
             if case == SaveSystem.scope.resources then
-                count_gold = udg_SaveUnit_data[i + 1]
-                count_lumber = udg_SaveUnit_data[i + 2]
+                count_gold = SaveSystem.data[i + 1]
+                count_lumber = SaveSystem.data[i + 2]
             end
 
             if case == SaveSystem.scope.hero_data then
-                unit_id = udg_SaveUnit_data[i + 1]
+                unit_id = SaveSystem.data[i + 1]
                 -- местоположение игрока в месте, где он сохранялся
-                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(udg_SaveUnit_data[i + 2]) / SaveSystem.magic_number.one)
-                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(udg_SaveUnit_data[i + 3]) / SaveSystem.magic_number.one)
-                unit_face = 360. * (I2R(udg_SaveUnit_data[i + 4]) / SaveSystem.magic_number.one)
-                health = udg_SaveUnit_data[i + 5]
-                mana = udg_SaveUnit_data[i + 6]
-                --SaveSystem.classid = udg_SaveUnit_data[i + 7]
+                unit_x = rect_min_x + (rect_max_x - rect_min_x) * (I2R(SaveSystem.data[i + 2]) / SaveSystem.magic_number.one)
+                unit_y = rect_min_y + (rect_max_y - rect_min_y) * (I2R(SaveSystem.data[i + 3]) / SaveSystem.magic_number.one)
+                unit_face = 360. * (I2R(SaveSystem.data[i + 4]) / SaveSystem.magic_number.one)
+                health = SaveSystem.data[i + 5]
+                mana = SaveSystem.data[i + 6]
+                --SaveSystem.classid = SaveSystem.data[i + 7]
             end
             i = SaveSystem.next_scope(i, case)
         end
 
+        -- если карта другая - создаём персонажа в заранее заданном месте
         if map_number ~= udg_SaveUnit_map_number then
-            unit_x = udg_SaveUnit_x
-            unit_y = udg_SaveUnit_y
+            local loc = GetRandomLocInRect(gg_rct_RespawZone)
+            unit_x = GetLocationX(loc)
+            unit_y = GetLocationY(loc)
         end
 
         --SaveSystem.AddHeroAbilities(SaveSystem.classid)
@@ -1560,7 +1629,7 @@ function SaveSystem.creature(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
         for i = 1, count do
-            udg_SaveUnit_data[i] = GetStoredInteger(gc, I2S(i), I2S(i))
+            SaveSystem.data[i] = GetStoredInteger(gc, I2S(i), I2S(i))
         end
         TriggerSleepAction(0.)
 
@@ -1583,9 +1652,9 @@ end
 --- Синхронизирует данные между игроками
 function SaveSystem.Syncing(gc, is_player)
     if is_player then
-        local count = udg_SaveUnit_data[1]
+        local count = SaveSystem.data[1]
         for i = 1, count do
-            StoreInteger(gc, I2S(i), I2S(i), udg_SaveUnit_data[i])
+            StoreInteger(gc, I2S(i), I2S(i), SaveSystem.data[i])
             SyncStoredInteger(gc, I2S(i), I2S(i))
         end
         StoreInteger(gc, "bool", "bool", 1)
@@ -1615,9 +1684,9 @@ function SaveSystem.load_uploading(author, user)
                 encrypted_data = encrypted_data - SaveSystem.generation1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
 
-                udg_SaveUnit_data[i] = encrypted_data
+                SaveSystem.data[i] = encrypted_data
             end
-            udg_SaveUnit_data[1] = max_count_data
+            SaveSystem.data[1] = max_count_data
 
             if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
@@ -1690,7 +1759,7 @@ function SaveSystem.Load()
     local save_file
     local full_command_from_chat
 
-    if udg_SaveUnit_bool then
+    if not SaveSystem.process then
         full_command_from_chat = GetEventPlayerChatString()
 
         -- определяем имя save-файла
@@ -1702,8 +1771,8 @@ function SaveSystem.Load()
 
         SaveSystem.afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
 
-        for i = 1, udg_SaveUnit_data[1] do
-            Preload(I2S(udg_SaveUnit_data[i]).." data["..I2S(i).."] < load")
+        for i = 1, SaveSystem.data[1] do
+            Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
         end
         for i = 1, SaveSystem.user_data[1] do
             Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
@@ -1766,23 +1835,23 @@ function SaveSystem.ada(is_player, file_name, u)
         if is_player then
             item_data = item_data - 1
             cjlocgn_00000007[item_data + 1] = 0
-            udg_SaveUnit_data[1] = item_data
+            SaveSystem.data[1] = item_data
             SaveSystem.hash1 = encrypted_key
             SaveSystem.hash2 = encrypted_key
 
             for i = 1, item_data do
                 -- получаем данные
-                encrypted_data = udg_SaveUnit_data[i]
+                encrypted_data = SaveSystem.data[i]
                 cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
                 -- шифруем
                 encrypted_data = encrypted_data + SaveSystem.generation1()
                 cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
                 -- записываем
-                udg_SaveUnit_data[i] = encrypted_data
+                SaveSystem.data[i] = encrypted_data
                 cjlocgn_00000007[i] = SaveSystem.generation2()
             end
 
-            udg_SaveUnit_data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
+            SaveSystem.data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
             cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
         end
 
@@ -1793,9 +1862,9 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
-                encrypted_data = udg_SaveUnit_data[i]
-                udg_SaveUnit_data[i] = udg_SaveUnit_data[cjlocgn_0000000e]
-                udg_SaveUnit_data[cjlocgn_0000000e] = encrypted_data
+                encrypted_data = SaveSystem.data[i]
+                SaveSystem.data[i] = SaveSystem.data[cjlocgn_0000000e]
+                SaveSystem.data[cjlocgn_0000000e] = encrypted_data
                 encrypted_data = cjlocgn_00000007[i]
                 cjlocgn_00000007[i] = cjlocgn_00000007[cjlocgn_0000000e]
                 cjlocgn_00000007[cjlocgn_0000000e] = encrypted_data
@@ -1808,7 +1877,7 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(udg_SaveUnit_data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
             -- сохранение данных в файл
@@ -1831,8 +1900,8 @@ end
 ---
 function SaveSystem.Save()
     local file
-    if udg_SaveUnit_bool then
-        udg_SaveUnit_bool = false
+    if not SaveSystem.process then
+        SaveSystem.process = true
         local handle_player = GetTriggerPlayer()
         local full_command_from_chat = GetEventPlayerChatString()
 
@@ -1850,50 +1919,50 @@ function SaveSystem.Save()
         end
 
         SaveSystem.ada((GetLocalPlayer() == handle_player), file, SaveSystem.unit)
-        udg_SaveUnit_bool = true
+        SaveSystem.process = false
     end
 end
 
 
 --- Возрождает юнита
 function SaveSystem.UnitsRespawn()
-    local u = GetTriggerUnit()
-    if IsUnitType(u, UNIT_TYPE_HERO) == true then
+    local unit = Unit(GetTriggerUnit())
+    if unit:IsHero() then
         TriggerSleepAction(5)
-        ReviveHero(u, udg_SaveUnit_x, udg_SaveUnit_y, false)
+        unit:Revive()
     end
 end
 
 --- Определяет способности выбранного класса
----@param class classid
-function SaveSystem.DefineAbilities(class)
-    if class == CLASSES["paladin"] then
+function SaveSystem.DefineAbilities()
+    if SaveSystem.classid == CLASSES["paladin"] then
         SaveSystem.DefineAbilitiesPaladin()
-    elseif class == CLASSES["priest"] then
+    elseif SaveSystem.classid == CLASSES["priest"] then
         SaveSystem.DefineAbilitiesPriest()
     end
 end
 
 --- Определяет способности паладина
 function SaveSystem.DefineAbilitiesPaladin()
-    SaveSystem.abilities = {DEVOTION_AURA,
-                            DIVINE_SHIELD,
-                            CONSECRATION,
-                            CONSECRATION_TR,
-                            HAMMER_RIGHTEOUS,
-                            JUDGEMENT_OF_LIGHT_TR,
-                            JUDGEMENT_OF_WISDOM_TR,
-                            SHIELD_OF_RIGHTEOUSNESS,
-                            SPELLBOOK_PALADIN
+    SaveSystem.abilities = {
+        DIVINE_SHIELD,
+        CONSECRATION,
+        CONSECRATION_TR,
+        HAMMER_RIGHTEOUS,
+        JUDGEMENT_OF_LIGHT_TR,
+        JUDGEMENT_OF_WISDOM_TR,
+        SHIELD_OF_RIGHTEOUSNESS,
+        SPELLBOOK_PALADIN,
     }
     SaveSystem.spellbook = SPELLBOOK_PALADIN
 end
 
 --- Определяет способности приста
 function SaveSystem.DefineAbilitiesPriest()
-    SaveSystem.abilities = {FLASH_HEAL,
-                            RENEW,
-                            CIRCLE_OF_HEALING,
+    SaveSystem.abilities = {
+        FLASH_HEAL,
+        RENEW,
+        CIRCLE_OF_HEALING,
     }
     SaveSystem.spellbook = nil
 end
@@ -1901,7 +1970,7 @@ end
 --- Выдает герою способности
 function SaveSystem.AddHeroAbilities(class)
     SaveSystem.classid = CLASSES[class]
-    SaveSystem.DefineAbilities(SaveSystem.classid)
+    SaveSystem.DefineAbilities()
     local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)
@@ -2343,8 +2412,9 @@ function BuffSystem.CheckingDebuffsExceptions()
 end
 
 
-BattleSystem = {target = nil,
-                target_event = nil,
+BattleSystem = {
+    target = nil,
+    target_event = nil,
 }
 
 function BattleSystem.Init()
@@ -2354,7 +2424,7 @@ function BattleSystem.Init()
 
     settarget:RegisterPlayerMouseDown()
 
-    damaged:AddAction(BattleSystem.ShowDamage)
+    --damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
     settarget:AddAction(BattleSystem.SetTarget)
 end
@@ -2364,12 +2434,15 @@ function BattleSystem.IsRightButton()
 end
 
 function BattleSystem.SetTarget()
+    -- получаем таргет (на кого тыкнул игрок)
     if BlzGetMouseFocusUnit() then
         BattleSystem.target = Unit(BlzGetMouseFocusUnit())
     end
+    -- если игрок решит сменить цель - то удалим ранее созданный ивент
     if BattleSystem.target_event then
         BattleSystem.target_event:Destroy()
     end
+    -- регистрируем ивент для таргета
     if IsPlayerEnemy(GetLocalPlayer(), BattleSystem.target:GetOwner()) then
         BattleSystem.target_event = EventsUnit(BattleSystem.target)
         BattleSystem.target_event:RegisterDamaged()
@@ -2380,6 +2453,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
+    print(damage)
     TextTag(damage, unit):Preset("damage")
 end
 
@@ -2437,8 +2511,9 @@ end
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
-    CultAdherent.unit:DealMagicDamageLoc(
-            1504, CultAdherent.unit:GetLoc(), 8)
+    CultAdherent.unit:DealMagicDamageLoc {
+        damage=1504, location=CultAdherent.unit:GetLoc(), radius=8
+    }
     CultAdherent.summoned = false
     CultAdherent.morphed = false
 end
@@ -2495,8 +2570,9 @@ end
 function CultFanatic.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
-    CultFanatic.unit:DealMagicDamageLoc(
-            1504, CultFanatic.unit:GetLoc(), 8)
+    CultFanatic.unit:DealMagicDamageLoc {
+            damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
+    }
     CultFanatic.summoned = false
     CultFanatic.morphed = false
 end
@@ -2610,29 +2686,27 @@ end
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker())))
-
-    local lord_location = GetUnitLoc(LordMarrowgar.unit:GetId())
-    local target_location = GetUnitLoc(target)
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM,
+            GetOwningPlayer(GetAttacker()))))
+    local lord_location = LordMarrowgar.unit:GetLoc()
+    local target_location = target:GetLoc()
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
-        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location):GetId()
-
-        SetUnitMoveSpeed(coldflame_obj, 0.6)
-        SetUnitPathing(coldflame_obj, false)
-        IssuePointOrderLoc(coldflame_obj, "move", target_location)
+        local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
+        coldflame_obj:SetMoveSpeed(0.6)
+        coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
-        UnitApplyTimedLife(coldflame_obj, COMMON_TIMER, 9.)
+        coldflame_obj:ApplyTimedLife(9.)
 
         while true do
+            coldflame_obj:MoveToLoc(target_location)
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
-            IssueTargetOrder(LordMarrowgar.coldflame, "flamestrike", coldflame_obj)
+            LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if GetUnitState(coldflame_obj, UNIT_STATE_LIFE) <= 0 then break end
+            if coldflame_obj:GetCurrentLife() <= 0 then break end
         end
-
         LordMarrowgar.coldflame_effect = false
     end
 end
@@ -2718,7 +2792,9 @@ function LadyDeathwhisper.DeathAndDecay()
     if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        LadyDeathwhisper.unit:DealMagicDamageLoc(450., loc, 15)
+        LadyDeathwhisper.unit:DealMagicDamageLoc {
+            damage=450., location=loc, radius=15
+        }
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
@@ -3084,7 +3160,7 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
     event:AddAction(Paladin.AvengersShield)
@@ -3268,18 +3344,53 @@ end
     
 
 
+function Paladin.EnableConsecration()
+    local group
+    local light = 1
+    local factor = 0.04
+    local ap = GetHeroStr(Paladin.hero:GetId(), true) * 2
+    local damage = 8 * (113 + factor * light + factor * ap)
+
+    while Paladin.consecration_effect do
+        group = GetUnitsInRangeOfLocAll(160.00, Location(
+                BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)))
+
+        local function act()
+            local u = GetEnumUnit()
+            if Paladin.hero:IsEnemy(Unit(u)) then
+                Paladin.hero:DealMagicDamage(u, damage)
+            end
+        end
+
+        TriggerSleepAction(1.)
+        ForGroupBJ(group, act)
+    end
+    DestroyGroup(group)
+end
+
+function Paladin.DisableConsecration()
+    DestroyEffect(Paladin.consecration_effect)
+    Paladin.consecration_effect = nil
+end
+
 function Paladin.Consecration()
     Paladin.hero:LoseMana{percent=22}
-    IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
+
+    local loc = Paladin.hero:GetLoc()
+    local model = "Consecration_Impact_Base.mdx"
+    local timer = CreateTimer()
+    Paladin.consecration_effect = AddSpecialEffectLoc(model, loc)
+    TimerStart(timer, 8., false, Paladin.DisableConsecration)
+    Paladin.EnableConsecration()
 end
 
 function Paladin.IsConsecration()
     return GetSpellAbilityId() == CONSECRATION_TR
 end
 
-
 function Paladin.InitConsecration()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)
     event:AddAction(Paladin.Consecration)
@@ -3298,10 +3409,15 @@ function Paladin.Init()
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)
 
-    Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
-            CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,
-            JUDGEMENT_OF_LIGHT_TR, JUDGEMENT_OF_WISDOM_TR,
-            SHIELD_OF_RIGHTEOUSNESS, AVENGERS_SHIELD,
+    Paladin.hero:AddAbilities(
+            DIVINE_SHIELD,
+            CONSECRATION,
+            CONSECRATION_TR,
+            HAMMER_RIGHTEOUS,
+            JUDGEMENT_OF_LIGHT_TR,
+            JUDGEMENT_OF_WISDOM_TR,
+            SHIELD_OF_RIGHTEOUSNESS,
+            AVENGERS_SHIELD,
             SPELLBOOK_PALADIN
     )
 
@@ -3346,8 +3462,8 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    local event_ability = EventsPlayer(PLAYER_1)
-    local event_jol = EventsPlayer(PLAYER_1)
+    local event_ability = EventsPlayer()
+    local event_jol = EventsPlayer()
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -3385,8 +3501,8 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    local event_ability = EventsPlayer(PLAYER_1)
-    local event_jow = EventsPlayer(PLAYER_1)
+    local event_ability = EventsPlayer()
+    local event_jow = EventsPlayer()
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -3547,7 +3663,16 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
+function Trig_Init_Paladin_Func001001003()
+    return (GroupPickRandomUnit(GetUnitsInRangeOfLocAll(160.00, GetUnitLoc(GetTriggerUnit()))) == GetEnumUnit())
+end
+
+function Trig_Init_Paladin_Func001002()
+    DoNothing()
+end
+
 function Trig_Init_Paladin_Actions()
+    ForGroupBJ(GetUnitsInRangeOfLocMatching(512, GetRectCenter(GetPlayableMapRect()), Condition(Trig_Init_Paladin_Func001001003)), Trig_Init_Paladin_Func001002)
         Paladin.Init()
 end
 
@@ -3556,7 +3681,7 @@ function InitTrig_Init_Paladin()
     TriggerAddAction(gg_trg_Init_Paladin, Trig_Init_Paladin_Actions)
 end
 
-function Trig_Reinitialize_Actions()
+function Trig_Alert_Actions()
     TriggerSleepAction(0.00)
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
     DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
@@ -3565,9 +3690,9 @@ function Trig_Reinitialize_Actions()
     SetForceAllianceStateBJ(bj_FORCE_PLAYER[0], bj_FORCE_PLAYER[0], bj_ALLIANCE_ALLIED)
 end
 
-function InitTrig_Reinitialize()
-    gg_trg_Reinitialize = CreateTrigger()
-    TriggerAddAction(gg_trg_Reinitialize, Trig_Reinitialize_Actions)
+function InitTrig_Alert()
+    gg_trg_Alert = CreateTrigger()
+    TriggerAddAction(gg_trg_Alert, Trig_Alert_Actions)
 end
 
 function Trig_RespawnHero_Actions()
@@ -3592,12 +3717,8 @@ end
 
 function Trig_Init_Actions()
         udg_SaveUnit_gamecache = InitGameCache("cache")
-    udg_SaveUnit_bool = true
-    udg_SaveUnit_data[1] = 0
     udg_SaveUnit_gamecache = udg_SaveUnit_gamecache
     udg_SaveUnit_map_number = 1
-    udg_SaveUnit_x = 4100.00
-    udg_SaveUnit_y = -3080.00
 end
 
 function InitTrig_Init()
@@ -3629,7 +3750,7 @@ function InitCustomTriggers()
     InitTrig_Init_LadyDeathwhisper()
     InitTrig_Init_Priest()
     InitTrig_Init_Paladin()
-    InitTrig_Reinitialize()
+    InitTrig_Alert()
     InitTrig_RespawnHero()
     InitTrig_NewHero()
     InitTrig_Init()
@@ -3643,7 +3764,7 @@ function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_Init_LadyDeathwhisper)
     ConditionalTriggerExecute(gg_trg_Init_Priest)
     ConditionalTriggerExecute(gg_trg_Init_Paladin)
-    ConditionalTriggerExecute(gg_trg_Reinitialize)
+    ConditionalTriggerExecute(gg_trg_Alert)
     ConditionalTriggerExecute(gg_trg_NewHero)
     ConditionalTriggerExecute(gg_trg_Init)
     ConditionalTriggerExecute(gg_trg_SaveHero)

@@ -5,7 +5,9 @@ function LadyDeathwhisper.DeathAndDecay()
     if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        LadyDeathwhisper.unit:DealMagicDamageLoc(450., loc, 15)
+        LadyDeathwhisper.unit:DealMagicDamageLoc {
+            damage=450., location=loc, radius=15
+        }
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)

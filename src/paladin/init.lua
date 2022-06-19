@@ -11,10 +11,15 @@ function Paladin.Init()
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)
 
-    Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
-            CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,
-            JUDGEMENT_OF_LIGHT_TR, JUDGEMENT_OF_WISDOM_TR,
-            SHIELD_OF_RIGHTEOUSNESS, AVENGERS_SHIELD,
+    Paladin.hero:AddAbilities(
+            DIVINE_SHIELD,
+            CONSECRATION,
+            CONSECRATION_TR,
+            HAMMER_RIGHTEOUS,
+            JUDGEMENT_OF_LIGHT_TR,
+            JUDGEMENT_OF_WISDOM_TR,
+            SHIELD_OF_RIGHTEOUSNESS,
+            AVENGERS_SHIELD,
             SPELLBOOK_PALADIN
     )
 
