@@ -1,4 +1,9 @@
 
+function Paladin.RemoveJudgementOfLight(target)
+    UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
+    BuffSystem.RemoveBuffToHero(target, "JudgementOfLight")
+end
+
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7  then
         Paladin.hero:GainLife{percent=2}
@@ -12,12 +17,18 @@ end
 
 function Paladin.CastJudgementOfLight()
     Paladin.hero:LoseMana{percent=5}
+    local target = GetSpellTargetUnit()
+    BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
-    jol_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
-    jol_unit:ApplyTimedLife(2.)
+    if not BuffSystem.IsBuffOnHero(target, "JudgementOfLight") then
+        local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+        jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+        jol_unit:CastToTarget("shadowstrike", target)
+        local remove_buff = function() Paladin.RemoveJudgementOfLight(target) end
+        BuffSystem.AddBuffToHero(target, "JudgementOfLight", remove_buff)
+        jol_unit:ApplyTimedLife(2.)
+    end
 end
 
 function Paladin.IsJudgementOfLight()

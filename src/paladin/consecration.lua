@@ -25,6 +25,7 @@ function Paladin.EnableConsecration()
 end
 
 function Paladin.DisableConsecration()
+    DestroyTimer(GetExpiredTimer())
     DestroyEffect(Paladin.consecration_effect)
     Paladin.consecration_effect = nil
 end

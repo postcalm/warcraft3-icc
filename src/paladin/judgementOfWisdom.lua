@@ -1,4 +1,9 @@
 
+function Paladin.RemoveJudgementOfWisdom(target)
+    UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
+    BuffSystem.RemoveBuffToHero(target, "JudgementOfWisdom")
+end
+
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
         Paladin.hero:GainMana{percent=2}
@@ -12,10 +17,16 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-    jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
-    jow_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
-    jow_unit:ApplyTimedLife(2.)
+    local target = GetSpellTargetUnit()
+    BuffSystem.RegisterHero(target)
+    if not BuffSystem.IsBuffOnHero(target, "JudgementOfWisdom") then
+        local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+        jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
+        jow_unit:CastToTarget("shadowstrike", target)
+        local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target) end
+        BuffSystem.AddBuffToHero(target, "JudgementOfWisdom", remove_buff)
+        jow_unit:ApplyTimedLife(2.)
+    end
 end
 
 function Paladin.IsJudgementOfWisdom()

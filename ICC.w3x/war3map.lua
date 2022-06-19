@@ -2289,16 +2289,17 @@ end
 
 -- Copyright (c) 2022 meiso
 
-BuffSystem = {}
---- Таблица содержащая всех героев с бафами
-buffs = {}
+BuffSystem = {
+    --- Таблица содержащая всех героев с бафами
+    buffs = {}
+}
 
 --- Регистрирует героя в системе бафов
 ---@param hero unit Id героя
 function BuffSystem.RegisterHero(hero)
     if BuffSystem.IsHeroInSystem(hero) then return end
     local u = ""..GetHandleId(hero)
-    buffs[u] = {}
+    BuffSystem.buffs[u] = {}
 end
 
 --- Добавляет герою баф
@@ -2308,7 +2309,7 @@ end
 function BuffSystem.AddBuffToHero(hero, buff, func)
     if BuffSystem.IsBuffOnHero(hero, buff) then return end
     local u = ""..GetHandleId(hero)
-    table.insert(buffs[u], { buff_ = buff, func_ = func })
+    table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
     BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
 
@@ -2317,7 +2318,7 @@ end
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
     local u = ""..GetHandleId(hero)
-    for name, _ in pairs(buffs) do
+    for name, _ in pairs(BuffSystem.buffs) do
         if name == u then
             return true
         end
@@ -2331,11 +2332,11 @@ end
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = ""..GetHandleId(hero)
-    if #buffs[u] == 0 then return false end
+    if #BuffSystem.buffs[u] == 0 then return false end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    for i = 1, #buffs[u] do
-        if buffs[u][i] == nil then return false end
-        if buffs[u][i].buff_ == buff then
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i] == nil then return false end
+        if BuffSystem.buffs[u][i].buff_ == buff then
             return true
         end
     end
@@ -2347,9 +2348,9 @@ end
 ---@param buff buff Id бафа
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = ""..GetHandleId(hero)
-    for i = 1, #buffs[u] do
-        if buffs[u][i].buff_ == buff then
-            buffs[u][i] = nil
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].buff_ == buff then
+            BuffSystem.buffs[u][i] = nil
         end
     end
 end
@@ -2359,10 +2360,10 @@ end
 ---@param buff buff Id бафа
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = ""..GetHandleId(hero)
-    for i = 1, #buffs[u] do
-        if buffs[u][i] == nil then return end
-        if buffs[u][i].buff_ == buff then
-            buffs[u][i].func_()
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i] == nil then return end
+        if BuffSystem.buffs[u][i].buff_ == buff then
+            BuffSystem.buffs[u][i].func_()
         end
     end
 end
@@ -2371,7 +2372,7 @@ end
 ---@param hero unit Id героя
 function BuffSystem.RemoveHero(hero)
     local u = ""..GetHandleId(hero)
-    buffs[u] = nil
+    BuffSystem.buffs[u] = nil
 end
 
 --- Проверят относится ли баф к
@@ -2383,15 +2384,35 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
         druid = {},
     }
 
+    local debuffs_exceptions = {
+        paladin = {"JudgementOfWisdom", "JudgementOfLight"},
+    }
+
     local function getBuffsByClass()
         for class, buffs in pairs(buffs_exceptions) do
             for i in pairs(buffs) do
                 if buffs[i] == buff then return buffs_exceptions[class] end
             end
         end
+        return {}
+    end
+
+    local function getDebuffsByClass()
+        for class, buffs in pairs(debuffs_exceptions) do
+            for i in pairs(buffs) do
+                if buffs[i] == buff then return debuffs_exceptions[class] end
+            end
+        end
+        return {}
     end
 
     for _, buff_ in pairs(getBuffsByClass()) do
+        if buff_ ~= buff then
+            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
+        end
+    end
+
+    for _, buff_ in pairs(getDebuffsByClass()) do
         if buff_ ~= buff then
             BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
         end
@@ -2400,16 +2421,11 @@ end
 
 function BuffSystem.RemoveAllBuffs(hero)
     local u = ""..GetHandleId(hero)
-    for i = 1, #buffs[u] do
-        BuffSystem.RemoveBuffToHeroByFunc(hero, buffs[u][i].buff_)
+    for i = 1, #BuffSystem.buffs[u] do
+        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
     end
 end
 
-function BuffSystem.CheckingDebuffsExceptions()
-    debuffs_exceptions = {
-        paladin = {"JudgementOfWisdom", "JudgementOfLight"},
-    }
-end
 
 
 BattleSystem = {
@@ -3370,6 +3386,7 @@ function Paladin.EnableConsecration()
 end
 
 function Paladin.DisableConsecration()
+    DestroyTimer(GetExpiredTimer())
     DestroyEffect(Paladin.consecration_effect)
     Paladin.consecration_effect = nil
 end
@@ -3436,6 +3453,11 @@ function Paladin.Init()
 end
 
 
+function Paladin.RemoveJudgementOfLight(target)
+    UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
+    BuffSystem.RemoveBuffToHero(target, "JudgementOfLight")
+end
+
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7  then
         Paladin.hero:GainLife{percent=2}
@@ -3449,12 +3471,18 @@ end
 
 function Paladin.CastJudgementOfLight()
     Paladin.hero:LoseMana{percent=5}
+    local target = GetSpellTargetUnit()
+    BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
-    jol_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
-    jol_unit:ApplyTimedLife(2.)
+    if not BuffSystem.IsBuffOnHero(target, "JudgementOfLight") then
+        local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+        jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+        jol_unit:CastToTarget("shadowstrike", target)
+        local remove_buff = function() Paladin.RemoveJudgementOfLight(target) end
+        BuffSystem.AddBuffToHero(target, "JudgementOfLight", remove_buff)
+        jol_unit:ApplyTimedLife(2.)
+    end
 end
 
 function Paladin.IsJudgementOfLight()
@@ -3477,6 +3505,11 @@ function Paladin.InitJudgementOfLight()
 end
 
 
+function Paladin.RemoveJudgementOfWisdom(target)
+    UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
+    BuffSystem.RemoveBuffToHero(target, "JudgementOfWisdom")
+end
+
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
         Paladin.hero:GainMana{percent=2}
@@ -3490,10 +3523,16 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
-    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-    jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
-    jow_unit:CastToTarget("shadowstrike", GetSpellTargetUnit())
-    jow_unit:ApplyTimedLife(2.)
+    local target = GetSpellTargetUnit()
+    BuffSystem.RegisterHero(target)
+    if not BuffSystem.IsBuffOnHero(target, "JudgementOfWisdom") then
+        local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+        jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
+        jow_unit:CastToTarget("shadowstrike", target)
+        local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target) end
+        BuffSystem.AddBuffToHero(target, "JudgementOfWisdom", remove_buff)
+        jow_unit:ApplyTimedLife(2.)
+    end
 end
 
 function Paladin.IsJudgementOfWisdom()
@@ -3663,16 +3702,8 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
-function Trig_Init_Paladin_Func001001003()
-    return (GroupPickRandomUnit(GetUnitsInRangeOfLocAll(160.00, GetUnitLoc(GetTriggerUnit()))) == GetEnumUnit())
-end
-
-function Trig_Init_Paladin_Func001002()
-    DoNothing()
-end
-
 function Trig_Init_Paladin_Actions()
-    ForGroupBJ(GetUnitsInRangeOfLocMatching(512, GetRectCenter(GetPlayableMapRect()), Condition(Trig_Init_Paladin_Func001001003)), Trig_Init_Paladin_Func001002)
+    UnitRemoveAbilityBJ(FourCC("A004"), GetTriggerUnit())
         Paladin.Init()
 end
 
