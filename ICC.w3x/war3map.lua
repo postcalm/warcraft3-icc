@@ -1007,6 +1007,22 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
+-- Animation
+
+--- Добавить тэг анимации
+---@param tag string
+---@return nil
+function Unit:AddAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, true)
+end
+
+--- Удалить тэг анимации
+---@param tag string
+---@return nil
+function Unit:RemoveAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, false)
+end
+
 -- Meta
 
 --- Проверяет является ли юнит героем
@@ -2408,12 +2424,15 @@ function BattleSystem.IsRightButton()
 end
 
 function BattleSystem.SetTarget()
+    -- получаем таргет (на кого тыкнул игрок)
     if BlzGetMouseFocusUnit() then
         BattleSystem.target = Unit(BlzGetMouseFocusUnit())
     end
+    -- если игрок решит сменить цель - то удалим ранее созданный ивент
     if BattleSystem.target_event then
         BattleSystem.target_event:Destroy()
     end
+    -- регистрируем ивент для таргета
     if IsPlayerEnemy(GetLocalPlayer(), BattleSystem.target:GetOwner()) then
         BattleSystem.target_event = EventsUnit(BattleSystem.target)
         BattleSystem.target_event:RegisterDamaged()

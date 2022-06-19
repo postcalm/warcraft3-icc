@@ -322,6 +322,22 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
+-- Animation
+
+--- Добавить тэг анимации
+---@param tag string
+---@return nil
+function Unit:AddAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, true)
+end
+
+--- Удалить тэг анимации
+---@param tag string
+---@return nil
+function Unit:RemoveAnimationTag(tag)
+    AddUnitAnimationProperties(self.unit, tag, false)
+end
+
 -- Meta
 
 --- Проверяет является ли юнит героем
