@@ -25,8 +25,8 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    local event_ability = EventsPlayer(PLAYER_1)
-    local event_jol = EventsPlayer(PLAYER_1)
+    local event_ability = EventsPlayer()
+    local event_jol = EventsPlayer()
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()

@@ -73,11 +73,13 @@ end
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
 ---@param damage real
+---@param overtime real Частота нанесения урона
 ---@param location location
 ---@param radius real Радиус в метрах
-function Unit:DealMagicDamageLoc(damage, location, radius)
-    local meters = METER * radius
-    UnitDamagePointLoc(self.unit, 0, meters, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+function Unit:DealMagicDamageLoc(args)
+    local meters = METER * args.radius
+    local ot = args.overtime or 0
+    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.

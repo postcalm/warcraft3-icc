@@ -70,7 +70,7 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
     event:AddAction(Paladin.AvengersShield)

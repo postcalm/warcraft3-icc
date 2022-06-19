@@ -20,7 +20,6 @@ end
 --- Определяет способности паладина
 function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {
-        DEVOTION_AURA,
         DIVINE_SHIELD,
         CONSECRATION,
         CONSECRATION_TR,

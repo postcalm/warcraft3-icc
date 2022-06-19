@@ -113,30 +113,39 @@ METER = 20
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
-Paladin          = {hero = nil}
-Priest           = {hero = nil}
-
-LordMarrowgar    = {unit = nil,
-                    coldflame = nil,
-                    coldflame_effect = false,
-                    bonespike_effect = false,
-                    whirlwind_effect = false,
+Paladin = {
+    hero = nil,
+    consecration_effect = nil,
 }
-LadyDeathwhisper = {unit = nil,
-                    mana_shield = nil,
-                    mana_is_over = false,
-                    dominate_mind_effect = false,
-                    death_and_decay_effect = false,
-                    phase = 1,
+Priest = {
+    hero = nil,
 }
 
-CultAdherent     = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LordMarrowgar = {
+    unit = nil,
+    coldflame = nil,
+    coldflame_effect = false,
+    bonespike_effect = false,
+    whirlwind_effect = false,
 }
-CultFanatic      = {unit = nil,
-                    summoned = false,
-                    morphed = false,
+LadyDeathwhisper = {
+    unit = nil,
+    mana_shield = nil,
+    mana_is_over = false,
+    dominate_mind_effect = false,
+    death_and_decay_effect = false,
+    phase = 1,
+}
+
+CultAdherent = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
+}
+CultFanatic = {
+    unit = nil,
+    summoned = false,
+    morphed = false,
 }
 
 
@@ -154,7 +163,6 @@ BLESSING_OF_SANCTUARY   = FourCC("A00H")
 BLESSING_OF_WISDOM      = FourCC("A00G")
 BLESSING_OF_MIGHT       = FourCC("A00M")
 CRUSADER_AURA           = FourCC("A00J")
-DEVOTION_AURA           = FourCC("AHhb")
 JUDGEMENT_OF_LIGHT      = FourCC("A00N")
 JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
 JUDGEMENT_OF_WISDOM     = FourCC("A00O")
@@ -758,11 +766,13 @@ end
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
 ---@param damage real
+---@param overtime real Частота нанесения урона
 ---@param location location
 ---@param radius real Радиус в метрах
-function Unit:DealMagicDamageLoc(damage, location, radius)
-    local meters = METER * radius
-    UnitDamagePointLoc(self.unit, 0, meters, location, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+function Unit:DealMagicDamageLoc(args)
+    local meters = METER * args.radius
+    local ot = args.overtime or 0
+    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -1935,7 +1945,6 @@ end
 --- Определяет способности паладина
 function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {
-        DEVOTION_AURA,
         DIVINE_SHIELD,
         CONSECRATION,
         CONSECRATION_TR,
@@ -2403,8 +2412,9 @@ function BuffSystem.CheckingDebuffsExceptions()
 end
 
 
-BattleSystem = {target = nil,
-                target_event = nil,
+BattleSystem = {
+    target = nil,
+    target_event = nil,
 }
 
 function BattleSystem.Init()
@@ -2414,7 +2424,7 @@ function BattleSystem.Init()
 
     settarget:RegisterPlayerMouseDown()
 
-    damaged:AddAction(BattleSystem.ShowDamage)
+    --damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
     settarget:AddAction(BattleSystem.SetTarget)
 end
@@ -2443,6 +2453,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
+    print(damage)
     TextTag(damage, unit):Preset("damage")
 end
 
@@ -2500,8 +2511,9 @@ end
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
-    CultAdherent.unit:DealMagicDamageLoc(
-            1504, CultAdherent.unit:GetLoc(), 8)
+    CultAdherent.unit:DealMagicDamageLoc {
+        damage=1504, location=CultAdherent.unit:GetLoc(), radius=8
+    }
     CultAdherent.summoned = false
     CultAdherent.morphed = false
 end
@@ -2558,8 +2570,9 @@ end
 function CultFanatic.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
-    CultFanatic.unit:DealMagicDamageLoc(
-            1504, CultFanatic.unit:GetLoc(), 8)
+    CultFanatic.unit:DealMagicDamageLoc {
+            damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
+    }
     CultFanatic.summoned = false
     CultFanatic.morphed = false
 end
@@ -2779,7 +2792,9 @@ function LadyDeathwhisper.DeathAndDecay()
     if LadyDeathwhisper.death_and_decay_effect then
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
-        LadyDeathwhisper.unit:DealMagicDamageLoc(450., loc, 15)
+        LadyDeathwhisper.unit:DealMagicDamageLoc {
+            damage=450., location=loc, radius=15
+        }
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
         DestroyEffect(effect)
@@ -3145,7 +3160,7 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
     event:AddAction(Paladin.AvengersShield)
@@ -3329,18 +3344,53 @@ end
     
 
 
+function Paladin.EnableConsecration()
+    local group
+    local light = 1
+    local factor = 0.04
+    local ap = GetHeroStr(Paladin.hero:GetId(), true) * 2
+    local damage = 8 * (113 + factor * light + factor * ap)
+
+    while Paladin.consecration_effect do
+        group = GetUnitsInRangeOfLocAll(160.00, Location(
+                BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)))
+
+        local function act()
+            local u = GetEnumUnit()
+            if Paladin.hero:IsEnemy(Unit(u)) then
+                Paladin.hero:DealMagicDamage(u, damage)
+            end
+        end
+
+        TriggerSleepAction(1.)
+        ForGroupBJ(group, act)
+    end
+    DestroyGroup(group)
+end
+
+function Paladin.DisableConsecration()
+    DestroyEffect(Paladin.consecration_effect)
+    Paladin.consecration_effect = nil
+end
+
 function Paladin.Consecration()
     Paladin.hero:LoseMana{percent=22}
-    IssuePointOrderLoc(GetTriggerUnit(), "flamestrike", GetUnitLoc(GetTriggerUnit()))
+
+    local loc = Paladin.hero:GetLoc()
+    local model = "Consecration_Impact_Base.mdx"
+    local timer = CreateTimer()
+    Paladin.consecration_effect = AddSpecialEffectLoc(model, loc)
+    TimerStart(timer, 8., false, Paladin.DisableConsecration)
+    Paladin.EnableConsecration()
 end
 
 function Paladin.IsConsecration()
     return GetSpellAbilityId() == CONSECRATION_TR
 end
 
-
 function Paladin.InitConsecration()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)
     event:AddAction(Paladin.Consecration)
@@ -3359,10 +3409,15 @@ function Paladin.Init()
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetMana(800)
 
-    Paladin.hero:AddAbilities(DEVOTION_AURA, DIVINE_SHIELD,
-            CONSECRATION, CONSECRATION_TR, HAMMER_RIGHTEOUS,
-            JUDGEMENT_OF_LIGHT_TR, JUDGEMENT_OF_WISDOM_TR,
-            SHIELD_OF_RIGHTEOUSNESS, AVENGERS_SHIELD,
+    Paladin.hero:AddAbilities(
+            DIVINE_SHIELD,
+            CONSECRATION,
+            CONSECRATION_TR,
+            HAMMER_RIGHTEOUS,
+            JUDGEMENT_OF_LIGHT_TR,
+            JUDGEMENT_OF_WISDOM_TR,
+            SHIELD_OF_RIGHTEOUSNESS,
+            AVENGERS_SHIELD,
             SPELLBOOK_PALADIN
     )
 
@@ -3407,8 +3462,8 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    local event_ability = EventsPlayer(PLAYER_1)
-    local event_jol = EventsPlayer(PLAYER_1)
+    local event_ability = EventsPlayer()
+    local event_jol = EventsPlayer()
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -3446,8 +3501,8 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    local event_ability = EventsPlayer(PLAYER_1)
-    local event_jow = EventsPlayer(PLAYER_1)
+    local event_ability = EventsPlayer()
+    local event_jow = EventsPlayer()
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
@@ -3608,7 +3663,16 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
+function Trig_Init_Paladin_Func001001003()
+    return (GroupPickRandomUnit(GetUnitsInRangeOfLocAll(160.00, GetUnitLoc(GetTriggerUnit()))) == GetEnumUnit())
+end
+
+function Trig_Init_Paladin_Func001002()
+    DoNothing()
+end
+
 function Trig_Init_Paladin_Actions()
+    ForGroupBJ(GetUnitsInRangeOfLocMatching(512, GetRectCenter(GetPlayableMapRect()), Condition(Trig_Init_Paladin_Func001001003)), Trig_Init_Paladin_Func001002)
         Paladin.Init()
 end
 
