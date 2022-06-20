@@ -2298,17 +2298,17 @@ BuffSystem = {
 ---@param hero unit Id героя
 function BuffSystem.RegisterHero(hero)
     if BuffSystem.IsHeroInSystem(hero) then return end
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = {}
 end
 
 --- Добавляет герою баф
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff buff Название бафа
 ---@param func function Функция, снимающая баф
 function BuffSystem.AddBuffToHero(hero, buff, func)
     if BuffSystem.IsBuffOnHero(hero, buff) then return end
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
     BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
@@ -2317,7 +2317,7 @@ end
 ---@param hero unit Id героя
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
         if name == u then
             return true
@@ -2331,7 +2331,7 @@ end
 ---@param buff buff Id бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     if #BuffSystem.buffs[u] == 0 then return false end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[u] do
@@ -2347,7 +2347,7 @@ end
 ---@param hero unit Id героя
 ---@param buff buff Id бафа
 function BuffSystem.RemoveBuffToHero(hero, buff)
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ == buff then
             BuffSystem.buffs[u][i] = nil
@@ -2359,20 +2359,13 @@ end
 ---@param hero unit Id героя
 ---@param buff buff Id бафа
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i] == nil then return end
         if BuffSystem.buffs[u][i].buff_ == buff then
             BuffSystem.buffs[u][i].func_()
         end
     end
-end
-
---- Удаляет героя из системы бафов
----@param hero unit Id героя
-function BuffSystem.RemoveHero(hero)
-    local u = ""..GetHandleId(hero)
-    BuffSystem.buffs[u] = nil
 end
 
 --- Проверят относится ли баф к
@@ -2420,12 +2413,18 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
 
 function BuffSystem.RemoveAllBuffs(hero)
-    local u = ""..GetHandleId(hero)
+    local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
     end
 end
 
+--- Удаляет героя из системы бафов
+---@param hero unit Id героя
+function BuffSystem.RemoveHero(hero)
+    local u = I2S(GetHandleId(hero))
+    BuffSystem.buffs[u] = nil
+end
 
 
 BattleSystem = {
