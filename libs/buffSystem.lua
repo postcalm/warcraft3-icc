@@ -7,6 +7,7 @@ BuffSystem = {
 
 --- Регистрирует героя в системе бафов
 ---@param hero unit Id героя
+---@return nil
 function BuffSystem.RegisterHero(hero)
     if BuffSystem.IsHeroInSystem(hero) then return end
     local u = I2S(GetHandleId(hero))
@@ -15,8 +16,9 @@ end
 
 --- Добавляет герою баф
 ---@param hero unit Id героя
----@param buff buff Название бафа
+---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
+---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
     if BuffSystem.IsBuffOnHero(hero, buff) then return end
     local u = I2S(GetHandleId(hero))
@@ -39,7 +41,7 @@ end
 
 --- Проверяет есть ли на герое баф
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -56,7 +58,8 @@ end
 
 --- Удаляет у героя баф
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff ability Название бафа
+---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -68,7 +71,8 @@ end
 
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff ability Название бафа
+---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -79,17 +83,20 @@ function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     end
 end
 
---- Проверят относится ли баф к
+--- Проверят относится ли баф к группе однотипных бафов
+---@param hero unit
+---@param buff ability Название бафа
+---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
-        paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
+        paladin = {BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT},
         priest = {},
         shaman = {},
         druid = {},
     }
 
     local debuffs_exceptions = {
-        paladin = {"JudgementOfWisdom", "JudgementOfLight"},
+        paladin = {JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT},
     }
 
     local function getBuffsByClass()
@@ -98,10 +105,6 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
                 if buffs[i] == buff then return buffs_exceptions[class] end
             end
         end
-        return {}
-    end
-
-    local function getDebuffsByClass()
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
                 if buffs[i] == buff then return debuffs_exceptions[class] end
@@ -115,14 +118,11 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
             BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
         end
     end
-
-    for _, buff_ in pairs(getDebuffsByClass()) do
-        if buff_ ~= buff then
-            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
-        end
-    end
 end
 
+--- Удалить все бафы с юнита
+---@param hero unit
+---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -132,6 +132,7 @@ end
 
 --- Удаляет героя из системы бафов
 ---@param hero unit Id героя
+---@return nil
 function BuffSystem.RemoveHero(hero)
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil

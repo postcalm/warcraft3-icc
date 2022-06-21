@@ -1,7 +1,10 @@
 
-function Paladin.RemoveJudgementOfLight(target)
-    UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-    BuffSystem.RemoveBuffToHero(target, "JudgementOfLight")
+function Paladin.RemoveJudgementOfLight(target, timer)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
+        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+    end
+    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfLight()
@@ -21,14 +24,20 @@ function Paladin.CastJudgementOfLight()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if not BuffSystem.IsBuffOnHero(target, "JudgementOfLight") then
-        local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-        jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
-        jol_unit:CastToTarget("shadowstrike", target)
-        local remove_buff = function() Paladin.RemoveJudgementOfLight(target) end
-        BuffSystem.AddBuffToHero(target, "JudgementOfLight", remove_buff)
-        jol_unit:ApplyTimedLife(2.)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
     end
+
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+    jol_unit:CastToTarget("shadowstrike", target)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveJudgementOfLight(target, timer) end
+
+    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
+    TimerStart(timer, 20., false, remove_buff)
+    jol_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfLight()

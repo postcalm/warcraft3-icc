@@ -1,10 +1,10 @@
 
-function Paladin.RemoveBlessingOfWisdom(unit, items_list)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
+function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_WISDOM)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfWisdom()
@@ -17,15 +17,17 @@ function Paladin.BlessingOfWisdom()
 
     Paladin.hero:LoseMana{percent=5}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
-        EquipSystem.AddItemsToUnit(unit, items_list)
-
-        local remove_buff = function() Paladin.RemoveBlessingOfWisdom(unit, items_list) end
-        local timer = CreateTimer()
-        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom", remove_buff)
-
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
+       BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
     end
+
+    EquipSystem.AddItemsToUnit(unit, items_list)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfWisdom(unit, items_list, timer) end
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_WISDOM, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfWisdom()
@@ -33,7 +35,7 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
     event:AddAction(Paladin.BlessingOfWisdom)

@@ -1,11 +1,11 @@
 
-function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
+function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_SANCTUARY)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfSanctuary()
@@ -18,18 +18,20 @@ function Paladin.BlessingOfSanctuary()
 
     Paladin.hero:LoseMana{percent=7}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
-        EquipSystem.AddItemsToUnit(unit, items_list)
-        local stat = R2I(GetHeroStr(unit, false) * 0.1)
-        SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
-
-        local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list) end
-        local timer = CreateTimer()
-
-        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary", remove_buff)
-
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
+        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
     end
+
+    EquipSystem.AddItemsToUnit(unit, items_list)
+    local stat = R2I(GetHeroStr(unit, false) * 0.1)
+    SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer) end
+
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfSanctuary()
@@ -37,7 +39,7 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
     event:AddAction(Paladin.BlessingOfSanctuary)

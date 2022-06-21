@@ -2296,6 +2296,7 @@ BuffSystem = {
 
 --- Регистрирует героя в системе бафов
 ---@param hero unit Id героя
+---@return nil
 function BuffSystem.RegisterHero(hero)
     if BuffSystem.IsHeroInSystem(hero) then return end
     local u = I2S(GetHandleId(hero))
@@ -2304,8 +2305,9 @@ end
 
 --- Добавляет герою баф
 ---@param hero unit Id героя
----@param buff buff Название бафа
+---@param buff string Название бафа
 ---@param func function Функция, снимающая баф
+---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
     if BuffSystem.IsBuffOnHero(hero, buff) then return end
     local u = I2S(GetHandleId(hero))
@@ -2328,7 +2330,7 @@ end
 
 --- Проверяет есть ли на герое баф
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff string Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2345,7 +2347,8 @@ end
 
 --- Удаляет у героя баф
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff string Название бафа
+---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -2357,7 +2360,8 @@ end
 
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
----@param buff buff Id бафа
+---@param buff string Название бафа
+---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -2368,17 +2372,20 @@ function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     end
 end
 
---- Проверят относится ли баф к
+--- Проверят относится ли баф к группе однотипных бафов
+---@param hero unit
+---@param buff string Название бафа
+---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
-        paladin = {"BlessingOfKings", "BlessingOfWisdom", "BlessingOfSanctuary", "BlessingOfMight"},
+        paladin = {BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT},
         priest = {},
         shaman = {},
         druid = {},
     }
 
     local debuffs_exceptions = {
-        paladin = {"JudgementOfWisdom", "JudgementOfLight"},
+        paladin = {JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT},
     }
 
     local function getBuffsByClass()
@@ -2387,10 +2394,6 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
                 if buffs[i] == buff then return buffs_exceptions[class] end
             end
         end
-        return {}
-    end
-
-    local function getDebuffsByClass()
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
                 if buffs[i] == buff then return debuffs_exceptions[class] end
@@ -2404,14 +2407,11 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
             BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
         end
     end
-
-    for _, buff_ in pairs(getDebuffsByClass()) do
-        if buff_ ~= buff then
-            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
-        end
-    end
 end
 
+--- Удалить все бафы с юнита
+---@param hero unit
+---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -2421,6 +2421,7 @@ end
 
 --- Удаляет героя из системы бафов
 ---@param hero unit Id героя
+---@return nil
 function BuffSystem.RemoveHero(hero)
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil
@@ -3182,14 +3183,14 @@ function Paladin.InitAvengersShield()
 end
 
 
-function Paladin.RemoveBlessingOfKings(unit, stat)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
+function Paladin.RemoveBlessingOfKings(unit, stat, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfKings")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_KINGS)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfKings()
@@ -3198,26 +3199,29 @@ function Paladin.BlessingOfKings()
 
     Paladin.hero:LoseMana{percent=6}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfKings") then
-        --массив с доп. статами
-        local stat = {
-            R2I(GetHeroStr(unit, false) * 0.1),
-            R2I(GetHeroAgi(unit, false) * 0.1),
-            R2I(GetHeroInt(unit, false) * 0.1)
-        }
-        SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
-        SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
-        SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
-
-        --создаем лямбду для снятия бафа
-        local remove_buff = function() Paladin.RemoveBlessingOfKings(unit, stat) end
-        local timer = CreateTimer()
-
-        BuffSystem.AddBuffToHero(unit, "BlessingOfKings", remove_buff)
-
-        --скидываем баф через 10 минут
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
+        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
     end
+
+    --массив с доп. статами
+    local stat = {
+        R2I(GetHeroStr(unit, false) * 0.1),
+        R2I(GetHeroAgi(unit, false) * 0.1),
+        R2I(GetHeroInt(unit, false) * 0.1)
+    }
+    SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
+    SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
+    SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+
+    --создаем лямбду для снятия бафа
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfKings(unit, stat, timer) end
+
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
+
+    --скидываем баф через 10 минут
+    TimerStart(timer, 10., false, remove_buff)
+
 end
 
 function Paladin.IsBlessingOfKings()
@@ -3225,19 +3229,19 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
     event:AddAction(Paladin.BlessingOfKings)
 end
 
 
-function Paladin.RemoveBlessingOfMight(unit)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
+function Paladin.RemoveBlessingOfMight(unit, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfMight")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_MIGHT)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfMight()
@@ -3246,17 +3250,19 @@ function Paladin.BlessingOfMight()
 
     Paladin.hero:LoseMana{percent=5}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfMight") then
-        -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
-        SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
-
-        local remove_buff = function() Paladin.RemoveBlessingOfMight(unit) end
-        local timer = CreateTimer()
-
-        BuffSystem.AddBuffToHero(unit, "BlessingOfMight", remove_buff)
-
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
+        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
     end
+
+    -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
+    SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfMight(unit, timer) end
+
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_MIGHT, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfMight()
@@ -3272,13 +3278,13 @@ end
     
 
 
-function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
+function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfSanctuary")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_SANCTUARY)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfSanctuary()
@@ -3291,18 +3297,20 @@ function Paladin.BlessingOfSanctuary()
 
     Paladin.hero:LoseMana{percent=7}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfSanctuary") then
-        EquipSystem.AddItemsToUnit(unit, items_list)
-        local stat = R2I(GetHeroStr(unit, false) * 0.1)
-        SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
-
-        local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list) end
-        local timer = CreateTimer()
-
-        BuffSystem.AddBuffToHero(unit, "BlessingOfSanctuary", remove_buff)
-
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
+        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
     end
+
+    EquipSystem.AddItemsToUnit(unit, items_list)
+    local stat = R2I(GetHeroStr(unit, false) * 0.1)
+    SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer) end
+
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfSanctuary()
@@ -3310,19 +3318,19 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
     event:AddAction(Paladin.BlessingOfSanctuary)
 end
 
 
-function Paladin.RemoveBlessingOfWisdom(unit, items_list)
-    if BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
+function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, "BlessingOfWisdom")
+        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_WISDOM)
     end
-    DestroyTimer(GetExpiredTimer())
+    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfWisdom()
@@ -3335,15 +3343,17 @@ function Paladin.BlessingOfWisdom()
 
     Paladin.hero:LoseMana{percent=5}
 
-    if not BuffSystem.IsBuffOnHero(unit, "BlessingOfWisdom") then
-        EquipSystem.AddItemsToUnit(unit, items_list)
-
-        local remove_buff = function() Paladin.RemoveBlessingOfWisdom(unit, items_list) end
-        local timer = CreateTimer()
-        BuffSystem.AddBuffToHero(unit, "BlessingOfWisdom", remove_buff)
-
-        TimerStart(timer, 600., false, remove_buff)
+    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
+       BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
     end
+
+    EquipSystem.AddItemsToUnit(unit, items_list)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveBlessingOfWisdom(unit, items_list, timer) end
+    BuffSystem.AddBuffToHero(unit, BLESSING_OF_WISDOM, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfWisdom()
@@ -3351,7 +3361,7 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
     event:AddAction(Paladin.BlessingOfWisdom)
@@ -3452,9 +3462,12 @@ function Paladin.Init()
 end
 
 
-function Paladin.RemoveJudgementOfLight(target)
-    UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-    BuffSystem.RemoveBuffToHero(target, "JudgementOfLight")
+function Paladin.RemoveJudgementOfLight(target, timer)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
+        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+    end
+    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfLight()
@@ -3474,14 +3487,20 @@ function Paladin.CastJudgementOfLight()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if not BuffSystem.IsBuffOnHero(target, "JudgementOfLight") then
-        local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-        jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
-        jol_unit:CastToTarget("shadowstrike", target)
-        local remove_buff = function() Paladin.RemoveJudgementOfLight(target) end
-        BuffSystem.AddBuffToHero(target, "JudgementOfLight", remove_buff)
-        jol_unit:ApplyTimedLife(2.)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
     end
+
+    local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
+    jol_unit:CastToTarget("shadowstrike", target)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveJudgementOfLight(target, timer) end
+
+    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
+    TimerStart(timer, 20., false, remove_buff)
+    jol_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfLight()
@@ -3504,9 +3523,12 @@ function Paladin.InitJudgementOfLight()
 end
 
 
-function Paladin.RemoveJudgementOfWisdom(target)
-    UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-    BuffSystem.RemoveBuffToHero(target, "JudgementOfWisdom")
+function Paladin.RemoveJudgementOfWisdom(target, timer)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
+        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_WISDOM)
+    end
+    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfWisdom()
@@ -3524,14 +3546,20 @@ function Paladin.CastJudgementOfWisdom()
     Paladin.hero:LoseMana{percent=5}
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
-    if not BuffSystem.IsBuffOnHero(target, "JudgementOfWisdom") then
-        local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
-        jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
-        jow_unit:CastToTarget("shadowstrike", target)
-        local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target) end
-        BuffSystem.AddBuffToHero(target, "JudgementOfWisdom", remove_buff)
-        jow_unit:ApplyTimedLife(2.)
+    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
+        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_WISDOM)
     end
+
+    local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
+    jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
+    jow_unit:CastToTarget("shadowstrike", target)
+
+    local timer = CreateTimer()
+    local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target, timer) end
+
+    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
+    TimerStart(timer, 20., false, remove_buff)
+    jow_unit:ApplyTimedLife(2.)
 end
 
 function Paladin.IsJudgementOfWisdom()
@@ -3702,7 +3730,7 @@ function InitTrig_Init_Priest()
 end
 
 function Trig_Init_Paladin_Actions()
-    UnitRemoveAbilityBJ(FourCC("A004"), GetTriggerUnit())
+    CreateTimerDialogBJ(GetLastCreatedTimerBJ(), "TRIGSTR_208")
         Paladin.Init()
 end
 
