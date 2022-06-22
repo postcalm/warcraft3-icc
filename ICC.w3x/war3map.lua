@@ -95,6 +95,28 @@ ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 ItemsSpells["MP_50K"]             = { int = FourCC('A00W'), str = 'A00W' }
 
 
+--- Метер. Равен 20 игровым единицам
+METER = 20
+
+--- Сила атаки
+AP = 1.
+
+--- Сила заклинаний
+SPD = 1.
+
+--- Урон в секунду
+DPS = 3.5
+
+-- Ловкость
+--AGILITY = 1
+--
+-- Интеллект
+--INTELLECT = 1
+--
+-- Сила
+--STRENGTH = 1.
+
+
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
 
@@ -109,7 +131,6 @@ PLAYER_2   = Player(1)
 LICH_KING = Player(10)
 
 COMMON_TIMER = FourCC('BTLF')
-METER = 20
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
@@ -771,8 +792,18 @@ end
 ---@param radius real Радиус в метрах
 function Unit:DealMagicDamageLoc(args)
     local meters = METER * args.radius
-    local ot = args.overtime or 0
-    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsEnemy(u) then
+            self:DealMagicDamage(u, args.damage)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -888,7 +919,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxMana(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
     if f then self:SetMana(self:GetMaxLife()) end
@@ -922,6 +952,28 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+end
+
+
+--- Реген HP по площади.
+---@param heal real
+---@param overtime real Частота нанесения
+---@param location location
+---@param radius real Радиус в метрах
+function Unit:GainLifeNear(args)
+    local meters = METER * args.radius
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsAlly(u) then
+            self:GainLife(heal)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
@@ -1042,17 +1094,23 @@ function Unit:IsHero()
 end
 
 --- Проверяет является ли юнит союзником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Проверяет является ли юнит противником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Получить градус поворота юнита
@@ -2524,6 +2582,13 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
+function DummyForHealing()
+    local d = Unit(PLAYER_1, FourCC('hfoo'), Location(4480., 400.), 0.)
+    d:SetMaxLife(50000)
+    d:SetLife(100)
+end
+
+
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
@@ -3110,7 +3175,7 @@ function Paladin.AvengersShield()
     local light_magic_damage = 1
     local factor = 0.07
     --т.к. силы атаки так таковой нет, то считается она, как сила героя помноженная на 2
-    local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
+    local attack_power = GetHeroStr(GetTriggerUnit(), true) * AP
 
     local damage = 0
     local model_name = "Aegis.mdl"
@@ -3197,7 +3262,7 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=6}
+    if not Paladin.hero:LoseMana{percent=6} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
@@ -3248,7 +3313,7 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
@@ -3295,7 +3360,7 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=7}
+    if not Paladin.hero:LoseMana{percent=7} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
@@ -3341,7 +3406,7 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
@@ -3370,28 +3435,23 @@ end
 
 
 function Paladin.EnableConsecration()
-    local group
+    local location
     local light = 1
     local factor = 0.04
     local ap = GetHeroStr(Paladin.hero:GetId(), true) * 2
     local damage = 8 * (113 + factor * light + factor * ap)
 
     while Paladin.consecration_effect do
-        group = GetUnitsInRangeOfLocAll(160.00, Location(
+        location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)))
-
-        local function act()
-            local u = GetEnumUnit()
-            if Paladin.hero:IsEnemy(Unit(u)) then
-                Paladin.hero:DealMagicDamage(u, damage)
-            end
-        end
-
-        TriggerSleepAction(1.)
-        ForGroupBJ(group, act)
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+        Paladin.hero:DealMagicDamageLoc {
+            damage = damage,
+            overtime = 1.,
+            location = location,
+            radius = 8
+        }
     end
-    DestroyGroup(group)
 end
 
 function Paladin.DisableConsecration()
@@ -3401,7 +3461,7 @@ function Paladin.DisableConsecration()
 end
 
 function Paladin.Consecration()
-    Paladin.hero:LoseMana{percent=22}
+    if not Paladin.hero:LoseMana{percent=22} then return end
 
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
@@ -3482,7 +3542,7 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
@@ -3543,7 +3603,7 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
@@ -3583,7 +3643,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    Paladin.hero:LoseMana{percent=6}
+    if not Paladin.hero:LoseMana{percent=6} then return end
     -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
@@ -3607,23 +3667,34 @@ function Priest.CastCircleOfHealing()
     local target = Unit(GetSpellTargetUnit())
 
     if not Priest.hero:LoseMana{percent=21} then return end
-
     local heal = GetRandomInt(958, 1058)
-    bj_groupCountUnits()
-    target:GainLife{life=heal}
-    TextTag(heal, target):Preset("heal")
+
+    while Priest.consecration_effect do
+        location = Location(
+                BlzGetLocalSpecialEffectX(Priest.consecration_effect),
+                BlzGetLocalSpecialEffectY(Priest.consecration_effect))
+        Priest.hero:GainLifeNear {
+            heal = heal,
+            overtime = 1.,
+            location = location,
+            radius = 15
+        }
+    end
 end
 
+--- Заврешение способности
 function Priest.IsCircleOfHealing()
     return GetSpellAbilityId() == CIRCLE_OF_HEALING
 end
 
+--- Иницилизация персонажа
 function Priest.InitCircleOfHealing()
     local event = EventsPlayer(PLAYER_1)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)
 end
+
 
 -- Copyright (c) 2022 Kodpi
 
@@ -3649,17 +3720,18 @@ end
 
 
 function Priest.Init()
-    --local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    --local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+
     Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(Priest.hero, items_list)
+    EquipSystem.RegisterItems(items_list, items_spells_list)
+    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
 
     Priest.hero:SetLevel(80)
-    Priest.hero:SetMaxLife(10000)
-    Priest.hero:SetMaxMana(10000)
+
     Priest.hero:SetLife(5000);
+    Priest.hero:SetMaxMana(5000,true);
 
 
     Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)

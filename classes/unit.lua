@@ -240,8 +240,26 @@ function Unit:GainLife(arg)
     self:SetLife(self:GetCurrentLife() + l)
 end
 
-function Unit:GainLifeNear()
 
+--- Реген HP по площади.
+---@param heal real
+---@param overtime real Частота нанесения
+---@param location location
+---@param radius real Радиус в метрах
+function Unit:GainLifeNear(args)
+    local meters = METER * args.radius
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsAlly(u) then
+            self:GainLife(heal)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
