@@ -13,7 +13,7 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=6}
+    if not Paladin.hero:LoseMana{percent=6} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)

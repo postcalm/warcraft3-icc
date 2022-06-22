@@ -15,7 +15,7 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 

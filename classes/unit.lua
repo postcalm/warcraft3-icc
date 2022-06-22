@@ -78,8 +78,18 @@ end
 ---@param radius real Радиус в метрах
 function Unit:DealMagicDamageLoc(args)
     local meters = METER * args.radius
-    local ot = args.overtime or 0
-    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsEnemy(u) then
+            self:DealMagicDamage(u, args.damage)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -195,7 +205,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxMana(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
     if f then self:SetMana(self:GetMaxLife()) end
@@ -229,6 +238,10 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+end
+
+function Unit:GainLifeNear()
+
 end
 
 --- Получить процент хп от максимума
@@ -349,17 +362,23 @@ function Unit:IsHero()
 end
 
 --- Проверяет является ли юнит союзником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Проверяет является ли юнит противником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Получить градус поворота юнита

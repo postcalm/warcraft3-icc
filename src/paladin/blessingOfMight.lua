@@ -11,7 +11,7 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)

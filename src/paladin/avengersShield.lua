@@ -4,7 +4,7 @@ function Paladin.AvengersShield()
     local light_magic_damage = 1
     local factor = 0.07
     --т.к. силы атаки так таковой нет, то считается она, как сила героя помноженная на 2
-    local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
+    local attack_power = GetHeroStr(GetTriggerUnit(), true) * AP
 
     local damage = 0
     local model_name = "Aegis.mdl"

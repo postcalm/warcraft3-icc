@@ -51,6 +51,7 @@ local param = {
         [[\libs\battleSystem.lua]],
         [[\libs\wrappers.lua]],
         -- исходники реализации боссов, героев и прочих существ
+        [[\src\dummy]],
         [[\src\enemies]],
         [[\src\lord_marrowgar]],
         [[\src\lady_deathwhisper]],
