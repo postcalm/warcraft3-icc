@@ -5,7 +5,7 @@ function Priest.CastRenew()
     local HP = 280
     local unit = Unit(GetSpellTargetUnit())
 
-    Priest.hero:LoseMana{percent=17}
+    if not Priest.hero:LoseMana{percent=17} then return end
     for _ = 1, 5 do
         unit:GainLife{life=HP}
         TextTag(HP, unit):Preset("heal")

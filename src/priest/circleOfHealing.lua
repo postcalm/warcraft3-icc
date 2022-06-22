@@ -3,7 +3,7 @@
 function Priest.CastCircleOfHealing()
     local target = Unit(GetSpellTargetUnit())
 
-    Priest.hero:LoseMana{percent=21}
+    if not Priest.hero:LoseMana{percent=21} then return end
 
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
