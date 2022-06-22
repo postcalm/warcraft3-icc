@@ -94,6 +94,28 @@ ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 ItemsSpells["MP_50K"]             = { int = FourCC('A00W'), str = 'A00W' }
 
 
+--- Метер. Равен 20 игровым единицам
+METER = 20
+
+--- Сила атаки
+AP = 1.
+
+--- Сила заклинаний
+SPD = 1.
+
+--- Урон в секунду
+DPS = 3.5
+
+-- Ловкость
+--AGILITY = 1
+--
+-- Интеллект
+--INTELLECT = 1
+--
+-- Сила
+--STRENGTH = 1.
+
+
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
 
@@ -108,7 +130,6 @@ PLAYER_2   = Player(1)
 LICH_KING = Player(10)
 
 COMMON_TIMER = FourCC('BTLF')
-METER = 20
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
@@ -897,7 +918,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxMana(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
     if f then self:SetMana(self:GetMaxLife()) end
@@ -931,6 +951,10 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+end
+
+function Unit:GainLifeNear()
+
 end
 
 --- Получить процент хп от максимума
@@ -2543,7 +2567,6 @@ function DummyForHealing()
     local d = Unit(PLAYER_1, FourCC('hfoo'), Location(4480., 400.), 0.)
     d:SetMaxLife(50000)
     d:SetLife(100)
-    d:SetMoveSpeed(0.)
 end
 
 
@@ -3133,7 +3156,7 @@ function Paladin.AvengersShield()
     local light_magic_damage = 1
     local factor = 0.07
     --т.к. силы атаки так таковой нет, то считается она, как сила героя помноженная на 2
-    local attack_power = GetHeroStr(GetTriggerUnit(), true) * 2
+    local attack_power = GetHeroStr(GetTriggerUnit(), true) * AP
 
     local damage = 0
     local model_name = "Aegis.mdl"
@@ -3220,7 +3243,7 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=6}
+    if not Paladin.hero:LoseMana{percent=6} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
@@ -3271,7 +3294,7 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
@@ -3318,7 +3341,7 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=7}
+    if not Paladin.hero:LoseMana{percent=7} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
@@ -3364,7 +3387,7 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
@@ -3419,7 +3442,7 @@ function Paladin.DisableConsecration()
 end
 
 function Paladin.Consecration()
-    Paladin.hero:LoseMana{percent=22}
+    if not Paladin.hero:LoseMana{percent=22} then return end
 
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
@@ -3500,7 +3523,7 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
@@ -3561,7 +3584,7 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
@@ -3601,7 +3624,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    Paladin.hero:LoseMana{percent=6}
+    if not Paladin.hero:LoseMana{percent=6} then return end
     -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
@@ -3649,7 +3672,9 @@ function Priest.CastFlashHeal()
     local target = Unit(GetSpellTargetUnit())
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-    Priest.hero:LoseMana{percent=18}
+
+    if not Priest.hero:LoseMana{percent=18} then return end
+
     target:GainLife{life=heal}
     TextTag(heal, target):Preset("heal")
 end
@@ -3757,7 +3782,6 @@ function InitTrig_DummyForHealing()
 end
 
 function Trig_Init_Paladin_Actions()
-    CreateTimerDialogBJ(GetLastCreatedTimerBJ(), "TRIGSTR_208")
         Paladin.Init()
 end
 

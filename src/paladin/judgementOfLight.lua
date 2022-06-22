@@ -19,7 +19,7 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    Paladin.hero:LoseMana{percent=5}
+    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность

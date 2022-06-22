@@ -16,7 +16,7 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    Paladin.hero:LoseMana{percent=7}
+    if not Paladin.hero:LoseMana{percent=7} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)

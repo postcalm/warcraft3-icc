@@ -4,7 +4,9 @@ function Priest.CastFlashHeal()
     local target = Unit(GetSpellTargetUnit())
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-    Priest.hero:LoseMana{percent=18}
+
+    if not Priest.hero:LoseMana{percent=18} then return end
+
     target:GainLife{life=heal}
     TextTag(heal, target):Preset("heal")
 end

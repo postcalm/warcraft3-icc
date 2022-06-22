@@ -26,7 +26,7 @@ function Paladin.DisableConsecration()
 end
 
 function Paladin.Consecration()
-    Paladin.hero:LoseMana{percent=22}
+    if not Paladin.hero:LoseMana{percent=22} then return end
 
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"

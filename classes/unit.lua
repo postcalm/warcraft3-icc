@@ -205,7 +205,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxMana(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_MANA, value)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
     if f then self:SetMana(self:GetMaxLife()) end
@@ -239,6 +238,10 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+end
+
+function Unit:GainLifeNear()
+
 end
 
 --- Получить процент хп от максимума
