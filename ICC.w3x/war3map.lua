@@ -2305,7 +2305,7 @@ end
 
 --- Добавляет герою баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
@@ -2330,7 +2330,7 @@ end
 
 --- Проверяет есть ли на герое баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2347,7 +2347,7 @@ end
 
 --- Удаляет у героя баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2360,7 +2360,7 @@ end
 
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2374,7 +2374,7 @@ end
 
 --- Проверят относится ли баф к группе однотипных бафов
 ---@param hero unit
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
@@ -3220,7 +3220,7 @@ function Paladin.BlessingOfKings()
     BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
 
     --скидываем баф через 10 минут
-    TimerStart(timer, 10., false, remove_buff)
+    TimerStart(timer, 600., false, remove_buff)
 
 end
 
@@ -3606,7 +3606,7 @@ end
 function Priest.CastCircleOfHealing()
     local target = Unit(GetSpellTargetUnit())
 
-    Priest.hero:LoseMana{percent=21}
+    if not Priest.hero:LoseMana{percent=21} then return end
 
     local heal = GetRandomInt(958, 1058)
     bj_groupCountUnits()
@@ -3631,7 +3631,7 @@ function Priest.CastFlashHeal()
     local target = Unit(GetSpellTargetUnit())
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-    Priest.hero:LoseMana{percent=18}
+    if not Priest.hero:LoseMana{percent=18} then return end
     target:GainLife{life=heal}
     TextTag(heal, target):Preset("heal")
 end
@@ -3649,15 +3649,18 @@ end
 
 
 function Priest.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    --local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    --local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
     Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(Priest.hero, items_list)
 
     Priest.hero:SetLevel(80)
-    Priest.hero:SetMana(2000)
+    Priest.hero:SetMaxLife(10000)
+    Priest.hero:SetMaxMana(10000)
+    Priest.hero:SetLife(5000);
+
 
     Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
 
@@ -3673,7 +3676,7 @@ function Priest.CastRenew()
     local HP = 280
     local unit = Unit(GetSpellTargetUnit())
 
-    Priest.hero:LoseMana{percent=17}
+    if not Priest.hero:LoseMana{percent=17} then return end
     for _ = 1, 5 do
         unit:GainLife{life=HP}
         TextTag(HP, unit):Preset("heal")
