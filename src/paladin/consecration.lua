@@ -1,27 +1,22 @@
 
 function Paladin.EnableConsecration()
-    local group
+    local location
     local light = 1
     local factor = 0.04
     local ap = GetHeroStr(Paladin.hero:GetId(), true) * 2
     local damage = 8 * (113 + factor * light + factor * ap)
 
     while Paladin.consecration_effect do
-        group = GetUnitsInRangeOfLocAll(160.00, Location(
+        location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)))
-
-        local function act()
-            local u = GetEnumUnit()
-            if Paladin.hero:IsEnemy(Unit(u)) then
-                Paladin.hero:DealMagicDamage(u, damage)
-            end
-        end
-
-        TriggerSleepAction(1.)
-        ForGroupBJ(group, act)
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+        Paladin.hero:DealMagicDamageLoc {
+            damage = damage,
+            overtime = 1.,
+            location = location,
+            radius = 8
+        }
     end
-    DestroyGroup(group)
 end
 
 function Paladin.DisableConsecration()

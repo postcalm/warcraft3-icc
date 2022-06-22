@@ -16,6 +16,7 @@ gg_trg_NewHero = nil
 gg_trg_Init = nil
 gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
+gg_trg_DummyForHealing = nil
 function InitGlobals()
     local i = 0
     udg_SaveUnit_map_number = 0
@@ -27,7 +28,7 @@ function CreateUnitsForPlayer0()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("Hpal"), 4454.3, 139.3, 110.510)
+    u = CreateUnit(p, FourCC("Hpal"), 4868.1, -183.6, 110.510)
     u = CreateUnit(p, FourCC("Hpal"), 4291.2, -2880.6, 52.820)
     SetHeroLevel(u, 80, false)
     u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
@@ -40,9 +41,7 @@ function CreateUnitsForPlayer10()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("ugho"), 3156.8, 32.8, 49.649)
-    u = CreateUnit(p, FourCC("ugho"), 3273.6, -75.0, 73.424)
-    u = CreateUnit(p, FourCC("ugho"), 3427.4, -101.2, 268.250)
+    u = CreateUnit(p, FourCC("ugho"), 3750.5, 401.3, 49.650)
     u = CreateUnit(p, FourCC("ugho"), 3227.7, -3737.3, 12.610)
     u = CreateUnit(p, FourCC("ugho"), 3214.7, -3584.5, 263.720)
     u = CreateUnit(p, FourCC("ugho"), 3371.0, -3728.6, 246.840)
@@ -771,8 +770,18 @@ end
 ---@param radius real Радиус в метрах
 function Unit:DealMagicDamageLoc(args)
     local meters = METER * args.radius
-    local ot = args.overtime or 0
-    UnitDamagePointLoc(self.unit, ot, meters, args.location, args.damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsEnemy(u) then
+            self:DealMagicDamage(u, args.damage)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
@@ -1042,17 +1051,23 @@ function Unit:IsHero()
 end
 
 --- Проверяет является ли юнит союзником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Проверяет является ли юнит противником
----@param unit Unit Юнит от класса Unit
+---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    if type(unit) == "table" then
+        return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
+    end
+    return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
 end
 
 --- Получить градус поворота юнита
@@ -2305,7 +2320,7 @@ end
 
 --- Добавляет герою баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
@@ -2330,7 +2345,7 @@ end
 
 --- Проверяет есть ли на герое баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2347,7 +2362,7 @@ end
 
 --- Удаляет у героя баф
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2360,7 +2375,7 @@ end
 
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
@@ -2374,7 +2389,7 @@ end
 
 --- Проверят относится ли баф к группе однотипных бафов
 ---@param hero unit
----@param buff string Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
@@ -2521,6 +2536,14 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
         end
     end
     return Location(vector_x, vector_y)
+end
+
+
+function DummyForHealing()
+    local d = Unit(PLAYER_1, FourCC('hfoo'), Location(4480., 400.), 0.)
+    d:SetMaxLife(50000)
+    d:SetLife(100)
+    d:SetMoveSpeed(0.)
 end
 
 
@@ -3220,7 +3243,7 @@ function Paladin.BlessingOfKings()
     BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
 
     --скидываем баф через 10 минут
-    TimerStart(timer, 10., false, remove_buff)
+    TimerStart(timer, 600., false, remove_buff)
 
 end
 
@@ -3370,28 +3393,23 @@ end
 
 
 function Paladin.EnableConsecration()
-    local group
+    local location
     local light = 1
     local factor = 0.04
     local ap = GetHeroStr(Paladin.hero:GetId(), true) * 2
     local damage = 8 * (113 + factor * light + factor * ap)
 
     while Paladin.consecration_effect do
-        group = GetUnitsInRangeOfLocAll(160.00, Location(
+        location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)))
-
-        local function act()
-            local u = GetEnumUnit()
-            if Paladin.hero:IsEnemy(Unit(u)) then
-                Paladin.hero:DealMagicDamage(u, damage)
-            end
-        end
-
-        TriggerSleepAction(1.)
-        ForGroupBJ(group, act)
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+        Paladin.hero:DealMagicDamageLoc {
+            damage = damage,
+            overtime = 1.,
+            location = location,
+            radius = 8
+        }
     end
-    DestroyGroup(group)
 end
 
 function Paladin.DisableConsecration()
@@ -3729,6 +3747,15 @@ function InitTrig_Init_Priest()
     TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
 end
 
+function Trig_DummyForHealing_Actions()
+        DummyForHealing()
+end
+
+function InitTrig_DummyForHealing()
+    gg_trg_DummyForHealing = CreateTrigger()
+    TriggerAddAction(gg_trg_DummyForHealing, Trig_DummyForHealing_Actions)
+end
+
 function Trig_Init_Paladin_Actions()
     CreateTimerDialogBJ(GetLastCreatedTimerBJ(), "TRIGSTR_208")
         Paladin.Init()
@@ -3807,6 +3834,7 @@ function InitCustomTriggers()
     InitTrig_Init_LordMarrowgar()
     InitTrig_Init_LadyDeathwhisper()
     InitTrig_Init_Priest()
+    InitTrig_DummyForHealing()
     InitTrig_Init_Paladin()
     InitTrig_Alert()
     InitTrig_RespawnHero()
@@ -3821,6 +3849,7 @@ function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_Init_LordMarrowgar)
     ConditionalTriggerExecute(gg_trg_Init_LadyDeathwhisper)
     ConditionalTriggerExecute(gg_trg_Init_Priest)
+    ConditionalTriggerExecute(gg_trg_DummyForHealing)
     ConditionalTriggerExecute(gg_trg_Init_Paladin)
     ConditionalTriggerExecute(gg_trg_Alert)
     ConditionalTriggerExecute(gg_trg_NewHero)
