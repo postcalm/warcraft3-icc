@@ -61,6 +61,7 @@ function SaveSystem.SaveUserData(i)
 end
 
 --- Загружает пользовательские данные
+---@return nil
 function SaveSystem.LoadUserData()
     if SaveSystem.data[1] > 0 then
         local case = -1

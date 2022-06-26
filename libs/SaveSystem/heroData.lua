@@ -112,7 +112,8 @@ function SaveSystem.SaveBaseState(i, u, world)
     return i
 end
 
----
+--- Загружает информацию о характеристиках, способностях и предметах
+---@return nil
 function SaveSystem.LoadUnitData()
     if SaveSystem.unit ~= nil then
         local current_unit = SaveSystem.unit
@@ -185,6 +186,7 @@ end
 
 --- Загрузка общих данных об игроке и его юните
 ---@param pl playerid Локальный игрок
+---@return nil
 function SaveSystem.LoadBaseState(pl)
     local unit_x
     local unit_y

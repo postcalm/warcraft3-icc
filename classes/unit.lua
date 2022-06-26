@@ -169,8 +169,7 @@ function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     if arg.check == nil then arg.check = true end
     if m > self:GetCurrentMana() and arg.check then
-        --TODO: печатать конкретному игроку
-        print("Недостаточно маны")
+        DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Недостаточно маны")
         return false
     end
     self:SetMana(self:GetCurrentMana() - m)
@@ -239,7 +238,6 @@ function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
 end
-
 
 --- Реген HP по площади.
 ---@param heal real

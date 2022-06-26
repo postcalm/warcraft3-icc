@@ -1,6 +1,7 @@
 
----
-function SaveSystem.creature(gc, pl)
+--- Создает юнита из полученных данных
+---@return nil
+function SaveSystem.CreateUnit(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
         for i = 1, count do
@@ -25,6 +26,7 @@ function SaveSystem.creature(gc, pl)
 end
 
 --- Синхронизирует данные между игроками
+---@return nil
 function SaveSystem.Syncing(gc, is_player)
     if is_player then
         local count = SaveSystem.data[1]
@@ -37,8 +39,9 @@ function SaveSystem.Syncing(gc, is_player)
     end
 end
 
----
-function SaveSystem.load_uploading(author, user)
+--- Проверяет целостность данных
+---@return boolean
+function SaveSystem.CheckDataIntegrity(author, user)
     local encrypted_data
     if author > 0 and user > 0 then
         local player_s = Player(25)
@@ -47,14 +50,14 @@ function SaveSystem.load_uploading(author, user)
         SaveSystem.hash1 = saved_encrypted_key
         SaveSystem.hash2 = saved_encrypted_key
 
-        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-        local check_max_count_data = cjlocgn_00000005 - SaveSystem.generation1()
+        local check_sum = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+        local check_max_count_data = check_sum - SaveSystem.generation1()
 
         if max_count_data == check_max_count_data then
             -- дешифруем
             for i = 2, max_count_data do
                 encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, SaveSystem.magic_number.three)
+                check_sum = math.fmod(check_sum + encrypted_data, SaveSystem.magic_number.three)
 
                 encrypted_data = encrypted_data - SaveSystem.generation1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
@@ -63,7 +66,7 @@ function SaveSystem.load_uploading(author, user)
             end
             SaveSystem.data[1] = max_count_data
 
-            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
+            if check_sum ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
                 return false
             end
@@ -81,7 +84,8 @@ function SaveSystem.load_uploading(author, user)
     return false
 end
 
----
+--- Дешифрует полученные данные из файла сохранения
+---@return nil
 function SaveSystem.afa(gc, pl, file_name)
     local is_player_author = false
     local user_key
@@ -112,7 +116,7 @@ function SaveSystem.afa(gc, pl, file_name)
         TriggerSleepAction(0.)
 
         if is_player_author then
-            is_player_author = SaveSystem.load_uploading(id_player, user_key)
+            is_player_author = SaveSystem.CheckDataIntegrity(id_player, user_key)
         end
 
         TriggerSleepAction(0.)
@@ -122,14 +126,15 @@ function SaveSystem.afa(gc, pl, file_name)
         TriggerSyncReady()
 
         if GetStoredInteger(gc, "bool", "bool") == 1 then
-            SaveSystem.creature(gc, pl)
+            SaveSystem.CreateUnit(gc, pl)
         end
 
         StoreInteger(gc, "bool", "bool", 0)
     end
 end
 
----
+--- Загружает юнита
+---@return nil
 function SaveSystem.Load()
     local save_file
     local full_command_from_chat
@@ -157,22 +162,22 @@ function SaveSystem.Load()
     end
 end
 
----
+--- Шифрует полученные данные и записывает в файл сохранений
+---@return nil
 function SaveSystem.ada(is_player, file_name, u)
     local user_key
     local id_author = SaveSystem.author
     local handle_world
-    local encrypted_key = GetRandomInt(1, SaveSystem.magic_number.nine)
-    local cjlocgn_00000004 = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local key = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local new_key = GetRandomInt(1, SaveSystem.magic_number.nine)
     local salt = GetRandomInt(1, SaveSystem.magic_number.nine)
     local value_for_key = GetRandomInt(1, 2000000000)
-    local cjlocgn_00000007 = {}
+    local data_copy = {}
     local item_data = 2
     local n
     local encrypted_data
-    local cjlocgn_0000000c = 0
-    local cjlocgn_0000000d = 0
-    local cjlocgn_0000000e
+    local raw_index = 0
+    local encrypted = 0
 
     if u ~= nil then
         handle_world = GetWorldBounds()
@@ -209,40 +214,37 @@ function SaveSystem.ada(is_player, file_name, u)
 
         if is_player then
             item_data = item_data - 1
-            cjlocgn_00000007[item_data + 1] = 0
+            data_copy[item_data + 1] = 0
             SaveSystem.data[1] = item_data
-            SaveSystem.hash1 = encrypted_key
-            SaveSystem.hash2 = encrypted_key
+            SaveSystem.hash1 = key
+            SaveSystem.hash2 = key
 
             for i = 1, item_data do
-                -- получаем данные
                 encrypted_data = SaveSystem.data[i]
-                cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
-                -- шифруем
+                raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
                 encrypted_data = encrypted_data + SaveSystem.generation1()
-                cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
-                -- записываем
+                encrypted = math.fmod(encrypted + encrypted_data, SaveSystem.magic_number.three)
                 SaveSystem.data[i] = encrypted_data
-                cjlocgn_00000007[i] = SaveSystem.generation2()
+                data_copy[i] = SaveSystem.generation2()
             end
 
-            SaveSystem.data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
-            cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
+            SaveSystem.data[item_data + 1] = encrypted + SaveSystem.generation1()
+            data_copy[item_data + 1] = SaveSystem.generation2()
         end
 
         TriggerSleepAction(0.)
 
         if is_player then
-            SaveSystem.hash1 = cjlocgn_00000004
+            SaveSystem.hash1 = new_key
             n = item_data + 1
             for i = 1, n do
-                cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
-                SaveSystem.data[i] = SaveSystem.data[cjlocgn_0000000e]
-                SaveSystem.data[cjlocgn_0000000e] = encrypted_data
-                encrypted_data = cjlocgn_00000007[i]
-                cjlocgn_00000007[i] = cjlocgn_00000007[cjlocgn_0000000e]
-                cjlocgn_00000007[cjlocgn_0000000e] = encrypted_data
+                SaveSystem.data[i] = SaveSystem.data[k]
+                SaveSystem.data[k] = encrypted_data
+                encrypted_data = data_copy[i]
+                data_copy[i] = data_copy[k]
+                data_copy[k] = encrypted_data
             end
         end
 
@@ -252,15 +254,15 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(SaveSystem.data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
             -- сохранение данных в файл
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(encrypted_key)..") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(key)..") \n //")
             -- смысл этих вычислений скрыт от мира сего
-            local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(cjlocgn_0000000c, SaveSystem.magic_number.two)
-            local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(encrypted_key, SaveSystem.magic_number.two)
+            local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(raw_index, SaveSystem.magic_number.two)
+            local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(key, SaveSystem.magic_number.two)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
@@ -272,7 +274,8 @@ function SaveSystem.ada(is_player, file_name, u)
     end
 end
 
----
+--- Сохраняет юнита
+---@return nil
 function SaveSystem.Save()
     local file
     if not SaveSystem.process then

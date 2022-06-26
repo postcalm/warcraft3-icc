@@ -21,6 +21,7 @@ SaveSystem = {
     user_data = {},
     --- Данные игрока и его юнита
     data = {},
+    --- Флаг процесса сохранения
     process = false,
     hash1 = 0,
     hash2 = 0,

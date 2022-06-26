@@ -1,5 +1,7 @@
 -- Copyright (c) 2022 meiso
 
+--- Добавляет нового юнита игроку
+---@return nil
 function SaveSystem.AddNewHero()
     local text = GetEventPlayerChatString()
     local unit
@@ -15,6 +17,8 @@ function SaveSystem.AddNewHero()
     end
 end
 
+--- Инициализирует событие выдачи юнита игроку
+---@return nil
 function SaveSystem.InitNewHeroEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-new")
