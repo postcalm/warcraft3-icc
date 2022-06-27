@@ -11,7 +11,7 @@ function BattleSystem.Init()
 
     settarget:RegisterPlayerMouseDown()
 
-    --damaged:AddAction(BattleSystem.ShowDamage)
+    damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
     settarget:AddAction(BattleSystem.SetTarget)
 end
@@ -40,6 +40,5 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    print(damage)
     TextTag(damage, unit):Preset("damage")
 end

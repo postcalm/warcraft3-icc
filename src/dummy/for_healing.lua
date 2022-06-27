@@ -1,6 +1,7 @@
 
-function DummyForHealing()
-    local d = Unit(PLAYER_1, FourCC('hfoo'), Location(4480., 400.), 0.)
+function DummyForHealing(location)
+    local loc = location or Location(4480., 400.)
+    local d = Unit(GetLocalPlayer(), FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(50000)
     d:SetLife(100)
 end

@@ -5,17 +5,13 @@ udg_My_hero = {}
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
-gg_trg_Battle = nil
-gg_trg_Init_LordMarrowgar = nil
-gg_trg_Init_LadyDeathwhisper = nil
-gg_trg_Init_Priest = nil
-gg_trg_Init_Paladin = nil
 gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
 gg_trg_NewHero = nil
 gg_trg_Init = nil
 gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
+gg_trg_EntryPoint = nil
 function InitGlobals()
     local i = 0
     udg_SaveUnit_map_number = 0
@@ -27,25 +23,11 @@ function CreateUnitsForPlayer0()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("Hpal"), 4454.3, 139.3, 110.510)
+    u = CreateUnit(p, FourCC("Hpal"), 4868.1, -183.6, 110.510)
     u = CreateUnit(p, FourCC("Hpal"), 4291.2, -2880.6, 52.820)
     SetHeroLevel(u, 80, false)
     u = CreateUnit(p, FourCC("Hpal"), 4096.3, -8835.7, 171.755)
     u = CreateUnit(p, FourCC("Hpal"), 4062.6, -5020.2, 109.900)
-end
-
-function CreateUnitsForPlayer10()
-    local p = Player(10)
-    local u
-    local unitID
-    local t
-    local life
-    u = CreateUnit(p, FourCC("ugho"), 3156.8, 32.8, 49.649)
-    u = CreateUnit(p, FourCC("ugho"), 3273.6, -75.0, 73.424)
-    u = CreateUnit(p, FourCC("ugho"), 3427.4, -101.2, 268.250)
-    u = CreateUnit(p, FourCC("ugho"), 3227.7, -3737.3, 12.610)
-    u = CreateUnit(p, FourCC("ugho"), 3214.7, -3584.5, 263.720)
-    u = CreateUnit(p, FourCC("ugho"), 3371.0, -3728.6, 246.840)
 end
 
 function CreatePlayerBuildings()
@@ -53,7 +35,6 @@ end
 
 function CreatePlayerUnits()
     CreateUnitsForPlayer0()
-    CreateUnitsForPlayer10()
 end
 
 function CreateAllUnits()
@@ -883,8 +864,7 @@ function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     if arg.check == nil then arg.check = true end
     if m > self:GetCurrentMana() and arg.check then
-        --TODO: печатать конкретному игроку
-        print("Недостаточно маны")
+        DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Недостаточно маны")
         return false
     end
     self:SetMana(self:GetCurrentMana() - m)
@@ -953,7 +933,6 @@ function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
 end
-
 
 --- Реген HP по площади.
 ---@param heal real
@@ -1243,6 +1222,7 @@ SaveSystem = {
     user_data = {},
     --- Данные игрока и его юнита
     data = {},
+    --- Флаг процесса сохранения
     process = false,
     hash1 = 0,
     hash2 = 0,
@@ -1407,6 +1387,7 @@ function SaveSystem.SaveUserData(i)
 end
 
 --- Загружает пользовательские данные
+---@return nil
 function SaveSystem.LoadUserData()
     if SaveSystem.data[1] > 0 then
         local case = -1
@@ -1542,7 +1523,8 @@ function SaveSystem.SaveBaseState(i, u, world)
     return i
 end
 
----
+--- Загружает информацию о характеристиках, способностях и предметах
+---@return nil
 function SaveSystem.LoadUnitData()
     if SaveSystem.unit ~= nil then
         local current_unit = SaveSystem.unit
@@ -1615,6 +1597,7 @@ end
 
 --- Загрузка общих данных об игроке и его юните
 ---@param pl playerid Локальный игрок
+---@return nil
 function SaveSystem.LoadBaseState(pl)
     local unit_x
     local unit_y
@@ -1682,8 +1665,9 @@ function SaveSystem.LoadBaseState(pl)
 end
 
 
----
-function SaveSystem.creature(gc, pl)
+--- Создает юнита из полученных данных
+---@return nil
+function SaveSystem.CreateUnit(gc, pl)
     if gc ~= nil then
         local count = GetStoredInteger(gc, "1", "1")
         for i = 1, count do
@@ -1708,6 +1692,7 @@ function SaveSystem.creature(gc, pl)
 end
 
 --- Синхронизирует данные между игроками
+---@return nil
 function SaveSystem.Syncing(gc, is_player)
     if is_player then
         local count = SaveSystem.data[1]
@@ -1720,8 +1705,9 @@ function SaveSystem.Syncing(gc, is_player)
     end
 end
 
----
-function SaveSystem.load_uploading(author, user)
+--- Проверяет целостность данных
+---@return boolean
+function SaveSystem.CheckDataIntegrity(author, user)
     local encrypted_data
     if author > 0 and user > 0 then
         local player_s = Player(25)
@@ -1730,14 +1716,14 @@ function SaveSystem.load_uploading(author, user)
         SaveSystem.hash1 = saved_encrypted_key
         SaveSystem.hash2 = saved_encrypted_key
 
-        local cjlocgn_00000005 = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-        local check_max_count_data = cjlocgn_00000005 - SaveSystem.generation1()
+        local check_sum = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
+        local check_max_count_data = check_sum - SaveSystem.generation1()
 
         if max_count_data == check_max_count_data then
             -- дешифруем
             for i = 2, max_count_data do
                 encrypted_data = GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2())
-                cjlocgn_00000005 = math.fmod(cjlocgn_00000005 + encrypted_data, SaveSystem.magic_number.three)
+                check_sum = math.fmod(check_sum + encrypted_data, SaveSystem.magic_number.three)
 
                 encrypted_data = encrypted_data - SaveSystem.generation1()
                 check_max_count_data = math.fmod(check_max_count_data + encrypted_data, SaveSystem.magic_number.four)
@@ -1746,7 +1732,7 @@ function SaveSystem.load_uploading(author, user)
             end
             SaveSystem.data[1] = max_count_data
 
-            if cjlocgn_00000005 ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
+            if check_sum ~= GetPlayerTechMaxAllowed(player_s, SaveSystem.generation2()) - SaveSystem.generation1() then
                 DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "error rsum")
                 return false
             end
@@ -1764,7 +1750,8 @@ function SaveSystem.load_uploading(author, user)
     return false
 end
 
----
+--- Дешифрует полученные данные из файла сохранения
+---@return nil
 function SaveSystem.afa(gc, pl, file_name)
     local is_player_author = false
     local user_key
@@ -1795,7 +1782,7 @@ function SaveSystem.afa(gc, pl, file_name)
         TriggerSleepAction(0.)
 
         if is_player_author then
-            is_player_author = SaveSystem.load_uploading(id_player, user_key)
+            is_player_author = SaveSystem.CheckDataIntegrity(id_player, user_key)
         end
 
         TriggerSleepAction(0.)
@@ -1805,14 +1792,15 @@ function SaveSystem.afa(gc, pl, file_name)
         TriggerSyncReady()
 
         if GetStoredInteger(gc, "bool", "bool") == 1 then
-            SaveSystem.creature(gc, pl)
+            SaveSystem.CreateUnit(gc, pl)
         end
 
         StoreInteger(gc, "bool", "bool", 0)
     end
 end
 
----
+--- Загружает юнита
+---@return nil
 function SaveSystem.Load()
     local save_file
     local full_command_from_chat
@@ -1840,22 +1828,22 @@ function SaveSystem.Load()
     end
 end
 
----
+--- Шифрует полученные данные и записывает в файл сохранений
+---@return nil
 function SaveSystem.ada(is_player, file_name, u)
     local user_key
     local id_author = SaveSystem.author
     local handle_world
-    local encrypted_key = GetRandomInt(1, SaveSystem.magic_number.nine)
-    local cjlocgn_00000004 = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local key = GetRandomInt(1, SaveSystem.magic_number.nine)
+    local new_key = GetRandomInt(1, SaveSystem.magic_number.nine)
     local salt = GetRandomInt(1, SaveSystem.magic_number.nine)
     local value_for_key = GetRandomInt(1, 2000000000)
-    local cjlocgn_00000007 = {}
+    local data_copy = {}
     local item_data = 2
     local n
     local encrypted_data
-    local cjlocgn_0000000c = 0
-    local cjlocgn_0000000d = 0
-    local cjlocgn_0000000e
+    local raw_index = 0
+    local encrypted = 0
 
     if u ~= nil then
         handle_world = GetWorldBounds()
@@ -1892,40 +1880,37 @@ function SaveSystem.ada(is_player, file_name, u)
 
         if is_player then
             item_data = item_data - 1
-            cjlocgn_00000007[item_data + 1] = 0
+            data_copy[item_data + 1] = 0
             SaveSystem.data[1] = item_data
-            SaveSystem.hash1 = encrypted_key
-            SaveSystem.hash2 = encrypted_key
+            SaveSystem.hash1 = key
+            SaveSystem.hash2 = key
 
             for i = 1, item_data do
-                -- получаем данные
                 encrypted_data = SaveSystem.data[i]
-                cjlocgn_0000000c = math.fmod(cjlocgn_0000000c + encrypted_data, SaveSystem.magic_number.four)
-                -- шифруем
+                raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
                 encrypted_data = encrypted_data + SaveSystem.generation1()
-                cjlocgn_0000000d = math.fmod(cjlocgn_0000000d + encrypted_data, SaveSystem.magic_number.three)
-                -- записываем
+                encrypted = math.fmod(encrypted + encrypted_data, SaveSystem.magic_number.three)
                 SaveSystem.data[i] = encrypted_data
-                cjlocgn_00000007[i] = SaveSystem.generation2()
+                data_copy[i] = SaveSystem.generation2()
             end
 
-            SaveSystem.data[item_data + 1] = cjlocgn_0000000d + SaveSystem.generation1()
-            cjlocgn_00000007[item_data + 1] = SaveSystem.generation2()
+            SaveSystem.data[item_data + 1] = encrypted + SaveSystem.generation1()
+            data_copy[item_data + 1] = SaveSystem.generation2()
         end
 
         TriggerSleepAction(0.)
 
         if is_player then
-            SaveSystem.hash1 = cjlocgn_00000004
+            SaveSystem.hash1 = new_key
             n = item_data + 1
             for i = 1, n do
-                cjlocgn_0000000e = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
-                SaveSystem.data[i] = SaveSystem.data[cjlocgn_0000000e]
-                SaveSystem.data[cjlocgn_0000000e] = encrypted_data
-                encrypted_data = cjlocgn_00000007[i]
-                cjlocgn_00000007[i] = cjlocgn_00000007[cjlocgn_0000000e]
-                cjlocgn_00000007[cjlocgn_0000000e] = encrypted_data
+                SaveSystem.data[i] = SaveSystem.data[k]
+                SaveSystem.data[k] = encrypted_data
+                encrypted_data = data_copy[i]
+                data_copy[i] = data_copy[k]
+                data_copy[k] = encrypted_data
             end
         end
 
@@ -1935,15 +1920,15 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(cjlocgn_00000007[i])..","..I2S(SaveSystem.data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
             -- сохранение данных в файл
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(encrypted_key)..") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(key)..") \n //")
             -- смысл этих вычислений скрыт от мира сего
-            local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(cjlocgn_0000000c, SaveSystem.magic_number.two)
-            local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(encrypted_key, SaveSystem.magic_number.two)
+            local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(raw_index, SaveSystem.magic_number.two)
+            local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(key, SaveSystem.magic_number.two)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
             Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
@@ -1955,7 +1940,8 @@ function SaveSystem.ada(is_player, file_name, u)
     end
 end
 
----
+--- Сохраняет юнита
+---@return nil
 function SaveSystem.Save()
     local file
     if not SaveSystem.process then
@@ -1983,6 +1969,7 @@ end
 
 
 --- Возрождает юнита
+---@return nil
 function SaveSystem.UnitsRespawn()
     local unit = Unit(GetTriggerUnit())
     if unit:IsHero() then
@@ -1992,6 +1979,7 @@ function SaveSystem.UnitsRespawn()
 end
 
 --- Определяет способности выбранного класса
+---@return nil
 function SaveSystem.DefineAbilities()
     if SaveSystem.classid == CLASSES["paladin"] then
         SaveSystem.DefineAbilitiesPaladin()
@@ -2001,6 +1989,7 @@ function SaveSystem.DefineAbilities()
 end
 
 --- Определяет способности паладина
+---@return nil
 function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {
         DIVINE_SHIELD,
@@ -2010,12 +1999,14 @@ function SaveSystem.DefineAbilitiesPaladin()
         JUDGEMENT_OF_LIGHT_TR,
         JUDGEMENT_OF_WISDOM_TR,
         SHIELD_OF_RIGHTEOUSNESS,
+        AVENGERS_SHIELD,
         SPELLBOOK_PALADIN,
     }
     SaveSystem.spellbook = SPELLBOOK_PALADIN
 end
 
 --- Определяет способности приста
+---@return nil
 function SaveSystem.DefineAbilitiesPriest()
     SaveSystem.abilities = {
         FLASH_HEAL,
@@ -2026,6 +2017,7 @@ function SaveSystem.DefineAbilitiesPriest()
 end
 
 --- Выдает герою способности
+---@return nil
 function SaveSystem.AddHeroAbilities(class)
     SaveSystem.classid = CLASSES[class]
     SaveSystem.DefineAbilities()
@@ -2037,6 +2029,8 @@ end
 
 -- Copyright (c) 2022 meiso
 
+--- Добавляет нового юнита игроку
+---@return nil
 function SaveSystem.AddNewHero()
     local text = GetEventPlayerChatString()
     local unit
@@ -2052,6 +2046,8 @@ function SaveSystem.AddNewHero()
     end
 end
 
+--- Инициализирует событие выдачи юнита игроку
+---@return nil
 function SaveSystem.InitNewHeroEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-new")
@@ -2061,12 +2057,16 @@ end
 
 -- Copyright (c) 2022 meiso
 
+--- Сохраняет юнита игрока
+---@return nil
 function SaveSystem.SaveHero()
     SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
     SaveSystem.user_data[1] = 1
     SaveSystem.Save()
 end
 
+--- Инициализирует событие сохранения юнита
+---@return nil
 function SaveSystem.InitSaveEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-save")
@@ -2075,12 +2075,16 @@ end
 
 -- Copyright (c) 2022 meiso
 
+--- Загружает юнита
+---@return nil
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
     SaveSystem.Load()
     udg_My_hero[i] = SaveSystem.unit
 end
 
+--- Инициализация события по загрузке юнита
+---@return nil
 function SaveSystem.InitLoadEvent()
     local event = EventsPlayer()
     event:RegisterChatEvent("-load")
@@ -2579,6 +2583,13 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
         end
     end
     return Location(vector_x, vector_y)
+end
+
+
+function DummyForDPS()
+    local d = Unit(LICH_KING, FourCC('hfoo'), Location(4480., 400.), 0.)
+    d:SetMaxLife(500000)
+    d:SetLife(100)
 end
 
 
@@ -3675,7 +3686,7 @@ function Priest.CastCircleOfHealing()
                 BlzGetLocalSpecialEffectY(Priest.consecration_effect))
         Priest.hero:GainLifeNear {
             heal = heal,
-            overtime = 1.,
+            overtime = 6.,
             location = location,
             radius = 15
         }
@@ -3767,51 +3778,32 @@ function Priest.InitRenew()
     event:AddAction(Priest.CastRenew)
 end
 
+
+-- Точка входа для инициализации всего
+function EntryPoint()
+    -- Механики
+    BattleSystem.Init()
+
+    -- Боссы
+    LordMarrowgar.Init()
+    LadyDeathwhisper.Init()
+
+    -- Персонажи
+    Priest.Init()
+    Paladin.Init()
+
+    -- Манекены
+    DummyForHealing()
+end
+
 --CUSTOM_CODE
-function Trig_Battle_Actions()
-        BattleSystem.Init()
+function Trig_EntryPoint_Actions()
+        EntryPoint()
 end
 
-function InitTrig_Battle()
-    gg_trg_Battle = CreateTrigger()
-    TriggerAddAction(gg_trg_Battle, Trig_Battle_Actions)
-end
-
-function Trig_Init_LordMarrowgar_Actions()
-        LordMarrowgar.Init()
-end
-
-function InitTrig_Init_LordMarrowgar()
-    gg_trg_Init_LordMarrowgar = CreateTrigger()
-    TriggerAddAction(gg_trg_Init_LordMarrowgar, Trig_Init_LordMarrowgar_Actions)
-end
-
-function Trig_Init_LadyDeathwhisper_Actions()
-        LadyDeathwhisper.Init()
-end
-
-function InitTrig_Init_LadyDeathwhisper()
-    gg_trg_Init_LadyDeathwhisper = CreateTrigger()
-    TriggerAddAction(gg_trg_Init_LadyDeathwhisper, Trig_Init_LadyDeathwhisper_Actions)
-end
-
-function Trig_Init_Priest_Actions()
-        Priest.Init()
-end
-
-function InitTrig_Init_Priest()
-    gg_trg_Init_Priest = CreateTrigger()
-    TriggerAddAction(gg_trg_Init_Priest, Trig_Init_Priest_Actions)
-end
-
-function Trig_Init_Paladin_Actions()
-    CreateTimerDialogBJ(GetLastCreatedTimerBJ(), "TRIGSTR_208")
-        Paladin.Init()
-end
-
-function InitTrig_Init_Paladin()
-    gg_trg_Init_Paladin = CreateTrigger()
-    TriggerAddAction(gg_trg_Init_Paladin, Trig_Init_Paladin_Actions)
+function InitTrig_EntryPoint()
+    gg_trg_EntryPoint = CreateTrigger()
+    TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
 function Trig_Alert_Actions()
@@ -3878,11 +3870,7 @@ function InitTrig_LoadHero()
 end
 
 function InitCustomTriggers()
-    InitTrig_Battle()
-    InitTrig_Init_LordMarrowgar()
-    InitTrig_Init_LadyDeathwhisper()
-    InitTrig_Init_Priest()
-    InitTrig_Init_Paladin()
+    InitTrig_EntryPoint()
     InitTrig_Alert()
     InitTrig_RespawnHero()
     InitTrig_NewHero()
@@ -3892,11 +3880,7 @@ function InitCustomTriggers()
 end
 
 function RunInitializationTriggers()
-    ConditionalTriggerExecute(gg_trg_Battle)
-    ConditionalTriggerExecute(gg_trg_Init_LordMarrowgar)
-    ConditionalTriggerExecute(gg_trg_Init_LadyDeathwhisper)
-    ConditionalTriggerExecute(gg_trg_Init_Priest)
-    ConditionalTriggerExecute(gg_trg_Init_Paladin)
+    ConditionalTriggerExecute(gg_trg_EntryPoint)
     ConditionalTriggerExecute(gg_trg_Alert)
     ConditionalTriggerExecute(gg_trg_NewHero)
     ConditionalTriggerExecute(gg_trg_Init)

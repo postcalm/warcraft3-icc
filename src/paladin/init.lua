@@ -1,9 +1,10 @@
 
-function Paladin.Init()
+function Paladin.Init(location)
+    local loc = location or Location(4000., 200.)
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
+    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
