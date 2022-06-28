@@ -12,7 +12,7 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
     event:AddAction(Paladin.ShieldOfRighteousness)

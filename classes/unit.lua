@@ -67,7 +67,9 @@ end
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
+    BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    BattleSystem.disable = false
 end
 
 --- Нанести магической урон по площади.
@@ -85,6 +87,7 @@ function Unit:DealMagicDamageLoc(args)
         local u = GetEnumUnit()
         if self:IsEnemy(u) then
             self:DealMagicDamage(u, args.damage)
+            TextTag(args.damage, u):Preset("spell")
         end
     end
     ForGroupBJ(group, act)
@@ -237,14 +240,15 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+    TextTag(l, self:GetId()):Preset("heal")
 end
 
 --- Реген HP по площади.
 ---@param heal real
----@param overtime real Частота нанесения
+---@param overtime real Частота исцеления
 ---@param location location
 ---@param radius real Радиус в метрах
-function Unit:GainLifeNear(args)
+function Unit:HealNear(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
     local group = GetUnitsInRangeOfLocAll(meters, args.location)
@@ -252,7 +256,7 @@ function Unit:GainLifeNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
-            self:GainLife(heal)
+            Unit(u):GainLife{ life = args.heal }
         end
     end
     ForGroupBJ(group, act)

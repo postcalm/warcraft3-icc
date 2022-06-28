@@ -8,7 +8,6 @@ function Priest.CastRenew()
     if not Priest.hero:LoseMana{percent=17} then return end
     for _ = 1, 5 do
         unit:GainLife{life=HP}
-        TextTag(HP, unit):Preset("heal")
         TriggerSleepAction(3.)
     end
 end

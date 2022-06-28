@@ -454,12 +454,6 @@ STRING 158
 Shield of Righteousness
 }
 
-STRING 159
-// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
-{
-Щит праведности (|cffffcc00C|r)
-}
-
 STRING 160
 // Способности: A00R (Shield of Righteousness), Ubertip (Подсказка: используется, подробная)
 {
@@ -658,5 +652,17 @@ STRING 214
 // Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
 {
 Круг исцеления (|cffffcc00W|r)
+}
+
+STRING 215
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 216
+// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
+{
+Щит праведности (|cffffcc00V|r)
 }
 

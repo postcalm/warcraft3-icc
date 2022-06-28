@@ -2,6 +2,7 @@
 BattleSystem = {
     target = nil,
     target_event = nil,
+    disable = false,
 }
 
 function BattleSystem.Init()
@@ -40,5 +41,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    TextTag(damage, unit):Preset("damage")
+    if damage ~= 0. and not BattleSystem.disable then
+        TextTag(damage, unit):Preset("damage")
+    end
 end

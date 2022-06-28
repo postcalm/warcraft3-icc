@@ -5,13 +5,13 @@ udg_My_hero = {}
 gg_rct_RespawZone = nil
 gg_rct_areaLD = nil
 gg_rct_areaLM = nil
+gg_trg_EntryPoint = nil
 gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
 gg_trg_NewHero = nil
 gg_trg_Init = nil
 gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
-gg_trg_EntryPoint = nil
 function InitGlobals()
     local i = 0
     udg_SaveUnit_map_number = 0
@@ -939,7 +939,7 @@ end
 ---@param overtime real Частота нанесения
 ---@param location location
 ---@param radius real Радиус в метрах
-function Unit:GainLifeNear(args)
+function Unit:HealNear(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
     local group = GetUnitsInRangeOfLocAll(meters, args.location)
@@ -2502,7 +2502,7 @@ function BattleSystem.Init()
 
     settarget:RegisterPlayerMouseDown()
 
-    --damaged:AddAction(BattleSystem.ShowDamage)
+    damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
     settarget:AddAction(BattleSystem.SetTarget)
 end
@@ -2531,8 +2531,9 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    print(damage)
-    TextTag(damage, unit):Preset("damage")
+    if damage ~= 0. then
+        TextTag(damage, unit):Preset("damage")
+    end
 end
 
 
@@ -2586,15 +2587,17 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
 end
 
 
-function DummyForDPS()
-    local d = Unit(LICH_KING, FourCC('hfoo'), Location(4480., 400.), 0.)
-    d:SetMaxLife(500000)
-    d:SetLife(100)
+function DummyForDPS(location)
+    local loc = location or Location(4480., 400.)
+    local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
+    d:SetMaxLife(500000, true)
+    d:SetBaseDamage(2000.)
 end
 
 
-function DummyForHealing()
-    local d = Unit(PLAYER_1, FourCC('hfoo'), Location(4480., 400.), 0.)
+function DummyForHealing(location)
+    local loc = location or Location(4480., 400.)
+    local d = Unit(GetLocalPlayer(), FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(50000)
     d:SetLife(100)
 end
@@ -3494,11 +3497,12 @@ function Paladin.InitConsecration()
 end
 
 
-function Paladin.Init()
+function Paladin.Init(location)
+    local loc = location or Location(4000., 200.)
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    Paladin.hero = Unit(PLAYER_1, PALADIN, Location(4000., 200.), 90.)
+    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
     --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
@@ -3655,7 +3659,7 @@ end
 
 function Paladin.ShieldOfRighteousness()
     if not Paladin.hero:LoseMana{percent=6} then return end
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -3684,7 +3688,7 @@ function Priest.CastCircleOfHealing()
         location = Location(
                 BlzGetLocalSpecialEffectX(Priest.consecration_effect),
                 BlzGetLocalSpecialEffectY(Priest.consecration_effect))
-        Priest.hero:GainLifeNear {
+        Priest.hero:HealNear {
             heal = heal,
             overtime = 6.,
             location = location,
@@ -3730,11 +3734,12 @@ function Priest.InitFlashHeal()
 end
 
 
-function Priest.Init()
+function Priest.Init(location)
+    local loc = location or Location(4200., 200.)
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
     local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
-    Priest.hero = Unit(PLAYER_1, PRIEST, Location(4200., 200.), 90.)
+    Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(Priest.hero, items_list)
@@ -3794,6 +3799,21 @@ function EntryPoint()
 
     -- Манекены
     DummyForHealing()
+end
+
+
+-- Точка входа для инициализации всего
+function TestEntryPoint()
+    -- Механики
+    BattleSystem.Init()
+
+    -- Персонажи
+    Priest.Init(Location(300., -490.))
+    Paladin.Init(Location(-400., -490.))
+
+    -- Манекены
+    DummyForHealing(Location(300., 200.))
+    DummyForDPS(Location(-400., 200))
 end
 
 --CUSTOM_CODE

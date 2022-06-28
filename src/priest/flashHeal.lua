@@ -6,7 +6,6 @@ function Priest.CastFlashHeal()
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
     target:GainLife{life=heal}
-    TextTag(heal, target):Preset("heal")
 end
 
 function Priest.IsFlashHeal()
