@@ -15,8 +15,6 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not Paladin.hero:LoseMana{percent=5} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
     end
@@ -35,6 +33,14 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
+    Ability(
+            BLESSING_OF_WISDOM,
+            "Благословение мудрости (C)",
+            "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)

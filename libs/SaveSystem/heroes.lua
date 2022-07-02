@@ -25,7 +25,6 @@ function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {
         DIVINE_SHIELD,
         CONSECRATION,
-        CONSECRATION_TR,
         HAMMER_RIGHTEOUS,
         JUDGEMENT_OF_LIGHT_TR,
         JUDGEMENT_OF_WISDOM_TR,

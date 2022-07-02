@@ -19,7 +19,6 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
@@ -43,6 +42,15 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
+    Ability(
+            JUDGEMENT_OF_WISDOM_TR,
+            "Правосудие мудрости",
+            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего."
+    )
+    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
+    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
 

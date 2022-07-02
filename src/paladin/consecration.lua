@@ -26,8 +26,6 @@ function Paladin.DisableConsecration()
 end
 
 function Paladin.Consecration()
-    if not Paladin.hero:LoseMana{percent=22} then return end
-
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
     local timer = CreateTimer()
@@ -37,10 +35,19 @@ function Paladin.Consecration()
 end
 
 function Paladin.IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION_TR
+    return GetSpellAbilityId() == CONSECRATION
 end
 
 function Paladin.InitConsecration()
+    Ability(
+            CONSECRATION,
+            "Освящение (R)",
+            "Освящает участок земли, на котором стоит паладин, " ..
+            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
+    )
+    Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
+    Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)

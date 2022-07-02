@@ -137,12 +137,6 @@ STRING 47
 Q
 }
 
-STRING 51
-// Способности: A009 (Consecration), Name (Название)
-{
-Consecration
-}
-
 STRING 57
 // Способности: A00B (Hammer of the Righteous), Name (Название)
 {
@@ -179,7 +173,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00A (Concecration (trigg)), Hotkey (Горячая клавиша: используется)
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -202,20 +196,14 @@ STRING 98
 Crusader Aura
 }
 
-STRING 99
-// Способности: A00A (Concecration (trigg)), Name (Название)
-{
-Concecration (trigg)
-}
-
 STRING 102
-// Способности: A00A (Concecration (trigg)), Tip (Подсказка: используется, нормальная)
+// Способности: A00A (Concecration), Tip (Подсказка: используется, нормальная)
 {
 Освящение
 }
 
 STRING 103
-// Способности: A00A (Concecration (trigg)), Ubertip (Подсказка: используется, подробная)
+// Способности: A00A (Concecration), Ubertip (Подсказка: используется, подробная)
 {
 Освящение
 }
@@ -230,12 +218,6 @@ STRING 114
 // Способности: A00K (decrease_dmg), Name (Название)
 {
 decrease_dmg
-}
-
-STRING 116
-// Способности: A00C (Blessing of Kings), Ubertip (Подсказка: используется, подробная)
-{
-Благославляет дружественную цель, повышая все ее характеристики на 10% на 10 минут.
 }
 
 STRING 117
@@ -664,5 +646,23 @@ STRING 216
 // Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
 {
 Щит праведности (|cffffcc00V|r)
+}
+
+STRING 217
+// Способности: A00A (Concecration), Name (Название)
+{
+Concecration
+}
+
+STRING 218
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 219
+// Способности: A00L (Spellbook_Paladin), Tip (Подсказка: используется, нормальная)
+{
+Книга заклинаний (X)
 }
 

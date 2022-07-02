@@ -17,7 +17,7 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
     event:AddAction(Priest.CastRenew)

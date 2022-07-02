@@ -5,8 +5,7 @@ WHIRLWIND               = FourCC("A005")
 
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")
-CONSECRATION            = FourCC("A009")
-CONSECRATION_TR         = FourCC("A00A")
+CONSECRATION            = FourCC("A00A")
 HAMMER_RIGHTEOUS        = FourCC("A00B")
 BLESSING_OF_KINGS       = FourCC("A00C")
 BLESSING_OF_SANCTUARY   = FourCC("A00H")

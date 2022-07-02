@@ -11,8 +11,6 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if not Paladin.hero:LoseMana{percent=5} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
     end
@@ -33,7 +31,15 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    local event = EventsPlayer(PLAYER_1)
+    Ability(
+            BLESSING_OF_MIGHT,
+            "Благословение могущества (V)",
+            "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
+
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)

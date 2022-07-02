@@ -11,8 +11,6 @@ function Paladin.AvengersShield()
 
     local exclude_targets = {}
 
-    if not Paladin.hero:LoseMana{percent=26} then return end
-
     local function AddTarget(target_, exc)
         table.insert(exc, target_:GetId())
     end
@@ -70,6 +68,15 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
+    Ability(
+            AVENGERS_SHIELD,
+            "Щит мстителя",
+            "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
+            "Щит затем перескакивает на других находящихся поблизости противников. " ..
+            "Способен воздействовать на 3 цели."
+    )
+    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
+    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)

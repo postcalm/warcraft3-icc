@@ -23,6 +23,7 @@ function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
     local f = face or 0
+    self.basemana = 0
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
@@ -161,6 +162,35 @@ function Unit:CastToTarget(spell, target)
     IssueTargetOrder(self.unit, spell, u)
 end
 
+--- Установить затраты маны на способность (от базовой маны)
+---@param ability ability
+---@param manacost integer Затраты в процентах
+---@return nil
+function Unit:SetAbilityManacost(ability, manacost)
+    local factor = 100
+    if manacost <= 1 then factor = 1 end
+    local m = (self.basemana * (manacost / factor)) // 1
+    BlzSetAbilityIntegerLevelField(
+            BlzGetUnitAbility(self:GetId(), ability),
+            ABILITY_ILF_MANA_COST,
+            0,
+            m
+    )
+end
+
+--- Установить время восстановления у способности
+---@param ability ability
+---@param cooldown real
+---@return nil
+function Unit:SetAbilityCooldown(ability, cooldown)
+    BlzSetAbilityRealLevelField(
+            BlzGetUnitAbility(self:GetId(), ability),
+            ABILITY_RLF_COOLDOWN,
+            0,
+            cooldown
+    )
+end
+
 -- Mana
 
 --- Потратить указанное количество маны
@@ -203,6 +233,14 @@ function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
+--- Установить базовое количество маны
+---@param value integer
+---@return nil
+function Unit:SetBaseMana(value)
+    self.basemana = value
+    self:SetMana(value)
+end
+
 --- Установить максимальное значение маны
 ---@param value real
 ---@param full boolean
@@ -222,6 +260,12 @@ end
 ---@return real
 function Unit:GetCurrentMana()
     return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+--- Получить базовое количество маны
+---@return integer
+function Unit:GetBaseMana()
+    return self.basemana
 end
 
 -- Health
@@ -284,7 +328,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxLife(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
     if f then self:SetLife(self:GetMaxLife()) end

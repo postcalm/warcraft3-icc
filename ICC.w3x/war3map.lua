@@ -762,7 +762,9 @@ end
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
+    BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    BattleSystem.disable = false
 end
 
 --- Нанести магической урон по площади.
@@ -780,6 +782,7 @@ function Unit:DealMagicDamageLoc(args)
         local u = GetEnumUnit()
         if self:IsEnemy(u) then
             self:DealMagicDamage(u, args.damage)
+            TextTag(args.damage, u):Preset("spell")
         end
     end
     ForGroupBJ(group, act)
@@ -932,11 +935,12 @@ end
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
+    TextTag(l, self:GetId()):Preset("heal")
 end
 
 --- Реген HP по площади.
 ---@param heal real
----@param overtime real Частота нанесения
+---@param overtime real Частота исцеления
 ---@param location location
 ---@param radius real Радиус в метрах
 function Unit:HealNear(args)
@@ -947,7 +951,7 @@ function Unit:HealNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
-            self:GainLife(heal)
+            Unit(u):GainLife{ life = args.heal }
         end
     end
     ForGroupBJ(group, act)
@@ -975,7 +979,6 @@ end
 ---@param value real
 ---@param full boolean
 function Unit:SetMaxLife(value, full)
-    --SetUnitState(self.unit, UNIT_STATE_MAX_LIFE, value)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
     if f then self:SetLife(self:GetMaxLife()) end
@@ -2493,6 +2496,7 @@ end
 BattleSystem = {
     target = nil,
     target_event = nil,
+    disable = false,
 }
 
 function BattleSystem.Init()
@@ -2531,7 +2535,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    if damage ~= 0. then
+    if damage ~= 0. and not BattleSystem.disable then
         TextTag(damage, unit):Preset("damage")
     end
 end
@@ -2598,7 +2602,7 @@ end
 function DummyForHealing(location)
     local loc = location or Location(4480., 400.)
     local d = Unit(GetLocalPlayer(), FourCC('hfoo'), loc, 0.)
-    d:SetMaxLife(50000)
+    d:SetMaxLife(500000)
     d:SetLife(100)
 end
 
@@ -3670,7 +3674,7 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
     event:AddAction(Paladin.ShieldOfRighteousness)
@@ -3679,22 +3683,14 @@ end
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastCircleOfHealing()
-    local target = Unit(GetSpellTargetUnit())
-
     if not Priest.hero:LoseMana{percent=21} then return end
     local heal = GetRandomInt(958, 1058)
 
-    while Priest.consecration_effect do
-        location = Location(
-                BlzGetLocalSpecialEffectX(Priest.consecration_effect),
-                BlzGetLocalSpecialEffectY(Priest.consecration_effect))
-        Priest.hero:HealNear {
-            heal = heal,
-            overtime = 6.,
-            location = location,
-            radius = 15
-        }
-    end
+    Priest.hero:HealNear {
+        heal = heal,
+        location = Priest.hero:GetLoc(),
+        radius = 15
+    }
 end
 
 --- Заврешение способности
@@ -3704,7 +3700,7 @@ end
 
 --- Иницилизация персонажа
 function Priest.InitCircleOfHealing()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)
@@ -3719,7 +3715,6 @@ function Priest.CastFlashHeal()
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
     target:GainLife{life=heal}
-    TextTag(heal, target):Preset("heal")
 end
 
 function Priest.IsFlashHeal()
@@ -3767,7 +3762,6 @@ function Priest.CastRenew()
     if not Priest.hero:LoseMana{percent=17} then return end
     for _ = 1, 5 do
         unit:GainLife{life=HP}
-        TextTag(HP, unit):Preset("heal")
         TriggerSleepAction(3.)
     end
 end
@@ -3819,6 +3813,7 @@ end
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
         EntryPoint()
+    BlzSetAbilityRealLevelFieldBJ(BlzGetUnitAbility(nil, FourCC("A00A")), ABILITY_RLF_COOLDOWN, 0, 10.00)
 end
 
 function InitTrig_EntryPoint()

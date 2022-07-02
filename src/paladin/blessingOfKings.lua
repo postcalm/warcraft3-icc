@@ -13,8 +13,6 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if not Paladin.hero:LoseMana{percent=6} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
     end
@@ -45,6 +43,14 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
+    Ability(
+            BLESSING_OF_KINGS,
+            "Благословение королей (Z)",
+            "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)

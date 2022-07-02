@@ -16,8 +16,6 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not Paladin.hero:LoseMana{percent=7} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
     end
@@ -39,6 +37,15 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
+    Ability(
+            BLESSING_OF_SANCTUARY,
+            "Благословение неприкосновенности (X)",
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)

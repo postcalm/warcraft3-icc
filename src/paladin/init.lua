@@ -10,12 +10,12 @@ function Paladin.Init(location)
     --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
-    Paladin.hero:SetMana(800)
+    Paladin.hero:SetBaseMana(4394)
+    Paladin.hero:SetMaxMana(4394, true)
 
     Paladin.hero:AddAbilities(
             DIVINE_SHIELD,
             CONSECRATION,
-            CONSECRATION_TR,
             HAMMER_RIGHTEOUS,
             JUDGEMENT_OF_LIGHT_TR,
             JUDGEMENT_OF_WISDOM_TR,

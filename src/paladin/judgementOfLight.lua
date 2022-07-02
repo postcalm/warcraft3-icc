@@ -19,7 +19,6 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
@@ -45,6 +44,15 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
+    Ability(
+            JUDGEMENT_OF_LIGHT_TR,
+            "Правосудие света",
+            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего."
+    )
+    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
+    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
