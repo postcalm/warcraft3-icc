@@ -76,7 +76,7 @@ ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
 ItemsSpells["MP_50K"]             = { int = FourCC('A00W'), str = 'A00W' }
 
 
---- Метер. Равен 20 игровым единицам
+--- Метр. Равен 20 игровым единицам
 METER = 20
 
 --- Сила атаки
@@ -157,8 +157,7 @@ WHIRLWIND               = FourCC("A005")
 
 --Paladin
 DIVINE_SHIELD           = FourCC("AHds")
-CONSECRATION            = FourCC("A009")
-CONSECRATION_TR         = FourCC("A00A")
+CONSECRATION            = FourCC("A00A")
 HAMMER_RIGHTEOUS        = FourCC("A00B")
 BLESSING_OF_KINGS       = FourCC("A00C")
 BLESSING_OF_SANCTUARY   = FourCC("A00H")
@@ -237,6 +236,53 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
+
+
+--- Класс для конфигурирования способностей
+---@param ability ability Способность
+---@param tooltip string Название способности
+---@param text string Описание способности
+Ability = {}
+Ability.__index = Ability
+
+setmetatable(Ability, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+
+function Ability:_init(ability, tooltip, text)
+    self.ability = ability
+    self.tooltip = tooltip
+    self.text = text
+    self:SetTooltip()
+    self:SetText()
+end
+
+--- Установить название для способности
+---@param tooltip string
+---@return nil
+function Ability:SetTooltip(tooltip)
+    local t = tooltip or self.tooltip
+    BlzSetAbilityTooltip(self.ability, t, 0)
+end
+
+--- Установить описание для способности
+---@param text string
+---@return nil
+function Ability:SetText(text)
+    local t = text or self.text
+    BlzSetAbilityExtendedTooltip(self.ability, t, 0)
+end
+
+--- Вернуть идентификатор способности
+---@return ability
+function Ability:GetId()
+    return self.ability
+end
 
 
 --- Класс для создания эффектов на юнитах
@@ -472,6 +518,48 @@ end
 --- Уничтожает триггер
 function EventsUnit:Destroy()
     Events.Destroy(self)
+end
+
+
+Frame = {}
+Frame.__index = Frame
+
+setmetatable(Frame, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function Frame:_init()
+
+end
+
+function StartFrameCD(cd)
+    local period = 0.05
+    local bar = BlzCreateFrameByType("STATUSBAR", "", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
+    BlzFrameSetAbsPoint(bar, FRAMEPOINT_CENTER, 0.3, 0.15)
+    -- Screen Size does not matter but has to be there
+    BlzFrameSetSize(bar, 0.00001, 0.00001)
+
+    -- Models don't care about Frame Size, But world Object Models are huge . To use them in the UI one has to scale them down alot.
+    BlzFrameSetScale(bar, 1)
+    BlzFrameSetModel(bar, "ui/feedback/progressbar/timerbar.mdx", 0)
+
+    local amount = period * 100 / cd
+    local full = 0
+
+    BlzFrameSetValue(bar, 0)
+    TimerStart(CreateTimer(), period, true, function()
+        full = full + amount
+        BlzFrameSetValue(bar, full)
+        if full >= 100 then
+            DestroyTimer(GetExpiredTimer())
+            BlzDestroyFrame(bar)
+            full = 0
+        end
+    end)
 end
 
 --- Created by meiso.
@@ -718,6 +806,7 @@ function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
     local f = face or 0
+    self.basemana = 0
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
@@ -764,6 +853,7 @@ function Unit:DealMagicDamage(target, damage)
     if type(target) == "table" then u = target:GetId() end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    TextTag(damage, self.unit):Preset("spell")
     BattleSystem.disable = false
 end
 
@@ -782,7 +872,6 @@ function Unit:DealMagicDamageLoc(args)
         local u = GetEnumUnit()
         if self:IsEnemy(u) then
             self:DealMagicDamage(u, args.damage)
-            TextTag(args.damage, u):Preset("spell")
         end
     end
     ForGroupBJ(group, act)
@@ -856,6 +945,35 @@ function Unit:CastToTarget(spell, target)
     IssueTargetOrder(self.unit, spell, u)
 end
 
+--- Установить затраты маны на способность (от базовой маны)
+---@param ability ability
+---@param manacost integer Затраты в процентах
+---@return nil
+function Unit:SetAbilityManacost(ability, manacost)
+    local factor = 100
+    if manacost <= 1 then factor = 1 end
+    local m = (self.basemana * (manacost / factor)) // 1
+    BlzSetAbilityIntegerLevelField(
+            BlzGetUnitAbility(self:GetId(), ability),
+            ABILITY_ILF_MANA_COST,
+            0,
+            m
+    )
+end
+
+--- Установить время восстановления у способности
+---@param ability ability
+---@param cooldown real
+---@return nil
+function Unit:SetAbilityCooldown(ability, cooldown)
+    BlzSetAbilityRealLevelField(
+            BlzGetUnitAbility(self:GetId(), ability),
+            ABILITY_RLF_COOLDOWN,
+            0,
+            cooldown
+    )
+end
+
 -- Mana
 
 --- Потратить указанное количество маны
@@ -898,6 +1016,14 @@ function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
+--- Установить базовое количество маны
+---@param value integer
+---@return nil
+function Unit:SetBaseMana(value)
+    self.basemana = value
+    self:SetMana(value)
+end
+
 --- Установить максимальное значение маны
 ---@param value real
 ---@param full boolean
@@ -917,6 +1043,12 @@ end
 ---@return real
 function Unit:GetCurrentMana()
     return GetUnitState(self.unit, UNIT_STATE_MANA)
+end
+
+--- Получить базовое количество маны
+---@return integer
+function Unit:GetBaseMana()
+    return self.basemana
 end
 
 -- Health
@@ -1997,7 +2129,6 @@ function SaveSystem.DefineAbilitiesPaladin()
     SaveSystem.abilities = {
         DIVINE_SHIELD,
         CONSECRATION,
-        CONSECRATION_TR,
         HAMMER_RIGHTEOUS,
         JUDGEMENT_OF_LIGHT_TR,
         JUDGEMENT_OF_WISDOM_TR,
@@ -3200,8 +3331,6 @@ function Paladin.AvengersShield()
 
     local exclude_targets = {}
 
-    if not Paladin.hero:LoseMana{percent=26} then return end
-
     local function AddTarget(target_, exc)
         table.insert(exc, target_:GetId())
     end
@@ -3259,6 +3388,15 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
+    Ability(
+            AVENGERS_SHIELD,
+            "Щит мстителя (C)",
+            "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
+            "Щит затем перескакивает на других находящихся поблизости противников. " ..
+            "Способен воздействовать на 3 цели."
+    )
+    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
+    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
@@ -3279,8 +3417,6 @@ end
 function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
-
-    if not Paladin.hero:LoseMana{percent=6} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
@@ -3312,6 +3448,14 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
+    Ability(
+            BLESSING_OF_KINGS,
+            "Благословение королей (Z)",
+            "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
@@ -3330,8 +3474,6 @@ end
 function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
-
-    if not Paladin.hero:LoseMana{percent=5} then return end
 
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
@@ -3353,7 +3495,15 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    local event = EventsPlayer(PLAYER_1)
+    Ability(
+            BLESSING_OF_MIGHT,
+            "Благословение могущества (V)",
+            "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
+
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)
@@ -3378,8 +3528,6 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not Paladin.hero:LoseMana{percent=7} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
     end
@@ -3401,6 +3549,15 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
+    Ability(
+            BLESSING_OF_SANCTUARY,
+            "Благословение неприкосновенности (X)",
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+            "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
@@ -3424,8 +3581,6 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if not Paladin.hero:LoseMana{percent=5} then return end
-
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
     end
@@ -3444,6 +3599,14 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
+    Ability(
+            BLESSING_OF_WISDOM,
+            "Благословение мудрости (C)",
+            "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
+    )
+    Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
+    Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
@@ -3479,8 +3642,6 @@ function Paladin.DisableConsecration()
 end
 
 function Paladin.Consecration()
-    if not Paladin.hero:LoseMana{percent=22} then return end
-
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
     local timer = CreateTimer()
@@ -3490,10 +3651,19 @@ function Paladin.Consecration()
 end
 
 function Paladin.IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION_TR
+    return GetSpellAbilityId() == CONSECRATION
 end
 
 function Paladin.InitConsecration()
+    Ability(
+            CONSECRATION,
+            "Освящение (R)",
+            "Освящает участок земли, на котором стоит паладин, " ..
+            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
+    )
+    Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
+    Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)
@@ -3512,12 +3682,12 @@ function Paladin.Init(location)
     --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
-    Paladin.hero:SetMana(800)
+    Paladin.hero:SetBaseMana(4394)
+    Paladin.hero:SetMaxMana(4394, true)
 
     Paladin.hero:AddAbilities(
             DIVINE_SHIELD,
             CONSECRATION,
-            CONSECRATION_TR,
             HAMMER_RIGHTEOUS,
             JUDGEMENT_OF_LIGHT_TR,
             JUDGEMENT_OF_WISDOM_TR,
@@ -3561,7 +3731,6 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
@@ -3587,6 +3756,15 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
+    Ability(
+            JUDGEMENT_OF_LIGHT_TR,
+            "Правосудие света (D)",
+            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
+    )
+    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
+    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
@@ -3622,7 +3800,6 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    if not Paladin.hero:LoseMana{percent=5} then return end
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
@@ -3646,6 +3823,15 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
+    Ability(
+            JUDGEMENT_OF_WISDOM_TR,
+            "Правосудие мудрости (F)",
+            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
+    )
+    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
+    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
 
@@ -3662,8 +3848,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    if not Paladin.hero:LoseMana{percent=6} then return end
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -3674,6 +3859,15 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
+    Ability(
+            SHIELD_OF_RIGHTEOUSNESS,
+            "Щит праведности (W)",
+            "Мощный удар щитом, наносящий урон от светлой магии. " ..
+            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
+    )
+    Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
+    Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
@@ -3710,7 +3904,9 @@ end
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
+    StartFrameCD(1.5)
     local target = Unit(GetSpellTargetUnit())
+    TriggerSleepAction(1.5)
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
@@ -3722,7 +3918,7 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
     event:AddAction(Priest.CastFlashHeal)
@@ -3771,7 +3967,7 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
     event:AddAction(Priest.CastRenew)
@@ -3808,12 +4004,12 @@ function TestEntryPoint()
     -- Манекены
     DummyForHealing(Location(300., 200.))
     DummyForDPS(Location(-400., 200))
+
 end
 
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
         EntryPoint()
-    BlzSetAbilityRealLevelFieldBJ(BlzGetUnitAbility(nil, FourCC("A00A")), ABILITY_RLF_COOLDOWN, 0, 10.00)
 end
 
 function InitTrig_EntryPoint()

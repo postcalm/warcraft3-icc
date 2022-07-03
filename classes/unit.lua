@@ -70,6 +70,7 @@ function Unit:DealMagicDamage(target, damage)
     if type(target) == "table" then u = target:GetId() end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    TextTag(damage, self.unit):Preset("spell")
     BattleSystem.disable = false
 end
 
@@ -88,7 +89,6 @@ function Unit:DealMagicDamageLoc(args)
         local u = GetEnumUnit()
         if self:IsEnemy(u) then
             self:DealMagicDamage(u, args.damage)
-            TextTag(args.damage, u):Preset("spell")
         end
     end
     ForGroupBJ(group, act)

@@ -3,6 +3,44 @@
 Игрок 1
 }
 
+STRING 3
+{
+ICC
+}
+
+STRING 4
+{
+Не важно
+}
+
+STRING 5
+{
+Описание отсутствует
+}
+
+STRING 6
+{
+meiso, IRMessiah
+}
+
+STRING 7
+{
+#ненавижусоздаватьгребанныекарты
+#приключениена15минут
+}
+
+STRING 13
+// Разрушаемые объекты: B001 (stairs), Name (Название)
+{
+stairs
+}
+
+STRING 14
+// Декорации: D000 (pillar), Name (Название)
+{
+pillar
+}
+
 STRING 22
 // Войска: h000 (Bone Spike), Name (Название)
 {
@@ -94,21 +132,20 @@ armor_500
 }
 
 STRING 47
-// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+// Способности: A00B (Hammer of the Righteous), Hotkey (Горячая клавиша: используется)
 {
 Q
-}
-
-STRING 51
-// Способности: A009 (Consecration), Name (Название)
-{
-Consecration
 }
 
 STRING 57
 // Способности: A00B (Hammer of the Righteous), Name (Название)
 {
 Hammer of the Righteous
+}
+
+STRING 65
+{
+Игрок 2
 }
 
 STRING 66
@@ -136,7 +173,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00A (Concecration (trigg)), Hotkey (Горячая клавиша: используется)
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -159,20 +196,14 @@ STRING 98
 Crusader Aura
 }
 
-STRING 99
-// Способности: A00A (Concecration (trigg)), Name (Название)
-{
-Concecration (trigg)
-}
-
 STRING 102
-// Способности: A00A (Concecration (trigg)), Tip (Подсказка: используется, нормальная)
+// Способности: A00A (Concecration), Tip (Подсказка: используется, нормальная)
 {
 Освящение
 }
 
 STRING 103
-// Способности: A00A (Concecration (trigg)), Ubertip (Подсказка: используется, подробная)
+// Способности: A00A (Concecration), Ubertip (Подсказка: используется, подробная)
 {
 Освящение
 }
@@ -189,12 +220,6 @@ STRING 114
 decrease_dmg
 }
 
-STRING 116
-// Способности: A00C (Blessing of Kings), Ubertip (Подсказка: используется, подробная)
-{
-Благославляет дружественную цель, повышая все ее характеристики на 10% на 10 минут.
-}
-
 STRING 117
 // Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
 {
@@ -202,7 +227,7 @@ X
 }
 
 STRING 118
-// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
+// Способности: AHds (Божественный щит), Hotkey (Горячая клавиша: используется)
 {
 Z
 }
@@ -411,12 +436,6 @@ STRING 158
 Shield of Righteousness
 }
 
-STRING 159
-// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
-{
-Щит праведности (|cffffcc00C|r)
-}
-
 STRING 160
 // Способности: A00R (Shield of Righteousness), Ubertip (Подсказка: используется, подробная)
 {
@@ -433,6 +452,27 @@ STRING 162
 // Способности: A004 (Avenger's Shield), Tip (Подсказка: используется, нормальная)
 {
 Щит мстителя (|cffffcc00C|r)
+}
+
+STRING 165
+{
+Игрок 3
+}
+
+STRING 166
+{
+Введите -save _название_ для сохранения персонажа
+Введите -load _название_ для загрузки персонажа
+}
+
+STRING 167
+{
+Король-лич
+}
+
+STRING 170
+{
+Силы света
 }
 
 STRING 171
@@ -460,7 +500,7 @@ E
 }
 
 STRING 185
-// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
 {
 W
 }
@@ -549,6 +589,11 @@ STRING 205
 (morphed)
 }
 
+STRING 206
+{
+Enter -new "class name", e.c. -new paladin
+}
+
 STRING 207
 // Войска: Hpal (Паладин), Propernames (Имена собственные)
 {
@@ -591,23 +636,51 @@ STRING 214
 Круг исцеления (|cffffcc00W|r)
 }
 
-STRING 215
-{
-TestMap
-}
-
 STRING 216
+// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
 {
-Не важно
+Щит праведности (|cffffcc00V|r)
 }
 
 STRING 217
+// Способности: A00A (Concecration), Name (Название)
 {
-Описание отсутствует
+Concecration
 }
 
 STRING 218
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
 {
-Неизвестно
+X
+}
+
+STRING 219
+// Способности: A00L (Spellbook_Paladin), Tip (Подсказка: используется, нормальная)
+{
+Книга заклинаний (X)
+}
+
+STRING 220
+// Способности: AHds (Божественный щит), Unhotkey (Горячая клавиша: не используется)
+{
+Z
+}
+
+STRING 221
+// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
+{
+Z
+}
+
+STRING 222
+// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 223
+// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+{
+W
 }
 

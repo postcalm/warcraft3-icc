@@ -1,7 +1,9 @@
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
+    StartFrameCD(1.5)
     local target = Unit(GetSpellTargetUnit())
+    TriggerSleepAction(1.5)
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
@@ -13,7 +15,7 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
     event:AddAction(Priest.CastFlashHeal)

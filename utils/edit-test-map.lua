@@ -1,4 +1,4 @@
 require 'lfs'
 
-BuildTestMap = true
+EditTestMap = true
 dofile(lfs.currentdir() .. [[\utils\build.lua]])

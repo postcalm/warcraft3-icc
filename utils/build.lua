@@ -88,24 +88,23 @@ end
 customCode:write(param.tag)
 customCode:close()
 
+ReplaceInMap(param.map)
+ReplaceInMap(param.test_map)
+
 -- запускаем игру
 if IsRunGame then
-    ReplaceInMap(param.map)
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'Warcraft III.exe" -loadfile "' .. param.current_dir .. '\\' .. param.map .. '"')
 end
 
 -- запускаем редактор
 if IsRunEditor then
-    ReplaceInMap(param.map)
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.map .. '"')
 end
 
 if IsTest then
-    ReplaceInMap(param.test_map)
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'Warcraft III.exe" -loadfile "' .. param.current_dir .. '\\' .. param.test_map .. '"')
 end
 
-if BuildTestMap then
-    ReplaceInMap(param.test_map)
-    --os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.test_map .. '"')
+if EditTestMap then
+    os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.test_map .. '"')
 end

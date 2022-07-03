@@ -485,6 +485,48 @@ function EventsUnit:Destroy()
     Events.Destroy(self)
 end
 
+
+Frame = {}
+Frame.__index = Frame
+
+setmetatable(Frame, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function Frame:_init()
+
+end
+
+function StartFrameCD(cd)
+    local period = 0.05
+    local bar = BlzCreateFrameByType("STATUSBAR", "", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
+    BlzFrameSetAbsPoint(bar, FRAMEPOINT_CENTER, 0.3, 0.15)
+    -- Screen Size does not matter but has to be there
+    BlzFrameSetSize(bar, 0.00001, 0.00001)
+
+    -- Models don't care about Frame Size, But world Object Models are huge . To use them in the UI one has to scale them down alot.
+    BlzFrameSetScale(bar, 1)
+    BlzFrameSetModel(bar, "ui/feedback/progressbar/timerbar.mdx", 0)
+
+    local amount = period * 100 / cd
+    local full = 0
+
+    BlzFrameSetValue(bar, 0)
+    TimerStart(CreateTimer(), period, true, function()
+        full = full + amount
+        BlzFrameSetValue(bar, full)
+        if full >= 100 then
+            DestroyTimer(GetExpiredTimer())
+            BlzDestroyFrame(bar)
+            full = 0
+        end
+    end)
+end
+
 --- Created by meiso.
 
 Line = {}
@@ -776,6 +818,7 @@ function Unit:DealMagicDamage(target, damage)
     if type(target) == "table" then u = target:GetId() end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
+    TextTag(damage, self.unit):Preset("spell")
     BattleSystem.disable = false
 end
 
@@ -794,7 +837,6 @@ function Unit:DealMagicDamageLoc(args)
         local u = GetEnumUnit()
         if self:IsEnemy(u) then
             self:DealMagicDamage(u, args.damage)
-            TextTag(args.damage, u):Preset("spell")
         end
     end
     ForGroupBJ(group, act)
@@ -3313,7 +3355,7 @@ end
 function Paladin.InitAvengersShield()
     Ability(
             AVENGERS_SHIELD,
-            "Щит мстителя",
+            "Щит мстителя (C)",
             "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
             "Способен воздействовать на 3 цели."
@@ -3681,7 +3723,7 @@ end
 function Paladin.InitJudgementOfLight()
     Ability(
             JUDGEMENT_OF_LIGHT_TR,
-            "Правосудие света",
+            "Правосудие света (D)",
             "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
     )
@@ -3748,7 +3790,7 @@ end
 function Paladin.InitJudgementOfWisdom()
     Ability(
             JUDGEMENT_OF_WISDOM_TR,
-            "Правосудие мудрости",
+            "Правосудие мудрости (F)",
             "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
     )
@@ -3784,7 +3826,7 @@ end
 function Paladin.InitShieldOfRighteousness()
     Ability(
             SHIELD_OF_RIGHTEOUSNESS,
-            "Щит праведности",
+            "Щит праведности (W)",
             "Мощный удар щитом, наносящий урон от светлой магии. " ..
             "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
     )
@@ -3827,7 +3869,9 @@ end
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
+    StartFrameCD(1.5)
     local target = Unit(GetSpellTargetUnit())
+    TriggerSleepAction(1.5)
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
@@ -3839,7 +3883,7 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    local event = EventsPlayer(PLAYER_1)
+    local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
     event:AddAction(Priest.CastFlashHeal)
@@ -3925,6 +3969,7 @@ function TestEntryPoint()
     -- Манекены
     DummyForHealing(Location(300., 200.))
     DummyForDPS(Location(-400., 200))
+
 end
 
 --CUSTOM_CODE
@@ -4050,7 +4095,7 @@ function config()
     SetPlayers(1)
     SetTeams(1)
     SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
-    DefineStartLocation(0, 960.0, -64.0)
+    DefineStartLocation(0, 0.0, -1152.0)
     InitCustomPlayerSlots()
     SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
     InitGenericPlayerSlots()
