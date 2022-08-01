@@ -1,7 +1,7 @@
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
-    StartFrameCD(1.5)
+    Frame:CastBar(1.5)
     local target = Unit(GetSpellTargetUnit())
     TriggerSleepAction(1.5)
     --TODO: скалировать от стат
