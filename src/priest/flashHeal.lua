@@ -1,9 +1,10 @@
 -- Copyright (c) 2022 Kodpi
 
 function Priest.CastFlashHeal()
-    Frame:CastBar(1.5)
+    local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
-    TriggerSleepAction(1.5)
+    Frame:CastBar(cast_time)
+    TriggerSleepAction(cast_time)
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end

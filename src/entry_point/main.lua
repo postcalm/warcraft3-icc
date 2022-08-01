@@ -13,5 +13,5 @@ function EntryPoint()
     Paladin.Init()
 
     -- Манекены
-    DummyForHealing()
+    --DummyForHealing()
 end

@@ -10,18 +10,24 @@ setmetatable(Frame, {
     end,
 })
 
-function Frame:_init()
-    self.frame = BlzCreateFrameByType("STATUSBAR", "", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
+---@param name string Название fdf-шаблона
+---@param owner framehandle Хэндл родителя
+---@param simple boolean Простой фрейм
+function Frame:_init(name, owner, simple)
+    if simple then
+        self.frame = BlzCreateSimpleFrame(name, owner, 0)
+    else
+        self.frame = BlzCreateFrame(name, owner, 0)
+    end
 end
 
 function Frame:CastBar(cd)
     local period = 0.05
     self.frame = BlzCreateFrameByType("STATUSBAR", "", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
-    -- Screen Size does not matter but has to be there
+    -- размер экрана не имеет значения, но должен быть
     self:SetSize(0.00001, 0.00001)
 
-    -- Models don't care about Frame Size, But world Object Models are huge . To use them in the UI one has to scale them down alot.
     self:SetScale(1)
     self:SetModel("ui/feedback/progressbar/timerbar.mdx")
 
