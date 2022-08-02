@@ -1,0 +1,20 @@
+// импорты
+
+IncludeFile "",
+
+// шаблон для создания фреймов
+
+Frame "BACKDROP" "frame_name" {
+	
+	// использовать кастомный id родителя
+	UseActiveContext,
+	
+	// размеры
+	Width 0.01,
+	Height 0.01,
+	
+	// позиционирование
+	Anchor ,
+	SetAllPoints ,
+	SetPoint ,
+}

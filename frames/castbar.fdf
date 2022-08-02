@@ -1,0 +1,13 @@
+// шаблон для каст-баров
+
+Frame "STATUSBAR" "Castbar" {
+	DecorateFileNames,
+	Width 0.00001,
+	Height 0.00001,
+	
+	Frame "TEXT" "CastbarLabel" {
+		DecorateFileNames,
+		SetPoint CENTER, "Castbar", CENTER, 0.0, 0.0,
+		Text "castbar_label",
+	}
+}

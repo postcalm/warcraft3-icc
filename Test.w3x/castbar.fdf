@@ -1,0 +1,11 @@
+// шаблон для каст-баров
+
+Frame "STATUSBAR" "Castbar" {
+	Width 0.00001,
+	Height 0.00001,
+	
+	Frame "TEXT" "CastbarLabel" {
+		SetPoint CENTER, "Castbar", CENTER, 0.0, 0.0,
+		Text "castbar_label",
+	}
+}
