@@ -201,16 +201,23 @@ function zip(...)
     return array
 end
 
+--- Загружает toc-файл
+---@param file string Путь до toc-файла
+---@return nil
+function loadTOCFile(file)
+    if BlzLoadTOCFile(file) then
+        print("load", file)
+    else
+        print("Failed to load: ", file)
+    end
+end
+
 --- Округляет число
 ---@param number number
 ---@return number
 function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
-
---function convertLength(len)
---    return round(round(len) / 100)
---end
 
 
 --Bosses
@@ -591,12 +598,13 @@ end
 --- Создать каст-бар
 ---@param cd real Время каста
 ---@return nil
-function Frame:CastBar(cd)
+function Frame:CastBar(cd, spell, unit)
     local period = 0.05
-    self.frame = BlzCreateFrameByType("STATUSBAR", "", self:GetOriginFrame(), "", 0)
+    self.drop = false
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
+    local child = BlzGetFrameByName("CastbarLabel", 0)
+    BlzFrameSetText(child, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
-    -- размер границ фрейма не имеет значения, но должен быть
-    self:SetSize(0.00001, 0.00001)
 
     self:SetScale(1)
     self:SetModel("ui/feedback/progressbar/timerbar.mdx")
@@ -604,11 +612,18 @@ function Frame:CastBar(cd)
     local amount = period * 100 / cd
     local full = 0
 
+    local point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+    local new_point
+
     -- хак, чтобы каст бар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
+        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
         self:SetValue(full)
+        if not point:atPoint(new_point) then
+            self.drop = true
+        end
         if full >= 100 or self.drop then
             DestroyTimer(GetExpiredTimer())
             self:Destroy()
@@ -699,6 +714,10 @@ function Frame:Drop()
     self.drop = true
 end
 
+function Frame:IsDrop()
+    return self.drop
+end
+
 --- Удалить фрейм
 ---@return nil
 function Frame:Destroy()
@@ -785,6 +804,9 @@ function Point:get3DPoint()
     return { self.X, self.Y, self.Z }
 end
 
+--- Проверяет равны ли указанные точки
+---@param point Point
+---@return boolean
 function Point:atPoint(point)
     local inaccuracy = 30.
     if math.abs(self.X - point.X) <= inaccuracy and
@@ -1324,6 +1346,32 @@ end
 ---@return location
 function Unit:GetLoc()
     return GetUnitLoc(self.unit)
+end
+
+function Unit:DropCastIfMoved(time)
+    local drop = false
+
+    local function check(point)
+        local n = 0.
+        while n <= time do
+            local new_point = Point(GetLocationX(self:GetLoc()), GetLocationX(self:GetLoc()))
+            print(point:atPoint(new_point))
+            if not point:atPoint(new_point) then
+                drop = true
+                break
+            end
+            n = n + 0.1
+            print(n)
+            TriggerSleepAction(0.1)
+        end
+        drop = false
+    end
+
+    local point = Point(GetLocationX(self:GetLoc()), GetLocationX(self:GetLoc()))
+
+    StartThread(check(point))
+    --TriggerSleepAction(time)
+    return drop
 end
 
 -- Animation
@@ -4049,8 +4097,12 @@ end
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
-    Frame:CastBar(cast_time)
+    Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
     TriggerSleepAction(cast_time)
+    if Frame:IsDrop() then
+        print(Frame:IsDrop())
+        return
+    end
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
@@ -4138,6 +4190,9 @@ end
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()
+    -- Загрузка шаблонов фреймов
+    loadTOCFile("templates.toc")
+
     -- Механики
     BattleSystem.Init()
 

@@ -4,17 +4,77 @@ IncludeFile "",
 
 // шаблон для создания фреймов
 
-Frame "BACKDROP" "frame_name" {
+Frame "BACKDROP" "frame_name_template" {
+	
+	// поиск имен. рекомендуется использовать всегда
+	DecorateFileNames,
 	
 	// использовать кастомный id родителя
 	UseActiveContext,
+	
+	// игнорировать события мыши
+	LayerStyle "IGNORETRACKEVENTS",
 	
 	// размеры
 	Width 0.01,
 	Height 0.01,
 	
 	// позиционирование
-	Anchor ,
-	SetAllPoints ,
-	SetPoint ,
+	// абсолютное
+	Anchor CENTER, 0.1, 0.1,
+	// все точки родителя
+	SetAllPoints,
+	// позииционирование относительно родителя
+	SetPoint CENTER, "Castbar", RIGHT, 0.0, 0.0,
+	
+	// основное изображение
+	BackdropBackground "path\to\file",
+	// сужаем картинку с разных сторон (right, top, bottom, left)
+	BackdropBackgroundInsets 0.005, 0.005, 0.005, 0.005,
+	
+	// включает режим Tile mode
+	BackdropTileBackground,
+	// размер tile
+	BackdropBackgroundSize 0.1,
+	
+	// прозрачность картинки BackdropBackground
+	BackdropBlendAll,
+	// общий файл рамок
+	BackdropEdgeFile "MultiboardBorder",
+	// одиночные файлы рамок
+	BackdropBottomFile "path\to\file",
+	BackdropLeftFile "path\to\file",
+	BackdropRightFile "path\to\file",
+	BackdropTopFile "path\to\file",
+	
+	// устанавливает границы
+	// углы границ
+	BackdropCornerFile "UI\Widgets\ButtonCorners.blp",
+	// какие границы отобразить
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	// размер границ
+	BackdropCornerSize 0.0125,
+	
+	// неизвестно
+	// BackdropHalfSides,
+	
+	// зеркально переворачивает изображение
+	BackdropMirrored,
+	
+}
+
+// импорт настроек другого шаблона
+Frame "FRAME_NAME" "frame_name" INHERITS "frame_name_template" {
+}
+
+// импорт настроек другого шаблона с потомками
+Frame "FRAME_NAME" "frame_name" INHERITS WITHCHILDREN "frame_name_template" {
+}
+
+// текстура фрейма
+Texture "frame_name" {
+}
+
+// текст фрейма
+String "frame_name" {
 }

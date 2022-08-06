@@ -22,6 +22,17 @@ function zip(...)
     return array
 end
 
+--- Загружает toc-файл
+---@param file string Путь до toc-файла
+---@return nil
+function loadTOCFile(file)
+    if BlzLoadTOCFile(file) then
+        print("load", file)
+    else
+        print("Failed to load: ", file)
+    end
+end
+
 --- Округляет число
 ---@param number number
 ---@return number

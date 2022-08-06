@@ -7,7 +7,7 @@ Frame "STATUSBAR" "Castbar" {
 	
 	Frame "TEXT" "CastbarLabel" {
 		DecorateFileNames,
-		SetPoint CENTER, "Castbar", CENTER, 0.0, 0.0,
+		SetPoint CENTER, "Castbar", RIGHT, 0.09, 0.01,
 		Text "castbar_label",
 	}
 }

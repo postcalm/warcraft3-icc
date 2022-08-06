@@ -25,6 +25,9 @@ function Point:get3DPoint()
     return { self.X, self.Y, self.Z }
 end
 
+--- Проверяет равны ли указанные точки
+---@param point Point
+---@return boolean
 function Point:atPoint(point)
     local inaccuracy = 30.
     if math.abs(self.X - point.X) <= inaccuracy and

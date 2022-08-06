@@ -30,12 +30,13 @@ end
 --- Создать каст-бар
 ---@param cd real Время каста
 ---@return nil
-function Frame:CastBar(cd)
+function Frame:CastBar(cd, spell, unit)
     local period = 0.05
-    self.frame = BlzCreateFrameByType("STATUSBAR", "", self:GetOriginFrame(), "", 0)
+    self.drop = false
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
+    local child = BlzGetFrameByName("CastbarLabel", 0)
+    BlzFrameSetText(child, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
-    -- размер границ фрейма не имеет значения, но должен быть
-    self:SetSize(0.00001, 0.00001)
 
     self:SetScale(1)
     self:SetModel("ui/feedback/progressbar/timerbar.mdx")
@@ -43,11 +44,18 @@ function Frame:CastBar(cd)
     local amount = period * 100 / cd
     local full = 0
 
+    local point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+    local new_point
+
     -- хак, чтобы каст бар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
+        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
         self:SetValue(full)
+        if not point:atPoint(new_point) then
+            self.drop = true
+        end
         if full >= 100 or self.drop then
             DestroyTimer(GetExpiredTimer())
             self:Destroy()
@@ -136,6 +144,10 @@ end
 ---@return nil
 function Frame:Drop()
     self.drop = true
+end
+
+function Frame:IsDrop()
+    return self.drop
 end
 
 --- Удалить фрейм

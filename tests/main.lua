@@ -1,6 +1,9 @@
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()
+    -- Загрузка шаблонов фреймов
+    loadTOCFile("templates.toc")
+
     -- Механики
     BattleSystem.Init()
 
