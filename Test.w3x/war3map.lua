@@ -586,7 +586,7 @@ function Frame:CastBar(cd, spell, unit)
         full = full + amount
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
         self:SetValue(full)
-        if not point:atPoint(new_point) then
+        if not point:atPoint(new_point, false) then
             self.drop = true
         end
         if full >= 100 or self.drop then
@@ -772,8 +772,9 @@ end
 --- Проверяет равны ли указанные точки
 ---@param point Point
 ---@return boolean
-function Point:atPoint(point)
-    local inaccuracy = 30.
+function Point:atPoint(point, inaccuracy)
+    if not inaccuracy then inaccuracy = 0
+    else inaccuracy = 30. end
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true

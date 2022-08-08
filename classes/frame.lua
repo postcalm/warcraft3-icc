@@ -53,7 +53,7 @@ function Frame:CastBar(cd, spell, unit)
         full = full + amount
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
         self:SetValue(full)
-        if not point:atPoint(new_point) then
+        if not point:atPoint(new_point, false) then
             self.drop = true
         end
         if full >= 100 or self.drop then
