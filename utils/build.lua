@@ -88,6 +88,14 @@ end
 customCode:write(param.tag)
 customCode:close()
 
+local skip_files = {"fdf.xml", "template.fdf"}
+CopyFiles(param.current_dir .. [[\frames]],
+          param.current_dir .. param.map,
+          skip_files)
+CopyFiles(param.current_dir .. [[\frames]],
+          param.current_dir .. param.test_map,
+          skip_files)
+
 ReplaceInMap(param.map)
 ReplaceInMap(param.test_map)
 

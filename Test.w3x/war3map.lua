@@ -1313,32 +1313,6 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
-function Unit:DropCastIfMoved(time)
-    local drop = false
-
-    local function check(point)
-        local n = 0.
-        while n <= time do
-            local new_point = Point(GetLocationX(self:GetLoc()), GetLocationX(self:GetLoc()))
-            print(point:atPoint(new_point))
-            if not point:atPoint(new_point) then
-                drop = true
-                break
-            end
-            n = n + 0.1
-            print(n)
-            TriggerSleepAction(0.1)
-        end
-        drop = false
-    end
-
-    local point = Point(GetLocationX(self:GetLoc()), GetLocationX(self:GetLoc()))
-
-    StartThread(check(point))
-    --TriggerSleepAction(time)
-    return drop
-end
-
 -- Animation
 
 --- Добавить тэг анимации
@@ -4062,12 +4036,13 @@ end
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+
+    -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
     TriggerSleepAction(cast_time)
-    if Frame:IsDrop() then
-        print(Frame:IsDrop())
-        return
-    end
+    -- дропаем каст заклинания, если кастбар был сброшен
+    if Frame:IsDrop() then return end
+
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
@@ -4137,6 +4112,9 @@ end
 
 -- Точка входа для инициализации всего
 function EntryPoint()
+    -- Загрузка шаблонов фреймов
+    loadTOCFile("templates.toc")
+
     -- Механики
     BattleSystem.Init()
 

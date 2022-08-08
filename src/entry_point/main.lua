@@ -3,7 +3,7 @@
 function EntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    
+
     -- Механики
     BattleSystem.Init()
 

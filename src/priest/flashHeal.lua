@@ -3,9 +3,13 @@
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+
+    -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
     TriggerSleepAction(cast_time)
+    -- дропаем каст заклинания, если кастбар был сброшен
     if Frame:IsDrop() then return end
+
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     if not Priest.hero:LoseMana{percent=18} then return end
