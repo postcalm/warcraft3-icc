@@ -3,6 +3,7 @@
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
+    Frame:HeroChoices()
 
     -- Механики
     BattleSystem.Init()

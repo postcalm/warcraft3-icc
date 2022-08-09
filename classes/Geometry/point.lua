@@ -27,6 +27,7 @@ end
 
 --- Проверяет равны ли указанные точки
 ---@param point Point
+---@param inaccuracy boolean Учитывать ли погрешность
 ---@return boolean
 function Point:atPoint(point, inaccuracy)
     if not inaccuracy then inaccuracy = 0

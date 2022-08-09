@@ -1,0 +1,22 @@
+
+Frame "BACKDROP" "HeroChoices" {
+	DecorateFileNames,
+	
+	Width 0.5,
+	Height 0.3,
+	
+	BackdropTileBackground,
+	BackdropBackgroundSize 0.1,
+	
+	BackdropBackground "QuestDialogNormalBackground",
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	BackdropCornerSize 0.0125,
+	BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
+	BackdropEdgeFile "QuestDialogNormalBorder",
+	
+	Frame "TEXT" "Choice" {
+		DecorateFileNames,
+		SetPoint CENTER, "HeroChoices", CENTER, 0.01, 0.0,
+		Text "choice_label",
+	}
+}

@@ -4,7 +4,7 @@ require 'utils/tools'
 local param = {
     game_dirs  = { [[E:\Warcraft III\x86_64]], [[E:\Games\Warcraft III\x86_64]] }, -- папка с игрой
     map        = [[\ICC.w3x]], -- папка с картой
-    test_map   = [[\Test.w3x]],
+    test_map   = [[\Test.w3x]], -- карта для тестов
     customCode = [[\custom-code.lua]], -- файл, в который собирается весь код
     patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
     files      = { -- порядок сборки файлов

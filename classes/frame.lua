@@ -64,6 +64,11 @@ function Frame:CastBar(cd, spell, unit)
     end)
 end
 
+function Frame:HeroChoices()
+    self.frame = BlzCreateFrame("HeroChoices", self:GetOriginFrame(), 0, 0)
+    self:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
+end
+
 -- Setters
 
 --- Установить уровень приоритетности

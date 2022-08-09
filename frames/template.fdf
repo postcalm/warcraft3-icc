@@ -30,7 +30,7 @@ Frame "BACKDROP" "frame_name_template" {
 	// основное изображение
 	BackdropBackground "path\to\file",
 	// сужаем картинку с разных сторон (right, top, bottom, left)
-	BackdropBackgroundInsets 0.005, 0.005, 0.005, 0.005,
+	BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
 	
 	// включает режим Tile mode
 	BackdropTileBackground,
