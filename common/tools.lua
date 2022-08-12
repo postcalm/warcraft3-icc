@@ -26,9 +26,7 @@ end
 ---@param file string Путь до toc-файла
 ---@return nil
 function loadTOCFile(file)
-    if BlzLoadTOCFile(file) then
-        print("load", file)
-    else
+    if not BlzLoadTOCFile(file) then
         print("Failed to load: ", file)
     end
 end

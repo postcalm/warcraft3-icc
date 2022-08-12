@@ -10,6 +10,7 @@ setmetatable(Frame, {
         else
             self:_init(...)
         end
+        return self
     end,
 })
 
@@ -18,9 +19,9 @@ setmetatable(Frame, {
 ---@param simple boolean Создать простой фрейм
 function Frame:_init(name, owner, simple)
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, owner, 0)
+        self.frame = BlzCreateSimpleFrame(name, owner, 0, 0)
     else
-        self.frame = BlzCreateFrame(name, owner, 0)
+        self.frame = BlzCreateFrame(name, owner, 0, 0)
     end
     self.drop = false
 end
@@ -29,13 +30,15 @@ end
 
 --- Создать каст-бар
 ---@param cd real Время каста
+---@param spell string Название способности
+---@param unit Unit Юнит, кастующий способность
 ---@return nil
 function Frame:CastBar(cd, spell, unit)
     local period = 0.05
     self.drop = false
     self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
-    local child = BlzGetFrameByName("CastbarLabel", 0)
-    BlzFrameSetText(child, spell)
+    local castbar_label = BlzGetFrameByName("CastbarLabel", 0)
+    BlzFrameSetText(castbar_label, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
 
     self:SetScale(1)
@@ -62,11 +65,6 @@ function Frame:CastBar(cd, spell, unit)
             full = 0
         end
     end)
-end
-
-function Frame:HeroChoices()
-    self.frame = BlzCreateFrame("HeroChoices", self:GetOriginFrame(), 0, 0)
-    self:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 end
 
 -- Setters
@@ -109,6 +107,13 @@ function Frame:SetModel(model)
     BlzFrameSetModel(self.frame, model, 0)
 end
 
+--- Установить текстуру
+---@param texture string Путь до текстуры
+---@return nil
+function Frame:SetTexture(texture)
+    BlzFrameSetTexture(self.frame, texture, 0, true)
+end
+
 --- Установить значение фрейму
 ---@param value real
 ---@return nil
@@ -125,10 +130,17 @@ end
 
 -- Getters
 
---- Вернуть главный фрейм
+--- Получить главный фрейм
 ---@return framehandle
 function Frame:GetOriginFrame()
     return BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0)
+end
+
+--- Получить хэндл фрейма по имени
+---@param name string
+---@return framehandle
+function Frame:GetFrameByName(name)
+    return BlzGetFrameByName(name, 0)
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -151,6 +163,8 @@ function Frame:Drop()
     self.drop = true
 end
 
+--- Проверить сброшена ли анимация фрейма
+---@return boolean
 function Frame:IsDrop()
     return self.drop
 end

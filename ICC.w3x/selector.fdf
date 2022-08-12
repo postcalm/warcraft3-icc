@@ -1,0 +1,43 @@
+
+Frame "BACKDROP" "HeroSelector" {
+	DecorateFileNames,
+	
+	Width 0.5,
+	Height 0.3,
+	
+	BackdropTileBackground,
+	BackdropBackgroundSize 0.1,
+	
+	BackdropBackground "QuestDialogNormalBackground",
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	BackdropCornerSize 0.0125,
+	BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
+	BackdropEdgeFile "QuestDialogNormalBorder",
+	
+	Frame "GLUEBUTTON" "PaladinButton" {
+		UseActiveContext,
+		
+		Width 0.05,
+		Height 0.05,
+		
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.01, -0.01,
+		
+		ControlStyle "AUTOTRACK|HIGHLIGHTONMOUSEOVER",
+		
+		ControlBackdrop "HeroSelectorButtonIcon",
+		Frame "BACKDROP" "HeroSelectorButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroPaladin.tga",
+		}
+
+		ControlDisabledBackdrop "HeroSelectorButtonIconDisabled",
+		Frame "BACKDROP" "HeroSelectorButtonIconDisabled" {
+		}
+
+		ControlMouseOverHighlight "HeroSelectorButtonHighLight",
+		Frame "HIGHLIGHT" "HeroSelectorButtonHighLight" {
+			HighlightType "FILETEXTURE",
+			HighlightAlphaFile "UI\Glues\ScoreScreen\scorescreen-tab-hilight.blp",
+			HighlightAlphaMode "ADD",
+		}
+	}
+}

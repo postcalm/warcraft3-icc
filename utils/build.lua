@@ -29,6 +29,8 @@ local param = {
         -- система отображения урона автоатак
         [[\libs\battleSystem.lua]],
         [[\libs\wrappers.lua]],
+        -- выбор героев
+        [[\libs\heroSelector.lua]],
         -- исходники реализации боссов, героев и прочих существ
         [[\src\dummy]],
         [[\src\enemies]],
