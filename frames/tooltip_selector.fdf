@@ -1,0 +1,51 @@
+
+Frame "BACKDROP" "BoxedTextBackgroundTemplate" {
+	DecorateFileNames,
+	
+	BackdropTileBackground,
+	BackdropBackground  "ToolTipBackground",
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	BackdropCornerSize  0.008,
+	BackdropBackgroundInsets 0.0022 0.0022 0.0022 0.0022,
+	BackdropEdgeFile  "ToolTipBorder",
+	BackdropBlendAll,
+}
+
+Frame "BACKDROP" "PaladinTooltip" INHERITS "BoxedTextBackgroundTemplate" {
+	UseActiveContext,
+	
+	Width 0.15,
+	Height 0.05,
+ 
+	Frame "TEXT" "PaladinTooltipTitle" {
+		UseActiveContext,
+		DecorateFileNames,
+   
+		// Positionate "BoxedTextSimpleTitle"'s TOPLEFT to "PaladinTooltip"'s TOPLEFT with an offset
+		SetPoint TOPLEFT, "PaladinTooltip", TOPLEFT, 0.005, -0.005,
+		SetPoint TOPRIGHT, "PaladinTooltip", TOPRIGHT, -0.005, -0.005,
+		FontFlags "FIXEDSIZE",
+		FrameFont "MasterFont", 0.014, "",
+		// Red Green Blue Alpha
+		FontColor 1.0 1.0 1.0 1.0,
+		FontShadowColor 0.0 0.0 0.0 0.9,
+		FontShadowOffset 0.001 -0.001,
+		
+		Text "Paladin",
+	}
+ 
+	Frame "TEXT" "PaladinTooltipValue" {
+		UseActiveContext,
+		DecorateFileNames,
+		
+		SetPoint TOPLEFT, "PaladinTooltip", TOPLEFT, 0.005, -0.02,
+		SetPoint BOTTOMRIGHT,  "PaladinTooltip", BOTTOMRIGHT, -0.005, 0.005,
+		FontFlags "FIXEDSIZE",
+		FrameFont "MasterFont", 0.012, "",
+		FontColor 1.0 1.0 1.0 1.0,
+		FontShadowColor 0.0 0.0 0.0 0.9,
+		FontShadowOffset 0.001 -0.001,
+		
+		Text "This is Paladin",
+	}
+}

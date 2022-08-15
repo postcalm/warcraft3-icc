@@ -694,6 +694,13 @@ function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
+--- Установить тултип на фрейм
+---@param tooltip framehandle
+---@return nil
+function Frame:SetTooltip(tooltip)
+    BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
+end
+
 -- Getters
 
 --- Получить главный фрейм
@@ -719,6 +726,12 @@ end
 ---@return string
 function Frame:GetText()
     return BlzFrameGetText(self.text)
+end
+
+--- Получить хэндл фрейма
+---@return framehandle
+function Frame:GetHandle()
+    return self.frame
 end
 
 -- Removers
@@ -2913,10 +2926,17 @@ HeroSelector = {
 
 function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector", Frame:GetOriginFrame())
-    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("PaladinButton"))
+    HeroSelector.InitPaladinSelector()
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 
     --HeroSelector.Close()
+end
+
+function HeroSelector.InitPaladinSelector()
+    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("PaladinButton"))
+    local tooltip = Frame("PaladinTooltip", HeroSelector.paladin_btn:GetHandle())
+    HeroSelector.paladin_btn:SetTooltip(tooltip)
+    tooltip:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.4)
 end
 
 function HeroSelector.Close()

@@ -128,6 +128,13 @@ function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
+--- Установить тултип на фрейм
+---@param tooltip framehandle
+---@return nil
+function Frame:SetTooltip(tooltip)
+    BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
+end
+
 -- Getters
 
 --- Получить главный фрейм
@@ -153,6 +160,12 @@ end
 ---@return string
 function Frame:GetText()
     return BlzFrameGetText(self.text)
+end
+
+--- Получить хэндл фрейма
+---@return framehandle
+function Frame:GetHandle()
+    return self.frame
 end
 
 -- Removers

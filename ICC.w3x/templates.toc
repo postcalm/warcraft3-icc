@@ -1,5 +1,6 @@
 UI\FrameDef\Glue\standardtemplates.fdf
 UI\FrameDef\Glue\battlenettemplates.fdf
 UI\FrameDef\UI\escmenutemplates.fdf
-selector.fdf
 castbar.fdf
+selector.fdf
+tooltip_selector.fdf
