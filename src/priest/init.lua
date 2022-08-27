@@ -11,8 +11,9 @@ function Priest.Init(location)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000);
-    Priest.hero:SetMaxMana(5000,true);
+    Priest.hero:SetLife(5000)
+    Priest.hero:SetBaseMana(3863)
+    Priest.hero:SetMaxMana(5000, true)
 
 
     Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)

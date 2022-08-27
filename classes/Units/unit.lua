@@ -234,7 +234,7 @@ function Unit:SetMana(value)
 end
 
 --- Установить базовое количество маны
----@param value integer
+---@param value integer Значение
 ---@return nil
 function Unit:SetBaseMana(value)
     self.basemana = value
@@ -242,8 +242,9 @@ function Unit:SetBaseMana(value)
 end
 
 --- Установить максимальное значение маны
----@param value real
----@param full boolean
+---@param value real Значение
+---@param full boolean Заполнить до максимума
+---@return nil
 function Unit:SetMaxMana(value, full)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)

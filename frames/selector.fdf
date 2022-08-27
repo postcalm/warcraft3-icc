@@ -14,7 +14,7 @@ Frame "BACKDROP" "HeroSelector" {
 	BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
 	BackdropEdgeFile "QuestDialogNormalBorder",
 	
-	Frame "GLUEBUTTON" "PaladinButton" {
+	Frame "GLUEBUTTON" "Paladin_Button" {
 		UseActiveContext,
 		
 		Width 0.05,

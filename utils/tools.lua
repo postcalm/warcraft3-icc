@@ -36,8 +36,8 @@ function WriteToFile(dst, src)
 end
 
 --- Копирует файлы в указанный каталог
----@param src string
----@param dst string
+---@param src string Источник
+---@param dst string Место назначения
 ---@param ignore_files table Список игнорируемых файлов
 ---@return nil
 function CopyFiles(src, dst, ignore_files)

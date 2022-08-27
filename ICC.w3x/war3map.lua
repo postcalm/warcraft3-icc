@@ -201,6 +201,15 @@ function zip(...)
     return array
 end
 
+function split(inputstr, sep)
+    sep = sep or "s"
+    local t = {}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
 --- Загружает toc-файл
 ---@param file string Путь до toc-файла
 ---@return nil
@@ -370,6 +379,7 @@ function Events:Destroy()
 end
 
 
+---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
 
@@ -386,31 +396,96 @@ setmetatable(EventsFrame, {
 function EventsFrame:_init(frame)
     Events._init(self)
     self.frame = frame
+    self.dialog_status = false
 end
 
 function EventsFrame:RegisterControlClick()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_CONTROL_CLICK)
 end
 
+function EventsFrame:RegisterDialog()
+    self:RegisterControlClick()
+    self:AddAction(function()
+        local confirm = Frame("ConfirmCharacter")
+        local trig = CreateTrigger()
+        TriggerAddAction(trig, function()
+            if self:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
+                self.dialog_status = true
+                self:Destroy()
+            end
+            confirm:Destroy()
+        end)
+        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_ACCEPT)
+        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_CANCEL)
+    end)
+end
+
+--- Регистрирует событие входа курсора мыши во фрейм
+---@return nil
 function EventsFrame:RegisterMouseEnter()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_MOUSE_ENTER)
 end
 
+--- Регистрирует событие выхода курсора мыши из фрейма
+---@return nil
 function EventsFrame:RegisterMouseLeave()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_MOUSE_LEAVE)
 end
 
+--- Получить фрейм
+---@return framehandle
 function EventsFrame:GetFrame()
     return BlzGetTriggerFrame()
 end
 
+--- Получить событие
+---@return frameeventtype
 function EventsFrame:GetEvent()
     return BlzGetTriggerFrameEvent()
 end
 
+function EventsFrame:DialogIsAccepted()
+    return self.dialog_status
+end
+
+-- далее идут бессмысленные обёртки над методами родителя
+-- и нужны только для того, чтобы методы показывались в IDE
+
+--- Добавляет условие для выполнения события
+---@param func function Функция, возвращающая bool или boolexpr
+---@return nil
+function EventsFrame:AddCondition(func)
+    Events.AddCondition(self, func)
+end
+
+--- Добавляет действие для события
+---@param func function Функция, запускающаяся после срабатывания события
+---@return nil
+function EventsFrame:AddAction(func)
+    Events.AddAction(self, func)
+end
+
+--- Отключает триггер
+---@return nil
+function EventsFrame:DisableTrigger()
+    Events.DisableTrigger(self)
+end
+
+--- Включает триггер
+---@return nil
+function EventsFrame:EnableTrigger()
+    Events.EnableTrigger(self)
+end
+
+--- Уничтожает триггер
+---@return nil
+function EventsFrame:Destroy()
+    Events.Destroy(self)
+end
+
 --- Created by meiso.
 
----@param player playerid Id игрока. По умолчанию - локальный игрока
+---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
 
@@ -429,6 +504,7 @@ function EventsPlayer:_init(player)
 end
 
 --- Регистриует событие нажатия кнопки мыши
+---@return nil
 function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
@@ -436,6 +512,7 @@ end
 --- Регистриует событие, написания в чат
 ---@param text string Сообщение, которое необходимо отследить
 ---@param exact boolean Проверять как точное вхождение
+---@return nil
 function EventsPlayer:RegisterChatEvent(text, exact)
     local e = exact or false
     TriggerRegisterPlayerChatEvent(self.trigger, self.player, text, e)
@@ -446,26 +523,31 @@ function EventsPlayer:RegisterUnitAttacked()
 end
 
 --- Регистриует событие каста способности юнитом игрока
+---@return nil
 function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
 --- Регистриует событие нанесения урона юнитом игрока
+---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
 --- Регистриует событие получения урона юнитом игрока
+---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
 end
 
 --- Регистриует событие смерти юнита игрока
+---@return nil
 function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
 --- Регистриует собыие призыва юнита игрока
+---@return nil
 function EventsPlayer:RegisterUnitSummon()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SUMMON, nil)
 end
@@ -475,27 +557,32 @@ end
 
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
+---@return nil
 function EventsPlayer:AddCondition(func)
     Events.AddCondition(self, func)
 end
 
 --- Добавляет действие для события
 ---@param func function Функция, запускающаяся после срабатывания события
+---@return nil
 function EventsPlayer:AddAction(func)
     Events.AddAction(self, func)
 end
 
 --- Отключает триггер
+---@return nil
 function EventsPlayer:DisableTrigger()
     Events.DisableTrigger(self)
 end
 
 --- Включает триггер
+---@return nil
 function EventsPlayer:EnableTrigger()
     Events.EnableTrigger(self)
 end
 
 --- Уничтожает триггер
+---@return nil
 function EventsPlayer:Destroy()
     Events.Destroy(self)
 end
@@ -565,13 +652,18 @@ function EventsUnit:Destroy()
 end
 
 
+--- Класс для создания фреймов
+---@param name string Название fdf-шаблона
+---@param owner framehandle Хэндл родителя
+---@param simple boolean Создать простой фрейм
 Frame = {}
 Frame.__index = Frame
 
 setmetatable(Frame, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
-        if #table.pack(...) == 1 then
+        if #table.pack(...) == 1 and
+                type(table.pack(...)[1]) == "userdata" then
             self.frame = ...
         else
             self:_init(...)
@@ -580,10 +672,8 @@ setmetatable(Frame, {
     end,
 })
 
----@param name string Название fdf-шаблона
----@param owner framehandle Хэндл родителя
----@param simple boolean Создать простой фрейм
 function Frame:_init(name, owner, simple)
+    owner = owner or self:GetOriginFrame()
     if simple then
         self.frame = BlzCreateSimpleFrame(name, owner, 0, 0)
     else
@@ -613,14 +703,16 @@ function Frame:CastBar(cd, spell, unit)
     local amount = period * 100 / cd
     local full = 0
 
-    local point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+    -- местоположение юнита
+    local point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
     local new_point
 
     -- хак, чтобы каст бар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
-        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+        -- новое местоположение
+        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
         if not point:atPoint(new_point, false) then
             self.drop = true
@@ -1214,7 +1306,7 @@ function Unit:SetMana(value)
 end
 
 --- Установить базовое количество маны
----@param value integer
+---@param value integer Значение
 ---@return nil
 function Unit:SetBaseMana(value)
     self.basemana = value
@@ -1222,8 +1314,9 @@ function Unit:SetBaseMana(value)
 end
 
 --- Установить максимальное значение маны
----@param value real
----@param full boolean
+---@param value real Значение
+---@param full boolean Заполнить до максимума
+---@return nil
 function Unit:SetMaxMana(value, full)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
@@ -1528,7 +1621,7 @@ function UnitSpell:NearTarget(target)
     local target_point = Point(GetLocationX(loc), GetLocationY(loc))
     local unit_loc = self:GetLoc()
     local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))
-    return target_point:atPoint(unit_point)
+    return target_point:atPoint(unit_point, true)
 end
 
 -- Copyright (c) Vlod www.xgm.ru
@@ -2921,19 +3014,23 @@ end
 
 HeroSelector = {
     table = nil,
-    paladin_btn = nil
+    paladin_btn = nil,
 }
 
 function HeroSelector.Init()
-    HeroSelector.table = Frame("HeroSelector", Frame:GetOriginFrame())
+    HeroSelector.table = Frame("HeroSelector")
     HeroSelector.InitPaladinSelector()
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
-
-    --HeroSelector.Close()
 end
 
 function HeroSelector.InitPaladinSelector()
-    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("PaladinButton"))
+    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("Paladin_Button"))
+
+    local selector = EventsFrame(HeroSelector.paladin_btn:GetHandle())
+    selector:RegisterDialog()
+    --selector:AddCondition(function() return EventsFrame:DialogIsAccepted()  end)
+    --selector:AddAction(function() print(EventsFrame:DialogIsAccepted())  end)
+
     local tooltip = Frame("PaladinTooltip", HeroSelector.paladin_btn:GetHandle())
     HeroSelector.paladin_btn:SetTooltip(tooltip)
     tooltip:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.4)
@@ -4169,8 +4266,9 @@ function Priest.Init(location)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000);
-    Priest.hero:SetMaxMana(5000,true);
+    Priest.hero:SetLife(5000)
+    Priest.hero:SetBaseMana(3863)
+    Priest.hero:SetMaxMana(5000, true)
 
 
     Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)

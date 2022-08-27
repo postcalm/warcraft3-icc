@@ -22,6 +22,15 @@ function zip(...)
     return array
 end
 
+function split(inputstr, sep)
+    sep = sep or "%s"
+    local t = {}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
 --- Загружает toc-файл
 ---@param file string Путь до toc-файла
 ---@return nil

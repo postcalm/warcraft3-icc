@@ -1,11 +1,16 @@
 
+--- Класс для создания фреймов
+---@param name string Название fdf-шаблона
+---@param owner framehandle Хэндл родителя
+---@param simple boolean Создать простой фрейм
 Frame = {}
 Frame.__index = Frame
 
 setmetatable(Frame, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
-        if #table.pack(...) == 1 then
+        if #table.pack(...) == 1 and
+                type(table.pack(...)[1]) == "userdata" then
             self.frame = ...
         else
             self:_init(...)
@@ -14,10 +19,8 @@ setmetatable(Frame, {
     end,
 })
 
----@param name string Название fdf-шаблона
----@param owner framehandle Хэндл родителя
----@param simple boolean Создать простой фрейм
 function Frame:_init(name, owner, simple)
+    owner = owner or self:GetOriginFrame()
     if simple then
         self.frame = BlzCreateSimpleFrame(name, owner, 0, 0)
     else
@@ -47,14 +50,16 @@ function Frame:CastBar(cd, spell, unit)
     local amount = period * 100 / cd
     local full = 0
 
-    local point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+    -- местоположение юнита
+    local point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
     local new_point
 
     -- хак, чтобы каст бар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
-        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationX(unit:GetLoc()))
+        -- новое местоположение
+        new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
         if not point:atPoint(new_point, false) then
             self.drop = true
