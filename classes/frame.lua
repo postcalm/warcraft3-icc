@@ -1,8 +1,9 @@
+-- Copyright (c) meiso
 
---- Класс для создания фреймов
----@param name string Название fdf-шаблона
----@param owner framehandle Хэндл родителя
----@param simple boolean Создать простой фрейм
+--- Класс создания фреймов
+---@param name string Название фрейма из fdf-шаблона
+---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
+---@param simple boolean Создать простой фрейм. По умолчанию false
 Frame = {}
 Frame.__index = Frame
 
@@ -20,11 +21,11 @@ setmetatable(Frame, {
 })
 
 function Frame:_init(name, owner, simple)
-    owner = owner or self:GetOriginFrame()
+    local own = owner or self:GetOriginFrame()
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, owner, 0, 0)
+        self.frame = BlzCreateSimpleFrame(name, own, 0, 0)
     else
-        self.frame = BlzCreateFrame(name, owner, 0, 0)
+        self.frame = BlzCreateFrame(name, own, 0, 0)
     end
     self.drop = false
 end
@@ -54,16 +55,18 @@ function Frame:CastBar(cd, spell, unit)
     local point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
     local new_point
 
-    -- хак, чтобы каст бар отображался корректно
+    -- хак, чтобы кастбар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
         -- новое местоположение
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
+        -- проверяем двинулся ли игрок, если да - дропаем кастбар
         if not point:atPoint(new_point, false) then
             self.drop = true
         end
+        -- завершаем анимацию если кастбар завершился успешно или был сброшен
         if full >= 100 or self.drop then
             DestroyTimer(GetExpiredTimer())
             self:Destroy()
@@ -75,19 +78,32 @@ end
 -- Setters
 
 --- Установить уровень приоритетности
----@param level integer
+---@param level integer Уровень от 0
 ---@return nil
 function Frame:SetLevelPriority(level)
     BlzFrameSetLevel(self.frame, level)
 end
 
 --- Привязать фрейм по абсолютным координатам
----@param point framepointtype
----@param x real
----@param y real
+---@param point framepointtype Точка, которой будет привязан фрейм
+---@param x real Значение x-координаты
+---@param y real Значение y-координаты
 ---@return nil
 function Frame:SetAbsPoint(point, x, y)
     BlzFrameSetAbsPoint(self.frame, point, x, y)
+end
+
+--- Привязать фрейм относительно другого фрейма
+---@param point framepointtype Точка фрейма, которой он будет привязан к другому фрейму
+---@param relative framehandle Фрейм, к которому будет привязка
+---@param relative_point framepointtype Точка, привязываемого фрейма
+---@param x real Значение x-координаты
+---@param y real Значение y-координаты
+---@return nil
+function Frame:SetPoint(point, relative, relative_point, x, y)
+    local r = relative
+    if type(relative) == "table" then r = relative:GetHandle() end
+    BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 
 --- Установить размер границ фрейма
@@ -99,14 +115,14 @@ function Frame:SetSize(width, height)
 end
 
 --- Установить размер фрейма
----@param scale real
+---@param scale real Значение размера
 ---@return nil
 function Frame:SetScale(scale)
     BlzFrameSetScale(self.frame, scale)
 end
 
 --- Установить модель
----@param model string
+---@param model string Название модели
 ---@return nil
 function Frame:SetModel(model)
     BlzFrameSetModel(self.frame, model, 0)
@@ -120,24 +136,37 @@ function Frame:SetTexture(texture)
 end
 
 --- Установить значение фрейму
----@param value real
+---@param value real Число
 ---@return nil
 function Frame:SetValue(value)
     BlzFrameSetValue(self.frame, value)
 end
 
 --- Установить текст фрейму
----@param text string
+---@param text string Строка
 ---@return nil
 function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
---- Установить тултип на фрейм
----@param tooltip framehandle
+--- Привязать тултип к фрейму
+---@param title string Заголовок
+---@param text string Содержимое
 ---@return nil
-function Frame:SetTooltip(tooltip)
+function Frame:SetTooltip(title, text)
+    local tooltip = Frame("Tooltip", self:GetHandle())
+    local tooltip_title = Frame("TooltipTitle", tooltip:GetHandle())
+    local tooltip_context = Frame("TooltipContext", tooltip:GetHandle())
     BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
+    -- крепим точки тултипа относительно текста,
+    -- дабы тултип мог расширяться в зависмости от текста
+    tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
+    tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
+    tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)
+    tooltip_context:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.01, -0.02)
+    tooltip_title:SetText(title)
+    tooltip_context:SetText(text)
+    tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.)
 end
 
 -- Getters
@@ -149,7 +178,7 @@ function Frame:GetOriginFrame()
 end
 
 --- Получить хэндл фрейма по имени
----@param name string
+---@param name string Название фрейма из fdf-шаблона
 ---@return framehandle
 function Frame:GetFrameByName(name)
     return BlzGetFrameByName(name, 0)
@@ -171,6 +200,12 @@ end
 ---@return framehandle
 function Frame:GetHandle()
     return self.frame
+end
+
+--- Возвращает имя фрейма
+---@return string
+function Frame:GetName()
+    return BlzFrameGetName(self.frame)
 end
 
 -- Removers

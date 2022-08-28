@@ -1,5 +1,6 @@
+-- Copyright (c) meiso
 
---- Класс для конфигурирования способностей
+--- Класс конфигурирования способностей
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности

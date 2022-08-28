@@ -6,6 +6,7 @@ EquipSystem = {}
 --- Последовательность имен в массивах должна сохраняться
 ---@param items string Список предметов
 ---@param items_spells string Список способностей предметов
+---@return nil
 function EquipSystem.RegisterItems(items, items_spells)
     local count = 1
     local items_ = zip(items, items_spells)
@@ -18,6 +19,7 @@ end
 ---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
+---@return nil
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
@@ -31,6 +33,7 @@ end
 ---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
+---@return nil
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit

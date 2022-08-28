@@ -1,5 +1,6 @@
+-- Copyright (c) meiso
 
---- Класс для создания эффектов на юнитах
+--- Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект
@@ -23,11 +24,8 @@ function Effect:_init(unit, model, attach_point, scale)
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end
 
-function Effect:SetTimedLife(time)
-    TriggerSleepAction(time)
-    self:Destroy()
-end
-
+--- Уничтожить эффект
+---@return nil
 function Effect:Destroy()
     DestroyEffect(self.effect)
 end

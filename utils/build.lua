@@ -28,10 +28,11 @@ local param = {
         [[\libs\buffSystem.lua]],
         -- система отображения урона автоатак
         [[\libs\battleSystem.lua]],
+        --
         [[\libs\wrappers.lua]],
-        -- выбор героев
+        -- система выбора героев
         [[\libs\heroSelector.lua]],
-        -- исходники реализации боссов, героев и прочих существ
+        -- реализация боссов, героев и прочих существ
         [[\src\dummy]],
         [[\src\enemies]],
         [[\src\lord_marrowgar]],
@@ -90,7 +91,7 @@ end
 customCode:write(param.tag)
 customCode:close()
 
-local skip_files = {"fdf.xml", "template.fdf"}
+local skip_files = {"template.fdf"}
 CopyFiles(param.current_dir .. [[\frames]],
           param.current_dir .. param.map,
           skip_files)

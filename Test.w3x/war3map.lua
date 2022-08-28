@@ -166,6 +166,10 @@ function zip(...)
     return array
 end
 
+--- Разбивает строку по разделителю
+---@param inputstr string Строка
+---@param sep string Разделитель. По умолчанию пробел
+---@return table
 function split(inputstr, sep)
     sep = sep or "s"
     local t = {}
@@ -216,8 +220,9 @@ DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
 
+-- Copyright (c) meiso
 
---- Класс для конфигурирования способностей
+--- Класс конфигурирования способностей
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
@@ -263,8 +268,9 @@ function Ability:GetId()
     return self.ability
 end
 
+-- Copyright (c) meiso
 
---- Класс для создания эффектов на юнитах
+--- Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект
@@ -288,17 +294,15 @@ function Effect:_init(unit, model, attach_point, scale)
     if scale then BlzSetSpecialEffectScale(self.effect, scale) end
 end
 
-function Effect:SetTimedLife(time)
-    TriggerSleepAction(time)
-    self:Destroy()
-end
-
+--- Уничтожить эффект
+---@return nil
 function Effect:Destroy()
     DestroyEffect(self.effect)
 end
 
---- Created by meiso.
+-- Copyright (c) meiso
 
+--- Базовый класс событий
 Events = {}
 Events.__index = Events
 
@@ -311,44 +315,49 @@ setmetatable(Events, {
     end,
 })
 
---- Базовый класс событий
 function Events:_init()
     self.trigger = CreateTrigger()
 end
 
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
+---@return nil
 function Events:AddCondition(func)
     TriggerAddCondition(self.trigger, Condition(func))
 end
 
 --- Добавляет действие для события
 ---@param func function Функция, запускающаяся после срабатывания события
+---@return nil
 function Events:AddAction(func)
     TriggerAddAction(self.trigger, func)
 end
 
 --- Отключает триггер
+---@return nil
 function Events:DisableTrigger()
     DisableTrigger(self.trigger)
 end
 
 --- Включает триггер
+---@return nil
 function Events:EnableTrigger()
     EnableTrigger(self.trigger)
 end
 
 --- Уничтожает триггер
+---@return nil
 function Events:Destroy()
     DestroyTrigger(self.trigger)
 end
 
+-- Copyright (c) meiso
 
+--- Класс регистрации событий фрейма
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
 
---Обёртка над конструктором класса
 setmetatable(EventsFrame, {
     __index = Events,
     __call = function(cls, ...)
@@ -361,28 +370,24 @@ setmetatable(EventsFrame, {
 function EventsFrame:_init(frame)
     Events._init(self)
     self.frame = frame
-    self.dialog_status = false
 end
 
+--- Регистрирует событие клика по фрейму
+---@return nil
 function EventsFrame:RegisterControlClick()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_CONTROL_CLICK)
 end
 
-function EventsFrame:RegisterDialog()
-    self:RegisterControlClick()
-    self:AddAction(function()
-        local confirm = Frame("ConfirmCharacter")
-        local trig = CreateTrigger()
-        TriggerAddAction(trig, function()
-            if self:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
-                self.dialog_status = true
-                self:Destroy()
-            end
-            confirm:Destroy()
-        end)
-        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_ACCEPT)
-        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_CANCEL)
-    end)
+--- Регистрирует событие принятия диалогового окна
+---@return nil
+function EventsFrame:RegisterDialogAccept()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_DIALOG_ACCEPT)
+end
+
+--- Регистрирует событие отмены диалогового окна
+---@return nil
+function EventsFrame:RegisterDialogCancel()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_DIALOG_CANCEL)
 end
 
 --- Регистрирует событие входа курсора мыши во фрейм
@@ -407,10 +412,6 @@ end
 ---@return frameeventtype
 function EventsFrame:GetEvent()
     return BlzGetTriggerFrameEvent()
-end
-
-function EventsFrame:DialogIsAccepted()
-    return self.dialog_status
 end
 
 -- далее идут бессмысленные обёртки над методами родителя
@@ -448,8 +449,9 @@ function EventsFrame:Destroy()
     Events.Destroy(self)
 end
 
---- Created by meiso.
+-- Copyright (c) meiso
 
+--- Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -552,7 +554,10 @@ function EventsPlayer:Destroy()
     Events.Destroy(self)
 end
 
+-- Copyright (c) meiso
 
+--- Класс регистрации событий юнита
+---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
 
@@ -572,16 +577,19 @@ function EventsUnit:_init(unit)
 end
 
 --- Регистриует событие получения урона юнитом
+---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
 --- Регистриует событие нанесения урона юнитом
+---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
 --- Регистриует событие, когда юнита атакуют или он атакует
+---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
@@ -591,36 +599,42 @@ end
 
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
+---@return nil
 function EventsUnit:AddCondition(func)
     Events.AddCondition(self, func)
 end
 
 --- Добавляет действие для события
 ---@param func function Функция, запускающаяся после срабатывания события
+---@return nil
 function EventsUnit:AddAction(func)
     Events.AddAction(self, func)
 end
 
 --- Отключает триггер
+---@return nil
 function EventsUnit:DisableTrigger()
     Events.DisableTrigger(self)
 end
 
 --- Включает триггер
+---@return nil
 function EventsUnit:EnableTrigger()
     Events.EnableTrigger(self)
 end
 
 --- Уничтожает триггер
+---@return nil
 function EventsUnit:Destroy()
     Events.Destroy(self)
 end
 
+-- Copyright (c) meiso
 
---- Класс для создания фреймов
----@param name string Название fdf-шаблона
----@param owner framehandle Хэндл родителя
----@param simple boolean Создать простой фрейм
+--- Класс создания фреймов
+---@param name string Название фрейма из fdf-шаблона
+---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
+---@param simple boolean Создать простой фрейм. По умолчанию false
 Frame = {}
 Frame.__index = Frame
 
@@ -638,11 +652,11 @@ setmetatable(Frame, {
 })
 
 function Frame:_init(name, owner, simple)
-    owner = owner or self:GetOriginFrame()
+    local own = owner or self:GetOriginFrame()
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, owner, 0, 0)
+        self.frame = BlzCreateSimpleFrame(name, own, 0, 0)
     else
-        self.frame = BlzCreateFrame(name, owner, 0, 0)
+        self.frame = BlzCreateFrame(name, own, 0, 0)
     end
     self.drop = false
 end
@@ -672,16 +686,18 @@ function Frame:CastBar(cd, spell, unit)
     local point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
     local new_point
 
-    -- хак, чтобы каст бар отображался корректно
+    -- хак, чтобы кастбар отображался корректно
     self:SetValue(0)
     TimerStart(CreateTimer(), period, true, function()
         full = full + amount
         -- новое местоположение
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
+        -- проверяем двинулся ли игрок, если да - дропаем кастбар
         if not point:atPoint(new_point, false) then
             self.drop = true
         end
+        -- завершаем анимацию если кастбар завершился успешно или был сброшен
         if full >= 100 or self.drop then
             DestroyTimer(GetExpiredTimer())
             self:Destroy()
@@ -693,19 +709,32 @@ end
 -- Setters
 
 --- Установить уровень приоритетности
----@param level integer
+---@param level integer Уровень от 0
 ---@return nil
 function Frame:SetLevelPriority(level)
     BlzFrameSetLevel(self.frame, level)
 end
 
 --- Привязать фрейм по абсолютным координатам
----@param point framepointtype
----@param x real
----@param y real
+---@param point framepointtype Точка, которой будет привязан фрейм
+---@param x real Значение x-координаты
+---@param y real Значение y-координаты
 ---@return nil
 function Frame:SetAbsPoint(point, x, y)
     BlzFrameSetAbsPoint(self.frame, point, x, y)
+end
+
+--- Привязать фрейм относительно другого фрейма
+---@param point framepointtype Точка фрейма, которой он будет привязан к другому фрейму
+---@param relative framehandle Фрейм, к которому будет привязка
+---@param relative_point framepointtype Точка, привязываемого фрейма
+---@param x real Значение x-координаты
+---@param y real Значение y-координаты
+---@return nil
+function Frame:SetPoint(point, relative, relative_point, x, y)
+    local r = relative
+    if type(relative) == "table" then r = relative:GetHandle() end
+    BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 
 --- Установить размер границ фрейма
@@ -717,14 +746,14 @@ function Frame:SetSize(width, height)
 end
 
 --- Установить размер фрейма
----@param scale real
+---@param scale real Значение размера
 ---@return nil
 function Frame:SetScale(scale)
     BlzFrameSetScale(self.frame, scale)
 end
 
 --- Установить модель
----@param model string
+---@param model string Название модели
 ---@return nil
 function Frame:SetModel(model)
     BlzFrameSetModel(self.frame, model, 0)
@@ -738,24 +767,35 @@ function Frame:SetTexture(texture)
 end
 
 --- Установить значение фрейму
----@param value real
+---@param value real Число
 ---@return nil
 function Frame:SetValue(value)
     BlzFrameSetValue(self.frame, value)
 end
 
 --- Установить текст фрейму
----@param text string
+---@param text string Строка
 ---@return nil
 function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
---- Установить тултип на фрейм
----@param tooltip framehandle
+--- Привязать тултип к фрейму
+---@param title string Заголовок
+---@param text string Содержимое
 ---@return nil
-function Frame:SetTooltip(tooltip)
+function Frame:SetTooltip(title, text)
+    local tooltip = Frame("Tooltip", self:GetHandle())
+    local tooltip_title = Frame("TooltipTitle", tooltip:GetHandle())
+    local tooltip_context = Frame("TooltipContext", tooltip:GetHandle())
     BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
+    tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
+    tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
+    tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)
+    tooltip_context:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.01, -0.02)
+    tooltip_title:SetText(title)
+    tooltip_context:SetText(text)
+    tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.)
 end
 
 -- Getters
@@ -767,7 +807,7 @@ function Frame:GetOriginFrame()
 end
 
 --- Получить хэндл фрейма по имени
----@param name string
+---@param name string Название фрейма из fdf-шаблона
 ---@return framehandle
 function Frame:GetFrameByName(name)
     return BlzGetFrameByName(name, 0)
@@ -789,6 +829,12 @@ end
 ---@return framehandle
 function Frame:GetHandle()
     return self.frame
+end
+
+--- Возвращает имя фрейма
+---@return string
+function Frame:GetName()
+    return BlzFrameGetName(self.frame)
 end
 
 -- Removers
@@ -905,6 +951,7 @@ function Point:atPoint(point, inaccuracy)
     return false
 end
 
+-- Copyright (c) meiso
 
 --- Класс для создания "плавающего" текста
 ---@param text string Текст
@@ -951,6 +998,7 @@ end
 
 --- Установить предопределенные настройки для текста
 ---@param preset string Варианты: "damage", "heal", "spell", "mana"
+---@return nil
 function TextTag:Preset(preset)
     if preset == "damage" then
         self:SetColor(255, 0, 0, 20)
@@ -970,6 +1018,7 @@ end
 
 --- Установить время жизни текста
 ---@param lifespan real
+---@return nil
 function TextTag:SetLifespan(lifespan)
     SetTextTagLifespan(self.texttag, lifespan)
 end
@@ -977,30 +1026,45 @@ end
 --- Установить направление перемещения текста
 ---@param speed real Скорость перемещения
 ---@param angle real Угол направления
+---@return nil
 function TextTag:SetVelocity(speed, angle)
     SetTextTagVelocityBJ(self.texttag, speed, angle)
 end
 
+--- Установить цвет тексту
+---@param red integer Интенсивность красного
+---@param green integer Интенсивность зеленого
+---@param blue integer Интенсивность синего
+---@param transparency integer Уровень прозрачноти
+---@return nil
 function TextTag:SetColor(red, green, blue, transparency)
     SetTextTagColor(self.texttag, red, green, blue, PercentTo255(100.0 - transparency))
 end
 
+--- Установить размер текста
+---@param size real Значение размера
+---@return nil
 function TextTag:SetSize(size)
     self.text_height = TextTagSize2Height(size)
     SetTextTagText(self.texttag, self.text, self.text_height)
 end
 
+--- Расположить текст относительно юнита
+---@param zoffset real Значение оси-z
+---@return nil
 function TextTag:SetPosition(zoffset)
     SetTextTagPosUnit(self.texttag, self.unit, zoffset)
 end
 
 --- Установить или снять перманентность
 ---@param flag boolean
+---@return nil
 function TextTag:Permanent(flag)
     SetTextTagPermanent(self.texttag, flag)
 end
 
 --- Уничтожить текст
+---@return nil
 function TextTag:Destroy()
     DestroyTextTag(self.texttag)
 end
@@ -1035,12 +1099,13 @@ function Timer:Destroy()
     DestroyTimer(self.timer)
 end
 
+-- Copyright (c) meiso
 
---- Класс для создания юнита
+--- Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
----@param face real Угол поворота, создаваемого юнита
+---@param face real Угол поворота юнита
 Unit = {}
 Unit.__index = Unit
 
@@ -1069,16 +1134,18 @@ end
 --- Выставить базовый урон
 ---@param value integer Урон
 ---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return nil
 function Unit:SetBaseDamage(value, index)
     local i = index or 0
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
 --- Нанести физический урон.
---- Урон снижает как от количества, так и от типа защиты
----@param target unit
----@param damage real
----@param attack_type attacktype
+--- Урон снижает как от количества защиты, так и от её типа
+---@param target unit Цель
+---@param damage real Урон
+---@param attack_type attacktype Тип атаки. По умолчанию ближняя
+---@return nil
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -1088,9 +1155,10 @@ end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
----@param target unit
----@param damage real
----@param attack_type attacktype
+---@param target unit Цель
+---@param damage real Урон
+---@param attack_type attacktype Типа атаки. По умолчанию ближняя
+---@return nil
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -1100,8 +1168,9 @@ end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -1113,10 +1182,11 @@ end
 
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
----@param damage real
+---@param damage real Урон
 ---@param overtime real Частота нанесения урона
----@param location location
+---@param location location Место нанесения урона
 ---@param radius real Радиус в метрах
+---@return nil
 function Unit:DealMagicDamageLoc(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
@@ -1135,8 +1205,9 @@ end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -1145,8 +1216,9 @@ end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -1155,8 +1227,9 @@ end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -1166,7 +1239,8 @@ end
 -- Ability
 
 --- Выдать юниту указанные способности
----@param ability ability
+---@param ability ability Список способностей (через запятую)
+---@return nil
 function Unit:AddAbilities(...)
     local abilities = table.pack(...)
     for _, ability in ipairs(abilities) do
@@ -1175,7 +1249,8 @@ function Unit:AddAbilities(...)
 end
 
 --- Выдать книгу заклинаний
----@param spellbook spellbook
+---@param spellbook spellbook Id книги заклинаний
+---@return nil
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
     if not spellbook then return end
@@ -1185,14 +1260,16 @@ function Unit:AddSpellbook(spellbook)
 end
 
 --- Применить способность
----@param ability string
+---@param ability string Id способности
+---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
 end
 
 --- Использовать заклинание по цели
 ---@param spell string Id приказа
----@param target unitid
+---@param target unitid Цель
+---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -1200,7 +1277,7 @@ function Unit:CastToTarget(spell, target)
 end
 
 --- Установить затраты маны на способность (от базовой маны)
----@param ability ability
+---@param ability ability Id способности
 ---@param manacost integer Затраты в процентах
 ---@return nil
 function Unit:SetAbilityManacost(ability, manacost)
@@ -1216,8 +1293,8 @@ function Unit:SetAbilityManacost(ability, manacost)
 end
 
 --- Установить время восстановления у способности
----@param ability ability
----@param cooldown real
+---@param ability ability Id способности
+---@param cooldown real Время восстановления
 ---@return nil
 function Unit:SetAbilityCooldown(ability, cooldown)
     BlzSetAbilityRealLevelField(
@@ -1233,7 +1310,7 @@ end
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
 ---@param percent real Количество маны в процентах
----@param check boolean Проверять ли текущее количество маны
+---@param check boolean Проверять ли текущее количество маны. По умолчанию true
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
@@ -1249,6 +1326,7 @@ end
 --- Получить ману количественно или в процентах от максимума
 ---@param mana real Количество маны в абсолютных единицах
 ---@param percent real Количество маны в процентах
+---@return nil
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     self:SetMana(self:GetCurrentMana() + m)
@@ -1265,13 +1343,14 @@ function Unit:GetPercentManaOfMax(percent)
 end
 
 --- Установить текущее количество маны
----@param value real
+---@param value real Количество маны в абсолютных величинах
+---@return nil
 function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
 --- Установить базовое количество маны
----@param value integer Значение
+---@param value real Количество маны в абсолютных величинах
 ---@return nil
 function Unit:SetBaseMana(value)
     self.basemana = value
@@ -1279,7 +1358,7 @@ function Unit:SetBaseMana(value)
 end
 
 --- Установить максимальное значение маны
----@param value real Значение
+---@param value real Количество маны в абсолютных величинах
 ---@param full boolean Заполнить до максимума
 ---@return nil
 function Unit:SetMaxMana(value, full)
@@ -1301,7 +1380,7 @@ function Unit:GetCurrentMana()
 end
 
 --- Получить базовое количество маны
----@return integer
+---@return real
 function Unit:GetBaseMana()
     return self.basemana
 end
@@ -1309,27 +1388,30 @@ end
 -- Health
 
 --- Потратить указанное количество хп
----@param life real Количество хп в абсолютных единицах
+---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@return nil
 function Unit:LoseLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() - l)
 end
 
 --- Получить хп количественно или в процентах от максимума
----@param life real Количество хп в абсолютных единицах
+---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
     TextTag(l, self:GetId()):Preset("heal")
 end
 
---- Реген HP по площади.
----@param heal real
+--- Реген HP по площади
+---@param heal real Количество хп в абсолютных величинах
 ---@param overtime real Частота исцеления
----@param location location
+---@param location location Место исцеления
 ---@param radius real Радиус в метрах
+---@return nil
 function Unit:HealNear(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
@@ -1357,14 +1439,16 @@ function Unit:GetPercentLifeOfMax(percent)
 end
 
 --- Установить текущее количество хп
----@param value real
+---@param value real Количество хп в абсолютных величинах
+---@return nil
 function Unit:SetLife(value)
     SetUnitState(self.unit, UNIT_STATE_LIFE, value)
 end
 
 --- Установить максимальное значение хп
----@param value real
----@param full boolean
+---@param value real Количество хп в абсолютных величинах
+---@param full boolean Заполнить до максимума
+---@return nil
 function Unit:SetMaxLife(value, full)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
@@ -1387,6 +1471,7 @@ end
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
+---@return nil
 function Unit:SetMoveSpeed(movespeed)
     SetUnitMoveSpeed(self.unit, movespeed)
 end
@@ -1399,12 +1484,14 @@ end
 
 --- Установить/снять прохождение через объекты
 ---@param flag boolean
+---@return nil
 function Unit:SetPathing(flag)
     SetUnitPathing(self.unit, flag)
 end
 
 --- Следовать к указанному юниту
 ---@param unit unit
+---@return nil
 function Unit:MoveToUnit(unit)
     local loc
     if type(unit) == "table" then loc = unit:GetLoc()
@@ -1414,13 +1501,14 @@ end
 
 --- Следовать к указанной точке
 ---@param location location
+---@return nil
 function Unit:MoveToLoc(location)
     IssuePointOrderLoc(self.unit, "move", location)
 end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
----@param filter function
+---@param filter function Функция-фильтр
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()
@@ -1441,14 +1529,14 @@ end
 -- Animation
 
 --- Добавить тэг анимации
----@param tag string
+---@param tag string Название тэга
 ---@return nil
 function Unit:AddAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, true)
 end
 
 --- Удалить тэг анимации
----@param tag string
+---@param tag string Название тэга
 ---@return nil
 function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
@@ -1495,19 +1583,22 @@ function Unit:IsDied()
 end
 
 --- Установить уровень юнита
----@param level integer
+---@param level integer Уровень в пределах до 83
+---@return nil
 function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
 end
 
 --- Установить количество брони
----@param armor real
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
 function Unit:SetArmor(armor)
     BlzSetUnitArmor(self.unit, armor)
 end
 
 --- Установить время жизни юнита
----@param time real
+---@param time real Время в абсолютных величинах
+---@return nil
 function Unit:ApplyTimedLife(time)
     UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end
@@ -1552,7 +1643,12 @@ function Unit:Remove()
     RemoveUnit(self.unit)
 end
 
+-- Copyright (c) meiso
 
+--- Класс создания дамми-юнита.
+--- Юнит используется для применения способностей
+---@param owner unit
+---@param location location
 UnitSpell = {}
 UnitSpell.__index = UnitSpell
 
@@ -1569,16 +1665,12 @@ function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
     self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetId()
-    SetUnitMoveSpeed(self.unit, 512.)
+    self:SetMoveSpeed(512.)
 end
 
-function UnitSpell:MoveToUnit(unit)
-    local loc
-    if type(unit) == "table" then loc = unit:GetLoc()
-    else loc = GetUnitLoc(unit) end
-    IssuePointOrderLoc(self.unit, "move", loc)
-end
-
+--- Проверяет находится ли дамми-юнит возле таргета
+---@param target unit Цель
+---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
     if type(target) == "table" then loc = target:GetLoc()
@@ -1655,6 +1747,7 @@ CLASSES = {
     priest  = 2,
 }
 
+-- Copyright (c) meiso
 
 --- Проверяет создан ли герой для игрока
 ---@return boolean
@@ -1665,6 +1758,7 @@ function SaveSystem.IsHeroNotCreated()
     return false
 end
 
+-- Copyright (c) meiso
 
 --- Возвращает итератор на следующую область для считывания данных
 ---@param index int Текущее значение итератора
@@ -1700,14 +1794,16 @@ function SaveSystem.next_scope(index, current_scope)
     return GetRandomInt(100000, 2000000)
 end
 
----
+--- Функция генерации первого хэша
+---@return integer
 function SaveSystem.generation1()
     SaveSystem.hash1 = SaveSystem.hash1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
     SaveSystem.hash1 = math.fmod(SaveSystem.hash1, SaveSystem.magic_number.five)
     return SaveSystem.hash1
 end
 
----
+--- Функция генерации второго хэша
+---@return integer
 function SaveSystem.generation2()
     SaveSystem.hash2 = SaveSystem.hash2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
     SaveSystem.hash2 = math.fmod(SaveSystem.hash2, SaveSystem.magic_number.five)
@@ -1799,6 +1895,7 @@ function SaveSystem.LoadUserData()
 end
 
 
+-- Copyright (c) meiso
 
 --- Сохранаяет информацию о характеристиках, способностях и предметах
 ---@param i integer Текущий итератор
@@ -2357,6 +2454,7 @@ function SaveSystem.Save()
     end
 end
 
+-- Copyright (c) meiso
 
 --- Возрождает юнита
 ---@return nil
@@ -2425,11 +2523,11 @@ function SaveSystem.AddNewHero()
     local unit
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
-        unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
+        unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
         udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("paladin")
     elseif text:find("priest") then
-        unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone), GetRandomDirectionDeg())
+        unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
         udg_My_hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("priest")
     end
@@ -2489,6 +2587,7 @@ EquipSystem = {}
 --- Последовательность имен в массивах должна сохраняться
 ---@param items string Список предметов
 ---@param items_spells string Список способностей предметов
+---@return nil
 function EquipSystem.RegisterItems(items, items_spells)
     local count = 1
     local items_ = zip(items, items_spells)
@@ -2501,6 +2600,7 @@ end
 ---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
+---@return nil
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
@@ -2514,6 +2614,7 @@ end
 ---@param unit unit Id юнита или от класса Unit
 ---@param items string Список предметов
 ---@param count int Количество предметов
+---@return nil
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
@@ -2979,26 +3080,53 @@ end
 
 HeroSelector = {
     table = nil,
-    paladin_btn = nil,
+    paladin = nil,
+    selected = nil,
 }
 
 function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector")
-    HeroSelector.InitPaladinSelector()
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
+
+    HeroSelector.InitPaladinSelector()
+
+    HeroSelector.CreateDialog()
+
 end
 
 function HeroSelector.InitPaladinSelector()
-    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("Paladin_Button"))
+    HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
+    local tooltip_title = "Паладин"
+    --TODO: поправить описание
+    local tooltip_context = "Паладины бьются с врагом лицом к лицу, "..
+            "полагаясь на тяжелые доспехи и навыки целительства. "..
+            "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..
+            "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
+            "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+    HeroSelector.paladin:SetTooltip(tooltip_title, tooltip_context)
 
-    local selector = EventsFrame(HeroSelector.paladin_btn:GetHandle())
-    selector:RegisterDialog()
-    --selector:AddCondition(function() return EventsFrame:DialogIsAccepted()  end)
-    --selector:AddAction(function() print(EventsFrame:DialogIsAccepted())  end)
+    --local character = split(HeroSelector.paladin:GetName(), "_")[1]
+    --print(character:lower())
+end
 
-    local tooltip = Frame("PaladinTooltip", HeroSelector.paladin_btn:GetHandle())
-    HeroSelector.paladin_btn:SetTooltip(tooltip)
-    tooltip:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.4)
+function HeroSelector.CreateDialog()
+    local dialog = EventsFrame(HeroSelector.paladin:GetHandle())
+    dialog:RegisterControlClick()
+    dialog:AddAction(function()
+        local confirm = Frame("ConfirmCharacter")
+        local trig = EventsFrame(confirm:GetHandle())
+        trig:RegisterDialogAccept()
+        trig:RegisterDialogCancel()
+        trig:AddAction(function()
+            if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
+                dialog:Destroy()
+                print(GetTriggerPlayer())
+                print(GetLocalPlayer())
+                HeroSelector.Close()
+            end
+            confirm:Destroy()
+        end)
+    end)
 end
 
 function HeroSelector.Close()
@@ -4185,7 +4313,7 @@ function Priest.InitCircleOfHealing()
 end
 
 
--- Copyright (c) 2022 Kodpi
+-- Copyright (c) 2022 Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5

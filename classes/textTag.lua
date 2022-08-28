@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --- Класс для создания "плавающего" текста
 ---@param text string Текст
@@ -44,6 +45,7 @@ end
 
 --- Установить предопределенные настройки для текста
 ---@param preset string Варианты: "damage", "heal", "spell", "mana"
+---@return nil
 function TextTag:Preset(preset)
     if preset == "damage" then
         self:SetColor(255, 0, 0, 20)
@@ -63,6 +65,7 @@ end
 
 --- Установить время жизни текста
 ---@param lifespan real
+---@return nil
 function TextTag:SetLifespan(lifespan)
     SetTextTagLifespan(self.texttag, lifespan)
 end
@@ -70,30 +73,45 @@ end
 --- Установить направление перемещения текста
 ---@param speed real Скорость перемещения
 ---@param angle real Угол направления
+---@return nil
 function TextTag:SetVelocity(speed, angle)
     SetTextTagVelocityBJ(self.texttag, speed, angle)
 end
 
+--- Установить цвет тексту
+---@param red integer Интенсивность красного
+---@param green integer Интенсивность зеленого
+---@param blue integer Интенсивность синего
+---@param transparency integer Уровень прозрачноти
+---@return nil
 function TextTag:SetColor(red, green, blue, transparency)
     SetTextTagColor(self.texttag, red, green, blue, PercentTo255(100.0 - transparency))
 end
 
+--- Установить размер текста
+---@param size real Значение размера
+---@return nil
 function TextTag:SetSize(size)
     self.text_height = TextTagSize2Height(size)
     SetTextTagText(self.texttag, self.text, self.text_height)
 end
 
+--- Расположить текст относительно юнита
+---@param zoffset real Значение оси-z
+---@return nil
 function TextTag:SetPosition(zoffset)
     SetTextTagPosUnit(self.texttag, self.unit, zoffset)
 end
 
 --- Установить или снять перманентность
 ---@param flag boolean
+---@return nil
 function TextTag:Permanent(flag)
     SetTextTagPermanent(self.texttag, flag)
 end
 
 --- Уничтожить текст
+---@return nil
 function TextTag:Destroy()
     DestroyTextTag(self.texttag)
 end

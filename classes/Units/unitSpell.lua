@@ -1,4 +1,9 @@
+-- Copyright (c) meiso
 
+--- Класс создания дамми-юнита.
+--- Юнит используется для применения способностей
+---@param owner unit
+---@param location location
 UnitSpell = {}
 UnitSpell.__index = UnitSpell
 
@@ -15,16 +20,12 @@ function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
     self.unit = Unit(GetOwningPlayer(owner), SPELL_DUMMY, loc, face):GetId()
-    SetUnitMoveSpeed(self.unit, 512.)
+    self:SetMoveSpeed(512.)
 end
 
-function UnitSpell:MoveToUnit(unit)
-    local loc
-    if type(unit) == "table" then loc = unit:GetLoc()
-    else loc = GetUnitLoc(unit) end
-    IssuePointOrderLoc(self.unit, "move", loc)
-end
-
+--- Проверяет находится ли дамми-юнит возле таргета
+---@param target unit Цель
+---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
     if type(target) == "table" then loc = target:GetLoc()

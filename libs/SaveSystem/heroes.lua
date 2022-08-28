@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --- Возрождает юнита
 ---@return nil

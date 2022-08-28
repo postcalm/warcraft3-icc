@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --- Проверяет создан ли герой для игрока
 ---@return boolean

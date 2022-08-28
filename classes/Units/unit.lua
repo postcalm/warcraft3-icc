@@ -1,9 +1,10 @@
+-- Copyright (c) meiso
 
---- Класс для создания юнита
+--- Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
----@param face real Угол поворота, создаваемого юнита
+---@param face real Угол поворота юнита
 Unit = {}
 Unit.__index = Unit
 
@@ -32,16 +33,18 @@ end
 --- Выставить базовый урон
 ---@param value integer Урон
 ---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return nil
 function Unit:SetBaseDamage(value, index)
     local i = index or 0
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
 --- Нанести физический урон.
---- Урон снижает как от количества, так и от типа защиты
----@param target unit
----@param damage real
----@param attack_type attacktype
+--- Урон снижает как от количества защиты, так и от её типа
+---@param target unit Цель
+---@param damage real Урон
+---@param attack_type attacktype Тип атаки. По умолчанию ближняя
+---@return nil
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -51,9 +54,10 @@ end
 
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
----@param target unit
----@param damage real
----@param attack_type attacktype
+---@param target unit Цель
+---@param damage real Урон
+---@param attack_type attacktype Типа атаки. По умолчанию ближняя
+---@return nil
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
@@ -63,8 +67,9 @@ end
 
 --- Нанести магической урон.
 --- Урон снижается "сопротивлением от магии"
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -76,10 +81,11 @@ end
 
 --- Нанести магической урон по площади.
 --- Урон снижается "сопротивлением от магии"
----@param damage real
+---@param damage real Урон
 ---@param overtime real Частота нанесения урона
----@param location location
+---@param location location Место нанесения урона
 ---@param radius real Радиус в метрах
+---@return nil
 function Unit:DealMagicDamageLoc(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
@@ -98,8 +104,9 @@ end
 
 --- Нанести магический урон, проходящий через иммунитет к магии.
 --- Урон игнорирует иммунитет к магии, но снижается "сопротивляемостью к магии"
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -108,8 +115,9 @@ end
 
 --- Нанести смешанный урон.
 --- Урон снижается и от защиты, и от сопротивления к магии
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -118,8 +126,9 @@ end
 
 --- Нанести чистый урон.
 --- Не снижается защитой
----@param target unit
----@param damage real
+---@param target unit Цель
+---@param damage real Урон
+---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -129,7 +138,8 @@ end
 -- Ability
 
 --- Выдать юниту указанные способности
----@param ability ability
+---@param ability ability Список способностей (через запятую)
+---@return nil
 function Unit:AddAbilities(...)
     local abilities = table.pack(...)
     for _, ability in ipairs(abilities) do
@@ -138,7 +148,8 @@ function Unit:AddAbilities(...)
 end
 
 --- Выдать книгу заклинаний
----@param spellbook spellbook
+---@param spellbook spellbook Id книги заклинаний
+---@return nil
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
     if not spellbook then return end
@@ -148,14 +159,16 @@ function Unit:AddSpellbook(spellbook)
 end
 
 --- Применить способность
----@param ability string
+---@param ability string Id способности
+---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
 end
 
 --- Использовать заклинание по цели
 ---@param spell string Id приказа
----@param target unitid
+---@param target unitid Цель
+---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
     if type(target) == "table" then u = target:GetId() end
@@ -163,7 +176,7 @@ function Unit:CastToTarget(spell, target)
 end
 
 --- Установить затраты маны на способность (от базовой маны)
----@param ability ability
+---@param ability ability Id способности
 ---@param manacost integer Затраты в процентах
 ---@return nil
 function Unit:SetAbilityManacost(ability, manacost)
@@ -179,8 +192,8 @@ function Unit:SetAbilityManacost(ability, manacost)
 end
 
 --- Установить время восстановления у способности
----@param ability ability
----@param cooldown real
+---@param ability ability Id способности
+---@param cooldown real Время восстановления
 ---@return nil
 function Unit:SetAbilityCooldown(ability, cooldown)
     BlzSetAbilityRealLevelField(
@@ -196,7 +209,7 @@ end
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
 ---@param percent real Количество маны в процентах
----@param check boolean Проверять ли текущее количество маны
+---@param check boolean Проверять ли текущее количество маны. По умолчанию true
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
@@ -212,6 +225,7 @@ end
 --- Получить ману количественно или в процентах от максимума
 ---@param mana real Количество маны в абсолютных единицах
 ---@param percent real Количество маны в процентах
+---@return nil
 function Unit:GainMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
     self:SetMana(self:GetCurrentMana() + m)
@@ -228,13 +242,14 @@ function Unit:GetPercentManaOfMax(percent)
 end
 
 --- Установить текущее количество маны
----@param value real
+---@param value real Количество маны в абсолютных величинах
+---@return nil
 function Unit:SetMana(value)
     SetUnitState(self.unit, UNIT_STATE_MANA, value)
 end
 
 --- Установить базовое количество маны
----@param value integer Значение
+---@param value real Количество маны в абсолютных величинах
 ---@return nil
 function Unit:SetBaseMana(value)
     self.basemana = value
@@ -242,7 +257,7 @@ function Unit:SetBaseMana(value)
 end
 
 --- Установить максимальное значение маны
----@param value real Значение
+---@param value real Количество маны в абсолютных величинах
 ---@param full boolean Заполнить до максимума
 ---@return nil
 function Unit:SetMaxMana(value, full)
@@ -264,7 +279,7 @@ function Unit:GetCurrentMana()
 end
 
 --- Получить базовое количество маны
----@return integer
+---@return real
 function Unit:GetBaseMana()
     return self.basemana
 end
@@ -272,27 +287,30 @@ end
 -- Health
 
 --- Потратить указанное количество хп
----@param life real Количество хп в абсолютных единицах
+---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@return nil
 function Unit:LoseLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() - l)
 end
 
 --- Получить хп количественно или в процентах от максимума
----@param life real Количество хп в абсолютных единицах
+---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
     TextTag(l, self:GetId()):Preset("heal")
 end
 
---- Реген HP по площади.
----@param heal real
+--- Реген HP по площади
+---@param heal real Количество хп в абсолютных величинах
 ---@param overtime real Частота исцеления
----@param location location
+---@param location location Место исцеления
 ---@param radius real Радиус в метрах
+---@return nil
 function Unit:HealNear(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
@@ -320,14 +338,16 @@ function Unit:GetPercentLifeOfMax(percent)
 end
 
 --- Установить текущее количество хп
----@param value real
+---@param value real Количество хп в абсолютных величинах
+---@return nil
 function Unit:SetLife(value)
     SetUnitState(self.unit, UNIT_STATE_LIFE, value)
 end
 
 --- Установить максимальное значение хп
----@param value real
----@param full boolean
+---@param value real Количество хп в абсолютных величинах
+---@param full boolean Заполнить до максимума
+---@return nil
 function Unit:SetMaxLife(value, full)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
@@ -350,6 +370,7 @@ end
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
+---@return nil
 function Unit:SetMoveSpeed(movespeed)
     SetUnitMoveSpeed(self.unit, movespeed)
 end
@@ -362,12 +383,14 @@ end
 
 --- Установить/снять прохождение через объекты
 ---@param flag boolean
+---@return nil
 function Unit:SetPathing(flag)
     SetUnitPathing(self.unit, flag)
 end
 
 --- Следовать к указанному юниту
 ---@param unit unit
+---@return nil
 function Unit:MoveToUnit(unit)
     local loc
     if type(unit) == "table" then loc = unit:GetLoc()
@@ -377,13 +400,14 @@ end
 
 --- Следовать к указанной точке
 ---@param location location
+---@return nil
 function Unit:MoveToLoc(location)
     IssuePointOrderLoc(self.unit, "move", location)
 end
 
 --- Вернуть ближайших врагов
 ---@param radius real Радиус в метрах, в котором выбираются враги. Необязательный аргумент
----@param filter function
+---@param filter function Функция-фильтр
 ---@return group
 function Unit:GetNearbyEnemies(radius, filter)
     local group = CreateGroup()
@@ -404,14 +428,14 @@ end
 -- Animation
 
 --- Добавить тэг анимации
----@param tag string
+---@param tag string Название тэга
 ---@return nil
 function Unit:AddAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, true)
 end
 
 --- Удалить тэг анимации
----@param tag string
+---@param tag string Название тэга
 ---@return nil
 function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
@@ -458,19 +482,22 @@ function Unit:IsDied()
 end
 
 --- Установить уровень юнита
----@param level integer
+---@param level integer Уровень в пределах до 83
+---@return nil
 function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
 end
 
 --- Установить количество брони
----@param armor real
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
 function Unit:SetArmor(armor)
     BlzSetUnitArmor(self.unit, armor)
 end
 
 --- Установить время жизни юнита
----@param time real
+---@param time real Время в абсолютных величинах
+---@return nil
 function Unit:ApplyTimedLife(time)
     UnitApplyTimedLife(self.unit, COMMON_TIMER, time)
 end

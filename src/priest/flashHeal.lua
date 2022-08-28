@@ -1,4 +1,4 @@
--- Copyright (c) 2022 Kodpi
+-- Copyright (c) 2022 Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5

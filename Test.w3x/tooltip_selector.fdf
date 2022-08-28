@@ -11,41 +11,46 @@ Frame "BACKDROP" "BoxedTextBackgroundTemplate" {
 	BackdropBlendAll,
 }
 
-Frame "BACKDROP" "PaladinTooltip" INHERITS "BoxedTextBackgroundTemplate" {
+Frame "BACKDROP" "Tooltip" INHERITS "BoxedTextBackgroundTemplate" {
 	UseActiveContext,
 	
 	Width 0.15,
 	Height 0.05,
  
-	Frame "TEXT" "PaladinTooltipTitle" {
-		UseActiveContext,
-		DecorateFileNames,
-   
-		// Positionate "BoxedTextSimpleTitle"'s TOPLEFT to "PaladinTooltip"'s TOPLEFT with an offset
-		SetPoint TOPLEFT, "PaladinTooltip", TOPLEFT, 0.005, -0.005,
-		SetPoint TOPRIGHT, "PaladinTooltip", TOPRIGHT, -0.005, -0.005,
-		FontFlags "FIXEDSIZE",
-		FrameFont "MasterFont", 0.014, "",
-		// Red Green Blue Alpha
-		FontColor 1.0 1.0 1.0 1.0,
-		FontShadowColor 0.0 0.0 0.0 0.9,
-		FontShadowOffset 0.001 -0.001,
-		
-		Text "Paladin",
-	}
+	
+}
+
+Frame "TEXT" "TooltipTitle" {
+	UseActiveContext,
+	DecorateFileNames,
+
+	// Positionate "BoxedTextSimpleTitle"'s TOPLEFT to "Tooltip"'s TOPLEFT with an offset
+	//SetPoint TOPLEFT, "Tooltip", TOPLEFT, 0.005, -0.005,
+	//SetPoint TOPRIGHT, "Tooltip", TOPRIGHT, -0.005, -0.005,
+	FontFlags "FIXEDSIZE",
+	FrameFont "MasterFont", 0.014, "",
+	// Red Green Blue Alpha
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+	
+	Text "Title",
+}
  
-	Frame "TEXT" "PaladinTooltipValue" {
-		UseActiveContext,
-		DecorateFileNames,
-		
-		SetPoint TOPLEFT, "PaladinTooltip", TOPLEFT, 0.005, -0.02,
-		SetPoint BOTTOMRIGHT,  "PaladinTooltip", BOTTOMRIGHT, -0.005, 0.005,
-		FontFlags "FIXEDSIZE",
-		FrameFont "MasterFont", 0.012, "",
-		FontColor 1.0 1.0 1.0 1.0,
-		FontShadowColor 0.0 0.0 0.0 0.9,
-		FontShadowOffset 0.001 -0.001,
-		
-		Text "This is Paladin",
-	}
+Frame "TEXT" "TooltipContext" {
+	UseActiveContext,
+	DecorateFileNames,
+	
+	Width 0.21,
+	Height 0.0,
+	
+	//SetPoint TOPLEFT, "Tooltip", TOPLEFT, 0.005, -0.02,
+	//SetPoint BOTTOMRIGHT,  "Tooltip", BOTTOMRIGHT, -0.005, 0.005,
+	FontFlags "FIXEDSIZE",
+	FrameFont "MasterFont", 0.012, "",
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+	
+	Text "Text",
 }

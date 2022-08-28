@@ -1,24 +1,53 @@
 
 HeroSelector = {
     table = nil,
-    paladin_btn = nil,
+    paladin = nil,
+    selected = nil,
 }
 
 function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector")
-    HeroSelector.InitPaladinSelector()
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
+
+    HeroSelector.InitPaladinSelector()
+
+    HeroSelector.CreateDialog()
+
 end
 
 function HeroSelector.InitPaladinSelector()
-    HeroSelector.paladin_btn = Frame(Frame:GetFrameByName("Paladin_Button"))
+    HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
+    local tooltip_title = "Паладин"
+    --TODO: поправить описание
+    local tooltip_context = "Паладины бьются с врагом лицом к лицу, "..
+            "полагаясь на тяжелые доспехи и навыки целительства. "..
+            "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..
+            "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
+            "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+    HeroSelector.paladin:SetTooltip(tooltip_title, tooltip_context)
 
-    EventsFrame(HeroSelector.paladin_btn:GetHandle()):RegisterDialog()
-    
+    --local character = split(HeroSelector.paladin:GetName(), "_")[1]
+    --print(character:lower())
+end
 
-    local tooltip = Frame("PaladinTooltip", HeroSelector.paladin_btn:GetHandle())
-    HeroSelector.paladin_btn:SetTooltip(tooltip)
-    tooltip:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.4)
+function HeroSelector.CreateDialog()
+    local dialog = EventsFrame(HeroSelector.paladin:GetHandle())
+    dialog:RegisterControlClick()
+    dialog:AddAction(function()
+        local confirm = Frame("ConfirmCharacter")
+        local trig = EventsFrame(confirm:GetHandle())
+        trig:RegisterDialogAccept()
+        trig:RegisterDialogCancel()
+        trig:AddAction(function()
+            if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
+                dialog:Destroy()
+                print(GetTriggerPlayer())
+                print(GetLocalPlayer())
+                HeroSelector.Close()
+            end
+            confirm:Destroy()
+        end)
+    end)
 end
 
 function HeroSelector.Close()

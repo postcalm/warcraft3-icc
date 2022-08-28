@@ -1,9 +1,10 @@
+-- Copyright (c) meiso
 
+--- Класс регистрации событий фрейма
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
 
---Обёртка над конструктором класса
 setmetatable(EventsFrame, {
     __index = Events,
     __call = function(cls, ...)
@@ -16,28 +17,24 @@ setmetatable(EventsFrame, {
 function EventsFrame:_init(frame)
     Events._init(self)
     self.frame = frame
-    self.dialog_status = false
 end
 
+--- Регистрирует событие клика по фрейму
+---@return nil
 function EventsFrame:RegisterControlClick()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_CONTROL_CLICK)
 end
 
-function EventsFrame:RegisterDialog()
-    self:RegisterControlClick()
-    self:AddAction(function()
-        local confirm = Frame("ConfirmCharacter")
-        local trig = CreateTrigger()
-        TriggerAddAction(trig, function()
-            if self:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
-                self.dialog_status = true
-                self:Destroy()
-            end
-            confirm:Destroy()
-        end)
-        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_ACCEPT)
-        BlzTriggerRegisterFrameEvent(trig, confirm:GetHandle(), FRAMEEVENT_DIALOG_CANCEL)
-    end)
+--- Регистрирует событие принятия диалогового окна
+---@return nil
+function EventsFrame:RegisterDialogAccept()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_DIALOG_ACCEPT)
+end
+
+--- Регистрирует событие отмены диалогового окна
+---@return nil
+function EventsFrame:RegisterDialogCancel()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_DIALOG_CANCEL)
 end
 
 --- Регистрирует событие входа курсора мыши во фрейм
@@ -62,10 +59,6 @@ end
 ---@return frameeventtype
 function EventsFrame:GetEvent()
     return BlzGetTriggerFrameEvent()
-end
-
-function EventsFrame:DialogIsAccepted()
-    return self.dialog_status
 end
 
 -- далее идут бессмысленные обёртки над методами родителя

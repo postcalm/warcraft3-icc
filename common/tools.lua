@@ -22,6 +22,10 @@ function zip(...)
     return array
 end
 
+--- Разбивает строку по разделителю
+---@param inputstr string Строка
+---@param sep string Разделитель. По умолчанию пробел
+---@return table
 function split(inputstr, sep)
     sep = sep or "%s"
     local t = {}

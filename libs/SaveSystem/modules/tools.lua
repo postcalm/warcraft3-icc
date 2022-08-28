@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --- Возвращает итератор на следующую область для считывания данных
 ---@param index int Текущее значение итератора
@@ -33,14 +34,16 @@ function SaveSystem.next_scope(index, current_scope)
     return GetRandomInt(100000, 2000000)
 end
 
----
+--- Функция генерации первого хэша
+---@return integer
 function SaveSystem.generation1()
     SaveSystem.hash1 = SaveSystem.hash1 * SaveSystem.magic_number.seven + SaveSystem.magic_number.six
     SaveSystem.hash1 = math.fmod(SaveSystem.hash1, SaveSystem.magic_number.five)
     return SaveSystem.hash1
 end
 
----
+--- Функция генерации второго хэша
+---@return integer
 function SaveSystem.generation2()
     SaveSystem.hash2 = SaveSystem.hash2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
     SaveSystem.hash2 = math.fmod(SaveSystem.hash2, SaveSystem.magic_number.five)
