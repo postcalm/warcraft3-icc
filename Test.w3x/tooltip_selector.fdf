@@ -17,7 +17,6 @@ Frame "BACKDROP" "Tooltip" INHERITS "BoxedTextBackgroundTemplate" {
 	Width 0.15,
 	Height 0.05,
  
-	
 }
 
 Frame "TEXT" "TooltipTitle" {
@@ -25,8 +24,6 @@ Frame "TEXT" "TooltipTitle" {
 	DecorateFileNames,
 
 	// Positionate "BoxedTextSimpleTitle"'s TOPLEFT to "Tooltip"'s TOPLEFT with an offset
-	//SetPoint TOPLEFT, "Tooltip", TOPLEFT, 0.005, -0.005,
-	//SetPoint TOPRIGHT, "Tooltip", TOPRIGHT, -0.005, -0.005,
 	FontFlags "FIXEDSIZE",
 	FrameFont "MasterFont", 0.014, "",
 	// Red Green Blue Alpha
@@ -44,8 +41,6 @@ Frame "TEXT" "TooltipContext" {
 	Width 0.21,
 	Height 0.0,
 	
-	//SetPoint TOPLEFT, "Tooltip", TOPLEFT, 0.005, -0.02,
-	//SetPoint BOTTOMRIGHT,  "Tooltip", BOTTOMRIGHT, -0.005, 0.005,
 	FontFlags "FIXEDSIZE",
 	FrameFont "MasterFont", 0.012, "",
 	FontColor 1.0 1.0 1.0 1.0,

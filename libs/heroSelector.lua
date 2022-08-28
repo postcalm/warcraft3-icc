@@ -19,6 +19,7 @@ function HeroSelector.InitPaladinSelector()
     HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
     local tooltip_title = "Паладин"
     --TODO: поправить описание
+    --TODO: вынести куда-нить
     local tooltip_context = "Паладины бьются с врагом лицом к лицу, "..
             "полагаясь на тяжелые доспехи и навыки целительства. "..
             "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..

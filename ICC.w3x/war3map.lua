@@ -52,28 +52,28 @@ end
 --CUSTOM_CODE
 
 --Paladin
-JUDGEMENT_OF_LIGHT_BUFF = FourCC('B002')
-JUDGEMENT_OF_WISDOM_BUFF = FourCC('B003')
+JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
+JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 
 
 Items = {}
-Items["ARMOR_ITEM"]              = FourCC('I001')
-Items["ATTACK_ITEM"]             = FourCC('I000')
-Items["HP_ITEM"]                 = FourCC('I002')
-Items["MAGICARMOR_ITEM"]         = FourCC('I003')
-Items["DEC_DMG_ITEM"]            = FourCC('I004')
-Items["BLESSING_OF_WISDOM_ITEM"] = FourCC('I005')
-Items["MP_ITEM"]                 = FourCC('I006')
+Items["ARMOR_ITEM"]              = FourCC("I001")
+Items["ATTACK_ITEM"]             = FourCC("I000")
+Items["HP_ITEM"]                 = FourCC("I002")
+Items["MAGICARMOR_ITEM"]         = FourCC("I003")
+Items["DEC_DMG_ITEM"]            = FourCC("I004")
+Items["BLESSING_OF_WISDOM_ITEM"] = FourCC("I005")
+Items["MP_ITEM"]                 = FourCC("I006")
 
 ItemsSpells = {}
-ItemsSpells["ARMOR_500"]          = { int = FourCC('A008'), str = 'A008' }
-ItemsSpells["ATTACK_1500"]        = { int = FourCC('A007'), str = 'A007' }
-ItemsSpells["HP_90K"]             = { int = FourCC('A00D'), str = 'A00D' }
-ItemsSpells["MAGICARMOR_500"]     = { int = FourCC('A00I'), str = 'A00I' }
-ItemsSpells["DECREASE_DMG"]       = { int = FourCC('A00K'), str = 'A00K' }
-ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC('A00F'), str = 'A00F' }
-ItemsSpells["MP_50K"]             = { int = FourCC('A00W'), str = 'A00W' }
+ItemsSpells["ARMOR_500"]          = { int = FourCC("A008"), str = "A008" }
+ItemsSpells["ATTACK_1500"]        = { int = FourCC("A007"), str = "A007" }
+ItemsSpells["HP_90K"]             = { int = FourCC("A00D"), str = "A00D" }
+ItemsSpells["MAGICARMOR_500"]     = { int = FourCC("A00I"), str = "A00I" }
+ItemsSpells["DECREASE_DMG"]       = { int = FourCC("A00K"), str = "A00K" }
+ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC("A00F"), str = "A00F" }
+ItemsSpells["MP_50K"]             = { int = FourCC("A00W"), str = "A00W" }
 
 
 --- Метр. Равен 20 игровым единицам
@@ -109,9 +109,9 @@ DUMMY_EQUIP = FourCC('e000')
 
 PLAYER_1   = Player(0)
 PLAYER_2   = Player(1)
-LICH_KING = Player(10)
+LICH_KING  = Player(10)
 
-COMMON_TIMER = FourCC('BTLF')
+COMMON_TIMER = FourCC("BTLF")
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
 
@@ -206,9 +206,9 @@ end
 ---@param sep string Разделитель. По умолчанию пробел
 ---@return table
 function split(inputstr, sep)
-    sep = sep or "s"
+    local s = sep or " "
     local t = {}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+    for str in string.gmatch(inputstr, "([^" .. s .. "]+)") do
         table.insert(t, str)
     end
     return t
@@ -824,6 +824,8 @@ function Frame:SetTooltip(title, text)
     local tooltip_title = Frame("TooltipTitle", tooltip:GetHandle())
     local tooltip_context = Frame("TooltipContext", tooltip:GetHandle())
     BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
+    -- крепим точки тултипа относительно текста,
+    -- дабы тултип мог расширяться в зависмости от текста
     tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
     tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
     tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)
@@ -3133,6 +3135,7 @@ function HeroSelector.InitPaladinSelector()
     HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
     local tooltip_title = "Паладин"
     --TODO: поправить описание
+    --TODO: вынести куда-нить
     local tooltip_context = "Паладины бьются с врагом лицом к лицу, "..
             "полагаясь на тяжелые доспехи и навыки целительства. "..
             "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..

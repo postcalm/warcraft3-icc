@@ -27,9 +27,9 @@ end
 ---@param sep string Разделитель. По умолчанию пробел
 ---@return table
 function split(inputstr, sep)
-    sep = sep or "%s"
+    local s = sep or " "
     local t = {}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+    for str in string.gmatch(inputstr, "([^" .. s .. "]+)") do
         table.insert(t, str)
     end
     return t
