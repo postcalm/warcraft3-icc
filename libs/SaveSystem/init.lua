@@ -63,3 +63,8 @@ CLASSES = {
     paladin = 1,
     priest  = 2,
 }
+
+HEROES = {
+    paladin = PALADIN,
+    priest = PRIEST,
+}

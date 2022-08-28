@@ -21,8 +21,8 @@ Frame "GLUEBUTTON" "TemplateButtonSelector" {
 Frame "BACKDROP" "HeroSelector" {
 	DecorateFileNames,
 	
-	Width 0.35,
-	Height 0.2,
+	Width 0.345,
+	Height 0.15,
 	
 	BackdropTileBackground,
 	BackdropBackgroundSize 0.1,
@@ -36,7 +36,7 @@ Frame "BACKDROP" "HeroSelector" {
 	Frame "GLUEBUTTON" "Paladin_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 			
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.01, -0.01,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.015, -0.015,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
@@ -47,7 +47,7 @@ Frame "BACKDROP" "HeroSelector" {
 	Frame "GLUEBUTTON" "Priest_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.07, -0.01,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.08, -0.015,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
@@ -58,88 +58,88 @@ Frame "BACKDROP" "HeroSelector" {
 	Frame "GLUEBUTTON" "DeathKnight_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.13, -0.01,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.145, -0.015,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroDeathKnight.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Druid_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.19, -0.01,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.21, -0.015,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNWitchDoctor.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Shaman_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.25, -0.01,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.275, -0.015,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNShadowHunter.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Warrior_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 			
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.01, -0.075,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.015, -0.08,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroPaladin.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBlademaster.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Mage_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.07, -0.075,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.08, -0.08,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroArchMage.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Rogue_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.13, -0.075,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.145, -0.08,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeadhunter.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Warlock_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.19, -0.075,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.21, -0.08,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNNecromancer.tga",
 		}
 	}
 	
 	Frame "GLUEBUTTON" "Hunter_Button" INHERITS "TemplateButtonSelector" {
 		UseActiveContext,
 		
-		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.25, -0.075,
+		SetPoint TOPLEFT, "HeroSelector", TOPLEFT, 0.275, -0.08,
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHuntress.tga",
 		}
 	}
 }

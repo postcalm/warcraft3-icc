@@ -829,10 +829,10 @@ function Frame:SetTooltip(title, text)
     tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
     tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
     tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)
-    tooltip_context:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.01, -0.02)
+    tooltip_context:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.01, -0.025)
     tooltip_title:SetText(title)
     tooltip_context:SetText(text)
-    tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.)
+    tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
 end
 
 -- Getters
@@ -1782,6 +1782,11 @@ SaveSystem = {
 CLASSES = {
     paladin = 1,
     priest  = 2,
+}
+
+HEROES = {
+    paladin = PALADIN,
+    priest = PRIEST,
 }
 
 -- Copyright (c) meiso
@@ -3118,7 +3123,8 @@ end
 HeroSelector = {
     table = nil,
     paladin = nil,
-    selected = nil,
+    priest = nil,
+    hero = nil,
 }
 
 function HeroSelector.Init()
@@ -3126,9 +3132,7 @@ function HeroSelector.Init()
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 
     HeroSelector.InitPaladinSelector()
-
-    HeroSelector.CreateDialog()
-
+    HeroSelector.InitPriestSelector()
 end
 
 function HeroSelector.InitPaladinSelector()
@@ -3142,13 +3146,24 @@ function HeroSelector.InitPaladinSelector()
             "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
             "но и удержит группу на ногах при помощи исцеляющих заклинаний."
     HeroSelector.paladin:SetTooltip(tooltip_title, tooltip_context)
-
-    --local character = split(HeroSelector.paladin:GetName(), "_")[1]
-    --print(character:lower())
+    HeroSelector.CreateDialog(HeroSelector.paladin)
 end
 
-function HeroSelector.CreateDialog()
-    local dialog = EventsFrame(HeroSelector.paladin:GetHandle())
+function HeroSelector.InitPriestSelector()
+    HeroSelector.priest = Frame(Frame:GetFrameByName("Priest_Button"))
+    local tooltip_title = "Жрец"
+    local tooltip_context = "Жрецы могут задействовать мощную целительную магию, "..
+            "чтобы спасти себя и своих спутников. Им подвластны и сильные "..
+            "атакующие заклинания, но физическая слабость и отсутствие прочных "..
+            "доспехов заставляют жрецов бояться сближения с противником. "..
+            "Опытные жрецы используют боевые и контролирующие способности, "..
+            "не допуская гибели членов отряда."
+    HeroSelector.priest:SetTooltip(tooltip_title, tooltip_context)
+    HeroSelector.CreateDialog(HeroSelector.priest)
+end
+
+function HeroSelector.CreateDialog(hero)
+    local dialog = EventsFrame(hero:GetHandle())
     dialog:RegisterControlClick()
     dialog:AddAction(function()
         local confirm = Frame("ConfirmCharacter")
@@ -3160,11 +3175,22 @@ function HeroSelector.CreateDialog()
                 dialog:Destroy()
                 print(GetTriggerPlayer())
                 print(GetLocalPlayer())
+                HeroSelector.hero = split(hero:GetName(), "_")[1]
+                HeroSelector.hero = HeroSelector.hero:lower()
+                print(HeroSelector.hero)
+                HeroSelector.CreateHero()
                 HeroSelector.Close()
             end
             confirm:Destroy()
         end)
     end)
+end
+
+function HeroSelector.CreateHero()
+    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
+    local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
+    udg_My_hero[playerid] = unit:GetId()
+    SaveSystem.AddHeroAbilities(HeroSelector.hero)
 end
 
 function HeroSelector.Close()
