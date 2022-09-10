@@ -5,7 +5,7 @@
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
     SaveSystem.Load()
-    udg_My_hero[i] = SaveSystem.unit
+    SaveSystem.hero[i] = SaveSystem.unit
 end
 
 --- Инициализация события по загрузке юнита

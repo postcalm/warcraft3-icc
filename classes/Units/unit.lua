@@ -20,6 +20,7 @@ setmetatable(Unit, {
     end,
 })
 
+--- Конструктор класса
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
@@ -307,7 +308,7 @@ end
 
 --- Реген HP по площади
 ---@param heal real Количество хп в абсолютных величинах
----@param overtime real Частота исцеления
+---@param overtime real Частота исцеления. По умолчанию 0
 ---@param location location Место исцеления
 ---@param radius real Радиус в метрах
 ---@return nil

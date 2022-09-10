@@ -14,6 +14,7 @@ setmetatable(EventsPlayer, {
     end,
 })
 
+--- Конструктор класса
 function EventsPlayer:_init(player)
     Events._init(self)
     self.player = player or GetLocalPlayer()

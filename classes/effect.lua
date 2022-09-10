@@ -16,6 +16,7 @@ setmetatable(Effect, {
     end,
 })
 
+--- Конструктор класса
 function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"

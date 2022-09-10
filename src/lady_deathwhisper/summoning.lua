@@ -1,6 +1,6 @@
 
 function LadyDeathwhisper.Summoning()
-    if not CultAdherent.summoned then
+    if not CultAdherent.summoned and not CultFanatic.summoned then
         CultAdherent.summoned = true
         CultFanatic.summoned = true
         CultAdherent.Init(Location(4671., 1483.), 350.)

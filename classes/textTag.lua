@@ -20,6 +20,7 @@ setmetatable(TextTag, {
     end
 })
 
+--- Конструктор класса
 function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency)
     self.texttag = CreateTextTag()
     self.text_height = 0

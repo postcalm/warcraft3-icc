@@ -1,5 +1,9 @@
---- Created by meiso.
+-- Copyright (c) meiso
 
+--- Класс создания точек
+---@param X real Координата X. По умолчанию 0
+---@param Y real Координата Y. По умолчанию 0
+---@param Z real Координата Z. По умолчанию 0
 Point = {}
 Point.__index = Point
 
@@ -11,10 +15,11 @@ setmetatable(Point, {
     end,
 })
 
+--- Конструктор класса
 function Point:_init(X, Y, Z)
-    self.X = X or 0
-    self.Y = Y or 0
-    self.Z = Z or 0
+    self.X = X or 0.
+    self.Y = Y or 0.
+    self.Z = Z or 0.
 end
 
 function Point:get2DPoint()

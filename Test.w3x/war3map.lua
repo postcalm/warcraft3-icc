@@ -1,7 +1,6 @@
 udg_SaveUnit_gamecache = nil
 udg_SaveUnit_map_number = 0
 udg_cache = nil
-udg_My_hero = {}
 gg_trg_EntryPoint = nil
 gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
@@ -10,7 +9,6 @@ gg_trg_Init = nil
 gg_trg_SaveHero = nil
 gg_trg_LoadHero = nil
 function InitGlobals()
-    local i = 0
     udg_SaveUnit_map_number = 0
 end
 
@@ -385,6 +383,7 @@ setmetatable(Events, {
     end,
 })
 
+--- Конструктор класса
 function Events:_init()
     self.trigger = CreateTrigger()
 end
@@ -437,6 +436,7 @@ setmetatable(EventsFrame, {
     end,
 })
 
+--- Конструктор класса
 function EventsFrame:_init(frame)
     Events._init(self)
     self.frame = frame
@@ -535,6 +535,7 @@ setmetatable(EventsPlayer, {
     end,
 })
 
+--- Конструктор класса
 function EventsPlayer:_init(player)
     Events._init(self)
     self.player = player or GetLocalPlayer()
@@ -640,6 +641,7 @@ setmetatable(EventsUnit, {
     end,
 })
 
+--- Конструктор класса
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
@@ -860,7 +862,7 @@ function Frame:SetTooltip(title, text)
     local tooltip_context = Frame("TooltipContext", tooltip:GetHandle())
     BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
     -- крепим точки тултипа относительно текста,
-    -- дабы тултип мог расширяться в зависмости от текста
+    -- дабы тултип мог расширяться
     tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
     tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
     tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)
@@ -996,8 +998,12 @@ function Line:getLength()
 end
 
 
---- Created by meiso.
+-- Copyright (c) meiso
 
+--- Класс создания точек
+---@param X real Координата X. По умолчанию 0
+---@param Y real Координата Y. По умолчанию 0
+---@param Z real Координата Z. По умолчанию 0
 Point = {}
 Point.__index = Point
 
@@ -1009,6 +1015,7 @@ setmetatable(Point, {
     end,
 })
 
+--- Конструктор класса
 function Point:_init(X, Y, Z)
     self.X = X or 0
     self.Y = Y or 0
@@ -1772,6 +1779,8 @@ end
 
 --- Система сохранений
 SaveSystem = {
+    --- Фактический юнит/Игровой персонаж
+    hero = {},
     --- Юнит, которого требуется сохранить
     unit = nil,
     --- Идентификатор класса
@@ -1784,7 +1793,7 @@ SaveSystem = {
     respawn = nil,
     --- Директория, где будут лежать сохранения
     directory = "test",
-    --- Идентификатор автора
+    --- Идентификатор автора системы сохранений
     author = 1546,
     --- Пользовательские данные
     user_data = {},
@@ -1844,7 +1853,7 @@ HEROES = {
 --- Проверяет создан ли герой для игрока
 ---@return boolean
 function SaveSystem.IsHeroNotCreated()
-    if not udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())] then
+    if not SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())] then
         return true
     end
     return false
@@ -2600,7 +2609,7 @@ end
 function SaveSystem.AddHeroAbilities(class)
     SaveSystem.classid = CLASSES[class]
     SaveSystem.DefineAbilities()
-    local hero = Unit(udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())])
+    local hero = Unit(SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())])
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)
     hero:SetLevel(80)
@@ -2616,11 +2625,11 @@ function SaveSystem.AddNewHero()
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
-        udg_My_hero[playerid] = unit:GetId()
+        SaveSystem.hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
-        udg_My_hero[playerid] = unit:GetId()
+        SaveSystem.hero[playerid] = unit:GetId()
         SaveSystem.AddHeroAbilities("priest")
     end
 end
@@ -2639,7 +2648,7 @@ end
 --- Сохраняет юнита игрока
 ---@return nil
 function SaveSystem.SaveHero()
-    SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
+    SaveSystem.unit = SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())]
     SaveSystem.user_data[1] = 1
     SaveSystem.Save()
 end
@@ -2659,7 +2668,7 @@ end
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
     SaveSystem.Load()
-    udg_My_hero[i] = SaveSystem.unit
+    SaveSystem.hero[i] = SaveSystem.unit
 end
 
 --- Инициализация события по загрузке юнита
@@ -3285,7 +3294,7 @@ end
 function HeroSelector.CreateHero()
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
-    udg_My_hero[playerid] = unit:GetId()
+    SaveSystem.hero[playerid] = unit:GetId()
     SaveSystem.AddHeroAbilities(HeroSelector.hero)
 end
 
@@ -4607,20 +4616,6 @@ function InitTrig_EntryPoint()
     TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
-function Trig_Alert_Actions()
-    TriggerSleepAction(0.00)
-    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
-    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
-    ForceAddPlayerSimple(Player(1), bj_FORCE_PLAYER[0])
-    SetForceAllianceStateBJ(GetPlayersByMapControl(MAP_CONTROL_USER), GetPlayersByMapControl(MAP_CONTROL_USER), bj_ALLIANCE_ALLIED)
-    SetForceAllianceStateBJ(bj_FORCE_PLAYER[0], bj_FORCE_PLAYER[0], bj_ALLIANCE_ALLIED)
-end
-
-function InitTrig_Alert()
-    gg_trg_Alert = CreateTrigger()
-    TriggerAddAction(gg_trg_Alert, Trig_Alert_Actions)
-end
-
 function Trig_RespawnHero_Actions()
         SaveSystem.UnitsRespawn()
         BuffSystem.RemoveAllBuffs(GetTriggerUnit())
@@ -4630,15 +4625,6 @@ function InitTrig_RespawnHero()
     gg_trg_RespawnHero = CreateTrigger()
     TriggerRegisterAnyUnitEventBJ(gg_trg_RespawnHero, EVENT_PLAYER_UNIT_DEATH)
     TriggerAddAction(gg_trg_RespawnHero, Trig_RespawnHero_Actions)
-end
-
-function Trig_NewHero_Actions()
-        SaveSystem.InitNewHeroEvent()
-end
-
-function InitTrig_NewHero()
-    gg_trg_NewHero = CreateTrigger()
-    TriggerAddAction(gg_trg_NewHero, Trig_NewHero_Actions)
 end
 
 function Trig_Init_Actions()
@@ -4672,9 +4658,7 @@ end
 
 function InitCustomTriggers()
     InitTrig_EntryPoint()
-    InitTrig_Alert()
     InitTrig_RespawnHero()
-    InitTrig_NewHero()
     InitTrig_Init()
     InitTrig_SaveHero()
     InitTrig_LoadHero()
@@ -4682,8 +4666,6 @@ end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_EntryPoint)
-    ConditionalTriggerExecute(gg_trg_Alert)
-    ConditionalTriggerExecute(gg_trg_NewHero)
     ConditionalTriggerExecute(gg_trg_Init)
     ConditionalTriggerExecute(gg_trg_SaveHero)
     ConditionalTriggerExecute(gg_trg_LoadHero)

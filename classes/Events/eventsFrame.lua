@@ -14,6 +14,7 @@ setmetatable(EventsFrame, {
     end,
 })
 
+--- Конструктор класса
 function EventsFrame:_init(frame)
     Events._init(self)
     self.frame = frame

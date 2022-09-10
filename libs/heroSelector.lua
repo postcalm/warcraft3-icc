@@ -114,7 +114,7 @@ end
 function HeroSelector.CreateHero()
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
-    udg_My_hero[playerid] = unit:GetId()
+    SaveSystem.hero[playerid] = unit:GetId()
     SaveSystem.AddHeroAbilities(HeroSelector.hero)
 end
 

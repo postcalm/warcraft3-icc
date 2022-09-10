@@ -3,7 +3,7 @@
 --- Сохраняет юнита игрока
 ---@return nil
 function SaveSystem.SaveHero()
-    SaveSystem.unit = udg_My_hero[GetConvertedPlayerId(GetTriggerPlayer())]
+    SaveSystem.unit = SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())]
     SaveSystem.user_data[1] = 1
     SaveSystem.Save()
 end

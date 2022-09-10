@@ -14,6 +14,7 @@ setmetatable(EventsUnit, {
     end,
 })
 
+--- Конструктор класса
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit

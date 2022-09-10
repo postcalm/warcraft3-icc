@@ -15,7 +15,7 @@ setmetatable(Ability, {
     end,
 })
 
-
+--- Конструктор класса
 function Ability:_init(ability, tooltip, text)
     self.ability = ability
     self.tooltip = tooltip

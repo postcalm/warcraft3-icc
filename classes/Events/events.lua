@@ -13,6 +13,7 @@ setmetatable(Events, {
     end,
 })
 
+--- Конструктор класса
 function Events:_init()
     self.trigger = CreateTrigger()
 end

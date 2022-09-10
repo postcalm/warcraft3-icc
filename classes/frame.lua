@@ -20,6 +20,7 @@ setmetatable(Frame, {
     end,
 })
 
+--- Конструктор класса
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
     if simple then
@@ -159,7 +160,7 @@ function Frame:SetTooltip(title, text)
     local tooltip_context = Frame("TooltipContext", tooltip:GetHandle())
     BlzFrameSetTooltip(self.frame, tooltip:GetHandle())
     -- крепим точки тултипа относительно текста,
-    -- дабы тултип мог расширяться в зависмости от текста
+    -- дабы тултип мог расширяться
     tooltip:SetPoint(FRAMEPOINT_TOPRIGHT, tooltip_context, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
     tooltip:SetPoint(FRAMEPOINT_BOTTOMLEFT, tooltip_context, FRAMEPOINT_BOTTOMLEFT, -0.005, -0.005)
     tooltip_title:SetPoint(FRAMEPOINT_TOPLEFT, tooltip, FRAMEPOINT_TOPLEFT, 0.005, -0.005)

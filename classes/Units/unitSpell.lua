@@ -16,6 +16,7 @@ setmetatable(UnitSpell, {
     end,
 })
 
+--- Конструктор класса
 function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
