@@ -3,6 +3,14 @@ HeroSelector = {
     table = nil,
     paladin = nil,
     priest = nil,
+    dk = nil,
+    druid = nil,
+    shaman = nil,
+    warrior = nil,
+    mage = nil,
+    rogue = nil,
+    warlock = nil,
+    hunter = nil,
     hero = nil,
 }
 
@@ -12,33 +20,74 @@ function HeroSelector.Init()
 
     HeroSelector.InitPaladinSelector()
     HeroSelector.InitPriestSelector()
+    HeroSelector.InitDKSelector()
+    HeroSelector.InitDruidSelector()
+    HeroSelector.InitShamanSelector()
+    HeroSelector.InitWarriorSelector()
+    HeroSelector.InitMageSelector()
+    HeroSelector.InitRogueSelector()
+    HeroSelector.InitWarlockSelector()
+    HeroSelector.InitHunterSelector()
 end
 
 function HeroSelector.InitPaladinSelector()
     HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
-    local tooltip_title = "Паладин"
-    --TODO: поправить описание
-    --TODO: вынести куда-нить
-    local tooltip_context = "Паладины бьются с врагом лицом к лицу, "..
-            "полагаясь на тяжелые доспехи и навыки целительства. "..
-            "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..
-            "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
-            "но и удержит группу на ногах при помощи исцеляющих заклинаний."
-    HeroSelector.paladin:SetTooltip(tooltip_title, tooltip_context)
+    HeroSelector.paladin:SetTooltip(paladin_tooltip, paladin_text)
     HeroSelector.CreateDialog(HeroSelector.paladin)
 end
 
 function HeroSelector.InitPriestSelector()
     HeroSelector.priest = Frame(Frame:GetFrameByName("Priest_Button"))
-    local tooltip_title = "Жрец"
-    local tooltip_context = "Жрецы могут задействовать мощную целительную магию, "..
-            "чтобы спасти себя и своих спутников. Им подвластны и сильные "..
-            "атакующие заклинания, но физическая слабость и отсутствие прочных "..
-            "доспехов заставляют жрецов бояться сближения с противником. "..
-            "Опытные жрецы используют боевые и контролирующие способности, "..
-            "не допуская гибели членов отряда."
-    HeroSelector.priest:SetTooltip(tooltip_title, tooltip_context)
+    HeroSelector.priest:SetTooltip(priest_tooltip, priest_text)
     HeroSelector.CreateDialog(HeroSelector.priest)
+end
+
+function HeroSelector.InitDKSelector()
+    HeroSelector.dk = Frame(Frame:GetFrameByName("DeathKnight_Button"))
+    HeroSelector.dk:SetTooltip(deathknight_tooltip, deathknight_text)
+    HeroSelector.CreateDialog(HeroSelector.dk)
+end
+
+function HeroSelector.InitDruidSelector()
+    HeroSelector.druid = Frame(Frame:GetFrameByName("Druid_Button"))
+    HeroSelector.druid:SetTooltip(druid_tooltip, druid_text)
+    HeroSelector.CreateDialog(HeroSelector.druid)
+end
+
+function HeroSelector.InitShamanSelector()
+    HeroSelector.shaman = Frame(Frame:GetFrameByName("Shaman_Button"))
+    HeroSelector.shaman:SetTooltip(shaman_tooltip, shaman_text)
+    HeroSelector.CreateDialog(HeroSelector.shaman)
+end
+
+function HeroSelector.InitWarriorSelector()
+    HeroSelector.warrior = Frame(Frame:GetFrameByName("Warrior_Button"))
+    HeroSelector.warrior:SetTooltip(warrior_tooltip, warrior_text)
+    HeroSelector.CreateDialog(HeroSelector.warrior)
+end
+
+function HeroSelector.InitMageSelector()
+    HeroSelector.mage = Frame(Frame:GetFrameByName("Mage_Button"))
+    HeroSelector.mage:SetTooltip(mage_tooltip, mage_text)
+    HeroSelector.CreateDialog(HeroSelector.mage)
+end
+
+function HeroSelector.InitRogueSelector()
+    HeroSelector.rogue = Frame(Frame:GetFrameByName("Rogue_Button"))
+    HeroSelector.rogue:SetTooltip(rogue_tooltip, rogue_text)
+    HeroSelector.CreateDialog(HeroSelector.rogue)
+end
+
+function HeroSelector.InitWarlockSelector()
+    HeroSelector.warlock = Frame(Frame:GetFrameByName("Warlock_Button"))
+    HeroSelector.warlock:SetTooltip(warlock_tooltip, warlock_text)
+    HeroSelector.CreateDialog(HeroSelector.warlock)
+end
+
+function HeroSelector.InitHunterSelector()
+    HeroSelector.hunter = Frame(Frame:GetFrameByName("Hunter_Button"))
+    HeroSelector.hunter:SetTooltip(hunter_tooltip, hunter_text)
+    HeroSelector.CreateDialog(HeroSelector.hunter)
 end
 
 function HeroSelector.CreateDialog(hero)
@@ -52,11 +101,8 @@ function HeroSelector.CreateDialog(hero)
         trig:AddAction(function()
             if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
                 dialog:Destroy()
-                print(GetTriggerPlayer())
-                print(GetLocalPlayer())
-                HeroSelector.hero = split(hero:GetName(), "_")[1]
-                HeroSelector.hero = HeroSelector.hero:lower()
-                print(HeroSelector.hero)
+                local tmp = split(hero:GetName(), "_")[1]
+                HeroSelector.hero = tmp:lower()
                 HeroSelector.CreateHero()
                 HeroSelector.Close()
             end

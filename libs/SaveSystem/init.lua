@@ -64,6 +64,7 @@ CLASSES = {
     priest  = 2,
 }
 
+--- Фактические идентификаторы классов
 HEROES = {
     paladin = PALADIN,
     priest = PRIEST,

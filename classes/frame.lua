@@ -227,3 +227,17 @@ end
 function Frame:Destroy()
     BlzDestroyFrame(self.frame)
 end
+
+-- Meta
+
+--- Отключить фрейм
+---@return nil
+function Frame:Disable()
+    BlzFrameSetEnable(self.frame, false)
+end
+
+--- Включить фрейм
+---@return nil
+function Frame:Enable()
+    BlzFrameSetEnable(self.frame, true)
+end
