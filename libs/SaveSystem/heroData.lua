@@ -152,13 +152,13 @@ function SaveSystem.LoadUnitData()
                 end
             end
 
-            -- выдаем юниту его навыки
+            -- выдаем юниту его очки навыков
             if current_case == SaveSystem.scope.hero_skill then
                 local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local count_level = SaveSystem.data[j + 1]
-                    while count_level >= 0 do
+                    local count_level = SaveSystem.data[j + 1] or 0
+                    while count_level > 0 do
                         SelectHeroSkill(current_unit, SaveSystem.data[j])
                         count_level = count_level - 1
                     end
@@ -180,6 +180,7 @@ function SaveSystem.LoadUnitData()
                     max_count_data = max_count_data - 1
                 end
             end
+
             i = SaveSystem.next_scope(i, current_case)
         end
     end

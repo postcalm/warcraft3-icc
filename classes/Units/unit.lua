@@ -24,7 +24,7 @@ setmetatable(Unit, {
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    local f = face or 0
+    local f = face or GetRandomDirectionDeg()
     self.basemana = 0
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end

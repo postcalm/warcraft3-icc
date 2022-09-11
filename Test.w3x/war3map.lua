@@ -1214,7 +1214,7 @@ setmetatable(Unit, {
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
-    local f = face or 0
+    local f = face or GetRandomDirectionDeg()
     self.basemana = 0
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
@@ -2070,7 +2070,6 @@ function SaveSystem.SaveBaseState(i, u, world)
         local rect_max_x = R2I(GetRectMaxX(world))
         local rect_min_y = R2I(GetRectMinY(world))
         local rect_max_y = R2I(GetRectMaxY(world))
-        print(SaveSystem.map_number)
         local map_number = SaveSystem.map_number
         local unit_type_id = GetUnitTypeId(u)
 
@@ -2153,13 +2152,13 @@ function SaveSystem.LoadUnitData()
                 end
             end
 
-            -- выдаем юниту его навыки
+            -- выдаем юниту его очки навыков
             if current_case == SaveSystem.scope.hero_skill then
                 local max_count_data = SaveSystem.data[i + 1]
                 local j = i + 2
                 while max_count_data >= 0 do
-                    local count_level = SaveSystem.data[j + 1]
-                    while count_level >= 0 do
+                    local count_level = SaveSystem.data[j + 1] or 0
+                    while count_level > 0 do
                         SelectHeroSkill(current_unit, SaveSystem.data[j])
                         count_level = count_level - 1
                     end
@@ -2181,6 +2180,7 @@ function SaveSystem.LoadUnitData()
                     max_count_data = max_count_data - 1
                 end
             end
+
             i = SaveSystem.next_scope(i, current_case)
         end
     end
@@ -2408,10 +2408,10 @@ function SaveSystem.Load()
 
         SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
-        for i = 1, SaveSystem.data[1] do
+        for i = 1, #SaveSystem.data do
             Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
         end
-        for i = 1, SaveSystem.user_data[1] do
+        for i = 1, #SaveSystem.user_data do
             Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
         end
         PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
@@ -2448,17 +2448,14 @@ function SaveSystem.ada(is_player, file_name, u)
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
-            print("user key")
         end
 
         if is_player then
             item_data = SaveSystem.SaveUnitData(item_data, u)
-            print("save unit data")
         end
 
         if is_player then
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
-            print("save base state")
         end
 
         if SaveSystem.user_data[1] > 0 then
@@ -2470,7 +2467,6 @@ function SaveSystem.ada(is_player, file_name, u)
                     is_player = false
                 end
             end
-            print("save user data")
         end
 
         if is_player then
@@ -2501,15 +2497,12 @@ function SaveSystem.ada(is_player, file_name, u)
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
-                print(i, k, n, SaveSystem.data[i], SaveSystem.data[k])
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
                 encrypted_data = data_copy[i]
                 data_copy[i] = data_copy[k]
                 data_copy[k] = encrypted_data
-                TriggerSleepAction(0.5)
             end
-            print("encrypted successful")
         end
 
         TriggerSleepAction(0.)
@@ -2518,8 +2511,10 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                --print(i, n, data_copy[i], SaveSystem.data[i])
-                --TriggerSleepAction(0.3)
+                if data_copy[i] == nil or SaveSystem.data[i] == nil then
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    return
+                end
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
@@ -4603,12 +4598,12 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
 
-    --SaveSystem.InitNewHeroEvent()
+    SaveSystem.InitNewHeroEvent()
     SaveSystem.gamecache = InitGameCache("savesystem")
     SaveSystem.map_number = 1
     SaveSystem.InitSaveEvent()

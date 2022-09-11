@@ -151,11 +151,11 @@ function SaveSystem.Load()
 
         SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
-        for i = 1, SaveSystem.data[1] do
+        for i = 1, #SaveSystem.data do
             Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
         end
-        for i = 1, SaveSystem.user_data[1] do
-            Preload(I2S(SaveSystem.user_data[i]).." user_data["..I2S(i).."] < load")
+        for j = 1, #SaveSystem.user_data do
+            Preload(I2S(SaveSystem.user_data[j]).." user_data["..I2S(j).."] < load")
         end
         PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
         PreloadGenClear()
@@ -191,17 +191,14 @@ function SaveSystem.ada(is_player, file_name, u)
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
-            print("user key")
         end
 
         if is_player then
             item_data = SaveSystem.SaveUnitData(item_data, u)
-            print("save unit data")
         end
 
         if is_player then
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
-            print("save base state")
         end
 
         if SaveSystem.user_data[1] > 0 then
@@ -213,7 +210,6 @@ function SaveSystem.ada(is_player, file_name, u)
                     is_player = false
                 end
             end
-            print("save user data")
         end
 
         if is_player then
@@ -244,15 +240,12 @@ function SaveSystem.ada(is_player, file_name, u)
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
-                print(i, k, n, SaveSystem.data[i], SaveSystem.data[k])
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
                 encrypted_data = data_copy[i]
                 data_copy[i] = data_copy[k]
                 data_copy[k] = encrypted_data
-                TriggerSleepAction(0.5)
             end
-            print("encrypted successful")
         end
 
         TriggerSleepAction(0.)
@@ -261,8 +254,10 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
-                --print(i, n, data_copy[i], SaveSystem.data[i])
-                --TriggerSleepAction(0.3)
+                if data_copy[i] == nil or SaveSystem.data[i] == nil then
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    return
+                end
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
