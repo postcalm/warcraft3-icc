@@ -8,6 +8,12 @@ function TestEntryPoint()
     -- Механики
     BattleSystem.Init()
 
+    --SaveSystem.InitNewHeroEvent()
+    SaveSystem.gamecache = InitGameCache("savesystem")
+    SaveSystem.map_number = 1
+    SaveSystem.InitSaveEvent()
+    SaveSystem.InitLoadEvent()
+
     -- Персонажи
     Priest.Init(Location(300., -490.))
     Paladin.Init(Location(-400., -490.))

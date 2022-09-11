@@ -149,7 +149,7 @@ function SaveSystem.Load()
             save_file = "default.txt"
         end
 
-        SaveSystem.afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
+        SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, SaveSystem.data[1] do
             Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
@@ -191,14 +191,17 @@ function SaveSystem.ada(is_player, file_name, u)
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
+            print("user key")
         end
 
         if is_player then
             item_data = SaveSystem.SaveUnitData(item_data, u)
+            print("save unit data")
         end
 
         if is_player then
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
+            print("save base state")
         end
 
         if SaveSystem.user_data[1] > 0 then
@@ -210,6 +213,7 @@ function SaveSystem.ada(is_player, file_name, u)
                     is_player = false
                 end
             end
+            print("save user data")
         end
 
         if is_player then
@@ -240,12 +244,15 @@ function SaveSystem.ada(is_player, file_name, u)
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
+                print(i, k, n, SaveSystem.data[i], SaveSystem.data[k])
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
                 encrypted_data = data_copy[i]
                 data_copy[i] = data_copy[k]
                 data_copy[k] = encrypted_data
+                TriggerSleepAction(0.5)
             end
+            print("encrypted successful")
         end
 
         TriggerSleepAction(0.)
@@ -254,6 +261,8 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
+                --print(i, n, data_copy[i], SaveSystem.data[i])
+                --TriggerSleepAction(0.3)
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 

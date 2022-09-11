@@ -1,15 +1,8 @@
-udg_SaveUnit_gamecache = nil
-udg_SaveUnit_map_number = 0
 udg_cache = nil
 gg_trg_EntryPoint = nil
 gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
-gg_trg_NewHero = nil
-gg_trg_Init = nil
-gg_trg_SaveHero = nil
-gg_trg_LoadHero = nil
 function InitGlobals()
-    udg_SaveUnit_map_number = 0
 end
 
 --CUSTOM_CODE
@@ -305,7 +298,7 @@ setmetatable(Ability, {
     end,
 })
 
-
+--- Конструктор класса
 function Ability:_init(ability, tooltip, text)
     self.ability = ability
     self.tooltip = tooltip
@@ -354,6 +347,7 @@ setmetatable(Effect, {
     end,
 })
 
+--- Конструктор класса
 function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
@@ -723,6 +717,7 @@ setmetatable(Frame, {
     end,
 })
 
+--- Конструктор класса
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
     if simple then
@@ -1017,9 +1012,9 @@ setmetatable(Point, {
 
 --- Конструктор класса
 function Point:_init(X, Y, Z)
-    self.X = X or 0
-    self.Y = Y or 0
-    self.Z = Z or 0
+    self.X = X or 0.
+    self.Y = Y or 0.
+    self.Z = Z or 0.
 end
 
 function Point:get2DPoint()
@@ -1066,6 +1061,7 @@ setmetatable(TextTag, {
     end
 })
 
+--- Конструктор класса
 function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency)
     self.texttag = CreateTextTag()
     self.text_height = 0
@@ -1214,6 +1210,7 @@ setmetatable(Unit, {
     end,
 })
 
+--- Конструктор класса
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
@@ -1501,7 +1498,7 @@ end
 
 --- Реген HP по площади
 ---@param heal real Количество хп в абсолютных величинах
----@param overtime real Частота исцеления
+---@param overtime real Частота исцеления. По умолчанию 0
 ---@param location location Место исцеления
 ---@param radius real Радиус в метрах
 ---@return nil
@@ -1754,6 +1751,7 @@ setmetatable(UnitSpell, {
     end,
 })
 
+--- Конструктор класса
 function UnitSpell:_init(owner, location)
     local loc = location or GetUnitLoc(owner)
     local face = GetUnitFacing(owner)
@@ -1780,29 +1778,33 @@ end
 --- Система сохранений
 SaveSystem = {
     --- Фактический юнит/Игровой персонаж
-    hero = {},
+    hero       = {},
     --- Юнит, которого требуется сохранить
-    unit = nil,
+    unit       = nil,
     --- Идентификатор класса
-    classid = 0,
+    classid    = 0,
     --- Список способностей юнита
-    abilities = {},
+    abilities  = {},
     --- Книга заклинаний юнита
-    spellbook = nil,
+    spellbook  = nil,
     --- Место воскрешения
-    respawn = nil,
+    respawn    = nil,
     --- Директория, где будут лежать сохранения
-    directory = "test",
+    directory  = "test",
     --- Идентификатор автора системы сохранений
-    author = 1546,
+    author     = 1546,
     --- Пользовательские данные
-    user_data = {},
+    user_data  = {},
     --- Данные игрока и его юнита
-    data = {},
+    data       = {},
     --- Флаг процесса сохранения
-    process = false,
-    hash1 = 0,
-    hash2 = 0,
+    process    = false,
+    hash1      = 0,
+    hash2      = 0,
+    --- Кэш для синхронизации данных
+    gamecache  = nil,
+    --- Номер карты
+    map_number = 0,
     -- Автор данного творения запихал все данные в один массив
     -- и дабы как-то различать что находится внутри него,
     -- добавил специальные числа, разграничиваниющие области эти данных
@@ -1845,7 +1847,7 @@ CLASSES = {
 --- Фактические идентификаторы классов
 HEROES = {
     paladin = PALADIN,
-    priest = PRIEST,
+    priest  = PRIEST,
 }
 
 -- Copyright (c) meiso
@@ -2068,7 +2070,8 @@ function SaveSystem.SaveBaseState(i, u, world)
         local rect_max_x = R2I(GetRectMaxX(world))
         local rect_min_y = R2I(GetRectMinY(world))
         local rect_max_y = R2I(GetRectMaxY(world))
-        local map_number = udg_SaveUnit_map_number
+        print(SaveSystem.map_number)
+        local map_number = SaveSystem.map_number
         local unit_type_id = GetUnitTypeId(u)
 
         local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(SaveSystem.magic_number.one) / (rect_max_x - rect_min_x)))
@@ -2233,7 +2236,7 @@ function SaveSystem.LoadBaseState(pl)
         end
 
         -- если карта другая - создаём персонажа в заранее заданном месте
-        if map_number ~= udg_SaveUnit_map_number then
+        if map_number ~= SaveSystem.map_number then
             local loc = GetRandomLocInRect(gg_rct_RespawZone)
             unit_x = GetLocationX(loc)
             unit_y = GetLocationY(loc)
@@ -2403,7 +2406,7 @@ function SaveSystem.Load()
             save_file = "default.txt"
         end
 
-        SaveSystem.afa(udg_SaveUnit_gamecache, GetTriggerPlayer(), save_file)
+        SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, SaveSystem.data[1] do
             Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
@@ -2445,14 +2448,17 @@ function SaveSystem.ada(is_player, file_name, u)
             if user_key == 0 then
                 user_key = SaveSystem.CreateUserKey(salt, value_for_key)
             end
+            print("user key")
         end
 
         if is_player then
             item_data = SaveSystem.SaveUnitData(item_data, u)
+            print("save unit data")
         end
 
         if is_player then
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
+            print("save base state")
         end
 
         if SaveSystem.user_data[1] > 0 then
@@ -2464,6 +2470,7 @@ function SaveSystem.ada(is_player, file_name, u)
                     is_player = false
                 end
             end
+            print("save user data")
         end
 
         if is_player then
@@ -2494,12 +2501,15 @@ function SaveSystem.ada(is_player, file_name, u)
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
                 encrypted_data = SaveSystem.data[i]
+                print(i, k, n, SaveSystem.data[i], SaveSystem.data[k])
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
                 encrypted_data = data_copy[i]
                 data_copy[i] = data_copy[k]
                 data_copy[k] = encrypted_data
+                TriggerSleepAction(0.5)
             end
+            print("encrypted successful")
         end
 
         TriggerSleepAction(0.)
@@ -2508,6 +2518,8 @@ function SaveSystem.ada(is_player, file_name, u)
             PreloadGenClear()
             n = item_data + 1
             for i = 1, n do
+                --print(i, n, data_copy[i], SaveSystem.data[i])
+                --TriggerSleepAction(0.3)
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
             end
 
@@ -2608,8 +2620,8 @@ end
 ---@return nil
 function SaveSystem.AddHeroAbilities(class)
     SaveSystem.classid = CLASSES[class]
-    SaveSystem.DefineAbilities()
     local hero = Unit(SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())])
+    SaveSystem.DefineAbilities()
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)
     hero:SetLevel(80)
@@ -3382,7 +3394,7 @@ function CultFanatic.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultFanatic.unit:DealMagicDamageLoc {
-            damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
+        damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
     }
     CultFanatic.summoned = false
     CultFanatic.morphed = false
@@ -3865,7 +3877,7 @@ end
 
 
 function LadyDeathwhisper.Summoning()
-    if not CultAdherent.summoned then
+    if not CultAdherent.summoned and not CultFanatic.summoned then
         CultAdherent.summoned = true
         CultFanatic.summoned = true
         CultAdherent.Init(Location(4671., 1483.), 350.)
@@ -4596,6 +4608,12 @@ function TestEntryPoint()
     -- Механики
     BattleSystem.Init()
 
+    --SaveSystem.InitNewHeroEvent()
+    SaveSystem.gamecache = InitGameCache("savesystem")
+    SaveSystem.map_number = 1
+    SaveSystem.InitSaveEvent()
+    SaveSystem.InitLoadEvent()
+
     -- Персонажи
     Priest.Init(Location(300., -490.))
     Paladin.Init(Location(-400., -490.))
@@ -4616,6 +4634,20 @@ function InitTrig_EntryPoint()
     TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
+function Trig_Alert_Actions()
+    TriggerSleepAction(0.00)
+    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
+    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
+    ForceAddPlayerSimple(Player(1), bj_FORCE_PLAYER[0])
+    SetForceAllianceStateBJ(GetPlayersByMapControl(MAP_CONTROL_USER), GetPlayersByMapControl(MAP_CONTROL_USER), bj_ALLIANCE_ALLIED)
+    SetForceAllianceStateBJ(bj_FORCE_PLAYER[0], bj_FORCE_PLAYER[0], bj_ALLIANCE_ALLIED)
+end
+
+function InitTrig_Alert()
+    gg_trg_Alert = CreateTrigger()
+    TriggerAddAction(gg_trg_Alert, Trig_Alert_Actions)
+end
+
 function Trig_RespawnHero_Actions()
         SaveSystem.UnitsRespawn()
         BuffSystem.RemoveAllBuffs(GetTriggerUnit())
@@ -4627,48 +4659,15 @@ function InitTrig_RespawnHero()
     TriggerAddAction(gg_trg_RespawnHero, Trig_RespawnHero_Actions)
 end
 
-function Trig_Init_Actions()
-        udg_SaveUnit_gamecache = InitGameCache("cache")
-    udg_SaveUnit_gamecache = udg_SaveUnit_gamecache
-    udg_SaveUnit_map_number = 1
-end
-
-function InitTrig_Init()
-    gg_trg_Init = CreateTrigger()
-    TriggerAddAction(gg_trg_Init, Trig_Init_Actions)
-end
-
-function Trig_SaveHero_Actions()
-        SaveSystem.InitSaveEvent()
-end
-
-function InitTrig_SaveHero()
-    gg_trg_SaveHero = CreateTrigger()
-    TriggerAddAction(gg_trg_SaveHero, Trig_SaveHero_Actions)
-end
-
-function Trig_LoadHero_Actions()
-        SaveSystem.InitLoadEvent()
-end
-
-function InitTrig_LoadHero()
-    gg_trg_LoadHero = CreateTrigger()
-    TriggerAddAction(gg_trg_LoadHero, Trig_LoadHero_Actions)
-end
-
 function InitCustomTriggers()
     InitTrig_EntryPoint()
+    InitTrig_Alert()
     InitTrig_RespawnHero()
-    InitTrig_Init()
-    InitTrig_SaveHero()
-    InitTrig_LoadHero()
 end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_EntryPoint)
-    ConditionalTriggerExecute(gg_trg_Init)
-    ConditionalTriggerExecute(gg_trg_SaveHero)
-    ConditionalTriggerExecute(gg_trg_LoadHero)
+    ConditionalTriggerExecute(gg_trg_Alert)
 end
 
 function InitCustomPlayerSlots()

@@ -70,7 +70,7 @@ function SaveSystem.SaveBaseState(i, u, world)
         local rect_max_x = R2I(GetRectMaxX(world))
         local rect_min_y = R2I(GetRectMinY(world))
         local rect_max_y = R2I(GetRectMaxY(world))
-        local map_number = udg_SaveUnit_map_number
+        local map_number = SaveSystem.map_number
         local unit_type_id = GetUnitTypeId(u)
 
         local hero_position_x = R2I((GetUnitX(u) - rect_min_x) * (I2R(SaveSystem.magic_number.one) / (rect_max_x - rect_min_x)))
@@ -235,7 +235,7 @@ function SaveSystem.LoadBaseState(pl)
         end
 
         -- если карта другая - создаём персонажа в заранее заданном месте
-        if map_number ~= udg_SaveUnit_map_number then
+        if map_number ~= SaveSystem.map_number then
             local loc = GetRandomLocInRect(gg_rct_RespawZone)
             unit_x = GetLocationX(loc)
             unit_y = GetLocationY(loc)

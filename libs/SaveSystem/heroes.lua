@@ -51,8 +51,8 @@ end
 ---@return nil
 function SaveSystem.AddHeroAbilities(class)
     SaveSystem.classid = CLASSES[class]
-    SaveSystem.DefineAbilities()
     local hero = Unit(SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())])
+    SaveSystem.DefineAbilities()
     hero:AddAbilities(table.unpack(SaveSystem.abilities))
     hero:AddSpellbook(SaveSystem.spellbook)
     hero:SetLevel(80)
