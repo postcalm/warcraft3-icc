@@ -8,7 +8,7 @@ function TestEntryPoint()
     -- Механики
     BattleSystem.Init()
 
-    SaveSystem.InitNewHeroEvent()
+    --SaveSystem.InitNewHeroEvent()
     SaveSystem.gamecache = InitGameCache("savesystem")
     SaveSystem.map_number = 1
     SaveSystem.InitSaveEvent()
