@@ -27,11 +27,11 @@ function dummy_eq()
 end
 
 function get_cache_eq()
-    if udg_cache == nil then
+    if EQUIP_CACHE == nil then
         FlushGameCache(InitGameCache("equipment_vars.w3v"))
-        udg_cache = InitGameCache("equipment_vars.w3v")
+        EQUIP_CACHE = InitGameCache("equipment_vars.w3v")
     end
-    return udg_cache
+    return EQUIP_CACHE
 end
 
 --###########################################################################

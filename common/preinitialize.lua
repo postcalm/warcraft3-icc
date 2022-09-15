@@ -33,3 +33,6 @@ CultFanatic = {
     summoned = false,
     morphed = false,
 }
+
+--- Кэш для системы экипировки
+EQUIP_CACHE = nil
