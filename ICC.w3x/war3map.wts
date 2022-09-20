@@ -1,0 +1,686 @@
+﻿STRING 1
+{
+Игрок 1
+}
+
+STRING 3
+{
+ICC
+}
+
+STRING 4
+{
+Не важно
+}
+
+STRING 5
+{
+Описание отсутствует
+}
+
+STRING 6
+{
+meiso, IRMessiah
+}
+
+STRING 7
+{
+#ненавижусоздаватьгребанныекарты
+#приключениена15минут
+}
+
+STRING 13
+// Разрушаемые объекты: B001 (stairs), Name (Название)
+{
+stairs
+}
+
+STRING 14
+// Декорации: D000 (pillar), Name (Название)
+{
+pillar
+}
+
+STRING 22
+// Войска: h000 (Bone Spike), Name (Название)
+{
+Bone Spike
+}
+
+STRING 25
+// Способности: A001 (Coldflame), Name (Название)
+{
+Coldflame
+}
+
+STRING 26
+// Способности: A000 (Bone Spike), Name (Название)
+{
+Bone Spike
+}
+
+STRING 27
+// Войска: U001 (Lord Marrowgar), Name (Название)
+{
+Lord Marrowgar
+}
+
+STRING 32
+// Способности: A002 (Saber Lash), Name (Название)
+{
+Saber Lash
+}
+
+STRING 33
+// Способности: A003 (Crit_template), Name (Название)
+{
+Crit_template
+}
+
+STRING 34
+// Способности: A005 (Whirlwind), Name (Название)
+{
+Whirlwind
+}
+
+STRING 37
+// Войска: U000 (Lady Deathwhisper), Propernames (Имена собственные)
+{
+Леди Смертный Шепот
+}
+
+STRING 38
+// Войска: U000 (Lady Deathwhisper), Name (Название)
+{
+Lady Deathwhisper
+}
+
+STRING 39
+// Войска: U001 (Lord Marrowgar), Propernames (Имена собственные)
+{
+Лорд Ребрад
+}
+
+STRING 42
+// Войска: e000 (dummy_eq), Name (Название)
+{
+dummy_eq
+}
+
+STRING 43
+// Предметы: I000 (add_attack), Name (Название)
+{
+add_attack
+}
+
+STRING 44
+// Способности: A007 (attack_1.5k), Name (Название)
+{
+attack_1.5k
+}
+
+STRING 45
+// Предметы: I001 (add_armor), Name (Название)
+{
+add_armor
+}
+
+STRING 46
+// Способности: A008 (armor_500), Name (Название)
+{
+armor_500
+}
+
+STRING 47
+// Способности: A00B (Hammer of the Righteous), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 57
+// Способности: A00B (Hammer of the Righteous), Name (Название)
+{
+Hammer of the Righteous
+}
+
+STRING 65
+{
+Игрок 2
+}
+
+STRING 66
+// Способности: A006 (ShadowBolt), Name (Название)
+{
+ShadowBolt
+}
+
+STRING 67
+// Предметы: I002 (add_hp), Name (Название)
+{
+add_hp
+}
+
+STRING 68
+// Способности: A00D (hp_90k), Name (Название)
+{
+hp_90k
+}
+
+STRING 90
+// Способности: A00E (Spell_Template), Name (Название)
+{
+Spell_Template
+}
+
+STRING 93
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+{
+R
+}
+
+STRING 96
+// Предметы: I003 (add_magicarmor), Name (Название)
+{
+add_magicarmor
+}
+
+STRING 97
+// Способности: A00I (magicarmor_500), Name (Название)
+{
+magicarmor_500
+}
+
+STRING 98
+// Способности: A00J (Crusader Aura), Name (Название)
+{
+Crusader Aura
+}
+
+STRING 102
+// Способности: A00A (Concecration), Tip (Подсказка: используется, нормальная)
+{
+Освящение
+}
+
+STRING 103
+// Способности: A00A (Concecration), Ubertip (Подсказка: используется, подробная)
+{
+Освящение
+}
+
+STRING 113
+// Предметы: I004 (add_dec_dmg), Name (Название)
+{
+add_dec_dmg
+}
+
+STRING 114
+// Способности: A00K (decrease_dmg), Name (Название)
+{
+decrease_dmg
+}
+
+STRING 117
+// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 118
+// Способности: AHds (Божественный щит), Hotkey (Горячая клавиша: используется)
+{
+Z
+}
+
+STRING 119
+// Способности: A00H (Blessing of Sanctuary), Name (Название)
+{
+Blessing of Sanctuary
+}
+
+STRING 120
+// Способности: A00H (Blessing of Sanctuary), Tip (Подсказка: используется, нормальная)
+{
+Благословение неприкосновенности (|cffffcc00X|r)
+}
+
+STRING 121
+// Способности: A00H (Blessing of Sanctuary), Ubertip (Подсказка: используется, подробная)
+{
+Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и повышая ее силу и выносливость на 10%.
+}
+
+STRING 122
+// Способности: A00J (Crusader Aura), Tip (Подсказка: используется, нормальная)
+{
+Аура воина Света [|cffffcc00Уровень 1|r]
+}
+
+STRING 123
+// Способности: A00J (Crusader Aura), Ubertip (Подсказка: используется, подробная)
+{
+Повышает на 20% скорость передвижения верхом всех участников группы в радиусе 40 м.
+}
+
+STRING 124
+// Способности: A00C (Blessing of Kings), Name (Название)
+{
+Blessing of Kings
+}
+
+STRING 125
+// Способности: A00C (Blessing of Kings), Tip (Подсказка: используется, нормальная)
+{
+Благословение королей (|cffffcc00Z|r)
+}
+
+STRING 127
+// Способности: A00G (Blessing of Wisdom), Tip (Подсказка: используется, нормальная)
+{
+Благословение мудрости (|cffffcc00C|r)
+}
+
+STRING 128
+// Способности: A00G (Blessing of Wisdom), Ubertip (Подсказка: используется, подробная)
+{
+Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.
+}
+
+STRING 129
+// Предметы: I005 (Blessing of Wisdom), Name (Название)
+{
+Blessing of Wisdom
+}
+
+STRING 130
+// Способности: A00G (Blessing of Wisdom), Name (Название)
+{
+Blessing of Wisdom
+}
+
+STRING 131
+// Способности: A00F (Blessing of Wisdom), Name (Название)
+{
+Blessing of Wisdom
+}
+
+STRING 132
+// Способности: A00L (Spellbook_Paladin), Name (Название)
+{
+Spellbook_Paladin
+}
+
+STRING 133
+// Способности: A00M (Blessing of Might), Name (Название)
+{
+Blessing of Might
+}
+
+STRING 134
+// Способности: A00M (Blessing of Might), Tip (Подсказка: используется, нормальная)
+{
+Благословение могущества (|cffffcc00V|r)
+}
+
+STRING 135
+// Способности: A00M (Blessing of Might), Ubertip (Подсказка: используется, подробная)
+{
+Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.
+}
+
+STRING 136
+// Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 137
+// Способности: A00N (Judgement of Light), Name (Название)
+{
+Judgement of Light
+}
+
+STRING 140
+// Способности: A00P (Judgement of Light), Name (Название)
+{
+Judgement of Light
+}
+
+STRING 141
+// Заклинания/эффекты: B002 (Judgement of Light), Bufftip (Подсказка)
+{
+Правосудие света
+}
+
+STRING 143
+// Способности: A00N (Judgement of Light), Tip (Подсказка: используется, нормальная)
+{
+Правосудие света (|cffffcc00D|r)
+}
+
+STRING 144
+// Способности: A00O (Judgement of Wisdom), Name (Название)
+{
+Judgement of Wisdom
+}
+
+STRING 145
+// Заклинания/эффекты: B003 (Judgement of Wisdom), Bufftip (Подсказка)
+{
+Правосудие мудрости
+}
+
+STRING 146
+// Способности: A00O (Judgement of Wisdom), Tip (Подсказка: используется, нормальная)
+{
+Правосудие мудрости (|cffffcc00D|r)
+}
+
+STRING 147
+// Способности: A00Q (Judgement of Wisdom), Name (Название)
+{
+Judgement of Wisdom
+}
+
+STRING 148
+// Способности: A00P (Judgement of Light), EditorSuffix (Суффикс редактора)
+{
+(trigger)
+}
+
+STRING 149
+// Способности: A00P (Judgement of Light), Hotkey (Горячая клавиша: используется)
+{
+D
+}
+
+STRING 151
+// Способности: A00Q (Judgement of Wisdom), EditorSuffix (Суффикс редактора)
+{
+(trigger)
+}
+
+STRING 152
+// Способности: A00Q (Judgement of Wisdom), Hotkey (Горячая клавиша: используется)
+{
+F
+}
+
+STRING 154
+// Заклинания/эффекты: B002 (Judgement of Light), EditorName (Название (только для Редактора))
+{
+Judgement of Light
+}
+
+STRING 155
+// Заклинания/эффекты: B003 (Judgement of Wisdom), EditorName (Название (только для Редактора))
+{
+Judgement of Wisdom
+}
+
+STRING 156
+// Способности: A00P (Judgement of Light), Tip (Подсказка: используется, нормальная)
+{
+Правосудие света (|cffffcc00D|r)
+}
+
+STRING 157
+// Способности: A00Q (Judgement of Wisdom), Tip (Подсказка: используется, нормальная)
+{
+Правосудие мудрости (|cffffcc00F|r)
+}
+
+STRING 158
+// Способности: A00R (Shield of Righteousness), Name (Название)
+{
+Shield of Righteousness
+}
+
+STRING 160
+// Способности: A00R (Shield of Righteousness), Ubertip (Подсказка: используется, подробная)
+{
+Мощный удар щитом, наносящий урон от светлой магии. Величина урона рассчитывается исходя из показателя силы и увеличивается на 520 ед. дополнительно.
+}
+
+STRING 161
+// Способности: A004 (Avenger's Shield), Name (Название)
+{
+Avenger's Shield
+}
+
+STRING 162
+// Способности: A004 (Avenger's Shield), Tip (Подсказка: используется, нормальная)
+{
+Щит мстителя (|cffffcc00C|r)
+}
+
+STRING 165
+{
+Игрок 3
+}
+
+STRING 166
+{
+Введите -save _название_ для сохранения персонажа
+Введите -load _название_ для загрузки персонажа
+}
+
+STRING 167
+{
+Король-лич
+}
+
+STRING 170
+{
+Силы света
+}
+
+STRING 171
+// Способности: A00S (Flash Heal), Name (Название)
+{
+Flash Heal
+}
+
+STRING 172
+// Способности: A00T (Renew), Name (Название)
+{
+Renew
+}
+
+STRING 177
+// Способности: A00U (CircleOfHealing), Name (Название)
+{
+CircleOfHealing
+}
+
+STRING 183
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 185
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+
+STRING 186
+// Заклинания/эффекты: B000 (Blessing of Kings), EditorName (Название (только для Редактора))
+{
+Blessing of Kings
+}
+
+STRING 187
+// Заклинания/эффекты: B001 (Blessing of Wisdom), EditorName (Название (только для Редактора))
+{
+Blessing of Wisdom
+}
+
+STRING 188
+// Заклинания/эффекты: B004 (Blessing of Sanctuary), EditorName (Название (только для Редактора))
+{
+Blessing of Sanctuary
+}
+
+STRING 189
+// Заклинания/эффекты: B005 (Blessing of Might), EditorName (Название (только для Редактора))
+{
+Blessing of Might
+}
+
+STRING 191
+// Войска: h001 (spell_dummy), Name (Название)
+{
+spell_dummy
+}
+
+STRING 194
+// Войска: h002 (dummy), Name (Название)
+{
+dummy
+}
+
+STRING 195
+// Предметы: I006 (add_mp), Name (Название)
+{
+add_mp
+}
+
+STRING 197
+// Способности: A00W (mp_50k), Name (Название)
+{
+mp_50k
+}
+
+STRING 198
+// Войска: u002 (Cult Adherent), Name (Название)
+{
+Cult Adherent
+}
+
+STRING 199
+// Войска: u003 (Cult Adherent), Name (Название)
+{
+Cult Adherent
+}
+
+STRING 200
+// Войска: u003 (Cult Adherent), EditorSuffix (Название: суффикс редактора)
+{
+(morphed)
+}
+
+STRING 203
+// Войска: h003 (Cult Fanatic), Name (Название)
+{
+Cult Fanatic
+}
+
+STRING 204
+// Войска: h004 (Cult Fanatic), Name (Название)
+{
+Cult Fanatic
+}
+
+STRING 205
+// Войска: h004 (Cult Fanatic), EditorSuffix (Название: суффикс редактора)
+{
+(morphed)
+}
+
+STRING 206
+{
+Enter -new "class name", e.c. -new paladin
+}
+
+STRING 207
+// Войска: Hpal (Паладин), Propernames (Имена собственные)
+{
+Сеймур Правдивый,Малак Справедливый,Морлун Могучий,Агамонд Заступник,Занн Бесстрашный,Ариус Храбрый,Рогволд Бесстрашный
+}
+
+STRING 209
+// Способности: A00T (Renew), Ubertip (Подсказка: используется, подробная)
+{
+Восстанавливает цели 1400 ед. здоровья в течение 15 сек..
+}
+
+STRING 210
+// Способности: A00S (Flash Heal), Tip (Подсказка: используется, нормальная)
+{
+Быстрое исцеление(|cffffcc00Q|r)
+}
+
+STRING 211
+// Способности: A00S (Flash Heal), Ubertip (Подсказка: используется, подробная)
+{
+Восстанавливает 1887 - 2193 ед. здоровья союзнику.
+}
+
+STRING 212
+// Способности: A00T (Renew), Tip (Подсказка: используется, нормальная)
+{
+Обновление (|cffffcc00E|r)
+}
+
+STRING 213
+// Способности: A00U (CircleOfHealing), Ubertip (Подсказка: используется, подробная)
+{
+Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда, находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.
+}
+
+STRING 214
+// Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
+{
+Круг исцеления (|cffffcc00W|r)
+}
+
+STRING 216
+// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
+{
+Щит праведности (|cffffcc00V|r)
+}
+
+STRING 217
+// Способности: A00A (Concecration), Name (Название)
+{
+Concecration
+}
+
+STRING 218
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 219
+// Способности: A00L (Spellbook_Paladin), Tip (Подсказка: используется, нормальная)
+{
+Книга заклинаний (X)
+}
+
+STRING 220
+// Способности: AHds (Божественный щит), Unhotkey (Горячая клавиша: не используется)
+{
+Z
+}
+
+STRING 221
+// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
+{
+Z
+}
+
+STRING 222
+// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 223
+// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+

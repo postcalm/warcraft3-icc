@@ -1,0 +1,51 @@
+
+Frame "BACKDROP" "BoxedTextBackgroundTemplate" {
+	DecorateFileNames,
+	
+	BackdropTileBackground,
+	BackdropBackground  "ToolTipBackground",
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	BackdropCornerSize  0.008,
+	BackdropBackgroundInsets 0.0022 0.0022 0.0022 0.0022,
+	BackdropEdgeFile  "ToolTipBorder",
+	BackdropBlendAll,
+}
+
+Frame "BACKDROP" "Tooltip" INHERITS "BoxedTextBackgroundTemplate" {
+	UseActiveContext,
+	
+	Width 0.15,
+	Height 0.05,
+ 
+}
+
+Frame "TEXT" "TooltipTitle" {
+	UseActiveContext,
+	DecorateFileNames,
+
+	// Positionate "BoxedTextSimpleTitle"'s TOPLEFT to "Tooltip"'s TOPLEFT with an offset
+	FontFlags "FIXEDSIZE",
+	FrameFont "MasterFont", 0.014, "",
+	// Red Green Blue Alpha
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+	
+	Text "Title",
+}
+ 
+Frame "TEXT" "TooltipContext" {
+	UseActiveContext,
+	DecorateFileNames,
+	
+	Width 0.21,
+	Height 0.0,
+	
+	FontFlags "FIXEDSIZE",
+	FrameFont "MasterFont", 0.012, "",
+	FontColor 1.0 1.0 1.0 1.0,
+	FontShadowColor 0.0 0.0 0.0 0.9,
+	FontShadowOffset 0.001 -0.001,
+	
+	Text "Text",
+}
