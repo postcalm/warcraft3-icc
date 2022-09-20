@@ -3237,7 +3237,7 @@ HeroSelector = {
     warlock        = nil,
     hunter         = nil,
     hero           = nil,
-    selected_heros = {},
+    selected_heroes = {},
 }
 
 function HeroSelector.Init()
@@ -3329,7 +3329,7 @@ function HeroSelector.ConfirmCharacter(hero)
                 dialog:Destroy()
                 local tmp = split(hero:GetName(), "_")[1]
                 HeroSelector.hero = tmp:lower()
-                HeroSelector.CreateHero()
+                HeroSelector.AcceptHero(HeroSelector.hero)
                 HeroSelector.Close()
             end
             confirm:Destroy()
@@ -3342,6 +3342,18 @@ function HeroSelector.CreateHero()
     local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
     SaveSystem.hero[playerid] = unit:GetId()
     SaveSystem.AddHeroAbilities(HeroSelector.hero)
+end
+
+function HeroSelector.AcceptHero(hero)
+    local function check()
+        for _, h in pairs(HeroSelector.selected_heroes) do
+            if h == hero then return true end
+        end
+        return false
+    end
+    if check() then return end
+    table.insert(HeroSelector.selected_heroes, hero)
+    HeroSelector.CreateHero()
 end
 
 function HeroSelector.Close()
