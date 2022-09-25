@@ -4065,7 +4065,7 @@ function Paladin.InitBlessingOfKings()
     Ability(
             BLESSING_OF_KINGS,
             "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
+            "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
@@ -4166,8 +4166,8 @@ function Paladin.InitBlessingOfSanctuary()
     Ability(
             BLESSING_OF_SANCTUARY,
             "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-            "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
@@ -4463,7 +4463,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -4649,7 +4649,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
@@ -4661,8 +4661,8 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    --Priest.Init(Location(300., -490.))
+    --Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
