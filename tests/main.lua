@@ -2,7 +2,7 @@
 -- Точка входа для инициализации всего
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
-    --loadTOCFile("templates.toc")
+    loadTOCFile("templates.toc")
     --HeroSelector.Init()
 
     -- Механики
