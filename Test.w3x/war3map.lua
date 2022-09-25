@@ -4652,7 +4652,7 @@ function TestEntryPoint()
     HeroSelector.Init()
 
     -- Механики
-    --BattleSystem.Init()
+    BattleSystem.Init()
 
     --SaveSystem.InitNewHeroEvent()
     --SaveSystem.gamecache = InitGameCache("savesystem")
