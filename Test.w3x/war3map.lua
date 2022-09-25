@@ -3111,11 +3111,11 @@ function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-    --settarget:RegisterPlayerMouseDown()
+    settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
-    settarget:AddAction(BattleSystem.SetTarget)
+    --settarget:AddAction(BattleSystem.SetTarget)
 end
 
 function BattleSystem.IsRightButton()
