@@ -3111,8 +3111,7 @@ function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-
-    settarget:RegisterPlayerMouseDown()
+    --settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
@@ -4065,7 +4064,7 @@ function Paladin.InitBlessingOfKings()
     Ability(
             BLESSING_OF_KINGS,
             "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
+            "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
@@ -4166,8 +4165,8 @@ function Paladin.InitBlessingOfSanctuary()
     Ability(
             BLESSING_OF_SANCTUARY,
             "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-            "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
@@ -4463,7 +4462,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -4649,7 +4648,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
@@ -4661,13 +4660,13 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    --Priest.Init(Location(300., -490.))
+    --Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
-    DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200.))
+    --DummyForHealing(Location(300., 200.))
+    --DummyForDPS(Location(-400., 200.))
 
 end
 
@@ -4679,20 +4678,6 @@ end
 function InitTrig_EntryPoint()
     gg_trg_EntryPoint = CreateTrigger()
     TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
-end
-
-function Trig_Alert_Actions()
-    TriggerSleepAction(0.00)
-    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_206")
-    DisplayTextToForce(GetPlayersAll(), "TRIGSTR_166")
-    ForceAddPlayerSimple(Player(1), bj_FORCE_PLAYER[0])
-    SetForceAllianceStateBJ(GetPlayersByMapControl(MAP_CONTROL_USER), GetPlayersByMapControl(MAP_CONTROL_USER), bj_ALLIANCE_ALLIED)
-    SetForceAllianceStateBJ(bj_FORCE_PLAYER[0], bj_FORCE_PLAYER[0], bj_ALLIANCE_ALLIED)
-end
-
-function InitTrig_Alert()
-    gg_trg_Alert = CreateTrigger()
-    TriggerAddAction(gg_trg_Alert, Trig_Alert_Actions)
 end
 
 function Trig_RespawnHero_Actions()
@@ -4708,13 +4693,11 @@ end
 
 function InitCustomTriggers()
     InitTrig_EntryPoint()
-    InitTrig_Alert()
     InitTrig_RespawnHero()
 end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_EntryPoint)
-    ConditionalTriggerExecute(gg_trg_Alert)
 end
 
 function InitCustomPlayerSlots()

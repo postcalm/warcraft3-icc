@@ -3147,8 +3147,7 @@ function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-
-    settarget:RegisterPlayerMouseDown()
+    --settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
@@ -4685,7 +4684,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
@@ -4697,13 +4696,13 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    --Priest.Init(Location(300., -490.))
+    --Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
-    DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200.))
+    --DummyForHealing(Location(300., 200.))
+    --DummyForDPS(Location(-400., 200.))
 
 end
 
