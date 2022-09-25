@@ -11,7 +11,7 @@ CULT_FANATIC_MORPH  = FourCC("h004")
 
 --tanks
 PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = nil
+DEATH_KNIGHT        = FourCC("Udea")
 WARRIOR             = nil
 --damage dealers
 WARLOCK             = nil

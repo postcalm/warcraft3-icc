@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)

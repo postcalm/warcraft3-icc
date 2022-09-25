@@ -1,0 +1,101 @@
+
+Frame "BACKDROP" "Runes" {
+	DecorateFileNames,
+	
+	Width 0.145,
+	Height 0.03,
+	
+	BackdropTileBackground,
+	BackdropBackgroundSize 0.1,
+	
+	BackdropBackground "QuestDialogNormalBackground",
+	BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+	BackdropCornerSize 0.01,
+	BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
+	BackdropEdgeFile "QuestDialogNormalBorder",
+	
+	Frame "BUTTON" "Blood1" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint RIGHT, "Runes", CENTER, -0.045, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_bloodpresence.tga",
+		}
+		
+	}
+	
+	Frame "BUTTON" "Blood2" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint RIGHT, "Runes", CENTER, -0.023, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_bloodpresence.tga",
+		}
+		
+	}
+	
+	Frame "BUTTON" "Frost1" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint RIGHT, "Runes", CENTER, -0.001, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_frostpresence.tga",
+		}
+		
+	}
+	
+	Frame "BUTTON" "Frost2" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint LEFT, "Runes", CENTER, 0.001, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_frostpresence.tga",
+		}
+		
+	}
+	
+	Frame "BUTTON" "Unholy1" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint LEFT, "Runes", CENTER, 0.023, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_unholypresence.tga",
+		}
+		
+	}
+	
+	Frame "BUTTON" "Unholy2" {
+		Width 0.02,
+		Height 0.02,
+		
+		SetPoint LEFT, "Runes", CENTER, 0.045, 0.0,
+		
+		ControlBackdrop "RunesButtonIcon",
+		Frame "BACKDROP" "RunesButtonIcon" {
+			BackdropBackground "ReplaceableTextures\CommandButtons\deathknight_unholypresence.tga",
+		}
+		
+	}
+	
+	/*Frame "BACKDROP" "Death" {
+		BackdropBackground "ReplaceableTextures\CommandButtons\.tga",
+		BackdropBlendAll,
+		SetPoint CENTER, "Runes", CENTER, 0.0, 0.0,
+	}*/
+	
+}

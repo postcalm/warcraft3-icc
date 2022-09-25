@@ -74,8 +74,17 @@ Paladin = {
     hero = nil,
     consecration_effect = nil,
 }
+
 Priest = {
     hero = nil,
+}
+
+DeathKnight = {
+    hero = nil,
+    blood_runes = 2,
+    frost_runes = 2,
+    unholy_runes = 2,
+    death_runes = 0,
 }
 
 LordMarrowgar = {
@@ -85,6 +94,7 @@ LordMarrowgar = {
     bonespike_effect = false,
     whirlwind_effect = false,
 }
+
 LadyDeathwhisper = {
     unit = nil,
     mana_shield = nil,
@@ -99,6 +109,7 @@ CultAdherent = {
     summoned = false,
     morphed = false,
 }
+
 CultFanatic = {
     unit = nil,
     summoned = false,
@@ -201,7 +212,7 @@ CULT_FANATIC_MORPH  = FourCC("h004")
 
 --tanks
 PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = nil
+DEATH_KNIGHT        = FourCC("Udea")
 WARRIOR             = nil
 --damage dealers
 WARLOCK             = nil
@@ -4054,7 +4065,7 @@ function Paladin.InitBlessingOfKings()
     Ability(
             BLESSING_OF_KINGS,
             "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
+            "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
@@ -4155,8 +4166,8 @@ function Paladin.InitBlessingOfSanctuary()
     Ability(
             BLESSING_OF_SANCTUARY,
             "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-            "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
@@ -4273,6 +4284,7 @@ function Paladin.InitConsecration()
     event:AddAction(Paladin.Consecration)
 end
 
+-- Copyright (c) meiso
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
@@ -4451,7 +4463,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -4587,6 +4599,30 @@ function Priest.InitRenew()
     event:AddAction(Priest.CastRenew)
 end
 
+-- Copyright (c) meiso
+
+function DeathKnight.Init(location)
+    local loc = location or Location(4000., 150.)
+    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+
+    DeathKnight.hero = Unit(GetLocalPlayer(), DEATH_KNIGHT, loc)
+
+    --EquipSystem.RegisterItems(items_list, items_spells_list)
+    --EquipSystem.AddItemsToUnit(DeathKnight.hero, items_list)
+
+    DeathKnight.hero:SetLevel(80)
+
+    DeathKnight.Runes()
+end
+
+-- Copyright (c) meiso
+
+function DeathKnight.Runes()
+    local runes = Frame("Runes")
+    runes:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.155)
+end
+
 
 -- Точка входа для инициализации всего
 function EntryPoint()
@@ -4613,7 +4649,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
@@ -4627,10 +4663,11 @@ function TestEntryPoint()
     -- Персонажи
     Priest.Init(Location(300., -490.))
     Paladin.Init(Location(-400., -490.))
+    DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
     DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200))
+    DummyForDPS(Location(-400., 200.))
 
 end
 

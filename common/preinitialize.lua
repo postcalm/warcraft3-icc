@@ -3,8 +3,17 @@ Paladin = {
     hero = nil,
     consecration_effect = nil,
 }
+
 Priest = {
     hero = nil,
+}
+
+DeathKnight = {
+    hero = nil,
+    blood_runes = 2,
+    frost_runes = 2,
+    unholy_runes = 2,
+    death_runes = 0,
 }
 
 LordMarrowgar = {
@@ -14,6 +23,7 @@ LordMarrowgar = {
     bonespike_effect = false,
     whirlwind_effect = false,
 }
+
 LadyDeathwhisper = {
     unit = nil,
     mana_shield = nil,
@@ -28,6 +38,7 @@ CultAdherent = {
     summoned = false,
     morphed = false,
 }
+
 CultFanatic = {
     unit = nil,
     summoned = false,

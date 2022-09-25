@@ -5,3 +5,4 @@ castbar.fdf
 confirm.fdf
 selector.fdf
 tooltip_selector.fdf
+runes.fdf

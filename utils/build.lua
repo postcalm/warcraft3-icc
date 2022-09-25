@@ -39,6 +39,7 @@ local param = {
         [[\src\lady_deathwhisper]],
         [[\src\paladin]],
         [[\src\priest]],
+        [[\src\death_knight]],
         -- точка входа
         [[\src\entry_point]],
         -- тесты
