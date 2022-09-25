@@ -4688,13 +4688,13 @@ function TestEntryPoint()
     HeroSelector.Init()
 
     -- Механики
-    BattleSystem.Init()
+    --BattleSystem.Init()
 
     --SaveSystem.InitNewHeroEvent()
-    --SaveSystem.gamecache = InitGameCache("savesystem")
-    --SaveSystem.map_number = 1
-    --SaveSystem.InitSaveEvent()
-    --SaveSystem.InitLoadEvent()
+    SaveSystem.gamecache = InitGameCache("savesystem")
+    SaveSystem.map_number = 1
+    SaveSystem.InitSaveEvent()
+    SaveSystem.InitLoadEvent()
 
     -- Персонажи
     --Priest.Init(Location(300., -490.))
