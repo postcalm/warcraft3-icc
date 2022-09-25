@@ -4065,7 +4065,7 @@ function Paladin.InitBlessingOfKings()
     Ability(
             BLESSING_OF_KINGS,
             "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
+            "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
@@ -4166,8 +4166,8 @@ function Paladin.InitBlessingOfSanctuary()
     Ability(
             BLESSING_OF_SANCTUARY,
             "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-            "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
+            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+            "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
     )
     Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
@@ -4463,7 +4463,7 @@ end
 
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -4723,10 +4723,23 @@ function InitCustomPlayerSlots()
     SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
     SetPlayerRaceSelectable(Player(0), true)
     SetPlayerController(Player(0), MAP_CONTROL_USER)
+    SetPlayerStartLocation(Player(1), 1)
+    SetPlayerColor(Player(1), ConvertPlayerColor(1))
+    SetPlayerRacePreference(Player(1), RACE_PREF_ORC)
+    SetPlayerRaceSelectable(Player(1), true)
+    SetPlayerController(Player(1), MAP_CONTROL_USER)
 end
 
 function InitCustomTeams()
     SetPlayerTeam(Player(0), 0)
+    SetPlayerTeam(Player(1), 0)
+end
+
+function InitAllyPriorities()
+    SetStartLocPrioCount(0, 1)
+    SetStartLocPrio(0, 0, 1, MAP_LOC_PRIO_HIGH)
+    SetStartLocPrioCount(1, 1)
+    SetStartLocPrio(1, 0, 0, MAP_LOC_PRIO_HIGH)
 end
 
 function main()
@@ -4745,12 +4758,15 @@ end
 function config()
     SetMapName("TRIGSTR_215")
     SetMapDescription("TRIGSTR_217")
-    SetPlayers(1)
-    SetTeams(1)
-    SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
+    SetPlayers(2)
+    SetTeams(2)
+    SetGamePlacement(MAP_PLACEMENT_TEAMS_TOGETHER)
     DefineStartLocation(0, 0.0, -1152.0)
+    DefineStartLocation(1, 0.0, -1152.0)
     InitCustomPlayerSlots()
     SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
+    SetPlayerSlotAvailable(Player(1), MAP_CONTROL_USER)
     InitGenericPlayerSlots()
+    InitAllyPriorities()
 end
 
