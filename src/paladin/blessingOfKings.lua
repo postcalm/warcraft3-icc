@@ -43,11 +43,7 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
-    Ability(
-            BLESSING_OF_KINGS,
-            "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин."
-    )
+    Ability(BLESSING_OF_KINGS, blessing_of_kings_tooltip, blessing_of_kings_desc)
     Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
 

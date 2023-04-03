@@ -37,12 +37,7 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    Ability(
-            BLESSING_OF_SANCTUARY,
-            "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
-            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин."
-    )
+    Ability(BLESSING_OF_SANCTUARY, blessing_of_sanctuary_tooltip, blessing_of_sanctuary_desc)
     Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
 

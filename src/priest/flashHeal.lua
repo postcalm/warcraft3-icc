@@ -25,6 +25,8 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
+    --Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)

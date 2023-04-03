@@ -42,12 +42,7 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    Ability(
-            JUDGEMENT_OF_WISDOM_TR,
-            "Правосудие мудрости (F)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего."
-    )
+    Ability(JUDGEMENT_OF_WISDOM_TR, judgement_of_wisdom_tooltip, judgement_of_wisdom_desc)
     Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
     Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
 

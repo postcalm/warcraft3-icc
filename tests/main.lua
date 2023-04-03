@@ -15,12 +15,12 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.))
-    --Paladin.Init(Location(-400., -490.))
+    Priest.Init(Location(300., -490.))
+    Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
-    --DummyForHealing(Location(300., 200.))
-    --DummyForDPS(Location(-400., 200.))
+    DummyForHealing(Location(300., 200.))
+    DummyForDPS(Location(-400., 200.))
 
 end

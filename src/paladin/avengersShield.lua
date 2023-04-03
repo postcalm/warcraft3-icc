@@ -68,13 +68,7 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    Ability(
-            AVENGERS_SHIELD,
-            "Щит мстителя (C)",
-            "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
-            "Щит затем перескакивает на других находящихся поблизости противников. " ..
-            "Способен воздействовать на 3 цели."
-    )
+    Ability(AVENGERS_SHIELD, avengers_shield_tooltip, avengers_shield_desc)
     Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
     Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
     local event = EventsPlayer()

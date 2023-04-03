@@ -31,11 +31,7 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    Ability(
-            BLESSING_OF_MIGHT,
-            "Благословение могущества (V)",
-            "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
-    )
+    Ability(BLESSING_OF_MIGHT, blessing_of_might_tooltip, blessing_of_might_desc)
     Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
 

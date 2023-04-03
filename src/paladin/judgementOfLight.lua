@@ -44,12 +44,7 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    Ability(
-            JUDGEMENT_OF_LIGHT_TR,
-            "Правосудие света (D)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего."
-    )
+    Ability(JUDGEMENT_OF_LIGHT_TR, judgement_of_light_tooltip, judgement_of_light_desc)
     Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
     Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
 

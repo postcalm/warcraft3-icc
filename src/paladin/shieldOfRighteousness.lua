@@ -11,12 +11,7 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
-    Ability(
-            SHIELD_OF_RIGHTEOUSNESS,
-            "Щит праведности (W)",
-            "Мощный удар щитом, наносящий урон от светлой магии. " ..
-            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-    )
+    Ability(SHIELD_OF_RIGHTEOUSNESS, shield_of_righteousness_tooltip, shield_of_righteousness_desc)
     Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
     Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
 

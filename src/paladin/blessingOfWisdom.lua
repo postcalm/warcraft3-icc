@@ -33,11 +33,7 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    Ability(
-            BLESSING_OF_WISDOM,
-            "Благословение мудрости (C)",
-            "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
-    )
+    Ability(BLESSING_OF_WISDOM, blessing_of_wisdom_tooltip, blessing_of_wisdom_desc)
     Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
     Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
 

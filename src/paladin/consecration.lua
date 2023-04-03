@@ -39,12 +39,7 @@ function Paladin.IsConsecration()
 end
 
 function Paladin.InitConsecration()
-    Ability(
-            CONSECRATION,
-            "Освящение (R)",
-            "Освящает участок земли, на котором стоит паладин, " ..
-            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
-    )
+    Ability(CONSECRATION, consecration_tooltip, consecration_desc)
     Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
     Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
 

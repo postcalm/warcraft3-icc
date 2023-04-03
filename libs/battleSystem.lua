@@ -13,7 +13,7 @@ function BattleSystem.Init()
 
     damaged:AddAction(BattleSystem.ShowDamage)
     settarget:AddCondition(BattleSystem.IsRightButton)
-    --settarget:AddAction(BattleSystem.SetTarget)
+    settarget:AddAction(BattleSystem.SetTarget)
 end
 
 function BattleSystem.IsRightButton()
