@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.EnableConsecration()
     local location

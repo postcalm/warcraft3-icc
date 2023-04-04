@@ -1,4 +1,4 @@
-
+-- Copyright (c) meiso
 Paladin = {
     hero = nil,
     consecration_effect = nil,

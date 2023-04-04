@@ -1,15 +1,16 @@
+-- Copyright (c) meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
 function SaveSystem.GetUserKey()
     if SaveSystem.author > 0 then
-        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preloader("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
+        if public_key <= 0 or public_key / 8286 > SaveSystem.magic_number.nine then
             return 0
         end
 
@@ -32,9 +33,9 @@ function SaveSystem.CreateUserKey(salt, val)
     if SaveSystem.author > 0 then
         SaveSystem.hash1 = salt
         PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(salt) .. ") \n //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(0) .. "," .. I2S(val + SaveSystem.generation1()) .. ") //")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         return val
     end
     return 0

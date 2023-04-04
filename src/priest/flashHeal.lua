@@ -1,4 +1,4 @@
--- Copyright (c) 2022 Kodpi, meiso
+-- Copyright (c) Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5
@@ -25,7 +25,9 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    --Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
+    Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
+    Priest.hero:SetAbilityManacost(FLASH_HEAL, 18)
+    Priest.hero:SetAbilityCooldown(FLASH_HEAL, 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

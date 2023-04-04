@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.RemoveJudgementOfLight(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
@@ -8,8 +9,8 @@ function Paladin.RemoveJudgementOfLight(target, timer)
 end
 
 function Paladin.JudgementOfLight()
-    if GetRandomReal(0., 1.) <= 0.7  then
-        Paladin.hero:GainLife{percent=2}
+    if GetRandomReal(0., 1.) <= 0.7 then
+        Paladin.hero:GainLife { percent = 2 }
         TextTag(Paladin.hero:GetPercentLifeOfMax(2), Paladin.hero):Preset("heal")
     end
 end
@@ -32,7 +33,9 @@ function Paladin.CastJudgementOfLight()
     jol_unit:CastToTarget("shadowstrike", target)
 
     local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfLight(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfLight(target, timer)
+    end
 
     BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
     TimerStart(timer, 20., false, remove_buff)

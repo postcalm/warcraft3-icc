@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfMight(unit, timer)
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
@@ -19,7 +20,9 @@ function Paladin.BlessingOfMight()
     SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
 
     local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfMight(unit, timer) end
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfMight(unit, timer)
+    end
 
     BuffSystem.AddBuffToHero(unit, BLESSING_OF_MIGHT, remove_buff)
 
@@ -40,4 +43,3 @@ function Paladin.InitBlessingOfMight()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)
 end
-    

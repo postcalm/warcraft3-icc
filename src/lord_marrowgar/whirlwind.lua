@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LordMarrowgar.ResetAnimation()
     if LordMarrowgar.whirlwind_effect then

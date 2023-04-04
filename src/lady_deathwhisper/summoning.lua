@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned and not CultFanatic.summoned then

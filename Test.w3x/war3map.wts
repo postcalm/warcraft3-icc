@@ -3,6 +3,44 @@
 Игрок 1
 }
 
+STRING 3
+{
+ICC
+}
+
+STRING 4
+{
+Не важно
+}
+
+STRING 5
+{
+Описание отсутствует
+}
+
+STRING 6
+{
+meiso, IRMessiah
+}
+
+STRING 7
+{
+#ненавижусоздаватьгребанныекарты
+#приключениена15минут
+}
+
+STRING 13
+// Разрушаемые объекты: B001 (stairs), Name (Название)
+{
+stairs
+}
+
+STRING 14
+// Декорации: D000 (pillar), Name (Название)
+{
+pillar
+}
+
 STRING 22
 // Войска: h000 (Bone Spike), Name (Название)
 {
@@ -103,6 +141,11 @@ STRING 57
 // Способности: A00B (Hammer of the Righteous), Name (Название)
 {
 Hammer of the Righteous
+}
+
+STRING 65
+{
+Игрок 2
 }
 
 STRING 66
@@ -411,10 +454,25 @@ STRING 162
 Щит мстителя (|cffffcc00C|r)
 }
 
+STRING 165
+{
+Игрок 3
+}
+
 STRING 166
 {
 Введите -save _название_ для сохранения персонажа
 Введите -load _название_ для загрузки персонажа
+}
+
+STRING 167
+{
+Король-лич
+}
+
+STRING 170
+{
+Силы света
 }
 
 STRING 171
@@ -427,12 +485,6 @@ STRING 172
 // Способности: A00T (Renew), Name (Название)
 {
 Renew
-}
-
-STRING 177
-// Способности: A00U (CircleOfHealing), Name (Название)
-{
-CircleOfHealing
 }
 
 STRING 183
@@ -567,28 +619,31 @@ STRING 212
 }
 
 STRING 213
-// Способности: A00U (CircleOfHealing), Ubertip (Подсказка: используется, подробная)
+// Способности: A00U (Circle Of Healing), Ubertip (Подсказка: используется, подробная)
 {
 Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда, находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.
 }
 
 STRING 214
-// Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
+// Способности: A00U (Circle Of Healing), Tip (Подсказка: используется, нормальная)
 {
 Круг исцеления (|cffffcc00W|r)
 }
 
 STRING 216
+// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
 {
 Щит праведности (|cffffcc00V|r)
 }
 
 STRING 217
+// Способности: A00A (Concecration), Name (Название)
 {
 Concecration
 }
 
 STRING 218
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
 {
 X
 }
@@ -618,31 +673,26 @@ Q
 }
 
 STRING 223
-// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
 {
 W
 }
 
 STRING 224
-// Способности: A00A (Concecration), Name (Название)
+// Способности: A00U (Circle Of Healing), Name (Название)
 {
-Concecration
+Circle Of Healing
 }
 
 STRING 225
-// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+// Способности: A009 (Prayer of Mending), Name (Название)
 {
-X
+Prayer of Mending
 }
 
 STRING 226
-// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
+// Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
 {
-Щит праведности (|cffffcc00V|r)
-}
-
-STRING 227
-{
-Игрок 2
+D
 }
 

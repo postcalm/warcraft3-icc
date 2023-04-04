@@ -49,7 +49,9 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
@@ -62,7 +64,9 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -73,7 +77,9 @@ end
 ---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
     TextTag(damage, self.unit):Preset("spell")
@@ -110,7 +116,9 @@ end
 ---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -121,7 +129,9 @@ end
 ---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
@@ -132,7 +142,9 @@ end
 ---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -153,7 +165,9 @@ end
 ---@return nil
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
-    if not spellbook then return end
+    if not spellbook then
+        return
+    end
     UnitAddAbility(self.unit, spellbook)
     UnitMakeAbilityPermanent(self.unit, true, spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
@@ -172,7 +186,9 @@ end
 ---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if type(target) == "table" then
+        u = target:GetId()
+    end
     IssueTargetOrder(self.unit, spell, u)
 end
 
@@ -182,7 +198,9 @@ end
 ---@return nil
 function Unit:SetAbilityManacost(ability, manacost)
     local factor = 100
-    if manacost <= 1 then factor = 1 end
+    if manacost <= 1 then
+        factor = 1
+    end
     local m = (self.basemana * (manacost / factor)) // 1
     BlzSetAbilityIntegerLevelField(
             BlzGetUnitAbility(self:GetId(), ability),
@@ -214,7 +232,9 @@ end
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
-    if arg.check == nil then arg.check = true end
+    if arg.check == nil then
+        arg.check = true
+    end
     if m > self:GetCurrentMana() and arg.check then
         DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Недостаточно маны")
         return false
@@ -236,9 +256,13 @@ end
 ---@param percent real Количество маны в процентах
 ---@return real
 function Unit:GetPercentManaOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / factor)
 end
 
@@ -264,7 +288,9 @@ end
 function Unit:SetMaxMana(value, full)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
-    if f then self:SetMana(self:GetMaxLife()) end
+    if f then
+        self:SetMana(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество маны юнита
@@ -320,7 +346,7 @@ function Unit:HealNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
-            Unit(u):GainLife{ life = args.heal }
+            Unit(u):GainLife { life = args.heal }
         end
     end
     ForGroupBJ(group, act)
@@ -332,9 +358,13 @@ end
 ---@param percent real Количество хп в процентах
 ---@return real
 function Unit:GetPercentLifeOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / factor)
 end
 
@@ -352,7 +382,9 @@ end
 function Unit:SetMaxLife(value, full)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
-    if f then self:SetLife(self:GetMaxLife()) end
+    if f then
+        self:SetLife(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество хп юнита
@@ -394,8 +426,11 @@ end
 ---@return nil
 function Unit:MoveToUnit(unit)
     local loc
-    if type(unit) == "table" then loc = unit:GetLoc()
-    else loc = GetUnitLoc(unit) end
+    if type(unit) == "table" then
+        loc = unit:GetLoc()
+    else
+        loc = GetUnitLoc(unit)
+    end
     IssuePointOrderLoc(self.unit, "move", loc)
 end
 

@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.RemoveJudgementOfWisdom(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
@@ -9,7 +10,7 @@ end
 
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
-        Paladin.hero:GainMana{percent=2}
+        Paladin.hero:GainMana { percent = 2 }
         TextTag(Paladin.hero:GetPercentManaOfMax(2), Paladin.hero):Preset("mana")
     end
 end
@@ -30,7 +31,9 @@ function Paladin.CastJudgementOfWisdom()
     jow_unit:CastToTarget("shadowstrike", target)
 
     local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfWisdom(target, timer)
+    end
 
     BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
     TimerStart(timer, 20., false, remove_buff)

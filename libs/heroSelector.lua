@@ -1,17 +1,18 @@
+-- Copyright (c) meiso
 
 HeroSelector = {
-    table          = nil,
-    paladin        = nil,
-    priest         = nil,
-    dk             = nil,
-    druid          = nil,
-    shaman         = nil,
-    warrior        = nil,
-    mage           = nil,
-    rogue          = nil,
-    warlock        = nil,
-    hunter         = nil,
-    hero           = nil,
+    table = nil,
+    paladin = nil,
+    priest = nil,
+    dk = nil,
+    druid = nil,
+    shaman = nil,
+    warrior = nil,
+    mage = nil,
+    rogue = nil,
+    warlock = nil,
+    hunter = nil,
+    hero = nil,
     selected_heroes = {},
 }
 
@@ -122,11 +123,15 @@ end
 function HeroSelector.AcceptHero(hero)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
-            if h == hero then return true end
+            if h == hero then
+                return true
+            end
         end
         return false
     end
-    if check() then return end
+    if check() then
+        return
+    end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.CreateHero()
 end

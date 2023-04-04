@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.AvengersShield()
     local target = Unit(GetSpellTargetUnit())
@@ -17,7 +18,9 @@ function Paladin.AvengersShield()
 
     local function TargetTookDamage(target_, exc)
         for i = 1, #exc do
-            if target_ == exc[i] then return true end
+            if target_ == exc[i] then
+                return true
+            end
         end
         return false
     end
@@ -46,7 +49,9 @@ function Paladin.AvengersShield()
         shield:MoveToUnit(target)
         if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
         if shield:NearTarget(target) then
@@ -55,7 +60,9 @@ function Paladin.AvengersShield()
             TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
     end

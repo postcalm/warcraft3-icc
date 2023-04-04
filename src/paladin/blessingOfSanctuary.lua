@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
     if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
@@ -10,8 +11,8 @@ end
 
 function Paladin.BlessingOfSanctuary()
     local unit = GetSpellTargetUnit()
-    local items_list = {"DEC_DMG_ITEM"}
-    local items_spells_list = {"DECREASE_DMG"}
+    local items_list = { "DEC_DMG_ITEM" }
+    local items_spells_list = { "DECREASE_DMG" }
 
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
@@ -25,7 +26,9 @@ function Paladin.BlessingOfSanctuary()
     SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
 
     local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer) end
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
+    end
 
     BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
 

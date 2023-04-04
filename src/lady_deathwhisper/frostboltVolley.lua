@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LadyDeathwhisper.FrostBoltVolley()
     TriggerSleepAction(15.)

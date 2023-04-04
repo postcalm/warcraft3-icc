@@ -1,4 +1,4 @@
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -9,7 +9,9 @@ function zip(...)
 
     --опеределяем самую маленькую последовательность
     for i = 1, args.n do
-        if #args[i] < len then len = #args[i] end
+        if #args[i] < len then
+            len = #args[i]
+        end
     end
 
     for i = 1, len do

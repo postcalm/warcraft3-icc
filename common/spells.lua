@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --Lord Marrowgar
 COLDFLAME               = FourCC("A001")
@@ -24,3 +25,4 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")

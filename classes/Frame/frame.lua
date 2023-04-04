@@ -103,7 +103,9 @@ end
 ---@return nil
 function Frame:SetPoint(point, relative, relative_point, x, y)
     local r = relative
-    if type(relative) == "table" then r = relative:GetHandle() end
+    if type(relative) == "table" then
+        r = relative:GetHandle()
+    end
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 

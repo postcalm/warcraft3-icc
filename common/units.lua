@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 --Bosses
 LORD_MARROWGAR      = FourCC("U001")

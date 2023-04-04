@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LadyDeathwhisper.ShadowBolt()
     TriggerSleepAction(10.)

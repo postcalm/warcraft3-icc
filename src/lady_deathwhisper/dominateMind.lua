@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LadyDeathwhisper.DominateMind()
     --TODO: исправить на нормальную реализацию

@@ -1,4 +1,4 @@
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
@@ -9,7 +9,9 @@ BuffSystem = {
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
-    if BuffSystem.IsHeroInSystem(hero) then return end
+    if BuffSystem.IsHeroInSystem(hero) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = {}
 end
@@ -20,7 +22,9 @@ end
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
-    if BuffSystem.IsBuffOnHero(hero, buff) then return end
+    if BuffSystem.IsBuffOnHero(hero, buff) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
     table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
     BuffSystem.CheckingBuffsExceptions(hero, buff)
@@ -45,10 +49,14 @@ end
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
-    if #BuffSystem.buffs[u] == 0 then return false end
+    if #BuffSystem.buffs[u] == 0 then
+        return false
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return false end
+        if BuffSystem.buffs[u][i] == nil then
+            return false
+        end
         if BuffSystem.buffs[u][i].buff_ == buff then
             return true
         end
@@ -76,7 +84,9 @@ end
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return end
+        if BuffSystem.buffs[u][i] == nil then
+            return
+        end
         if BuffSystem.buffs[u][i].buff_ == buff then
             BuffSystem.buffs[u][i].func_()
         end
@@ -89,25 +99,29 @@ end
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
-        paladin = {BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT},
+        paladin = { BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT },
         priest = {},
         shaman = {},
         druid = {},
     }
 
     local debuffs_exceptions = {
-        paladin = {JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT},
+        paladin = { JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT },
     }
 
     local function getBuffsByClass()
         for class, buffs in pairs(buffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return buffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return buffs_exceptions[class]
+                end
             end
         end
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return debuffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return debuffs_exceptions[class]
+                end
             end
         end
         return {}

@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function Paladin.ShieldOfRighteousness()
     -- 42% от силы + 520 ед. урона дополнительно
@@ -8,7 +9,6 @@ end
 function Paladin.IsShieldOfRighteousness()
     return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
 end
-
 
 function Paladin.InitShieldOfRighteousness()
     Ability(SHIELD_OF_RIGHTEOUSNESS, shield_of_righteousness_tooltip, shield_of_righteousness_desc)

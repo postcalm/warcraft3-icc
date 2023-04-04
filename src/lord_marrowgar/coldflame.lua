@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
@@ -21,7 +22,9 @@ function LordMarrowgar.Coldflame()
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
             LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if coldflame_obj:GetCurrentLife() <= 0 then break end
+            if coldflame_obj:GetCurrentLife() <= 0 then
+                break
+            end
         end
         LordMarrowgar.coldflame_effect = false
     end

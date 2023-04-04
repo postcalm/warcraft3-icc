@@ -5,6 +5,7 @@ function InitGlobals()
 end
 
 --CUSTOM_CODE
+-- Copyright (c) meiso
 
 --Paladin
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
@@ -13,75 +14,77 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Copyright (c) meiso
 
+-- Описания классов
+
 paladin_tooltip = "Паладин"
-paladin_text = "Паладины бьются с врагом лицом к лицу, "..
-        "полагаясь на тяжелые доспехи и навыки целительства. "..
-        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..
-        "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
+paladin_text = "Паладины бьются с врагом лицом к лицу, " ..
+        "полагаясь на тяжелые доспехи и навыки целительства. " ..
+        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
+        "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
         "но и удержит группу на ногах при помощи исцеляющих заклинаний."
 
 priest_tooltip = "Жрец"
-priest_text = "Жрецы могут задействовать мощную целительную магию, "..
-        "чтобы спасти себя и своих спутников. Им подвластны и сильные "..
-        "атакующие заклинания, но физическая слабость и отсутствие прочных "..
-        "доспехов заставляют жрецов бояться сближения с противником. "..
-        "Опытные жрецы используют боевые и контролирующие способности, "..
+priest_text = "Жрецы могут задействовать мощную целительную магию, " ..
+        "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
+        "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
+        "доспехов заставляют жрецов бояться сближения с противником. " ..
+        "Опытные жрецы используют боевые и контролирующие способности, " ..
         "не допуская гибели членов отряда."
 
 deathknight_tooltip = "Рыцарь смерти"
-deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары "..
-        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой "..
-        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и "..
-        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, "..
-        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и "..
+deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
+        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
+        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
+        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
+        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
         "соответствующим образом направлять свои атаки."
 
 druid_tooltip = "Друид"
-druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны "..
-        "играть почти любую роль в команде: быть целителями, танками или бойцами, но "..
-        "должны помнить об особенностях каждой роли. Друид вынужден внимательно "..
+druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
+        "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
+        "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
         "подбирать облик к ситуации, так как каждый из них служит определенной цели."
 
 shaman_tooltip = "Шаман"
-shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, "..
-        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в "..
-        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается "..
+shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
+        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
+        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
         "учитывать сильные и слабые стороны врага."
 
 warrior_tooltip = "Воин"
-warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, "..
-        "принимая все удары на свои доспехи. Они пользуются различными боевыми "..
-        "тактиками и применяют разнообразное оружие, чтобы защитить своих более "..
-        "хрупких союзников. Для максимальной эффективности воины должны "..
+warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
+        "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
+        "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
+        "хрупких союзников. Для максимальной эффективности воины должны " ..
         "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
 
 mage_tooltip = "Маг"
-mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, "..
-        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. "..
-        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе "..
+mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
+        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
+        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
         "обездвиживают его."
 
 rogue_tooltip = "Разбойник"
-rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. "..
-        "В затяжном бою они изматывают врага тщательно продуманной серией атак, "..
-        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись "..
-        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, "..
+rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
+        "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
+        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
+        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
         "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
 
 warlock_tooltip = "Чернокнижник"
-warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и "..
-        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага "..
-        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, "..
+warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
+        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
+        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
         "поэтому подставляют под вражеские удары своих слуг."
 
 hunter_tooltip = "Охотник"
-hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, "..
-        "приказывая питомцам атаковать, пока сами натягивают тетиву, "..
-        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, "..
-        "и издалека. Кроме того, охотники очень подвижны. "..
+hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, " ..
+        "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
+        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
+        "и издалека. Кроме того, охотники очень подвижны. " ..
         "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
 
--- Spells description
+-- Описания способностей
 
 avengers_shield_tooltip = "Щит мстителя (C)"
 avengers_shield_desc = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
@@ -113,6 +116,27 @@ judgement_of_wisdom_tooltip = "Правосудие мудрости (F)"
 judgement_of_wisdom_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
         "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
 
+shield_of_righteousness_tooltip = "Щит праведности (W)"
+shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
+        "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
+
+flash_heal_tooltip = "Быстрое исцеление (Q)"
+flash_heal_desc = "Восстанавливает 1887 - 2193 ед. здоровья союзнику."
+
+renew_tooltip = "Обновление (E)"
+renew_desc = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек."
+
+circle_of_healing_tooltip = "Круг исцеления (W)"
+circle_of_healing_desc = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
+        "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей."
+
+prayer_of_mending_tooltip = "Молитва восстановления (D)"
+prayer_of_mending_desc = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем" ..
+        " получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
+        "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
+        "только на одну цель одновременно."
+
+-- Copyright (c) meiso
 
 Items = {}
 Items["ARMOR_ITEM"]              = FourCC("I001")
@@ -132,6 +156,7 @@ ItemsSpells["DECREASE_DMG"]       = { int = FourCC("A00K"), str = "A00K" }
 ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC("A00F"), str = "A00F" }
 ItemsSpells["MP_50K"]             = { int = FourCC("A00W"), str = "A00W" }
 
+-- Copyright (c) meiso
 
 --- Метр. Равен 20 игровым единицам
 METER = 20
@@ -154,6 +179,7 @@ DPS = 3.5
 -- Сила
 --STRENGTH = 1.
 
+-- Copyright (c) meiso
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
@@ -163,6 +189,7 @@ DUMMY       = FourCC('h002')
 SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
 
+-- Copyright (c) meiso
 
 PLAYER_1   = Player(0)
 PLAYER_2   = Player(1)
@@ -171,7 +198,7 @@ LICH_KING  = Player(10)
 COMMON_TIMER = FourCC("BTLF")
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 
-
+-- Copyright (c) meiso
 Paladin = {
     hero = nil,
     consecration_effect = nil,
@@ -221,6 +248,7 @@ CultFanatic = {
 --- Кэш для системы экипировки
 EQUIP_CACHE = nil
 
+-- Copyright (c) meiso
 
 --Lord Marrowgar
 COLDFLAME               = FourCC("A001")
@@ -247,8 +275,9 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -259,7 +288,9 @@ function zip(...)
 
     --опеределяем самую маленькую последовательность
     for i = 1, args.n do
-        if #args[i] < len then len = #args[i] end
+        if #args[i] < len then
+            len = #args[i]
+        end
     end
 
     for i = 1, len do
@@ -301,6 +332,7 @@ function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
+-- Copyright (c) meiso
 
 --Bosses
 LORD_MARROWGAR      = FourCC("U001")
@@ -325,9 +357,6 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
-
---descriptions
-
 
 -- Copyright (c) meiso
 
@@ -1961,18 +1990,19 @@ function SaveSystem.generation2()
     return SaveSystem.hash2
 end
 
+-- Copyright (c) meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
 function SaveSystem.GetUserKey()
     if SaveSystem.author > 0 then
-        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preloader("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
+        if public_key <= 0 or public_key / 8286 > SaveSystem.magic_number.nine then
             return 0
         end
 
@@ -1995,9 +2025,9 @@ function SaveSystem.CreateUserKey(salt, val)
     if SaveSystem.author > 0 then
         SaveSystem.hash1 = salt
         PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(salt) .. ") \n //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(0) .. "," .. I2S(val + SaveSystem.generation1()) .. ") //")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         return val
     end
     return 0
@@ -2303,6 +2333,7 @@ function SaveSystem.LoadBaseState(pl)
     end
 end
 
+-- Copyright (c) meiso
 
 --- Создает юнита из полученных данных
 ---@return nil
@@ -2377,9 +2408,9 @@ function SaveSystem.CheckDataIntegrity(author, user)
             end
 
             local result = math.fmod(math.fmod(math.fmod(math.fmod(author, SaveSystem.magic_number.two) *
-                               math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
+                    math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
             if GetPlayerTechMaxAllowed(player_s, -3) == result then
                 return true
             end
@@ -2415,7 +2446,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preloader("save\\" .. SaveSystem.directory .. "\\" .. file_name)
         end
 
         TriggerSleepAction(0.)
@@ -2449,7 +2480,7 @@ function SaveSystem.Load()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            save_file = SubString(full_command_from_chat, 6, 16)..".txt"
+            save_file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             save_file = "default.txt"
         end
@@ -2457,12 +2488,12 @@ function SaveSystem.Load()
         SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, #SaveSystem.data do
-            Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
+            Preload(I2S(SaveSystem.data[i]) .. " data[" .. I2S(i) .. "] < load")
         end
         for j = 1, #SaveSystem.user_data do
-            Preload(I2S(SaveSystem.user_data[j]).." user_data["..I2S(j).."] < load")
+            Preload(I2S(SaveSystem.user_data[j]) .. " user_data[" .. I2S(j) .. "] < load")
         end
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "log_load.txt")
         PreloadGenClear()
     end
 end
@@ -2563,19 +2594,19 @@ function SaveSystem.ada(is_player, file_name, u)
                     DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
                     return
                 end
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(data_copy[i]) .. "," .. I2S(SaveSystem.data[i]) .. ") \n //")
             end
 
             -- сохранение данных в файл
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(key)..") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(item_data) .. ") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-2) .. "," .. I2S(key) .. ") \n //")
             -- смысл этих вычислений скрыт от мира сего
             local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(raw_index, SaveSystem.magic_number.two)
             local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(key, SaveSystem.magic_number.two)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
-            PreloadGenEnd("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-3) .. "," .. I2S(encrypted_data) .. ") \n //")
+            PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. file_name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -2600,7 +2631,7 @@ function SaveSystem.Save()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            file = SubString(full_command_from_chat, 6, 16)..".txt"
+            file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             file = "default.txt"
         end
@@ -2670,7 +2701,7 @@ function SaveSystem.AddHeroAbilities(class)
     hero:SetLevel(80)
 end
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 --- Добавляет нового юнита игроку
 ---@return nil
@@ -2698,7 +2729,7 @@ function SaveSystem.InitNewHeroEvent()
     event:AddAction(SaveSystem.AddNewHero)
 end
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 --- Сохраняет юнита игрока
 ---@return nil
@@ -2716,7 +2747,7 @@ function SaveSystem.InitSaveEvent()
     event:AddAction(SaveSystem.SaveHero)
 end
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 --- Загружает юнита
 ---@return nil
@@ -2735,7 +2766,9 @@ function SaveSystem.InitLoadEvent()
     event:AddAction(SaveSystem.LoadHero)
 end
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
+
+--Обёртка над системой экипировки
 
 EquipSystem = {}
 
@@ -2747,7 +2780,7 @@ EquipSystem = {}
 function EquipSystem.RegisterItems(items, items_spells)
     local count = 1
     local items_ = zip(items, items_spells)
-    for _, item in pairs({table.unpack(items_)}) do
+    for _, item in pairs({ table.unpack(items_) }) do
         reg_item_eq(Items[item[1]], ItemsSpells[item[2]].str, count)
     end
 end
@@ -2760,7 +2793,9 @@ end
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then u = unit:GetId() end
+    if type(unit) == "table" then
+        u = unit:GetId()
+    end
     for _, item in pairs(items) do
         equip_items_id(u, Items[item], c)
     end
@@ -2774,7 +2809,9 @@ end
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then u = unit:GetId() end
+    if type(unit) == "table" then
+        u = unit:GetId()
+    end
     for _, item in pairs(items) do
         unequip_item_id(u, Items[item], c)
     end
@@ -2803,6 +2840,8 @@ end
 >> Примечания :
 1. в 'ablist' записываются id способностей предмета, без тегов и через запятую (Например : "I000,I001")
 --]]
+
+--Код взят в исходном виде и переписан под Lua (C) meiso
 
 function dummy_eq()
     return FourCC('e000')
@@ -2995,7 +3034,7 @@ function unequip_item_id(hero, id, c)
     end
 end
 
--- Copyright (c) 2022 meiso
+-- Copyright (c)  meiso
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
@@ -3006,7 +3045,9 @@ BuffSystem = {
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
-    if BuffSystem.IsHeroInSystem(hero) then return end
+    if BuffSystem.IsHeroInSystem(hero) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = {}
 end
@@ -3017,7 +3058,9 @@ end
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
-    if BuffSystem.IsBuffOnHero(hero, buff) then return end
+    if BuffSystem.IsBuffOnHero(hero, buff) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
     table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
     BuffSystem.CheckingBuffsExceptions(hero, buff)
@@ -3042,10 +3085,14 @@ end
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
-    if #BuffSystem.buffs[u] == 0 then return false end
+    if #BuffSystem.buffs[u] == 0 then
+        return false
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return false end
+        if BuffSystem.buffs[u][i] == nil then
+            return false
+        end
         if BuffSystem.buffs[u][i].buff_ == buff then
             return true
         end
@@ -3073,7 +3120,9 @@ end
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return end
+        if BuffSystem.buffs[u][i] == nil then
+            return
+        end
         if BuffSystem.buffs[u][i].buff_ == buff then
             BuffSystem.buffs[u][i].func_()
         end
@@ -3086,25 +3135,29 @@ end
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     local buffs_exceptions = {
-        paladin = {BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT},
+        paladin = { BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT },
         priest = {},
         shaman = {},
         druid = {},
     }
 
     local debuffs_exceptions = {
-        paladin = {JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT},
+        paladin = { JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT },
     }
 
     local function getBuffsByClass()
         for class, buffs in pairs(buffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return buffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return buffs_exceptions[class]
+                end
             end
         end
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return debuffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return debuffs_exceptions[class]
+                end
             end
         end
         return {}
@@ -3135,6 +3188,7 @@ function BuffSystem.RemoveHero(hero)
     BuffSystem.buffs[u] = nil
 end
 
+-- Copyright (c) meiso
 
 BattleSystem = {
     target = nil,
@@ -3182,6 +3236,7 @@ function BattleSystem.ShowDamage()
     end
 end
 
+-- Copyright (c) meiso
 
 -- Обертки над близовскими функциями для работы с областями и их переделка под себя
 
@@ -3232,20 +3287,21 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
     return Location(vector_x, vector_y)
 end
 
+-- Copyright (c) meiso
 
 HeroSelector = {
-    table          = nil,
-    paladin        = nil,
-    priest         = nil,
-    dk             = nil,
-    druid          = nil,
-    shaman         = nil,
-    warrior        = nil,
-    mage           = nil,
-    rogue          = nil,
-    warlock        = nil,
-    hunter         = nil,
-    hero           = nil,
+    table = nil,
+    paladin = nil,
+    priest = nil,
+    dk = nil,
+    druid = nil,
+    shaman = nil,
+    warrior = nil,
+    mage = nil,
+    rogue = nil,
+    warlock = nil,
+    hunter = nil,
+    hero = nil,
     selected_heroes = {},
 }
 
@@ -3356,11 +3412,15 @@ end
 function HeroSelector.AcceptHero(hero)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
-            if h == hero then return true end
+            if h == hero then
+                return true
+            end
         end
         return false
     end
-    if check() then return end
+    if check() then
+        return
+    end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.CreateHero()
 end
@@ -4470,12 +4530,7 @@ end
 
 
 function Paladin.InitShieldOfRighteousness()
-    Ability(
-            SHIELD_OF_RIGHTEOUSNESS,
-            "Щит праведности (W)",
-            "Мощный удар щитом, наносящий урон от светлой магии. " ..
-            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-    )
+    Ability(SHIELD_OF_RIGHTEOUSNESS, shield_of_righteousness_tooltip, shield_of_righteousness_desc)
     Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
     Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
 
@@ -4485,10 +4540,12 @@ function Paladin.InitShieldOfRighteousness()
     event:AddAction(Paladin.ShieldOfRighteousness)
 end
 
--- Copyright (c) 2022 Kodpi
+-- Copyright (c) Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
-    if not Priest.hero:LoseMana{percent=21} then return end
+    if not Priest.hero:LoseMana { percent = 21 } then
+        return
+    end
     local heal = GetRandomInt(958, 1058)
 
     Priest.hero:HealNear {
@@ -4498,21 +4555,22 @@ function Priest.CastCircleOfHealing()
     }
 end
 
---- Заврешение способности
 function Priest.IsCircleOfHealing()
     return GetSpellAbilityId() == CIRCLE_OF_HEALING
 end
 
---- Иницилизация персонажа
 function Priest.InitCircleOfHealing()
+    Ability(CIRCLE_OF_HEALING, circle_of_healing_tooltip, circle_of_healing_desc)
+    Priest.hero:SetAbilityManacost(CIRCLE_OF_HEALING, 21)
+    Priest.hero:SetAbilityCooldown(CIRCLE_OF_HEALING, 6.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)
 end
 
-
--- Copyright (c) 2022 Kodpi, meiso
+-- Copyright (c) Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5
@@ -4539,22 +4597,27 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
+    Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
+    Priest.hero:SetAbilityManacost(FLASH_HEAL, 18)
+    Priest.hero:SetAbilityCooldown(FLASH_HEAL, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
     event:AddAction(Priest.CastFlashHeal)
 end
 
+-- Copyright (c) meiso
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items = { "ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM" }
+    local items_spells = { "ARMOR_500", "ATTACK_1500", "HP_90K" }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
+    EquipSystem.RegisterItems(items, items_spells)
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
 
@@ -4562,15 +4625,36 @@ function Priest.Init(location)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-
-    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
+    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING, PRAYER_OF_MENDING)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
     Priest.InitCircleOfHealing()
+    Priest.InitPrayerOfMending()
 end
 
--- Copyright (c) 2022 Kodpi
+-- Copyright (c) 2023 meiso
+
+function Priest.CastPrayerOfMending()
+
+end
+
+function Priest.IsPrayerOfMending()
+    return GetSpellAbilityId() == PRAYER_OF_MENDING
+end
+
+function Priest.InitPrayerOfMending()
+    Ability(PRAYER_OF_MENDING, prayer_of_mending_tooltip, prayer_of_mending_desc)
+    Priest.hero:SetAbilityManacost(PRAYER_OF_MENDING, 15)
+    Priest.hero:SetAbilityCooldown(PRAYER_OF_MENDING, 10.)
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPrayerOfMending)
+    event:AddAction(Priest.CastPrayerOfMending)
+end
+
+-- Copyright (c)  Kodpi
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды
@@ -4589,6 +4673,10 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
+    Ability(RENEW, renew_tooltip, renew_desc)
+    Priest.hero:SetAbilityManacost(RENEW, 17)
+    Priest.hero:SetAbilityCooldown(RENEW, 1.5)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
@@ -4645,7 +4733,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()

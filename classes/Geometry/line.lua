@@ -29,14 +29,22 @@ function Line:getPoints(quantity)
     local x, y
 
     for i = 1, quantity do
-        if slope == 0 then y = 0
-        else y = ydiff * (i / quantity) end
+        if slope == 0 then
+            y = 0
+        else
+            y = ydiff * (i / quantity)
+        end
 
-        if slope == 0 then x = xdiff * (i / quantity)
-        else x = y / slope end
+        if slope == 0 then
+            x = xdiff * (i / quantity)
+        else
+            x = y / slope
+        end
 
-        points = Point(round(x) + self.point1.X,
-                       round(y) + self.point1.Y)
+        points = Point(
+                round(x) + self.point1.X,
+                round(y) + self.point1.Y
+        )
         table.insert(new_points, i, points:get2DPoint())
     end
     table.insert(new_points, 1, self.point1:get2DPoint())

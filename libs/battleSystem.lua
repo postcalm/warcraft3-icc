@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 BattleSystem = {
     target = nil,

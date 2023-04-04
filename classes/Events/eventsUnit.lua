@@ -18,7 +18,9 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then self.unit = unit:GetId() end
+    if type(unit) == "table" then
+        self.unit = unit:GetId()
+    end
 end
 
 --- Регистриует событие получения урона юнитом

@@ -35,8 +35,11 @@ end
 ---@param inaccuracy boolean Учитывать ли погрешность
 ---@return boolean
 function Point:atPoint(point, inaccuracy)
-    if not inaccuracy then inaccuracy = 0
-    else inaccuracy = 30. end
+    if not inaccuracy then
+        inaccuracy = 0
+    else
+        inaccuracy = 30.
+    end
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true

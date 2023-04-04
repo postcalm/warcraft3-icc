@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)
@@ -12,11 +13,14 @@ function LadyDeathwhisper.ManaShield()
     local function ManaShield()
         local damage = GetEventDamage()
 
-        if damage == 0 then event:Destroy() return end
+        if damage == 0 then
+            event:Destroy()
+            return
+        end
 
         TriggerSleepAction(0.7)
-        LadyDeathwhisper.unit:GainLife{life=damage}
-        LadyDeathwhisper.unit:LoseMana{mana=damage, check=false}
+        LadyDeathwhisper.unit:GainLife { life = damage }
+        LadyDeathwhisper.unit:LoseMana { mana = damage, check = false }
         event:Destroy()
     end
 

@@ -487,12 +487,6 @@ STRING 172
 Renew
 }
 
-STRING 177
-// Способности: A00U (CircleOfHealing), Name (Название)
-{
-CircleOfHealing
-}
-
 STRING 183
 // Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
 {
@@ -625,13 +619,13 @@ STRING 212
 }
 
 STRING 213
-// Способности: A00U (CircleOfHealing), Ubertip (Подсказка: используется, подробная)
+// Способности: A00U (Circle Of Healing), Ubertip (Подсказка: используется, подробная)
 {
 Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда, находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.
 }
 
 STRING 214
-// Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
+// Способности: A00U (Circle Of Healing), Tip (Подсказка: используется, нормальная)
 {
 Круг исцеления (|cffffcc00W|r)
 }
@@ -679,8 +673,26 @@ Q
 }
 
 STRING 223
-// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
 {
 W
+}
+
+STRING 224
+// Способности: A00U (Circle Of Healing), Name (Название)
+{
+Circle Of Healing
+}
+
+STRING 225
+// Способности: A009 (Prayer of Mending), Name (Название)
+{
+Prayer of Mending
+}
+
+STRING 226
+// Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
+{
+D
 }
 

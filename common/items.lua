@@ -1,3 +1,4 @@
+-- Copyright (c) meiso
 
 Items = {}
 Items["ARMOR_ITEM"]              = FourCC("I001")
