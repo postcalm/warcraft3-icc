@@ -54,12 +54,12 @@ function Paladin.InitJudgementOfLight()
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
-    --событие того, что персонаж использовал способность
+    --персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
     event_ability:AddCondition(Paladin.IsJudgementOfLight)
     event_ability:AddAction(Paladin.CastJudgementOfLight)
 
-    --событие того, что персонаж бьёт юнита с дебафом
+    --персонаж бьёт юнита с дебафом
     event_jol:RegisterUnitDamaging()
     event_jol:AddCondition(Paladin.IsJudgementOfLightDebuff)
     event_jol:AddAction(Paladin.JudgementOfLight)

@@ -24,6 +24,7 @@ function Paladin.BlessingOfKings()
         R2I(GetHeroAgi(unit, false) * 0.1),
         R2I(GetHeroInt(unit, false) * 0.1)
     }
+    --бафаем цель
     SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
     SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
     SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)

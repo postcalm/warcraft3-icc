@@ -3,7 +3,7 @@
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
 
     -- Механики
     BattleSystem.Init()
@@ -20,7 +20,7 @@ function TestEntryPoint()
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
-    DummyForHealing(Location(300., 200.))
+    --DummyForHealing(Location(300., 200.))
     DummyForDPS(Location(-400., 200.))
 
 end

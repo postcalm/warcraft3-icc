@@ -2,6 +2,8 @@
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
+    ---Формат:
+    ---{ unit = { buff, func } }
     buffs = {}
 }
 
@@ -49,6 +51,9 @@ end
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
     local u = I2S(GetHandleId(hero))
+    if not BuffSystem.IsHeroInSystem(hero) then
+        return false
+    end
     if #BuffSystem.buffs[u] == 0 then
         return false
     end
@@ -141,6 +146,22 @@ function BuffSystem.RemoveAllBuffs(hero)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+    end
+end
+
+--- Удалить баф со всех юнитов
+---@param buff ability Название бафа
+---@return nil
+function BuffSystem.RemoveBuffFromUnits(buff)
+    for unit, _ in pairs(BuffSystem.buffs) do
+        for i = 1, #BuffSystem.buffs[unit] do
+            if BuffSystem.buffs[unit][i] == nil then
+                return
+            end
+            if BuffSystem.buffs[unit][i].buff_ == buff then
+                BuffSystem.buffs[unit][i] = nil
+            end
+        end
     end
 end
 
