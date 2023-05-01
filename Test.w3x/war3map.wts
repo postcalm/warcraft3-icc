@@ -3,44 +3,6 @@
 Игрок 1
 }
 
-STRING 3
-{
-ICC
-}
-
-STRING 4
-{
-Не важно
-}
-
-STRING 5
-{
-Описание отсутствует
-}
-
-STRING 6
-{
-meiso, IRMessiah
-}
-
-STRING 7
-{
-#ненавижусоздаватьгребанныекарты
-#приключениена15минут
-}
-
-STRING 13
-// Разрушаемые объекты: B001 (stairs), Name (Название)
-{
-stairs
-}
-
-STRING 14
-// Декорации: D000 (pillar), Name (Название)
-{
-pillar
-}
-
 STRING 22
 // Войска: h000 (Bone Spike), Name (Название)
 {
@@ -141,11 +103,6 @@ STRING 57
 // Способности: A00B (Hammer of the Righteous), Name (Название)
 {
 Hammer of the Righteous
-}
-
-STRING 65
-{
-Игрок 2
 }
 
 STRING 66
@@ -454,25 +411,10 @@ STRING 162
 Щит мстителя (|cffffcc00C|r)
 }
 
-STRING 165
-{
-Игрок 3
-}
-
 STRING 166
 {
 Введите -save _название_ для сохранения персонажа
 Введите -load _название_ для загрузки персонажа
-}
-
-STRING 167
-{
-Король-лич
-}
-
-STRING 170
-{
-Силы света
 }
 
 STRING 171
@@ -631,19 +573,16 @@ STRING 214
 }
 
 STRING 216
-// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
 {
 Щит праведности (|cffffcc00V|r)
 }
 
 STRING 217
-// Способности: A00A (Concecration), Name (Название)
 {
 Concecration
 }
 
 STRING 218
-// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
 {
 X
 }
@@ -694,5 +633,41 @@ STRING 226
 // Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
 {
 D
+}
+
+STRING 227
+// Способности: A00A (Concecration), Name (Название)
+{
+Concecration
+}
+
+STRING 228
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 229
+// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
+{
+Щит праведности (|cffffcc00V|r)
+}
+
+STRING 230
+// Способности: A00V (Power Word: Shield), Name (Название)
+{
+Power Word: Shield
+}
+
+STRING 231
+// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
+{
+S
+}
+
+STRING 232
+// Способности: A00V (Power Word: Shield), EditorSuffix (Суффикс редактора)
+{
+(trigger)
 }
 

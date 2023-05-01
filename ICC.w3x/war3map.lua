@@ -167,10 +167,15 @@ circle_of_healing_desc = "Восстанавливает 958 - 1058 ед. здо
         "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей."
 
 prayer_of_mending_tooltip = "Молитва восстановления (D)"
-prayer_of_mending_desc = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем" ..
-        " получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
+prayer_of_mending_desc = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
+        "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
         "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
         "только на одну цель одновременно."
+
+power_word_shield_tooltip = "Слово силы: Щит (S)"
+power_word_shield_desc = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
+        "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
+        "получением урона. Повторно наложить щит можно только через 15 сек."
 
 -- Copyright (c) meiso
 
@@ -313,6 +318,8 @@ FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
 PRAYER_OF_MENDING       = FourCC("A009")
+POWER_WORD_SHIELD_TR    = FourCC("A00V")
+POWER_WORD_SHIELD       = FourCC("A00X")
 
 -- Copyright (c)  meiso
 
@@ -367,6 +374,13 @@ end
 ---@return number
 function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
+end
+
+--- Проверяет, является ли объектом типом "table"
+---@param object type Проверяемый объект
+---@return boolean
+function isTable(object)
+    return type(object) == "table"
 end
 
 -- Copyright (c) meiso
@@ -762,13 +776,13 @@ function EventsUnit:_init(unit)
     end
 end
 
---- Регистриует событие получения урона юнитом
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистриует событие нанесения урона юнитом
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
@@ -1368,7 +1382,7 @@ function Unit:SetBaseDamage(value, index)
 end
 
 --- Нанести физический урон.
---- Урон снижает как от количества защиты, так и от её типа
+--- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель
 ---@param damage real Урон
 ---@param attack_type attacktype Тип атаки. По умолчанию ближняя
@@ -1487,6 +1501,16 @@ function Unit:AddAbilities(...)
     end
 end
 
+--- Удалить у юнита указанные способности
+---@param ability ability Список способностей (через запятую)
+---@return nil
+function Unit:RemoveAbilities(...)
+    local abilities = table.pack(...)
+    for _, ability in ipairs(abilities) do
+        UnitRemoveAbility(self.unit, ability)
+    end
+end
+
 --- Выдать книгу заклинаний
 ---@param spellbook spellbook Id книги заклинаний
 ---@return nil
@@ -1513,7 +1537,7 @@ end
 ---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     IssueTargetOrder(self.unit, spell, u)
@@ -1548,6 +1572,20 @@ function Unit:SetAbilityCooldown(ability, cooldown)
             0,
             cooldown
     )
+end
+
+--- Скрыть способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:HideAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, true)
+end
+
+--- Показать способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:ShowAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, false)
 end
 
 -- Mana
@@ -1652,11 +1690,14 @@ end
 --- Получить хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@param show boolean Показывать ли исцеление
 ---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
-    TextTag(l, self:GetId()):Preset("heal")
+    if arg.show then
+        TextTag(l, self:GetId()):Preset("heal")
+    end
 end
 
 --- Реген HP по площади
@@ -1753,7 +1794,7 @@ end
 ---@return nil
 function Unit:MoveToUnit(unit)
     local loc
-    if type(unit) == "table" then
+    if isTable(unit) then
         loc = unit:GetLoc()
     else
         loc = GetUnitLoc(unit)
@@ -1816,7 +1857,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
@@ -1826,7 +1867,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
@@ -1866,7 +1907,7 @@ function Unit:ApplyTimedLife(time)
 end
 
 --- Воскрешает юнита
----@param location location Место воскрешения. Опционально
+---@param location location Место воскрешения. Опционально. По умолчанию воскрешает в той же точке, где умер
 ---@return nil
 function Unit:Revive(location)
     local loc = location or self:GetLoc()
@@ -1936,7 +1977,7 @@ end
 ---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
-    if type(target) == "table" then
+    if isTable(target) then
         loc = target:GetLoc()
     else
         loc = GetUnitLoc(target)
@@ -3145,6 +3186,7 @@ BuffSystem = {
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsHeroInSystem(hero) then
         return
     end
@@ -3158,6 +3200,7 @@ end
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsBuffOnHero(hero, buff) then
         return
     end
@@ -3170,6 +3213,7 @@ end
 ---@param hero unit Id героя
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
         if name == u then
@@ -3184,6 +3228,7 @@ end
 ---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     if not BuffSystem.IsHeroInSystem(hero) then
         return false
@@ -3208,6 +3253,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ == buff then
@@ -3221,6 +3267,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i] == nil then
@@ -3237,6 +3284,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
         paladin = { BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT },
         priest = {},
@@ -3277,6 +3325,7 @@ end
 ---@param hero unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
@@ -3303,6 +3352,7 @@ end
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RemoveHero(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil
 end
@@ -3553,7 +3603,7 @@ function DummyForDPS(location)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(500000, true)
-    d:SetBaseDamage(2000.)
+    d:SetBaseDamage(4000.)
 end
 
 
@@ -4556,7 +4606,7 @@ end
 
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7 then
-        Paladin.hero:GainLife { percent = 2 }
+        Paladin.hero:GainLife { percent = 2, show = true }
         TextTag(Paladin.hero:GetPercentLifeOfMax(2), Paladin.hero):Preset("heal")
     end
 end
@@ -4748,7 +4798,7 @@ function Priest.CastFlashHeal()
     if Frame:IsDrop() then return end
 
     -- даем хп указанному юниту
-    target:GainLife{life=heal}
+    target:GainLife { life = heal, show = true}
 end
 
 function Priest.IsFlashHeal()
@@ -4784,12 +4834,88 @@ function Priest.Init(location)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING, PRAYER_OF_MENDING)
+    Priest.hero:AddAbilities(
+            FLASH_HEAL,
+            RENEW,
+            CIRCLE_OF_HEALING,
+            PRAYER_OF_MENDING,
+            POWER_WORD_SHIELD_TR
+    )
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
     Priest.InitCircleOfHealing()
     Priest.InitPrayerOfMending()
+    Priest.InitPowerWordShield()
+end
+
+-- Copyright (c) meiso
+
+function Priest.RemovePowerWordShield(unit)
+    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
+        BuffSystem.RemoveBuffToHero(unit, POWER_WORD_SHIELD)
+    end
+end
+
+function Priest.CastPowerWordShield()
+    local unit = Unit(GetSpellTargetUnit())
+    local event = EventsUnit(unit)
+    local absorb = 150
+    local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
+
+    BuffSystem.RegisterHero(unit)
+
+    --TODO: вешать 15-секундный дебаф на повтор
+    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
+        BuffSystem.RemoveBuffToHeroByFunc(unit, POWER_WORD_SHIELD)
+    end
+
+    local timer = CreateTimer()
+    local pws_effect = Effect(unit, model, "origin")
+    event:RegisterDamaged()
+
+    local remove_buff = function()
+        Priest.RemovePowerWordShield(unit)
+        DestroyTimer(timer)
+        event:Destroy()
+        pws_effect:Destroy()
+    end
+
+    local function Shield()
+        local damage = GetEventDamage()
+        if damage == 0 then return end
+        absorb = absorb - damage
+        if 0. <= absorb and absorb < damage then
+            BlzSetEventDamage(absorb)
+            remove_buff()
+        else
+            BlzSetEventDamage(0.)
+        end
+    end
+
+    local function UsingShield()
+        return absorb > 0.
+    end
+    BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
+    TimerStart(timer, 30., false, remove_buff)
+
+    event:AddCondition(UsingShield)
+    event:AddAction(Shield)
+end
+
+function Priest.IsPowerWordShield()
+    return GetSpellAbilityId() == POWER_WORD_SHIELD_TR
+end
+
+function Priest.InitPowerWordShield()
+    Ability(POWER_WORD_SHIELD_TR, power_word_shield_tooltip, power_word_shield_desc)
+    Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
+    Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPowerWordShield)
+    event:AddAction(Priest.CastPowerWordShield)
 end
 
 -- Copyright (c) meiso
@@ -4815,10 +4941,9 @@ function Priest.CastPrayerOfMending()
         POM_JUMP_COUNT = 5
     end
 
-    while POM_JUMP_COUNT ~= 0 do
+    while POM_JUMP_COUNT > -1 do
         TriggerSleepAction(0.)
         if unit ~= last_unit then
-            print(POM_JUMP_COUNT)
             POM_JUMP_COUNT = POM_JUMP_COUNT - 1
             last_unit = unit
 

@@ -17,7 +17,7 @@ function Priest.CastFlashHeal()
     if Frame:IsDrop() then return end
 
     -- даем хп указанному юниту
-    target:GainLife{life=heal}
+    target:GainLife { life = heal, show = true}
 end
 
 function Priest.IsFlashHeal()

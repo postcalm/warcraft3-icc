@@ -41,7 +41,7 @@ function Unit:SetBaseDamage(value, index)
 end
 
 --- Нанести физический урон.
---- Урон снижает как от количества защиты, так и от её типа
+--- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель
 ---@param damage real Урон
 ---@param attack_type attacktype Тип атаки. По умолчанию ближняя
@@ -160,6 +160,16 @@ function Unit:AddAbilities(...)
     end
 end
 
+--- Удалить у юнита указанные способности
+---@param ability ability Список способностей (через запятую)
+---@return nil
+function Unit:RemoveAbilities(...)
+    local abilities = table.pack(...)
+    for _, ability in ipairs(abilities) do
+        UnitRemoveAbility(self.unit, ability)
+    end
+end
+
 --- Выдать книгу заклинаний
 ---@param spellbook spellbook Id книги заклинаний
 ---@return nil
@@ -186,7 +196,7 @@ end
 ---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     IssueTargetOrder(self.unit, spell, u)
@@ -221,6 +231,20 @@ function Unit:SetAbilityCooldown(ability, cooldown)
             0,
             cooldown
     )
+end
+
+--- Скрыть способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:HideAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, true)
+end
+
+--- Показать способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:ShowAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, false)
 end
 
 -- Mana
@@ -325,11 +349,14 @@ end
 --- Получить хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@param show boolean Показывать ли исцеление
 ---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
-    TextTag(l, self:GetId()):Preset("heal")
+    if arg.show then
+        TextTag(l, self:GetId()):Preset("heal")
+    end
 end
 
 --- Реген HP по площади
@@ -426,7 +453,7 @@ end
 ---@return nil
 function Unit:MoveToUnit(unit)
     local loc
-    if type(unit) == "table" then
+    if isTable(unit) then
         loc = unit:GetLoc()
     else
         loc = GetUnitLoc(unit)
@@ -489,7 +516,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
@@ -499,7 +526,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
@@ -539,7 +566,7 @@ function Unit:ApplyTimedLife(time)
 end
 
 --- Воскрешает юнита
----@param location location Место воскрешения. Опционально
+---@param location location Место воскрешения. Опционально. По умолчанию воскрешает в той же точке, где умер
 ---@return nil
 function Unit:Revive(location)
     local loc = location or self:GetLoc()

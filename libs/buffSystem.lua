@@ -11,6 +11,7 @@ BuffSystem = {
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsHeroInSystem(hero) then
         return
     end
@@ -24,6 +25,7 @@ end
 ---@param func function Функция, снимающая баф
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func)
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsBuffOnHero(hero, buff) then
         return
     end
@@ -36,6 +38,7 @@ end
 ---@param hero unit Id героя
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
         if name == u then
@@ -50,6 +53,7 @@ end
 ---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     if not BuffSystem.IsHeroInSystem(hero) then
         return false
@@ -74,6 +78,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ == buff then
@@ -87,6 +92,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i] == nil then
@@ -103,6 +109,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
         paladin = { BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT },
         priest = {},
@@ -143,6 +150,7 @@ end
 ---@param hero unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
@@ -169,6 +177,7 @@ end
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RemoveHero(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil
 end

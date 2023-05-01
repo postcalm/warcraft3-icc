@@ -23,13 +23,13 @@ function EventsUnit:_init(unit)
     end
 end
 
---- Регистриует событие получения урона юнитом
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистриует событие нанесения урона юнитом
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)

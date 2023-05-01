@@ -16,10 +16,17 @@ function Priest.Init(location)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING, PRAYER_OF_MENDING)
+    Priest.hero:AddAbilities(
+            FLASH_HEAL,
+            RENEW,
+            CIRCLE_OF_HEALING,
+            PRAYER_OF_MENDING,
+            POWER_WORD_SHIELD_TR
+    )
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
     Priest.InitCircleOfHealing()
     Priest.InitPrayerOfMending()
+    Priest.InitPowerWordShield()
 end

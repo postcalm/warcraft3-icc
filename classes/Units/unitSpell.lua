@@ -29,7 +29,7 @@ end
 ---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
-    if type(target) == "table" then
+    if isTable(target) then
         loc = target:GetLoc()
     else
         loc = GetUnitLoc(target)

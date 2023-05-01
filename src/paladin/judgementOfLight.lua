@@ -10,7 +10,7 @@ end
 
 function Paladin.JudgementOfLight()
     if GetRandomReal(0., 1.) <= 0.7 then
-        Paladin.hero:GainLife { percent = 2 }
+        Paladin.hero:GainLife { percent = 2, show = true }
         TextTag(Paladin.hero:GetPercentLifeOfMax(2), Paladin.hero):Preset("heal")
     end
 end
