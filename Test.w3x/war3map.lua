@@ -3258,6 +3258,7 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     local debuffs_exceptions = {
         paladin = { JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT },
+        priest = { POWER_WORD_SHIELD }
     }
 
     local function getBuffsByClass()
@@ -4755,7 +4756,7 @@ function Priest.CastFlashHeal()
     local heal = GetRandomInt(1887, 2193)
 
     -- проверяем есть ли мана
-    if not Priest.hero:LoseMana{percent=18} then return end
+    if not Priest.hero:LoseMana{ percent = 18 } then return end
 
     -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
@@ -4832,11 +4833,16 @@ function Priest.CastPowerWordShield()
     BuffSystem.RegisterHero(unit)
 
     --TODO: вешать 15-секундный дебаф на повтор
+    if BuffSystem.IsBuffOnHero(unit, "POWER_WORD_SHIELD_DEBUFF") then
+        return
+    end
+    --проверяем есть ли щит, если да - сбрасываем и обновляем
     if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
         BuffSystem.RemoveBuffToHeroByFunc(unit, POWER_WORD_SHIELD)
     end
 
     local timer = CreateTimer()
+    local debuff_timer = CreateTimer()
     local pws_effect = Effect(unit, model, "origin")
     event:RegisterDamaged()
 
@@ -4845,6 +4851,12 @@ function Priest.CastPowerWordShield()
         DestroyTimer(timer)
         event:Destroy()
         pws_effect:Destroy()
+    end
+
+    local remove_debuff = function()
+        BuffSystem.RemoveBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF")
+        DestroyTimer(debuff_timer)
+        print("cooldown")
     end
 
     local function Shield()
@@ -4862,8 +4874,11 @@ function Priest.CastPowerWordShield()
     local function UsingShield()
         return absorb > 0.
     end
+
     BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
+    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff)
     TimerStart(timer, 30., false, remove_buff)
+    TimerStart(debuff_timer, 15., false, remove_debuff)
 
     event:AddCondition(UsingShield)
     event:AddAction(Shield)
