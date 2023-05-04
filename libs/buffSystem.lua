@@ -181,3 +181,29 @@ function BuffSystem.RemoveHero(hero)
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil
 end
+
+--- Усилить способность взависимости от наличия определенного бафа
+---@param hero unit Юнит, на которого воздействуют спеллом
+---@param value integer Количество урона/исцеления воздействующее на цель
+---@return real
+function BuffSystem.ImproveSpell(hero, value)
+    if isTable(hero) then hero = hero:GetId() end
+    local improving_buffs = {
+        GUARDIAN_SPIRIT,
+    }
+    if not BuffSystem.IsHeroInSystem(hero) then
+        return value
+    end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        for _, buff in pairs(improving_buffs) do
+            if BuffSystem.buffs[u][i] == nil then
+                return value
+            end
+            if buff == BuffSystem.buffs[u][i].buff_ then
+                return value * 1.4
+            end
+        end
+    end
+    return value
+end

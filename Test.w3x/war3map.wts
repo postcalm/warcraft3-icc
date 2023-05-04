@@ -665,9 +665,15 @@ STRING 231
 S
 }
 
-STRING 232
-// Способности: A00V (Power Word: Shield), EditorSuffix (Суффикс редактора)
+STRING 233
+// Способности: A00X (Guardian Spirit), Name (Название)
 {
-(trigger)
+Guardian Spirit
+}
+
+STRING 234
+// Способности: A00X (Guardian Spirit), Hotkey (Горячая клавиша: используется)
+{
+R
 }
 

@@ -12,7 +12,6 @@ function Priest.CastPrayerOfMending()
     local last_unit
     local event
     local cured = false
-    local heal = 1043
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
@@ -45,6 +44,8 @@ function Priest.CastPrayerOfMending()
                 return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
             end)
             event:AddAction(function()
+                local heal = 1043
+                heal = BuffSystem.ImproveSpell(unit, heal)
                 Unit(unit):GainLife { life = heal, show = true }
                 cured = true
                 Priest.RemovePrayerOfMending(unit, timer)

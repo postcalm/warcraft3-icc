@@ -121,6 +121,8 @@ hunter_text = "Охотники бьют врага на расстоянии и
         "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
 
 -- Описания способностей
+----------------------------------------------------
+-- Паладин
 
 avengers_shield_tooltip = "Щит мстителя (C)"
 avengers_shield_desc = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
@@ -156,6 +158,9 @@ shield_of_righteousness_tooltip = "Щит праведности (W)"
 shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
         "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
 
+----------------------------------------------------
+-- Прист
+
 flash_heal_tooltip = "Быстрое исцеление (Q)"
 flash_heal_desc = "Восстанавливает 1887 - 2193 ед. здоровья союзнику."
 
@@ -176,6 +181,12 @@ power_word_shield_tooltip = "Слово силы: Щит (S)"
 power_word_shield_desc = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
         "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
         "получением урона. Повторно наложить щит можно только через 15 сек."
+
+guardian_spirit_tooltip = "Оберегающий дух (|cffffcc00R|r)"
+guardian_spirit_desc = "Призывает оберегающего духа для охраны дружественной цели. " ..
+        "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
+        "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
+        "50 ее максимального запаса здоровья. Время действия – 10 сек."
 
 -- Copyright (c) meiso
 
@@ -318,8 +329,8 @@ FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
 PRAYER_OF_MENDING       = FourCC("A009")
-POWER_WORD_SHIELD_TR    = FourCC("A00V")
-POWER_WORD_SHIELD       = FourCC("A00X")
+POWER_WORD_SHIELD       = FourCC("A00V")
+GUARDIAN_SPIRIT         = FourCC("A00X")
 
 -- Copyright (c)  meiso
 
@@ -1714,7 +1725,7 @@ function Unit:HealNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
-            Unit(u):GainLife { life = args.heal }
+            Unit(u):GainLife { life = args.heal, show = true }
         end
     end
     ForGroupBJ(group, act)
@@ -3294,7 +3305,6 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     local debuffs_exceptions = {
         paladin = { JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT },
-        priest = { POWER_WORD_SHIELD }
     }
 
     local function getBuffsByClass()
@@ -3356,6 +3366,32 @@ function BuffSystem.RemoveHero(hero)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = nil
+end
+
+--- Усилить способность взависимости от наличия определенного бафа
+---@param hero unit Юнит, на которого воздействуют спеллом
+---@param value integer Количество урона/исцеления воздействующее на цель
+---@return real
+function BuffSystem.ImproveSpell(hero, value)
+    if isTable(hero) then hero = hero:GetId() end
+    local improving_buffs = {
+        GUARDIAN_SPIRIT,
+    }
+    if not BuffSystem.IsHeroInSystem(hero) then
+        return value
+    end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        for _, buff in pairs(improving_buffs) do
+            if BuffSystem.buffs[u][i] == nil then
+                return value
+            end
+            if buff == BuffSystem.buffs[u][i].buff_ then
+                return value * 1.4
+            end
+        end
+    end
+    return value
 end
 
 -- Copyright (c) meiso
@@ -4790,6 +4826,7 @@ function Priest.CastFlashHeal()
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
+    heal = BuffSystem.ImproveSpell(target, heal)
 
     -- проверяем есть ли мана
     if not Priest.hero:LoseMana{ percent = 18 } then return end
@@ -4821,6 +4858,59 @@ end
 
 -- Copyright (c) meiso
 
+function Priest.CastGuardianSpirit()
+    local unit = Unit(GetSpellTargetUnit())
+    local model = "Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl"
+
+    BuffSystem.RegisterHero(unit)
+
+    local timer = CreateTimer()
+    local gs_effect = Effect(Priest.hero, model, "origin")
+    local event = EventsUnit(unit)
+    event:RegisterDamaged()
+
+    local remove_buff = function()
+        BuffSystem.RemoveBuffToHero(unit, GUARDIAN_SPIRIT)
+        DestroyTimer(timer)
+        gs_effect:Destroy()
+        event:Destroy()
+    end
+
+    local function SaveHero()
+        BlzSetEventDamage(0.)
+        unit:SetLife(unit:GetPercentLifeOfMax(50.))
+    end
+
+    local function GetLife()
+        local damage = GetEventDamage()
+        local current_hp = unit:GetCurrentLife()
+        return current_hp < damage
+    end
+
+    BuffSystem.AddBuffToHero(unit, GUARDIAN_SPIRIT)
+    TimerStart(timer, 10., false, remove_buff)
+
+    event:AddCondition(GetLife)
+    event:AddAction(SaveHero)
+end
+
+function Priest.IsGuardianSpirit()
+    return GetSpellAbilityId() == GUARDIAN_SPIRIT
+end
+
+function Priest.InitGuardianSpirit()
+    Ability(GUARDIAN_SPIRIT, guardian_spirit_tooltip, guardian_spirit_desc)
+    Priest.hero:SetAbilityManacost(GUARDIAN_SPIRIT, 6)
+    Priest.hero:SetAbilityCooldown(GUARDIAN_SPIRIT, 180.)
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsGuardianSpirit)
+    event:AddAction(Priest.CastGuardianSpirit)
+end
+
+-- Copyright (c) meiso
+
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
     local items = { "ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM" }
@@ -4833,7 +4923,7 @@ function Priest.Init(location)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000)
+    Priest.hero:SetLife(1)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
@@ -4842,7 +4932,8 @@ function Priest.Init(location)
             RENEW,
             CIRCLE_OF_HEALING,
             PRAYER_OF_MENDING,
-            POWER_WORD_SHIELD_TR
+            POWER_WORD_SHIELD,
+            GUARDIAN_SPIRIT
     )
 
     Priest.InitFlashHeal()
@@ -4850,6 +4941,7 @@ function Priest.Init(location)
     Priest.InitCircleOfHealing()
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
+    Priest.InitGuardianSpirit()
 end
 
 -- Copyright (c) meiso
@@ -4868,7 +4960,7 @@ function Priest.CastPowerWordShield()
 
     BuffSystem.RegisterHero(unit)
 
-    --TODO: вешать 15-секундный дебаф на повтор
+    --ничего не делаем, если есть дебаф на повтор
     if BuffSystem.IsBuffOnHero(unit, "POWER_WORD_SHIELD_DEBUFF") then
         return
     end
@@ -4892,7 +4984,6 @@ function Priest.CastPowerWordShield()
     local remove_debuff = function()
         BuffSystem.RemoveBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF")
         DestroyTimer(debuff_timer)
-        print("cooldown")
     end
 
     local function Shield()
@@ -4912,8 +5003,10 @@ function Priest.CastPowerWordShield()
     end
 
     BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
+    --фиксируем дебаф на юните
     BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff)
     TimerStart(timer, 30., false, remove_buff)
+    --сбрасываем сам дебаф через 15 сек
     TimerStart(debuff_timer, 15., false, remove_debuff)
 
     event:AddCondition(UsingShield)
@@ -4921,11 +5014,11 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return GetSpellAbilityId() == POWER_WORD_SHIELD_TR
+    return GetSpellAbilityId() == POWER_WORD_SHIELD
 end
 
 function Priest.InitPowerWordShield()
-    Ability(POWER_WORD_SHIELD_TR, power_word_shield_tooltip, power_word_shield_desc)
+    Ability(POWER_WORD_SHIELD, power_word_shield_tooltip, power_word_shield_desc)
     Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
     Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
 
@@ -4949,7 +5042,6 @@ function Priest.CastPrayerOfMending()
     local last_unit
     local event
     local cured = false
-    local heal = 1043
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
@@ -4982,6 +5074,8 @@ function Priest.CastPrayerOfMending()
                 return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
             end)
             event:AddAction(function()
+                local heal = 1043
+                heal = BuffSystem.ImproveSpell(unit, heal)
                 Unit(unit):GainLife { life = heal, show = true }
                 cured = true
                 Priest.RemovePrayerOfMending(unit, timer)
@@ -5026,14 +5120,15 @@ end
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
-    local HP = 280
+    local heal = 280
     local unit = Unit(GetSpellTargetUnit())
 
     if not Priest.hero:LoseMana { percent = 17 } then
         return
     end
     for _ = 1, 5 do
-        unit:GainLife { life = HP, show = true }
+        heal = BuffSystem.ImproveSpell(unit, heal)
+        unit:GainLife { life = heal, show = true }
         TriggerSleepAction(3.)
     end
 end

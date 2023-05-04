@@ -6,6 +6,7 @@ function Priest.CastFlashHeal()
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
+    heal = BuffSystem.ImproveSpell(target, heal)
 
     -- проверяем есть ли мана
     if not Priest.hero:LoseMana{ percent = 18 } then return end

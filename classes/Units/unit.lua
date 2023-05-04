@@ -373,7 +373,8 @@ function Unit:HealNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
-            Unit(u):GainLife { life = args.heal }
+            --TODO: усиливать бафами
+            Unit(u):GainLife { life = args.heal, show = true }
         end
     end
     ForGroupBJ(group, act)

@@ -68,11 +68,11 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return GetSpellAbilityId() == POWER_WORD_SHIELD_TR
+    return GetSpellAbilityId() == POWER_WORD_SHIELD
 end
 
 function Priest.InitPowerWordShield()
-    Ability(POWER_WORD_SHIELD_TR, power_word_shield_tooltip, power_word_shield_desc)
+    Ability(POWER_WORD_SHIELD, power_word_shield_tooltip, power_word_shield_desc)
     Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
     Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
 

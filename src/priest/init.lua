@@ -12,7 +12,7 @@ function Priest.Init(location)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000)
+    Priest.hero:SetLife(1)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
@@ -21,7 +21,8 @@ function Priest.Init(location)
             RENEW,
             CIRCLE_OF_HEALING,
             PRAYER_OF_MENDING,
-            POWER_WORD_SHIELD_TR
+            POWER_WORD_SHIELD,
+            GUARDIAN_SPIRIT
     )
 
     Priest.InitFlashHeal()
@@ -29,4 +30,5 @@ function Priest.Init(location)
     Priest.InitCircleOfHealing()
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
+    Priest.InitGuardianSpirit()
 end

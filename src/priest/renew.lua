@@ -2,14 +2,15 @@
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
-    local HP = 280
+    local heal = 280
     local unit = Unit(GetSpellTargetUnit())
 
     if not Priest.hero:LoseMana { percent = 17 } then
         return
     end
     for _ = 1, 5 do
-        unit:GainLife { life = HP, show = true }
+        heal = BuffSystem.ImproveSpell(unit, heal)
+        unit:GainLife { life = heal, show = true }
         TriggerSleepAction(3.)
     end
 end
