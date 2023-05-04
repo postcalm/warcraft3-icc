@@ -6,10 +6,18 @@ function Priest.CastCircleOfHealing()
     end
     local heal = GetRandomInt(958, 1058)
 
+    local function act()
+        local u = GetEnumUnit()
+        if Priest.hero:IsAlly(u) then
+            heal = BuffSystem.ImproveSpell(u, heal)
+            Unit(u):GainLife { life = heal, show = true }
+        end
+    end
+
     Priest.hero:HealNear {
-        heal = heal,
         location = Priest.hero:GetLoc(),
-        radius = 15
+        radius = 15,
+        func = act
     }
 end
 

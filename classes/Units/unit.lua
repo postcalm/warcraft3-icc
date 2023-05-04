@@ -360,7 +360,7 @@ function Unit:GainLife(arg)
 end
 
 --- Реген HP по площади
----@param heal real Количество хп в абсолютных величинах
+---@param func function Функция исцеления
 ---@param overtime real Частота исцеления. По умолчанию 0
 ---@param location location Место исцеления
 ---@param radius real Радиус в метрах
@@ -370,14 +370,7 @@ function Unit:HealNear(args)
     local ot = args.overtime or 0.
     local group = GetUnitsInRangeOfLocAll(meters, args.location)
 
-    local function act()
-        local u = GetEnumUnit()
-        if self:IsAlly(u) then
-            --TODO: усиливать бафами
-            Unit(u):GainLife { life = args.heal, show = true }
-        end
-    end
-    ForGroupBJ(group, act)
+    ForGroupBJ(group, args.func)
     TriggerSleepAction(ot)
     DestroyGroup(group)
 end

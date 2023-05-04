@@ -1680,6 +1680,7 @@ end
 ---@param overtime real Частота исцеления. По умолчанию 0
 ---@param location location Место исцеления
 ---@param radius real Радиус в метрах
+---@param func function Функция исцеления
 ---@return nil
 function Unit:HealNear(args)
     local meters = METER * args.radius
@@ -1689,10 +1690,11 @@ function Unit:HealNear(args)
     local function act()
         local u = GetEnumUnit()
         if self:IsAlly(u) then
+            --TODO: усиливать бафами
             Unit(u):GainLife { life = args.heal, show = true }
         end
     end
-    ForGroupBJ(group, act)
+    ForGroupBJ(group, args.func)
     TriggerSleepAction(ot)
     DestroyGroup(group)
 end
@@ -4760,10 +4762,18 @@ function Priest.CastCircleOfHealing()
     end
     local heal = GetRandomInt(958, 1058)
 
+    local function act()
+        local u = GetEnumUnit()
+        if Priest.hero:IsAlly(u) then
+            heal = BuffSystem.ImproveSpell(u, heal)
+            Unit(u):GainLife { life = heal, show = true }
+        end
+    end
+
     Priest.hero:HealNear {
-        heal = heal,
         location = Priest.hero:GetLoc(),
-        radius = 15
+        radius = 15,
+        func = act
     }
 end
 
