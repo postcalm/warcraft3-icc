@@ -19,6 +19,8 @@ function LadyDeathwhisper.ManaShield()
         end
 
         TriggerSleepAction(0.7)
+        --можно было бы реализовать через BlzSetEventDamage, но в оригинале
+        --хп у Леди явно регенилось от маны
         LadyDeathwhisper.unit:GainLife { life = damage }
         LadyDeathwhisper.unit:LoseMana { mana = damage, check = false }
         event:Destroy()

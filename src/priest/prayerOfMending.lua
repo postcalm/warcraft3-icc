@@ -45,7 +45,7 @@ function Priest.CastPrayerOfMending()
                 return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
             end)
             event:AddAction(function()
-                Unit(unit):GainLife { life = heal }
+                Unit(unit):GainLife { life = heal, show = true }
                 cured = true
                 Priest.RemovePrayerOfMending(unit, timer)
             end)

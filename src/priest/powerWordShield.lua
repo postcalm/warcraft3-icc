@@ -9,7 +9,7 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local absorb = 150
+    local absorb = 2230
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)

@@ -788,7 +788,7 @@ function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистриует событие, когда юнита атакуют или он атакует
+--- Регистриует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
@@ -4100,6 +4100,8 @@ function LadyDeathwhisper.ManaShield()
         end
 
         TriggerSleepAction(0.7)
+        --можно было бы реализовать через BlzSetEventDamage, но в оригинале
+        --хп у Леди явно регенилось от маны
         LadyDeathwhisper.unit:GainLife { life = damage }
         LadyDeathwhisper.unit:LoseMana { mana = damage, check = false }
         event:Destroy()
@@ -4860,7 +4862,7 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local absorb = 150
+    local absorb = 2230
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
@@ -4965,7 +4967,7 @@ function Priest.CastPrayerOfMending()
                 return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
             end)
             event:AddAction(function()
-                Unit(unit):GainLife { life = heal }
+                Unit(unit):GainLife { life = heal, show = true }
                 cured = true
                 Priest.RemovePrayerOfMending(unit, timer)
             end)
@@ -5016,7 +5018,7 @@ function Priest.CastRenew()
         return
     end
     for _ = 1, 5 do
-        unit:GainLife { life = HP }
+        unit:GainLife { life = HP, show = true }
         TriggerSleepAction(3.)
     end
 end

@@ -92,14 +92,14 @@ avengers_shield_desc = "Бросает в противника священны�
         "Способен воздействовать на 3 цели."
 
 blessing_of_kings_tooltip = "Благословение королей (Z)"
-blessing_of_kings_desc = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
+blessing_of_kings_desc = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
 
 blessing_of_might_tooltip = "Благословение могущества (V)"
 blessing_of_might_desc = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
 
 blessing_of_sanctuary_tooltip = "Благословение неприкосновенности (X)"
-blessing_of_sanctuary_desc = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-        "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
+blessing_of_sanctuary_desc = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+        "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
 
 blessing_of_wisdom_tooltip = "Благословение мудрости (C)"
 blessing_of_wisdom_desc = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
@@ -752,7 +752,7 @@ function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистриует событие, когда юнита атакуют или он атакует
+--- Регистриует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
@@ -4064,6 +4064,8 @@ function LadyDeathwhisper.ManaShield()
         end
 
         TriggerSleepAction(0.7)
+        --можно было бы реализовать через BlzSetEventDamage, но в оригинале
+        --хп у Леди явно регенилось от маны
         LadyDeathwhisper.unit:GainLife { life = damage }
         LadyDeathwhisper.unit:LoseMana { mana = damage, check = false }
         event:Destroy()
@@ -4693,7 +4695,7 @@ end
 -- Copyright (c) meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -4824,7 +4826,7 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local absorb = 150
+    local absorb = 2230
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
@@ -4929,7 +4931,7 @@ function Priest.CastPrayerOfMending()
                 return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
             end)
             event:AddAction(function()
-                Unit(unit):GainLife { life = heal }
+                Unit(unit):GainLife { life = heal, show = true }
                 cured = true
                 Priest.RemovePrayerOfMending(unit, timer)
             end)
@@ -4980,7 +4982,7 @@ function Priest.CastRenew()
         return
     end
     for _ = 1, 5 do
-        unit:GainLife { life = HP }
+        unit:GainLife { life = HP, show = true }
         TriggerSleepAction(3.)
     end
 end

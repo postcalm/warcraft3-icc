@@ -9,7 +9,7 @@ function Priest.CastRenew()
         return
     end
     for _ = 1, 5 do
-        unit:GainLife { life = HP }
+        unit:GainLife { life = HP, show = true }
         TriggerSleepAction(3.)
     end
 end
