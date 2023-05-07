@@ -58,7 +58,7 @@ function Priest.CastPowerWordShield()
 
     BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
     --фиксируем дебаф на юните
-    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff)
+    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff, true)
     TimerStart(timer, 30., false, remove_buff)
     --сбрасываем сам дебаф через 15 сек
     TimerStart(debuff_timer, 15., false, remove_debuff)

@@ -6,3 +6,4 @@ confirm.fdf
 selector.fdf
 tooltip_selector.fdf
 runes.fdf
+buff_system.fdf

@@ -3,11 +3,19 @@
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
     ---Формат:
-    ---{ unit = { buff, func } }
-    buffs = {}
+    ---{ unit = { buff, debuff, func, frame } }
+    buffs = {},
+    debuffs = {},
+    main_frame_buff = nil,
 }
 
---- Регистрирует героя в системе бафов
+function BuffSystem.LoadFrame()
+    BuffSystem.main_frame_buff = Frame("BSBuff")
+    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0., 0.18)
+    BuffSystem.main_frame_buff:Hide()
+end
+
+--- Регистрирует героя в системе
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
@@ -23,15 +31,26 @@ end
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
+---@param is_debuff boolean Является баф дебафом
 ---@return nil
-function BuffSystem.AddBuffToHero(hero, buff, func)
+function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsBuffOnHero(hero, buff) then
         return
     end
     local u = I2S(GetHandleId(hero))
-    table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
+    if is_debuff then
+        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func })
+    else
+        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func })
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
+    BuffSystem.main_frame_buff:Show()
+    if is_debuff then
+        BuffSystem._SetDebuffToFrame()
+    else
+        BuffSystem._SetBuffToFrame(u)
+    end
 end
 
 --- Проверяет есть ли герой в системе бафов
@@ -66,7 +85,8 @@ function BuffSystem.IsBuffOnHero(hero, buff)
         if BuffSystem.buffs[u][i] == nil then
             return false
         end
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             return true
         end
     end
@@ -81,7 +101,8 @@ function BuffSystem.RemoveBuffToHero(hero, buff)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             BuffSystem.buffs[u][i] = nil
         end
     end
@@ -98,14 +119,16 @@ function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
         if BuffSystem.buffs[u][i] == nil then
             return
         end
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             BuffSystem.buffs[u][i].func_()
+            BuffSystem.buffs[u][i] = nil
         end
     end
 end
 
 --- Проверят относится ли баф к группе однотипных бафов
----@param hero unit
+---@param hero unit Юнит
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
@@ -154,6 +177,7 @@ function BuffSystem.RemoveAllBuffs(hero)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
     end
 end
 
@@ -166,7 +190,8 @@ function BuffSystem.RemoveBuffFromUnits(buff)
             if BuffSystem.buffs[unit][i] == nil then
                 return
             end
-            if BuffSystem.buffs[unit][i].buff_ == buff then
+            if BuffSystem.buffs[unit][i].buff_ == buff or
+                    BuffSystem.buffs[unit][i].debuff_ == buff then
                 BuffSystem.buffs[unit][i] = nil
             end
         end
@@ -182,7 +207,7 @@ function BuffSystem.RemoveHero(hero)
     BuffSystem.buffs[u] = nil
 end
 
---- Усилить способность взависимости от наличия определенного бафа
+--- Усилить воздействие способности на цель взависимости от наличия определенного бафа
 ---@param hero unit Юнит, на которого воздействуют спеллом
 ---@param value integer Количество урона/исцеления воздействующее на цель
 ---@return real
@@ -206,4 +231,30 @@ function BuffSystem.ImproveSpell(hero, value)
         end
     end
     return value
+end
+
+function BuffSystem._SetBuffToFrame(u)
+    local frame = Frame("BSIconTemp")
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].buff_ ~= "" then
+            count = count + 1
+        end
+    end
+    count = count - 1
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * frame:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (frame:GetWidth() * 2 + 0.005) * count
+    --0.06 - размер фона ровно на одну иконку
+    BuffSystem.main_frame_buff:SetWidth(0.06 + _add)
+    frame:SetPoint(FRAMEPOINT_LEFT, BuffSystem.main_frame_buff, FRAMEPOINT_LEFT, x, 0.0)
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(blessing_of_kings_tex)
+end
+
+function BuffSystem._SetDebuffToFrame()
+
 end

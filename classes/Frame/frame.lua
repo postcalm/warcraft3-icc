@@ -24,14 +24,12 @@ setmetatable(Frame, {
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, own, 0, 0)
+        self.frame = BlzCreateSimpleFrame(name, own, 0, self:GetContext())
     else
-        self.frame = BlzCreateFrame(name, own, 0, 0)
+        self.frame = BlzCreateFrame(name, own, 0, self:GetContext())
     end
     self.drop = false
 end
-
--- Presets
 
 --- Создать каст-бар
 ---@param cd real Время каста
@@ -41,7 +39,7 @@ end
 function Frame:CastBar(cd, spell, unit)
     local period = 0.05
     self.drop = false
-    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, self:GetContext())
     local castbar_label = BlzGetFrameByName("CastbarLabel", 0)
     BlzFrameSetText(castbar_label, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
@@ -76,8 +74,6 @@ function Frame:CastBar(cd, spell, unit)
     end)
 end
 
--- Setters
-
 --- Установить уровень приоритетности
 ---@param level integer Уровень от 0
 ---@return nil
@@ -103,7 +99,7 @@ end
 ---@return nil
 function Frame:SetPoint(point, relative, relative_point, x, y)
     local r = relative
-    if type(relative) == "table" then
+    if isTable(relative) then
         r = relative:GetHandle()
     end
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
@@ -152,6 +148,20 @@ function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
+--- Задать ширину фрейма
+---@param value real Значение ширины
+---@return nil
+function Frame:SetWidth(value)
+    BlzFrameSetSize(self.frame, value, self:GetHeight())
+end
+
+--- Задать высоту фрейма
+---@param value real Значение высоты
+---@return nil
+function Frame:SetHeight(value)
+    BlzFrameSetSize(self.frame, self:GetWidth(), value)
+end
+
 --- Привязать тултип к фрейму
 ---@param title string Заголовок
 ---@param text string Содержимое
@@ -172,8 +182,6 @@ function Frame:SetTooltip(title, text)
     tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
 end
 
--- Getters
-
 --- Получить главный фрейм
 ---@return framehandle
 function Frame:GetOriginFrame()
@@ -184,7 +192,7 @@ end
 ---@param name string Название фрейма из fdf-шаблона
 ---@return framehandle
 function Frame:GetFrameByName(name)
-    return BlzGetFrameByName(name, 0)
+    return BlzGetFrameByName(name, self:GetContext())
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -211,7 +219,24 @@ function Frame:GetName()
     return BlzFrameGetName(self.frame)
 end
 
--- Removers
+--- Получить "контекст" фрейма.
+---По сути возвращает ID игрока
+---@return integer
+function Frame:GetContext()
+    return GetHandleId(GetLocalPlayer())
+end
+
+--- Получить высоту фрейма
+---@return integer
+function Frame:GetHeight()
+    return BlzFrameGetHeight(self.frame)
+end
+
+--- Получить ширину фрейма
+---@return integer
+function Frame:GetWidth()
+    return BlzFrameGetWidth(self.frame)
+end
 
 --- Сброс анимации фрейма
 ---@return nil
@@ -231,8 +256,6 @@ function Frame:Destroy()
     BlzDestroyFrame(self.frame)
 end
 
--- Meta
-
 --- Отключить фрейм
 ---@return nil
 function Frame:Disable()
@@ -243,4 +266,16 @@ end
 ---@return nil
 function Frame:Enable()
     BlzFrameSetEnable(self.frame, true)
+end
+
+--- Скрыть фрейм
+---@return nil
+function Frame:Hide()
+    BlzFrameSetVisible(self.frame, false)
+end
+
+--- Показать фрейм
+---@return nil
+function Frame:Show()
+    BlzFrameSetVisible(self.frame, true)
 end

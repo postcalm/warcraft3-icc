@@ -1,0 +1,30 @@
+// Copyright (c) meiso
+
+Frame "BACKDROP" "BSBuff" {
+    DecorateFileNames,
+
+    Height 0.03,
+    Width 0.06,
+
+    BackdropTileBackground,
+    BackdropBackgroundSize 0.1,
+
+    BackdropBackground "QuestDialogNormalBackground",
+    BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+    BackdropCornerSize 0.01,
+    BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
+    BackdropEdgeFile "QuestDialogNormalBorder",
+}
+
+Frame "BUTTON" "BSIconTemp" {
+    UseActiveContext,
+    DecorateFileNames,
+
+    Width 0.02,
+    Height 0.02,
+
+    ControlBackdrop "BSIcon",
+    Frame "BACKDROP" "BSIcon" {
+        BackdropBackground "",
+    }
+}

@@ -131,6 +131,7 @@ avengers_shield_desc = "Бросает в противника священны�
 
 blessing_of_kings_tooltip = "Благословение королей (Z)"
 blessing_of_kings_desc = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
+blessing_of_kings_tex = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga"
 
 blessing_of_might_tooltip = "Благословение могущества (V)"
 blessing_of_might_desc = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
@@ -182,7 +183,7 @@ power_word_shield_desc = "Вытягивает частичку души сою�
         "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
         "получением урона. Повторно наложить щит можно только через 15 сек."
 
-guardian_spirit_tooltip = "Оберегающий дух (|cffffcc00R|r)"
+guardian_spirit_tooltip = "Оберегающий дух (R)"
 guardian_spirit_desc = "Призывает оберегающего духа для охраны дружественной цели. " ..
         "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
         "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
@@ -866,14 +867,12 @@ setmetatable(Frame, {
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, own, 0, 0)
+        self.frame = BlzCreateSimpleFrame(name, own, 0, self:GetContext())
     else
-        self.frame = BlzCreateFrame(name, own, 0, 0)
+        self.frame = BlzCreateFrame(name, own, 0, self:GetContext())
     end
     self.drop = false
 end
-
--- Presets
 
 --- Создать каст-бар
 ---@param cd real Время каста
@@ -883,7 +882,7 @@ end
 function Frame:CastBar(cd, spell, unit)
     local period = 0.05
     self.drop = false
-    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, self:GetContext())
     local castbar_label = BlzGetFrameByName("CastbarLabel", 0)
     BlzFrameSetText(castbar_label, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
@@ -918,8 +917,6 @@ function Frame:CastBar(cd, spell, unit)
     end)
 end
 
--- Setters
-
 --- Установить уровень приоритетности
 ---@param level integer Уровень от 0
 ---@return nil
@@ -945,7 +942,7 @@ end
 ---@return nil
 function Frame:SetPoint(point, relative, relative_point, x, y)
     local r = relative
-    if type(relative) == "table" then
+    if isTable(relative) then
         r = relative:GetHandle()
     end
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
@@ -994,6 +991,20 @@ function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
+--- Задать ширину фрейма
+---@param value real Значение ширины
+---@return nil
+function Frame:SetWidth(value)
+    BlzFrameSetSize(self.frame, value, self:GetHeight())
+end
+
+--- Задать высоту фрейма
+---@param value real Значение высоты
+---@return nil
+function Frame:SetHeight(value)
+    BlzFrameSetSize(self.frame, self:GetWidth(), value)
+end
+
 --- Привязать тултип к фрейму
 ---@param title string Заголовок
 ---@param text string Содержимое
@@ -1014,8 +1025,6 @@ function Frame:SetTooltip(title, text)
     tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
 end
 
--- Getters
-
 --- Получить главный фрейм
 ---@return framehandle
 function Frame:GetOriginFrame()
@@ -1026,7 +1035,7 @@ end
 ---@param name string Название фрейма из fdf-шаблона
 ---@return framehandle
 function Frame:GetFrameByName(name)
-    return BlzGetFrameByName(name, 0)
+    return BlzGetFrameByName(name, self:GetContext())
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -1053,7 +1062,24 @@ function Frame:GetName()
     return BlzFrameGetName(self.frame)
 end
 
--- Removers
+--- Получить "контекст" фрейма.
+---По сути возвращает ID игрока
+---@return integer
+function Frame:GetContext()
+    return GetHandleId(GetLocalPlayer())
+end
+
+--- Получить высоту фрейма
+---@return integer
+function Frame:GetHeight()
+    return BlzFrameGetHeight(self.frame)
+end
+
+--- Получить ширину фрейма
+---@return integer
+function Frame:GetWidth()
+    return BlzFrameGetWidth(self.frame)
+end
 
 --- Сброс анимации фрейма
 ---@return nil
@@ -1073,8 +1099,6 @@ function Frame:Destroy()
     BlzDestroyFrame(self.frame)
 end
 
--- Meta
-
 --- Отключить фрейм
 ---@return nil
 function Frame:Disable()
@@ -1085,6 +1109,18 @@ end
 ---@return nil
 function Frame:Enable()
     BlzFrameSetEnable(self.frame, true)
+end
+
+--- Скрыть фрейм
+---@return nil
+function Frame:Hide()
+    BlzFrameSetVisible(self.frame, false)
+end
+
+--- Показать фрейм
+---@return nil
+function Frame:Show()
+    BlzFrameSetVisible(self.frame, true)
 end
 
 --- Created by meiso.
@@ -1712,24 +1748,16 @@ function Unit:GainLife(arg)
 end
 
 --- Реген HP по площади
----@param heal real Количество хп в абсолютных величинах
+---@param func function Функция исцеления
 ---@param overtime real Частота исцеления. По умолчанию 0
 ---@param location location Место исцеления
 ---@param radius real Радиус в метрах
----@param func function Функция исцеления
 ---@return nil
 function Unit:HealNear(args)
     local meters = METER * args.radius
     local ot = args.overtime or 0.
     local group = GetUnitsInRangeOfLocAll(meters, args.location)
 
-    local function act()
-        local u = GetEnumUnit()
-        if self:IsAlly(u) then
-            --TODO: усиливать бафами
-            Unit(u):GainLife { life = args.heal, show = true }
-        end
-    end
     ForGroupBJ(group, args.func)
     TriggerSleepAction(ot)
     DestroyGroup(group)
@@ -3191,11 +3219,19 @@ end
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
     ---Формат:
-    ---{ unit = { buff, func } }
-    buffs = {}
+    ---{ unit = { buff, debuff, func, frame } }
+    buffs = {},
+    debuffs = {},
+    main_frame_buff = nil,
 }
 
---- Регистрирует героя в системе бафов
+function BuffSystem.LoadFrame()
+    BuffSystem.main_frame_buff = Frame("BSBuff")
+    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0., 0.18)
+    BuffSystem.main_frame_buff:Hide()
+end
+
+--- Регистрирует героя в системе
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
@@ -3211,15 +3247,26 @@ end
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
+---@param is_debuff boolean Является баф дебафом
 ---@return nil
-function BuffSystem.AddBuffToHero(hero, buff, func)
+function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsBuffOnHero(hero, buff) then
         return
     end
     local u = I2S(GetHandleId(hero))
-    table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
+    if is_debuff then
+        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func })
+    else
+        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func })
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
+    BuffSystem.main_frame_buff:Show()
+    if is_debuff then
+        BuffSystem._SetDebuffToFrame()
+    else
+        BuffSystem._SetBuffToFrame(u)
+    end
 end
 
 --- Проверяет есть ли герой в системе бафов
@@ -3254,7 +3301,8 @@ function BuffSystem.IsBuffOnHero(hero, buff)
         if BuffSystem.buffs[u][i] == nil then
             return false
         end
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             return true
         end
     end
@@ -3269,7 +3317,8 @@ function BuffSystem.RemoveBuffToHero(hero, buff)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             BuffSystem.buffs[u][i] = nil
         end
     end
@@ -3286,14 +3335,16 @@ function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
         if BuffSystem.buffs[u][i] == nil then
             return
         end
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             BuffSystem.buffs[u][i].func_()
+            BuffSystem.buffs[u][i] = nil
         end
     end
 end
 
 --- Проверят относится ли баф к группе однотипных бафов
----@param hero unit
+---@param hero unit Юнит
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
@@ -3342,6 +3393,7 @@ function BuffSystem.RemoveAllBuffs(hero)
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
     end
 end
 
@@ -3354,7 +3406,8 @@ function BuffSystem.RemoveBuffFromUnits(buff)
             if BuffSystem.buffs[unit][i] == nil then
                 return
             end
-            if BuffSystem.buffs[unit][i].buff_ == buff then
+            if BuffSystem.buffs[unit][i].buff_ == buff or
+                    BuffSystem.buffs[unit][i].debuff_ == buff then
                 BuffSystem.buffs[unit][i] = nil
             end
         end
@@ -3370,7 +3423,7 @@ function BuffSystem.RemoveHero(hero)
     BuffSystem.buffs[u] = nil
 end
 
---- Усилить способность взависимости от наличия определенного бафа
+--- Усилить воздействие способности на цель взависимости от наличия определенного бафа
 ---@param hero unit Юнит, на которого воздействуют спеллом
 ---@param value integer Количество урона/исцеления воздействующее на цель
 ---@return real
@@ -3394,6 +3447,32 @@ function BuffSystem.ImproveSpell(hero, value)
         end
     end
     return value
+end
+
+function BuffSystem._SetBuffToFrame(u)
+    local frame = Frame("BSIconTemp")
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].buff_ ~= "" then
+            count = count + 1
+        end
+    end
+    count = count - 1
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * frame:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (frame:GetWidth() * 2 + 0.005) * count
+    --0.06 - размер фона ровно на одну иконку
+    BuffSystem.main_frame_buff:SetWidth(0.06 + _add)
+    frame:SetPoint(FRAMEPOINT_LEFT, BuffSystem.main_frame_buff, FRAMEPOINT_LEFT, x, 0.0)
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(blessing_of_kings_tex)
+end
+
+function BuffSystem._SetDebuffToFrame()
+
 end
 
 -- Copyright (c) meiso
@@ -5014,7 +5093,7 @@ function Priest.CastPowerWordShield()
 
     BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
     --фиксируем дебаф на юните
-    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff)
+    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff, true)
     TimerStart(timer, 30., false, remove_buff)
     --сбрасываем сам дебаф через 15 сек
     TimerStart(debuff_timer, 15., false, remove_debuff)
@@ -5209,6 +5288,7 @@ function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     --HeroSelector.Init()
+    BuffSystem.LoadFrame()
 
     -- Механики
     BattleSystem.Init()

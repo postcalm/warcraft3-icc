@@ -1,3 +1,5 @@
+// Copyright (c) meiso
+
 // Окно подтверждения выбора персонажа
 
 IncludeFile "UI\FrameDef\UI\EscMenuTemplates.fdf",

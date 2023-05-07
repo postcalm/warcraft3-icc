@@ -1,3 +1,5 @@
+// Copyright (c) meiso
+
 // шаблон для каст-баров
 
 Frame "STATUSBAR" "Castbar" {
