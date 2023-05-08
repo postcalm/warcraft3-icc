@@ -491,7 +491,7 @@ setmetatable(Effect, {
 function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
-    if type(unit) == "table" then
+    if isTable(unit) then
         u = unit:GetId()
     end
     self.effect = AddSpecialEffectTarget(model, u, point)
@@ -783,7 +783,7 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         self.unit = unit:GetId()
     end
 end
@@ -1266,7 +1266,7 @@ function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency
     if type(text) == "number" then
         self.text = I2S(text // 1)
     end
-    if type(unit) == "table" then
+    if isTable(unit) then
         self.unit = unit:GetId()
     end
 
@@ -1437,7 +1437,7 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
@@ -1452,7 +1452,7 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
@@ -1465,7 +1465,7 @@ end
 ---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     BattleSystem.disable = true
@@ -1504,7 +1504,7 @@ end
 ---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
@@ -1517,7 +1517,7 @@ end
 ---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
@@ -1530,7 +1530,7 @@ end
 ---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then
+    if isTable(target) then
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
@@ -2973,7 +2973,7 @@ end
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         u = unit:GetId()
     end
     for _, item in pairs(items) do
@@ -2989,7 +2989,7 @@ end
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         u = unit:GetId()
     end
     for _, item in pairs(items) do
@@ -3223,12 +3223,16 @@ BuffSystem = {
     buffs = {},
     debuffs = {},
     main_frame_buff = nil,
+    main_frame_debuff = nil,
 }
 
 function BuffSystem.LoadFrame()
-    BuffSystem.main_frame_buff = Frame("BSBuff")
-    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0., 0.18)
-    BuffSystem.main_frame_buff:Hide()
+    BuffSystem.main_frame_buff = Frame("BuffSystem")
+    BuffSystem.main_frame_debuff = Frame("BuffSystem")
+    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0.015, 0.18)
+    BuffSystem.main_frame_debuff:SetAbsPoint(FRAMEPOINT_CENTER, 0.61, 0.18)
+    --BuffSystem.main_frame_buff:Hide()
+    --BuffSystem.main_frame_debuff:Hide()
 end
 
 --- Регистрирует героя в системе
@@ -3261,10 +3265,11 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
         table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func })
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    BuffSystem.main_frame_buff:Show()
     if is_debuff then
-        BuffSystem._SetDebuffToFrame()
+        BuffSystem.main_frame_debuff:Show()
+        BuffSystem._SetDebuffToFrame(u)
     else
+        BuffSystem.main_frame_buff:Show()
         BuffSystem._SetBuffToFrame(u)
     end
 end
@@ -3450,7 +3455,6 @@ function BuffSystem.ImproveSpell(hero, value)
 end
 
 function BuffSystem._SetBuffToFrame(u)
-    local frame = Frame("BSIconTemp")
     local count = 0
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ ~= "" then
@@ -3458,21 +3462,38 @@ function BuffSystem._SetBuffToFrame(u)
         end
     end
     count = count - 1
-    --расположение иконки бафа по X
-    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
-    local x = 0.005 + (count * frame:GetWidth()) + (0.0025 * count)
-    --на сколько расширить фон
-    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
-    local _add = (frame:GetWidth() * 2 + 0.005) * count
-    --0.06 - размер фона ровно на одну иконку
-    BuffSystem.main_frame_buff:SetWidth(0.06 + _add)
-    frame:SetPoint(FRAMEPOINT_LEFT, BuffSystem.main_frame_buff, FRAMEPOINT_LEFT, x, 0.0)
-    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
-    buff_icon:SetTexture(blessing_of_kings_tex)
+    BuffSystem:_ResizeFrame(BuffSystem.main_frame_buff, count)
+    BuffSystem._SetIcon()
 end
 
-function BuffSystem._SetDebuffToFrame()
+function BuffSystem._SetDebuffToFrame(u)
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].debuff_ ~= "" then
+            count = count + 1
+        end
+    end
+    count = count - 1
+    BuffSystem:_ResizeFrame(BuffSystem.main_frame_debuff, count)
+    BuffSystem._SetIcon()
+end
 
+function BuffSystem:_ResizeFrame(main_frame, count)
+    local iframe = Frame("BSIconTemp")
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * iframe:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (iframe:GetWidth() * 2 + 0.005) * count
+    --0.03 - базовая ширина фона
+    main_frame:SetWidth(0.03 + _add)
+    iframe:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+end
+
+function BuffSystem._SetIcon()
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(blessing_of_kings_tex)
 end
 
 -- Copyright (c) meiso

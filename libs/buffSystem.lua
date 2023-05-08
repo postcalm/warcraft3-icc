@@ -7,12 +7,16 @@ BuffSystem = {
     buffs = {},
     debuffs = {},
     main_frame_buff = nil,
+    main_frame_debuff = nil,
 }
 
 function BuffSystem.LoadFrame()
-    BuffSystem.main_frame_buff = Frame("BSBuff")
-    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0., 0.18)
+    BuffSystem.main_frame_buff = Frame("BuffSystem")
+    BuffSystem.main_frame_debuff = Frame("BuffSystem")
+    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0.015, 0.18)
+    BuffSystem.main_frame_debuff:SetAbsPoint(FRAMEPOINT_CENTER, 0.61, 0.18)
     BuffSystem.main_frame_buff:Hide()
+    BuffSystem.main_frame_debuff:Hide()
 end
 
 --- Регистрирует героя в системе
@@ -45,10 +49,11 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
         table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func })
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    BuffSystem.main_frame_buff:Show()
     if is_debuff then
-        BuffSystem._SetDebuffToFrame()
+        BuffSystem.main_frame_debuff:Show()
+        BuffSystem._SetDebuffToFrame(u)
     else
+        BuffSystem.main_frame_buff:Show()
         BuffSystem._SetBuffToFrame(u)
     end
 end
@@ -234,7 +239,6 @@ function BuffSystem.ImproveSpell(hero, value)
 end
 
 function BuffSystem._SetBuffToFrame(u)
-    local frame = Frame("BSIconTemp")
     local count = 0
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ ~= "" then
@@ -242,19 +246,36 @@ function BuffSystem._SetBuffToFrame(u)
         end
     end
     count = count - 1
-    --расположение иконки бафа по X
-    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
-    local x = 0.005 + (count * frame:GetWidth()) + (0.0025 * count)
-    --на сколько расширить фон
-    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
-    local _add = (frame:GetWidth() * 2 + 0.005) * count
-    --0.06 - размер фона ровно на одну иконку
-    BuffSystem.main_frame_buff:SetWidth(0.06 + _add)
-    frame:SetPoint(FRAMEPOINT_LEFT, BuffSystem.main_frame_buff, FRAMEPOINT_LEFT, x, 0.0)
-    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
-    buff_icon:SetTexture(blessing_of_kings_tex)
+    BuffSystem:_ResizeFrame(BuffSystem.main_frame_buff, count)
+    BuffSystem._SetIcon()
 end
 
-function BuffSystem._SetDebuffToFrame()
+function BuffSystem._SetDebuffToFrame(u)
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].debuff_ ~= "" then
+            count = count + 1
+        end
+    end
+    count = count - 1
+    BuffSystem:_ResizeFrame(BuffSystem.main_frame_debuff, count)
+    BuffSystem._SetIcon()
+end
 
+function BuffSystem:_ResizeFrame(main_frame, count)
+    local iframe = Frame("BSIconTemp")
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * iframe:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (iframe:GetWidth() * 2 + 0.005) * count
+    --0.03 - базовая ширина фона
+    main_frame:SetWidth(0.03 + _add)
+    iframe:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+end
+
+function BuffSystem._SetIcon()
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(blessing_of_kings_tex)
 end

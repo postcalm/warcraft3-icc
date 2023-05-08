@@ -1,10 +1,10 @@
 // Copyright (c) meiso
 
-Frame "BACKDROP" "BSBuff" {
+Frame "BACKDROP" "BuffSystem" {
     DecorateFileNames,
 
     Height 0.03,
-    Width 0.06,
+    Width 0.03, // 0.03, 0.075, 0.12
 
     BackdropTileBackground,
     BackdropBackgroundSize 0.1,
