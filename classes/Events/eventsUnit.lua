@@ -18,7 +18,7 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         self.unit = unit:GetId()
     end
 end

@@ -25,7 +25,7 @@ end
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         u = unit:GetId()
     end
     for _, item in pairs(items) do
@@ -41,7 +41,7 @@ end
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then
+    if isTable(unit) then
         u = unit:GetId()
     end
     for _, item in pairs(items) do

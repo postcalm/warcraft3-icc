@@ -31,7 +31,7 @@ function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency
     if type(text) == "number" then
         self.text = I2S(text // 1)
     end
-    if type(unit) == "table" then
+    if isTable(unit) then
         self.unit = unit:GetId()
     end
 
