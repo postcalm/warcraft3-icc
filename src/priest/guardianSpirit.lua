@@ -12,7 +12,7 @@ function Priest.CastGuardianSpirit()
     event:RegisterDamaged()
 
     local remove_buff = function()
-        BuffSystem.RemoveBuffToHero(unit, GUARDIAN_SPIRIT)
+        BuffSystem.RemoveBuffFromHero(unit, guardian_spirit)
         DestroyTimer(timer)
         gs_effect:Destroy()
         event:Destroy()
@@ -29,7 +29,7 @@ function Priest.CastGuardianSpirit()
         return current_hp < damage
     end
 
-    BuffSystem.AddBuffToHero(unit, GUARDIAN_SPIRIT)
+    BuffSystem.AddBuffToHero(unit, guardian_spirit)
     TimerStart(timer, 10., false, remove_buff)
 
     event:AddCondition(GetLife)
@@ -37,13 +37,13 @@ function Priest.CastGuardianSpirit()
 end
 
 function Priest.IsGuardianSpirit()
-    return GetSpellAbilityId() == GUARDIAN_SPIRIT
+    return guardian_spirit:SpellCasted()
 end
 
 function Priest.InitGuardianSpirit()
-    Ability(GUARDIAN_SPIRIT, guardian_spirit_tooltip, guardian_spirit_desc)
-    Priest.hero:SetAbilityManacost(GUARDIAN_SPIRIT, 6)
-    Priest.hero:SetAbilityCooldown(GUARDIAN_SPIRIT, 180.)
+    guardian_spirit:Init()
+    Priest.hero:SetAbilityManacost(guardian_spirit:GetId(), 6)
+    Priest.hero:SetAbilityCooldown(guardian_spirit:GetId(), 180.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

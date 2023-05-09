@@ -3,7 +3,7 @@
 function Paladin.RemoveJudgementOfLight(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_LIGHT)
     end
     DestroyTimer(timer)
 end
@@ -25,7 +25,7 @@ function Paladin.CastJudgementOfLight()
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_LIGHT)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())

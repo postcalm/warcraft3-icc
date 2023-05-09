@@ -1,8 +1,8 @@
 -- Copyright (c) meiso
 
 function Priest.RemovePrayerOfMending(unit, timer)
-    if BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING) then
-        BuffSystem.RemoveBuffToHero(unit, PRAYER_OF_MENDING)
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromHero(unit, prayer_of_mending)
     end
     DestroyTimer(timer)
 end
@@ -15,8 +15,8 @@ function Priest.CastPrayerOfMending()
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
-    if BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING) then
-        BuffSystem.RemoveBuffFromUnits(PRAYER_OF_MENDING)
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromUnits(prayer_of_mending)
         POM_JUMP_COUNT = 5
     end
 
@@ -36,12 +36,12 @@ function Priest.CastPrayerOfMending()
                 Priest.RemovePrayerOfMending(unit, timer)
             end
 
-            BuffSystem.AddBuffToHero(unit, PRAYER_OF_MENDING, remove_buff)
+            BuffSystem.AddBuffToHero(unit, prayer_of_mending, remove_buff)
             --баф снимется сам через 30 сек
             TimerStart(timer, 30., remove_buff)
 
             event:AddCondition(function()
-                return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
+                return BuffSystem.IsBuffOnHero(unit, prayer_of_mending)
             end)
             event:AddAction(function()
                 local heal = 1043
@@ -64,6 +64,7 @@ function Priest.CastPrayerOfMending()
                 end
                 GroupRemoveUnit(group, temp)
             end
+            BuffSystem.RemoveBuffFromHero(last_unit, prayer_of_mending)
             DestroyGroup(group)
         end
     end
@@ -72,13 +73,13 @@ function Priest.CastPrayerOfMending()
 end
 
 function Priest.IsPrayerOfMending()
-    return GetSpellAbilityId() == PRAYER_OF_MENDING
+    return prayer_of_mending:SpellCasted()
 end
 
 function Priest.InitPrayerOfMending()
-    Ability(PRAYER_OF_MENDING, prayer_of_mending_tooltip, prayer_of_mending_desc)
-    Priest.hero:SetAbilityManacost(PRAYER_OF_MENDING, 15)
-    Priest.hero:SetAbilityCooldown(PRAYER_OF_MENDING, 10.)
+    prayer_of_mending:Init()
+    Priest.hero:SetAbilityManacost(prayer_of_mending:GetId(), 15)
+    Priest.hero:SetAbilityCooldown(prayer_of_mending:GetId(), 10.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

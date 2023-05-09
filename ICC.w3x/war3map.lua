@@ -124,25 +124,6 @@ hunter_text = "Охотники бьют врага на расстоянии и
 ----------------------------------------------------
 -- Паладин
 
-avengers_shield_tooltip = "Щит мстителя (C)"
-avengers_shield_desc = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
-        "Щит затем перескакивает на других находящихся поблизости противников. " ..
-        "Способен воздействовать на 3 цели."
-
-blessing_of_kings_tooltip = "Благословение королей (Z)"
-blessing_of_kings_desc = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин."
-blessing_of_kings_tex = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga"
-
-blessing_of_might_tooltip = "Благословение могущества (V)"
-blessing_of_might_desc = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
-
-blessing_of_sanctuary_tooltip = "Благословение неприкосновенности (X)"
-blessing_of_sanctuary_desc = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-        "повышая ее силу и выносливость на 10. Эффект длится 10 мин."
-
-blessing_of_wisdom_tooltip = "Благословение мудрости (C)"
-blessing_of_wisdom_desc = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
-
 consecration_tooltip = "Освящение (R)"
 consecration_desc = "Освящает участок земли, на котором стоит паладин, " ..
         "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
@@ -158,36 +139,6 @@ judgement_of_wisdom_desc = "Высвобождает энергию печати
 shield_of_righteousness_tooltip = "Щит праведности (W)"
 shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
         "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-
-----------------------------------------------------
--- Прист
-
-flash_heal_tooltip = "Быстрое исцеление (Q)"
-flash_heal_desc = "Восстанавливает 1887 - 2193 ед. здоровья союзнику."
-
-renew_tooltip = "Обновление (E)"
-renew_desc = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек."
-
-circle_of_healing_tooltip = "Круг исцеления (W)"
-circle_of_healing_desc = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
-        "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей."
-
-prayer_of_mending_tooltip = "Молитва восстановления (D)"
-prayer_of_mending_desc = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
-        "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
-        "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
-        "только на одну цель одновременно."
-
-power_word_shield_tooltip = "Слово силы: Щит (S)"
-power_word_shield_desc = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
-        "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
-        "получением урона. Повторно наложить щит можно только через 15 сек."
-
-guardian_spirit_tooltip = "Оберегающий дух (R)"
-guardian_spirit_desc = "Призывает оберегающего духа для охраны дружественной цели. " ..
-        "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
-        "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-        "50 ее максимального запаса здоровья. Время действия – 10 сек."
 
 -- Copyright (c) meiso
 
@@ -427,6 +378,7 @@ PRIEST              = FourCC("Hblm")
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
+---@param icon string Иконка
 Ability = {}
 Ability.__index = Ability
 
@@ -439,12 +391,19 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text)
+function Ability:_init(ability, tooltip, text, icon)
     self.ability = ability
     self.tooltip = tooltip
     self.text = text
+    self.icon = icon
+end
+
+--- Проинициализировать способность.
+---Задать тултип, описание и иконку
+function Ability:Init()
     self:SetTooltip()
     self:SetText()
+    self:SetIcon()
 end
 
 --- Установить название для способности
@@ -461,6 +420,18 @@ end
 function Ability:SetText(text)
     local t = text or self.text
     BlzSetAbilityExtendedTooltip(self.ability, t, 0)
+end
+
+--- Установить иконку способности
+---@param icon string Путь до текстуры
+---@return nil
+function Ability:SetIcon(icon)
+    local i = icon or self.icon
+    BlzSetAbilityIcon(self.ability, i)
+end
+
+function Ability:SpellCasted()
+    return GetSpellAbilityId() == self.ability
 end
 
 --- Вернуть идентификатор способности
@@ -882,7 +853,7 @@ end
 function Frame:CastBar(cd, spell, unit)
     local period = 0.05
     self.drop = false
-    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, self:GetContext())
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
     local castbar_label = BlzGetFrameByName("CastbarLabel", 0)
     BlzFrameSetText(castbar_label, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)
@@ -3227,12 +3198,14 @@ BuffSystem = {
 }
 
 function BuffSystem.LoadFrame()
-    BuffSystem.main_frame_buff = Frame("BuffSystem")
-    BuffSystem.main_frame_debuff = Frame("BuffSystem")
+    BuffSystem.main_frame_buff = Frame("BSMainFrame")
+    BuffSystem.main_frame_debuff = Frame("BSMainFrame")
+    --если ставить фрейм в упор к границе, то фрейм ужимает в два раза,
+    --потому немного смещаем бафы на позицию 0.015
     BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0.015, 0.18)
     BuffSystem.main_frame_debuff:SetAbsPoint(FRAMEPOINT_CENTER, 0.61, 0.18)
-    --BuffSystem.main_frame_buff:Hide()
-    --BuffSystem.main_frame_debuff:Hide()
+    BuffSystem.main_frame_buff:Hide()
+    BuffSystem.main_frame_debuff:Hide()
 end
 
 --- Регистрирует героя в системе
@@ -3260,17 +3233,17 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     end
     local u = I2S(GetHandleId(hero))
     if is_debuff then
-        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func })
+        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func, frame_ = Frame("BSIconTemp") })
     else
-        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func })
+        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func, frame_ = Frame("BSIconTemp") })
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
         BuffSystem.main_frame_debuff:Show()
-        BuffSystem._SetDebuffToFrame(u)
+        BuffSystem._ShowDebuffs(u)
     else
         BuffSystem.main_frame_buff:Show()
-        BuffSystem._SetBuffToFrame(u)
+        BuffSystem._ShowBuffs(u)
     end
 end
 
@@ -3318,22 +3291,25 @@ end
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
-function BuffSystem.RemoveBuffToHero(hero, buff)
+function BuffSystem.RemoveBuffFromHero(hero, buff)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ == buff or
                 BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
             BuffSystem.buffs[u][i] = nil
         end
     end
+    BuffSystem._ShowBuffs(u)
+    BuffSystem._ShowDebuffs(u)
 end
 
 --- Использует лямбда-функцию для удаления бафа
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
-function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
+function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
@@ -3348,14 +3324,14 @@ function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
     end
 end
 
---- Проверят относится ли баф к группе однотипных бафов
+--- Проверяет относится ли баф к группе однотипных бафов
 ---@param hero unit Юнит
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
-        paladin = { BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT },
+        paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
         shaman = {},
         druid = {},
@@ -3385,7 +3361,7 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
+            BuffSystem.RemoveBuffFromHeroByFunc(hero, buff_)
         end
     end
 end
@@ -3397,8 +3373,8 @@ function BuffSystem.RemoveAllBuffs(hero)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
-        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
     end
 end
 
@@ -3413,9 +3389,12 @@ function BuffSystem.RemoveBuffFromUnits(buff)
             end
             if BuffSystem.buffs[unit][i].buff_ == buff or
                     BuffSystem.buffs[unit][i].debuff_ == buff then
+                BuffSystem.buffs[unit][i].frame_:Destroy()
                 BuffSystem.buffs[unit][i] = nil
             end
         end
+        BuffSystem._ShowBuffs(unit)
+        BuffSystem._ShowDebuffs(unit)
     end
 end
 
@@ -3425,6 +3404,7 @@ end
 function BuffSystem.RemoveHero(hero)
     if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
+    --TODO: корректно удалять все бафы и фреймы!!
     BuffSystem.buffs[u] = nil
 end
 
@@ -3435,7 +3415,7 @@ end
 function BuffSystem.ImproveSpell(hero, value)
     if isTable(hero) then hero = hero:GetId() end
     local improving_buffs = {
-        GUARDIAN_SPIRIT,
+        guardian_spirit,
     }
     if not BuffSystem.IsHeroInSystem(hero) then
         return value
@@ -3454,46 +3434,58 @@ function BuffSystem.ImproveSpell(hero, value)
     return value
 end
 
-function BuffSystem._SetBuffToFrame(u)
+function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * icon_frame:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (icon_frame:GetWidth() * 2 + 0.005) * count
+    --0.03 - базовая ширина фона
+    main_frame:SetWidth(0.03 + _add)
+    icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+end
+
+function BuffSystem._SetIcon(icon)
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(icon)
+end
+
+function BuffSystem._ShowBuffs(u)
     local count = 0
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ ~= "" then
             count = count + 1
+            print(count)
+            BuffSystem._ResizeMainFrame(
+                    BuffSystem.main_frame_buff,
+                    BuffSystem.buffs[u][i].frame_,
+                    count - 1
+            )
+            BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
         end
     end
-    count = count - 1
-    BuffSystem:_ResizeFrame(BuffSystem.main_frame_buff, count)
-    BuffSystem._SetIcon()
+    if count == 0 then
+        BuffSystem.main_frame_buff:Hide()
+    end
 end
 
-function BuffSystem._SetDebuffToFrame(u)
+function BuffSystem._ShowDebuffs(u)
     local count = 0
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].debuff_ ~= "" then
             count = count + 1
+            BuffSystem._ResizeMainFrame(
+                    BuffSystem.main_frame_debuff,
+                    BuffSystem.buffs[u][i].frame_,
+                    count - 1
+            )
+            BuffSystem._SetIcon(BuffSystem.buffs[u][i].debuff_.icon)
         end
     end
-    count = count - 1
-    BuffSystem:_ResizeFrame(BuffSystem.main_frame_debuff, count)
-    BuffSystem._SetIcon()
-end
-
-function BuffSystem:_ResizeFrame(main_frame, count)
-    local iframe = Frame("BSIconTemp")
-    --расположение иконки бафа по X
-    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
-    local x = 0.005 + (count * iframe:GetWidth()) + (0.0025 * count)
-    --на сколько расширить фон
-    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
-    local _add = (iframe:GetWidth() * 2 + 0.005) * count
-    --0.03 - базовая ширина фона
-    main_frame:SetWidth(0.03 + _add)
-    iframe:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
-end
-
-function BuffSystem._SetIcon()
-    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
-    buff_icon:SetTexture(blessing_of_kings_tex)
+    if count == 0 then
+        BuffSystem.main_frame_debuff:Hide()
+    end
 end
 
 -- Copyright (c) meiso
@@ -3736,6 +3728,106 @@ end
 function HeroSelector.Close()
     HeroSelector.table:Destroy()
 end
+
+-- Copyright (c) meiso
+
+avengers_shield = Ability(
+        AVENGERS_SHIELD,
+        "Щит мстителя (C)",
+        "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
+                "Щит затем перескакивает на других находящихся поблизости противников. " ..
+                "Способен воздействовать на 3 цели.",
+        "ReplaceableTextures/CommandButtons/avengers_shield.tga"
+)
+
+blessing_of_kings = Ability(
+        BLESSING_OF_KINGS,
+        "Благословение королей (Z)",
+        "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
+        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga"
+)
+
+blessing_of_might = Ability(
+        BLESSING_OF_MIGHT,
+        "Благословение могущества (V)",
+        "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
+        "ReplaceableTextures/CommandButtons/blessing_of_might.tga"
+)
+
+blessing_of_wisdom = Ability(
+        BLESSING_OF_WISDOM,
+        "Благословение мудрости (C)",
+        "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
+        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga"
+)
+
+blessing_of_sanctuary = Ability(
+        BLESSING_OF_SANCTUARY,
+        "Благословение неприкосновенности (X)",
+        "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+                "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
+        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga"
+)
+
+-------------------------------------------
+
+flash_heal = Ability(
+        FLASH_HEAL,
+        "Быстрое исцеление (Q)",
+        "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
+        "ReplaceableTextures/CommandButtons/flash_heal.tga"
+)
+
+renew = Ability(
+        RENEW,
+        "Обновление (E)",
+        "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
+        "ReplaceableTextures/CommandButtons/renew.tga"
+)
+
+power_word_shield = Ability(
+        POWER_WORD_SHIELD,
+        "Слово силы: Щит (S)",
+        "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
+                "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
+                "получением урона. Повторно наложить щит можно только через 15 сек.",
+        "ReplaceableTextures/CommandButtons/power_word_shield.tga"
+)
+
+weakened_soul = Ability(
+        "",
+        "Ослабленная душа",
+        "Душа цели ослаблена заклинанием 'Слово силы: Щит' и не может быть повторно защищена в течение 15 сек.",
+        "ReplaceableTextures/CommandButtons/weakened_soul.tga"
+)
+
+guardian_spirit = Ability(
+        GUARDIAN_SPIRIT,
+        "Оберегающий дух (R)",
+        "Призывает оберегающего духа для охраны дружественной цели. " ..
+                "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
+                "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
+                "50 ее максимального запаса здоровья. Время действия – 10 сек.",
+        "ReplaceableTextures/CommandButtons/guardian_spirit.tga"
+)
+
+prayer_of_mending = Ability(
+        PRAYER_OF_MENDING,
+        "Молитва восстановления (D)",
+        "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
+                "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
+                "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
+                "только на одну цель одновременно.",
+        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga"
+)
+
+circle_of_healing = Ability(
+        CIRCLE_OF_HEALING,
+        "Круг исцеления (W)",
+        "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
+                "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
+        "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
+)
 
 
 function DummyForDPS(location)
@@ -4424,13 +4516,13 @@ function Paladin.AvengersShield()
 end
 
 function Paladin.IsAvengersShield()
-    return GetSpellAbilityId() == AVENGERS_SHIELD
+    return avengers_shield:SpellCasted()
 end
 
 function Paladin.InitAvengersShield()
-    Ability(AVENGERS_SHIELD, avengers_shield_tooltip, avengers_shield_desc)
-    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
-    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
+    avengers_shield:Init()
+    Paladin.hero:SetAbilityManacost(avengers_shield:GetId(), 26)
+    Paladin.hero:SetAbilityCooldown(avengers_shield:GetId(), 30.)
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
@@ -4440,11 +4532,11 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfKings(unit, stat, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_KINGS)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
     DestroyTimer(timer)
 end
@@ -4453,8 +4545,8 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_kings)
     end
 
     --массив с доп. статами
@@ -4474,7 +4566,7 @@ function Paladin.BlessingOfKings()
         Paladin.RemoveBlessingOfKings(unit, stat, timer)
     end
 
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
 
     --скидываем баф через 10 минут
     TimerStart(timer, 600., false, remove_buff)
@@ -4482,13 +4574,13 @@ function Paladin.BlessingOfKings()
 end
 
 function Paladin.IsBlessingOfKings()
-    return GetSpellAbilityId() == BLESSING_OF_KINGS
+    return blessing_of_kings:SpellCasted()
 end
 
 function Paladin.InitBlessingOfKings()
-    Ability(BLESSING_OF_KINGS, blessing_of_kings_tooltip, blessing_of_kings_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+    blessing_of_kings:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_kings:GetId(), 6)
+    Paladin.hero:SetAbilityCooldown(blessing_of_kings:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4499,9 +4591,9 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfMight(unit, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
         SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_MIGHT)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
     end
     DestroyTimer(timer)
 end
@@ -4510,8 +4602,8 @@ function Paladin.BlessingOfMight()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
     end
 
     -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
@@ -4522,19 +4614,19 @@ function Paladin.BlessingOfMight()
         Paladin.RemoveBlessingOfMight(unit, timer)
     end
 
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_MIGHT, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfMight()
-    return GetSpellAbilityId() == BLESSING_OF_MIGHT
+    return blessing_of_might:SpellCasted()
 end
 
 function Paladin.InitBlessingOfMight()
-    Ability(BLESSING_OF_MIGHT, blessing_of_might_tooltip, blessing_of_might_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
+    blessing_of_might:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_might:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(blessing_of_might:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4545,10 +4637,10 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_SANCTUARY)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
     end
     DestroyTimer(timer)
 end
@@ -4561,8 +4653,8 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
@@ -4574,19 +4666,19 @@ function Paladin.BlessingOfSanctuary()
         Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
     end
 
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_sanctuary, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfSanctuary()
-    return GetSpellAbilityId() == BLESSING_OF_SANCTUARY
+    return blessing_of_sanctuary:SpellCasted()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    Ability(BLESSING_OF_SANCTUARY, blessing_of_sanctuary_tooltip, blessing_of_sanctuary_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
+    blessing_of_sanctuary:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_sanctuary:GetId(), 7)
+    Paladin.hero:SetAbilityCooldown(blessing_of_sanctuary:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4597,9 +4689,9 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_wisdom)
     end
     DestroyTimer(timer)
 end
@@ -4612,8 +4704,8 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_wisdom)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
@@ -4622,19 +4714,19 @@ function Paladin.BlessingOfWisdom()
     local remove_buff = function()
         Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
     end
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_WISDOM, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfWisdom()
-    return GetSpellAbilityId() == BLESSING_OF_WISDOM
+    return blessing_of_wisdom:SpellCasted()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    Ability(BLESSING_OF_WISDOM, blessing_of_wisdom_tooltip, blessing_of_wisdom_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
+    blessing_of_wisdom:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_wisdom:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(blessing_of_wisdom:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4740,7 +4832,7 @@ end
 function Paladin.RemoveJudgementOfLight(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_LIGHT)
     end
     DestroyTimer(timer)
 end
@@ -4762,7 +4854,7 @@ function Paladin.CastJudgementOfLight()
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_LIGHT)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -4807,7 +4899,7 @@ end
 function Paladin.RemoveJudgementOfWisdom(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_WISDOM)
     end
     DestroyTimer(timer)
 end
@@ -4827,7 +4919,7 @@ function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_WISDOM)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -4918,7 +5010,7 @@ function Priest.IsCircleOfHealing()
 end
 
 function Priest.InitCircleOfHealing()
-    Ability(CIRCLE_OF_HEALING, circle_of_healing_tooltip, circle_of_healing_desc)
+    circle_of_healing:Init()
     Priest.hero:SetAbilityManacost(CIRCLE_OF_HEALING, 21)
     Priest.hero:SetAbilityCooldown(CIRCLE_OF_HEALING, 6.)
 
@@ -4956,7 +5048,7 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
+    flash_heal:Init()
     Priest.hero:SetAbilityManacost(FLASH_HEAL, 18)
     Priest.hero:SetAbilityCooldown(FLASH_HEAL, 1.5)
 
@@ -4980,7 +5072,7 @@ function Priest.CastGuardianSpirit()
     event:RegisterDamaged()
 
     local remove_buff = function()
-        BuffSystem.RemoveBuffToHero(unit, GUARDIAN_SPIRIT)
+        BuffSystem.RemoveBuffFromHero(unit, guardian_spirit)
         DestroyTimer(timer)
         gs_effect:Destroy()
         event:Destroy()
@@ -4997,7 +5089,7 @@ function Priest.CastGuardianSpirit()
         return current_hp < damage
     end
 
-    BuffSystem.AddBuffToHero(unit, GUARDIAN_SPIRIT)
+    BuffSystem.AddBuffToHero(unit, guardian_spirit)
     TimerStart(timer, 10., false, remove_buff)
 
     event:AddCondition(GetLife)
@@ -5009,7 +5101,7 @@ function Priest.IsGuardianSpirit()
 end
 
 function Priest.InitGuardianSpirit()
-    Ability(GUARDIAN_SPIRIT, guardian_spirit_tooltip, guardian_spirit_desc)
+    guardian_spirit:Init()
     Priest.hero:SetAbilityManacost(GUARDIAN_SPIRIT, 6)
     Priest.hero:SetAbilityCooldown(GUARDIAN_SPIRIT, 180.)
 
@@ -5057,8 +5149,8 @@ end
 -- Copyright (c) meiso
 
 function Priest.RemovePowerWordShield(unit)
-    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
-        BuffSystem.RemoveBuffToHero(unit, POWER_WORD_SHIELD)
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHero(unit, power_word_shield)
     end
 end
 
@@ -5071,12 +5163,12 @@ function Priest.CastPowerWordShield()
     BuffSystem.RegisterHero(unit)
 
     --ничего не делаем, если есть дебаф на повтор
-    if BuffSystem.IsBuffOnHero(unit, "POWER_WORD_SHIELD_DEBUFF") then
+    if BuffSystem.IsBuffOnHero(unit, weakened_soul) then
         return
     end
     --проверяем есть ли щит, если да - сбрасываем и обновляем
-    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, POWER_WORD_SHIELD)
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_shield)
     end
 
     local timer = CreateTimer()
@@ -5092,7 +5184,7 @@ function Priest.CastPowerWordShield()
     end
 
     local remove_debuff = function()
-        BuffSystem.RemoveBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF")
+        BuffSystem.RemoveBuffFromHero(unit, weakened_soul)
         DestroyTimer(debuff_timer)
     end
 
@@ -5112,9 +5204,9 @@ function Priest.CastPowerWordShield()
         return absorb > 0.
     end
 
-    BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
+    BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
     --фиксируем дебаф на юните
-    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff, true)
+    BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
     TimerStart(timer, 30., false, remove_buff)
     --сбрасываем сам дебаф через 15 сек
     TimerStart(debuff_timer, 15., false, remove_debuff)
@@ -5128,7 +5220,7 @@ function Priest.IsPowerWordShield()
 end
 
 function Priest.InitPowerWordShield()
-    Ability(POWER_WORD_SHIELD, power_word_shield_tooltip, power_word_shield_desc)
+    power_word_shield:Init()
     Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
     Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
 
@@ -5141,8 +5233,8 @@ end
 -- Copyright (c) meiso
 
 function Priest.RemovePrayerOfMending(unit, timer)
-    if BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING) then
-        BuffSystem.RemoveBuffToHero(unit, PRAYER_OF_MENDING)
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromHero(unit, prayer_of_mending)
     end
     DestroyTimer(timer)
 end
@@ -5155,8 +5247,8 @@ function Priest.CastPrayerOfMending()
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
-    if BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING) then
-        BuffSystem.RemoveBuffFromUnits(PRAYER_OF_MENDING)
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromUnits(prayer_of_mending)
         POM_JUMP_COUNT = 5
     end
 
@@ -5176,12 +5268,12 @@ function Priest.CastPrayerOfMending()
                 Priest.RemovePrayerOfMending(unit, timer)
             end
 
-            BuffSystem.AddBuffToHero(unit, PRAYER_OF_MENDING, remove_buff)
+            BuffSystem.AddBuffToHero(unit, prayer_of_mending, remove_buff)
             --баф снимется сам через 30 сек
             TimerStart(timer, 30., remove_buff)
 
             event:AddCondition(function()
-                return BuffSystem.IsBuffOnHero(unit, PRAYER_OF_MENDING)
+                return BuffSystem.IsBuffOnHero(unit, prayer_of_mending)
             end)
             event:AddAction(function()
                 local heal = 1043
@@ -5204,6 +5296,7 @@ function Priest.CastPrayerOfMending()
                 end
                 GroupRemoveUnit(group, temp)
             end
+            BuffSystem.RemoveBuffFromHero(last_unit, prayer_of_mending)
             DestroyGroup(group)
         end
     end
@@ -5216,7 +5309,7 @@ function Priest.IsPrayerOfMending()
 end
 
 function Priest.InitPrayerOfMending()
-    Ability(PRAYER_OF_MENDING, prayer_of_mending_tooltip, prayer_of_mending_desc)
+    prayer_of_mending:Init()
     Priest.hero:SetAbilityManacost(PRAYER_OF_MENDING, 15)
     Priest.hero:SetAbilityCooldown(PRAYER_OF_MENDING, 10.)
 
@@ -5226,7 +5319,7 @@ function Priest.InitPrayerOfMending()
     event:AddAction(Priest.CastPrayerOfMending)
 end
 
--- Copyright (c)  Kodpi
+-- Copyright (c) Kodpi, meiso
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
@@ -5248,7 +5341,7 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
-    Ability(RENEW, renew_tooltip, renew_desc)
+    renew:Init()
     Priest.hero:SetAbilityManacost(RENEW, 17)
     Priest.hero:SetAbilityCooldown(RENEW, 1.5)
 

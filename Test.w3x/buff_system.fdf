@@ -1,6 +1,6 @@
 // Copyright (c) meiso
 
-Frame "BACKDROP" "BuffSystem" {
+Frame "BACKDROP" "BSMainFrame" {
     DecorateFileNames,
 
     Height 0.03,

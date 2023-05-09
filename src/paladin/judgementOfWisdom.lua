@@ -3,7 +3,7 @@
 function Paladin.RemoveJudgementOfWisdom(target, timer)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_WISDOM)
     end
     DestroyTimer(timer)
 end
@@ -23,7 +23,7 @@ function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_WISDOM)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())

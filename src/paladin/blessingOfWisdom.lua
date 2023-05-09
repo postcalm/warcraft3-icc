@@ -1,9 +1,9 @@
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_wisdom)
     end
     DestroyTimer(timer)
 end
@@ -16,8 +16,8 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_wisdom)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
@@ -26,19 +26,19 @@ function Paladin.BlessingOfWisdom()
     local remove_buff = function()
         Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
     end
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_WISDOM, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfWisdom()
-    return GetSpellAbilityId() == BLESSING_OF_WISDOM
+    return blessing_of_wisdom:SpellCasted()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    Ability(BLESSING_OF_WISDOM, blessing_of_wisdom_tooltip, blessing_of_wisdom_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
+    blessing_of_wisdom:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_wisdom:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(blessing_of_wisdom:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

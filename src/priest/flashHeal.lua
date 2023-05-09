@@ -22,13 +22,13 @@ function Priest.CastFlashHeal()
 end
 
 function Priest.IsFlashHeal()
-    return GetSpellAbilityId() == FLASH_HEAL
+    return flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal()
-    Ability(FLASH_HEAL, flash_heal_tooltip, flash_heal_desc)
-    Priest.hero:SetAbilityManacost(FLASH_HEAL, 18)
-    Priest.hero:SetAbilityCooldown(FLASH_HEAL, 1.5)
+    flash_heal:Init()
+    Priest.hero:SetAbilityManacost(flash_heal:GetId(), 18)
+    Priest.hero:SetAbilityCooldown(flash_heal:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

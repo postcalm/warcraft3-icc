@@ -1,10 +1,10 @@
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_SANCTUARY)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
     end
     DestroyTimer(timer)
 end
@@ -17,8 +17,8 @@ function Paladin.BlessingOfSanctuary()
     BuffSystem.RegisterHero(unit)
     EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
@@ -30,19 +30,19 @@ function Paladin.BlessingOfSanctuary()
         Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
     end
 
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_sanctuary, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
 end
 
 function Paladin.IsBlessingOfSanctuary()
-    return GetSpellAbilityId() == BLESSING_OF_SANCTUARY
+    return blessing_of_sanctuary:SpellCasted()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    Ability(BLESSING_OF_SANCTUARY, blessing_of_sanctuary_tooltip, blessing_of_sanctuary_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
+    blessing_of_sanctuary:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_sanctuary:GetId(), 7)
+    Paladin.hero:SetAbilityCooldown(blessing_of_sanctuary:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

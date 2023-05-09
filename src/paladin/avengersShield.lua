@@ -71,13 +71,13 @@ function Paladin.AvengersShield()
 end
 
 function Paladin.IsAvengersShield()
-    return GetSpellAbilityId() == AVENGERS_SHIELD
+    return avengers_shield:SpellCasted()
 end
 
 function Paladin.InitAvengersShield()
-    Ability(AVENGERS_SHIELD, avengers_shield_tooltip, avengers_shield_desc)
-    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
-    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
+    avengers_shield:Init()
+    Paladin.hero:SetAbilityManacost(avengers_shield:GetId(), 26)
+    Paladin.hero:SetAbilityCooldown(avengers_shield:GetId(), 30.)
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)

@@ -1,11 +1,11 @@
 -- Copyright (c) meiso
 
 function Paladin.RemoveBlessingOfKings(unit, stat, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_KINGS)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
     DestroyTimer(timer)
 end
@@ -14,8 +14,8 @@ function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_kings)
     end
 
     --массив с доп. статами
@@ -35,7 +35,7 @@ function Paladin.BlessingOfKings()
         Paladin.RemoveBlessingOfKings(unit, stat, timer)
     end
 
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
+    BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
 
     --скидываем баф через 10 минут
     TimerStart(timer, 600., false, remove_buff)
@@ -43,13 +43,13 @@ function Paladin.BlessingOfKings()
 end
 
 function Paladin.IsBlessingOfKings()
-    return GetSpellAbilityId() == BLESSING_OF_KINGS
+    return blessing_of_kings:SpellCasted()
 end
 
 function Paladin.InitBlessingOfKings()
-    Ability(BLESSING_OF_KINGS, blessing_of_kings_tooltip, blessing_of_kings_desc)
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+    blessing_of_kings:Init()
+    Paladin.hero:SetAbilityManacost(blessing_of_kings:GetId(), 6)
+    Paladin.hero:SetAbilityCooldown(blessing_of_kings:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

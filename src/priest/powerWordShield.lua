@@ -1,8 +1,8 @@
 -- Copyright (c) meiso
 
 function Priest.RemovePowerWordShield(unit)
-    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
-        BuffSystem.RemoveBuffToHero(unit, POWER_WORD_SHIELD)
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHero(unit, power_word_shield)
     end
 end
 
@@ -15,12 +15,12 @@ function Priest.CastPowerWordShield()
     BuffSystem.RegisterHero(unit)
 
     --ничего не делаем, если есть дебаф на повтор
-    if BuffSystem.IsBuffOnHero(unit, "POWER_WORD_SHIELD_DEBUFF") then
+    if BuffSystem.IsBuffOnHero(unit, weakened_soul) then
         return
     end
     --проверяем есть ли щит, если да - сбрасываем и обновляем
-    if BuffSystem.IsBuffOnHero(unit, POWER_WORD_SHIELD) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, POWER_WORD_SHIELD)
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_shield)
     end
 
     local timer = CreateTimer()
@@ -36,7 +36,7 @@ function Priest.CastPowerWordShield()
     end
 
     local remove_debuff = function()
-        BuffSystem.RemoveBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF")
+        BuffSystem.RemoveBuffFromHero(unit, weakened_soul)
         DestroyTimer(debuff_timer)
     end
 
@@ -56,9 +56,9 @@ function Priest.CastPowerWordShield()
         return absorb > 0.
     end
 
-    BuffSystem.AddBuffToHero(unit, POWER_WORD_SHIELD, remove_buff)
+    BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
     --фиксируем дебаф на юните
-    BuffSystem.AddBuffToHero(unit, "POWER_WORD_SHIELD_DEBUFF", remove_debuff, true)
+    BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
     TimerStart(timer, 30., false, remove_buff)
     --сбрасываем сам дебаф через 15 сек
     TimerStart(debuff_timer, 15., false, remove_debuff)
@@ -68,13 +68,13 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return GetSpellAbilityId() == POWER_WORD_SHIELD
+    return power_word_shield:SpellCasted()
 end
 
 function Priest.InitPowerWordShield()
-    Ability(POWER_WORD_SHIELD, power_word_shield_tooltip, power_word_shield_desc)
-    Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
-    Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
+    power_word_shield:Init()
+    Priest.hero:SetAbilityManacost(power_word_shield:GetId(), 23)
+    Priest.hero:SetAbilityCooldown(power_word_shield:GetId(), 4.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

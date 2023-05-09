@@ -22,13 +22,13 @@ function Priest.CastCircleOfHealing()
 end
 
 function Priest.IsCircleOfHealing()
-    return GetSpellAbilityId() == CIRCLE_OF_HEALING
+    return circle_of_healing:SpellCasted()
 end
 
 function Priest.InitCircleOfHealing()
-    Ability(CIRCLE_OF_HEALING, circle_of_healing_tooltip, circle_of_healing_desc)
-    Priest.hero:SetAbilityManacost(CIRCLE_OF_HEALING, 21)
-    Priest.hero:SetAbilityCooldown(CIRCLE_OF_HEALING, 6.)
+    circle_of_healing:Init()
+    Priest.hero:SetAbilityManacost(circle_of_healing:GetId(), 21)
+    Priest.hero:SetAbilityCooldown(circle_of_healing:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

@@ -25,14 +25,15 @@ local param = {
         -- система экипировки
         [[\libs\EquipmentSystem]],
         -- система бафов/дебафов
-        [[\libs\buffSystem.lua]],
+        [[\libs\BuffSystem]],
         -- система отображения урона автоатак
         [[\libs\battleSystem.lua]],
         --
         [[\libs\wrappers.lua]],
         -- система выбора героев
         [[\libs\heroSelector.lua]],
-        -- реализация боссов, героев и прочих существ
+        -- реализация боссов, героев и пр.
+        [[\src\abilities.lua]],
         [[\src\dummy]],
         [[\src\enemies]],
         [[\src\lord_marrowgar]],

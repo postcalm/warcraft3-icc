@@ -39,7 +39,7 @@ end
 function Frame:CastBar(cd, spell, unit)
     local period = 0.05
     self.drop = false
-    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, self:GetContext())
+    self.frame = BlzCreateFrame("Castbar", self:GetOriginFrame(), 0, 0)
     local castbar_label = BlzGetFrameByName("CastbarLabel", 0)
     BlzFrameSetText(castbar_label, spell)
     self:SetAbsPoint(FRAMEPOINT_CENTER, 0.3, 0.15)

@@ -1,4 +1,4 @@
--- Copyright (c)  Kodpi
+-- Copyright (c) Kodpi, meiso
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
@@ -16,13 +16,13 @@ function Priest.CastRenew()
 end
 
 function Priest.IsRenew()
-    return GetSpellAbilityId() == RENEW
+    return renew:SpellCasted()
 end
 
 function Priest.InitRenew()
-    Ability(RENEW, renew_tooltip, renew_desc)
-    Priest.hero:SetAbilityManacost(RENEW, 17)
-    Priest.hero:SetAbilityCooldown(RENEW, 1.5)
+    renew:Init()
+    Priest.hero:SetAbilityManacost(renew:GetId(), 17)
+    Priest.hero:SetAbilityCooldown(renew:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
