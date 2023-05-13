@@ -13,21 +13,27 @@ blessing_of_kings = Ability(
         BLESSING_OF_KINGS,
         "Благословение королей (Z)",
         "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
+        "Благословение королей",
+        "Все характеристики повышены на 10%."
 )
 
 blessing_of_might = Ability(
         BLESSING_OF_MIGHT,
         "Благословение могущества (V)",
         "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_might.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
+        "Благословение могущества",
+        "Сила атаки увеличена на 550."
 )
 
 blessing_of_wisdom = Ability(
         BLESSING_OF_WISDOM,
         "Благословение мудрости (C)",
         "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
+        "Благословение мудрости",
+        "Восполнение 92 ед. маны раз в 5 сек."
 )
 
 blessing_of_sanctuary = Ability(
@@ -35,7 +41,42 @@ blessing_of_sanctuary = Ability(
         "Благословение неприкосновенности (X)",
         "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
                 "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
+        "Благословение неприкосновенности",
+        "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+                "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
+)
+
+consecration = Ability(
+        CONSECRATION,
+        "Освящение (R)",
+        "Освящает участок земли, на котором стоит паладин, " ..
+                "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
+        "ReplaceableTextures/CommandButtons/consecration.tga"
+)
+
+judgement_of_light_tr = Ability(
+        JUDGEMENT_OF_LIGHT_TR,
+        "Правосудие света (D)",
+        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+                "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего.",
+        "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
+)
+
+judgement_of_wisdom_tr = Ability(
+        JUDGEMENT_OF_WISDOM_TR,
+        "Правосудие мудрости (F)",
+        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+                "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего.",
+        "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
+)
+
+shield_of_righteousness = Ability(
+        SHIELD_OF_RIGHTEOUSNESS,
+        "Щит праведности (W)",
+        "Мощный удар щитом, наносящий урон от светлой магии. " ..
+                "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
+        "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 )
 
 -------------------------------------------
@@ -51,7 +92,9 @@ renew = Ability(
         RENEW,
         "Обновление (E)",
         "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
-        "ReplaceableTextures/CommandButtons/renew.tga"
+        "ReplaceableTextures/CommandButtons/renew.tga",
+        "Обновление",
+        "Восстановление 280 ед. здоровья раз в 3 с."
 )
 
 power_word_shield = Ability(
@@ -60,13 +103,15 @@ power_word_shield = Ability(
         "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
                 "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
                 "получением урона. Повторно наложить щит можно только через 15 сек.",
-        "ReplaceableTextures/CommandButtons/power_word_shield.tga"
+        "ReplaceableTextures/CommandButtons/power_word_shield.tga",
+        "Слово силы: Щит",
+        "Поглощение урона."
 )
 
 weakened_soul = Ability(
         "",
         "Ослабленная душа",
-        "Душа цели ослаблена заклинанием 'Слово силы: Щит' и не может быть повторно защищена в течение 15 сек.",
+        "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
         "ReplaceableTextures/CommandButtons/weakened_soul.tga"
 )
 
@@ -77,7 +122,9 @@ guardian_spirit = Ability(
                 "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
                 "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
                 "50% ее максимального запаса здоровья. Время действия – 10 сек.",
-        "ReplaceableTextures/CommandButtons/guardian_spirit.tga"
+        "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
+        "Оберегающий дух",
+        "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
 )
 
 prayer_of_mending = Ability(
@@ -87,7 +134,9 @@ prayer_of_mending = Ability(
                 "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
                 "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
                 "только на одну цель одновременно.",
-        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga"
+        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+        "Молитва восстановления",
+        "Восстанавливает 1043 ед. здоровья при последующем получении урона."
 )
 
 circle_of_healing = Ability(

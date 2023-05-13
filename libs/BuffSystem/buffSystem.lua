@@ -118,7 +118,7 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
     BuffSystem._ShowDebuffs(u)
 end
 
---- Использует лямбда-функцию для удаления бафа
+--- Использует функцию для удаления бафа
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
@@ -269,12 +269,14 @@ function BuffSystem._ShowBuffs(u)
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ ~= "" then
             count = count + 1
+            local buff_ = BuffSystem.buffs[u][i].buff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_buff,
                     BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
             BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(buff_.buff_tooltip, buff_.buff_desc)
         end
     end
     if count == 0 then
@@ -287,12 +289,14 @@ function BuffSystem._ShowDebuffs(u)
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].debuff_ ~= "" then
             count = count + 1
+            local debuff_ = BuffSystem.buffs[u][i].debuff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_debuff,
                     BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
-            BuffSystem._SetIcon(BuffSystem.buffs[u][i].debuff_.icon)
+            BuffSystem._SetIcon(debuff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(debuff_.buff_tooltip, debuff_.buff_desc)
         end
     end
     if count == 0 then

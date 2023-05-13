@@ -7,13 +7,13 @@ function Paladin.ShieldOfRighteousness()
 end
 
 function Paladin.IsShieldOfRighteousness()
-    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+    return shield_of_righteousness:SpellCasted()
 end
 
 function Paladin.InitShieldOfRighteousness()
-    Ability(SHIELD_OF_RIGHTEOUSNESS, shield_of_righteousness_tooltip, shield_of_righteousness_desc)
-    Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
-    Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
+    shield_of_righteousness:Init()
+    Paladin.hero:SetAbilityManacost(shield_of_righteousness:GetId(), 6)
+    Paladin.hero:SetAbilityCooldown(shield_of_righteousness:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

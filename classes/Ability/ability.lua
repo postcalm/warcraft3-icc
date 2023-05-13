@@ -5,6 +5,8 @@
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка
+---@param buff_tooltip string Название бафа
+---@param buff_desc string Описание бафа
 Ability = {}
 Ability.__index = Ability
 
@@ -17,11 +19,13 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text, icon)
+function Ability:_init(ability, tooltip, text, icon, buff_tooltip, buff_desc)
     self.ability = ability
     self.tooltip = tooltip
     self.text = text
     self.icon = icon
+    self.buff_tooltip = buff_tooltip or tooltip
+    self.buff_desc = buff_desc or text
 end
 
 --- Проинициализировать способность.

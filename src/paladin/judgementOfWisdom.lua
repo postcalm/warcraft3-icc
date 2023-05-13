@@ -41,13 +41,13 @@ function Paladin.CastJudgementOfWisdom()
 end
 
 function Paladin.IsJudgementOfWisdom()
-    return GetSpellAbilityId() == JUDGEMENT_OF_WISDOM_TR
+    return judgement_of_wisdom_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    Ability(JUDGEMENT_OF_WISDOM_TR, judgement_of_wisdom_tooltip, judgement_of_wisdom_desc)
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+    judgement_of_wisdom_tr:Init()
+    Paladin.hero:SetAbilityManacost(judgement_of_wisdom_tr:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(judgement_of_wisdom_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()

@@ -50,98 +50,6 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Copyright (c) meiso
 
--- Описания классов
-
-paladin_tooltip = "Паладин"
-paladin_text = "Паладины бьются с врагом лицом к лицу, " ..
-        "полагаясь на тяжелые доспехи и навыки целительства. " ..
-        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
-        "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
-        "но и удержит группу на ногах при помощи исцеляющих заклинаний."
-
-priest_tooltip = "Жрец"
-priest_text = "Жрецы могут задействовать мощную целительную магию, " ..
-        "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
-        "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
-        "доспехов заставляют жрецов бояться сближения с противником. " ..
-        "Опытные жрецы используют боевые и контролирующие способности, " ..
-        "не допуская гибели членов отряда."
-
-deathknight_tooltip = "Рыцарь смерти"
-deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
-        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
-        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
-        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
-        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
-        "соответствующим образом направлять свои атаки."
-
-druid_tooltip = "Друид"
-druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
-        "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
-        "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
-        "подбирать облик к ситуации, так как каждый из них служит определенной цели."
-
-shaman_tooltip = "Шаман"
-shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
-        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
-        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
-        "учитывать сильные и слабые стороны врага."
-
-warrior_tooltip = "Воин"
-warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
-        "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
-        "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
-        "хрупких союзников. Для максимальной эффективности воины должны " ..
-        "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
-
-mage_tooltip = "Маг"
-mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
-        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
-        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
-        "обездвиживают его."
-
-rogue_tooltip = "Разбойник"
-rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
-        "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
-        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
-        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
-        "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
-
-warlock_tooltip = "Чернокнижник"
-warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
-        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
-        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
-        "поэтому подставляют под вражеские удары своих слуг."
-
-hunter_tooltip = "Охотник"
-hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, " ..
-        "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
-        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
-        "и издалека. Кроме того, охотники очень подвижны. " ..
-        "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
-
--- Описания способностей
-----------------------------------------------------
--- Паладин
-
-consecration_tooltip = "Освящение (R)"
-consecration_desc = "Освящает участок земли, на котором стоит паладин, " ..
-        "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
-
-judgement_of_light_tooltip = "Правосудие света (D)"
-judgement_of_light_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-        "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
-
-judgement_of_wisdom_tooltip = "Правосудие мудрости (F)"
-judgement_of_wisdom_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-        "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
-
-shield_of_righteousness_tooltip = "Щит праведности (W)"
-shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
-        "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-
--- Copyright (c) meiso
-
 Items = {}
 Items["ARMOR_ITEM"]              = FourCC("I001")
 Items["ATTACK_ITEM"]             = FourCC("I000")
@@ -379,6 +287,8 @@ PRIEST              = FourCC("Hblm")
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка
+---@param buff_tooltip string Название бафа
+---@param buff_desc string Описание бафа
 Ability = {}
 Ability.__index = Ability
 
@@ -391,11 +301,13 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text, icon)
+function Ability:_init(ability, tooltip, text, icon, buff_tooltip, buff_desc)
     self.ability = ability
     self.tooltip = tooltip
     self.text = text
     self.icon = icon
+    self.buff_tooltip = buff_tooltip or tooltip
+    self.buff_desc = buff_desc or text
 end
 
 --- Проинициализировать способность.
@@ -3305,7 +3217,7 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
     BuffSystem._ShowDebuffs(u)
 end
 
---- Использует лямбда-функцию для удаления бафа
+--- Использует функцию для удаления бафа
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
@@ -3456,13 +3368,14 @@ function BuffSystem._ShowBuffs(u)
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].buff_ ~= "" then
             count = count + 1
-            print(count)
+            local buff_ = BuffSystem.buffs[u][i].buff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_buff,
                     BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
             BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(buff_.buff_tooltip, buff_.buff_desc)
         end
     end
     if count == 0 then
@@ -3475,12 +3388,14 @@ function BuffSystem._ShowDebuffs(u)
     for i = 1, #BuffSystem.buffs[u] do
         if BuffSystem.buffs[u][i].debuff_ ~= "" then
             count = count + 1
+            local debuff_ = BuffSystem.buffs[u][i].debuff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_debuff,
                     BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
-            BuffSystem._SetIcon(BuffSystem.buffs[u][i].debuff_.icon)
+            BuffSystem._SetIcon(debuff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(debuff_.buff_tooltip, debuff_.buff_desc)
         end
     end
     if count == 0 then
@@ -3586,6 +3501,98 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
     end
     return Location(vector_x, vector_y)
 end
+
+-- Copyright (c) meiso
+
+-- Описания классов
+
+paladin_tooltip = "Паладин"
+paladin_text = "Паладины бьются с врагом лицом к лицу, " ..
+        "полагаясь на тяжелые доспехи и навыки целительства. " ..
+        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
+        "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
+        "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+
+priest_tooltip = "Жрец"
+priest_text = "Жрецы могут задействовать мощную целительную магию, " ..
+        "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
+        "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
+        "доспехов заставляют жрецов бояться сближения с противником. " ..
+        "Опытные жрецы используют боевые и контролирующие способности, " ..
+        "не допуская гибели членов отряда."
+
+deathknight_tooltip = "Рыцарь смерти"
+deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
+        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
+        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
+        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
+        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
+        "соответствующим образом направлять свои атаки."
+
+druid_tooltip = "Друид"
+druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
+        "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
+        "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
+        "подбирать облик к ситуации, так как каждый из них служит определенной цели."
+
+shaman_tooltip = "Шаман"
+shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
+        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
+        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
+        "учитывать сильные и слабые стороны врага."
+
+warrior_tooltip = "Воин"
+warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
+        "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
+        "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
+        "хрупких союзников. Для максимальной эффективности воины должны " ..
+        "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
+
+mage_tooltip = "Маг"
+mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
+        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
+        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
+        "обездвиживают его."
+
+rogue_tooltip = "Разбойник"
+rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
+        "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
+        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
+        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
+        "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
+
+warlock_tooltip = "Чернокнижник"
+warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
+        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
+        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
+        "поэтому подставляют под вражеские удары своих слуг."
+
+hunter_tooltip = "Охотник"
+hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, " ..
+        "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
+        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
+        "и издалека. Кроме того, охотники очень подвижны. " ..
+        "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
+
+-- Описания способностей
+----------------------------------------------------
+-- Паладин
+
+consecration_tooltip = "Освящение (R)"
+consecration_desc = "Освящает участок земли, на котором стоит паладин, " ..
+        "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
+
+judgement_of_light_tooltip = "Правосудие света (D)"
+judgement_of_light_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+        "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
+
+judgement_of_wisdom_tooltip = "Правосудие мудрости (F)"
+judgement_of_wisdom_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+        "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
+
+shield_of_righteousness_tooltip = "Щит праведности (W)"
+shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
+        "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
 
 -- Copyright (c) meiso
 
@@ -3744,21 +3751,27 @@ blessing_of_kings = Ability(
         BLESSING_OF_KINGS,
         "Благословение королей (Z)",
         "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
+        "Благословение королей",
+        "Все характеристики повышены на 10."
 )
 
 blessing_of_might = Ability(
         BLESSING_OF_MIGHT,
         "Благословение могущества (V)",
         "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_might.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
+        "Благословение могущества",
+        "Сила атаки увеличена на 550."
 )
 
 blessing_of_wisdom = Ability(
         BLESSING_OF_WISDOM,
         "Благословение мудрости (C)",
         "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
+        "Благословение мудрости",
+        "Восполнение 92 ед. маны раз в 5 сек."
 )
 
 blessing_of_sanctuary = Ability(
@@ -3766,7 +3779,42 @@ blessing_of_sanctuary = Ability(
         "Благословение неприкосновенности (X)",
         "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
                 "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga"
+        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
+        "Благословение неприкосновенности",
+        "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
+                "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
+)
+
+consecration = Ability(
+        CONSECRATION,
+        "Освящение (R)",
+        "Освящает участок земли, на котором стоит паладин, " ..
+                "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
+        "ReplaceableTextures/CommandButtons/consecration.tga"
+)
+
+judgement_of_light_tr = Ability(
+        JUDGEMENT_OF_LIGHT_TR,
+        "Правосудие света (D)",
+        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+                "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+        "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
+)
+
+judgement_of_wisdom_tr = Ability(
+        JUDGEMENT_OF_WISDOM_TR,
+        "Правосудие мудрости (F)",
+        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+                "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+        "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
+)
+
+shield_of_righteousness = Ability(
+        SHIELD_OF_RIGHTEOUSNESS,
+        "Щит праведности (W)",
+        "Мощный удар щитом, наносящий урон от светлой магии. " ..
+                "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
+        "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 )
 
 -------------------------------------------
@@ -3782,7 +3830,9 @@ renew = Ability(
         RENEW,
         "Обновление (E)",
         "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
-        "ReplaceableTextures/CommandButtons/renew.tga"
+        "ReplaceableTextures/CommandButtons/renew.tga",
+        "Обновление",
+        "Восстановление 280 ед. здоровья раз в 3 с."
 )
 
 power_word_shield = Ability(
@@ -3791,13 +3841,15 @@ power_word_shield = Ability(
         "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
                 "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
                 "получением урона. Повторно наложить щит можно только через 15 сек.",
-        "ReplaceableTextures/CommandButtons/power_word_shield.tga"
+        "ReplaceableTextures/CommandButtons/power_word_shield.tga",
+        "Слово силы: Щит",
+        "Поглощение урона."
 )
 
 weakened_soul = Ability(
         "",
         "Ослабленная душа",
-        "Душа цели ослаблена заклинанием 'Слово силы: Щит' и не может быть повторно защищена в течение 15 сек.",
+        "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
         "ReplaceableTextures/CommandButtons/weakened_soul.tga"
 )
 
@@ -3808,7 +3860,9 @@ guardian_spirit = Ability(
                 "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
                 "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
                 "50 ее максимального запаса здоровья. Время действия – 10 сек.",
-        "ReplaceableTextures/CommandButtons/guardian_spirit.tga"
+        "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
+        "Оберегающий дух",
+        "Получаемое исцеление увеличено на 40.\nПредотвращает один смертельный удар."
 )
 
 prayer_of_mending = Ability(
@@ -3818,7 +3872,9 @@ prayer_of_mending = Ability(
                 "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
                 "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
                 "только на одну цель одновременно.",
-        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga"
+        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+        "Молитва восстановления",
+        "Восстанавливает 1043 ед. здоровья при последующем получении урона."
 )
 
 circle_of_healing = Ability(
@@ -4746,7 +4802,8 @@ function Paladin.EnableConsecration()
     while Paladin.consecration_effect do
         location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)
+        )
         Paladin.hero:DealMagicDamageLoc {
             damage = damage,
             overtime = 1.,
@@ -4772,13 +4829,13 @@ function Paladin.Consecration()
 end
 
 function Paladin.IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION
+    return consecration:SpellCasted()
 end
 
 function Paladin.InitConsecration()
-    Ability(CONSECRATION, consecration_tooltip, consecration_desc)
-    Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
-    Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
+    consecration:Init()
+    Paladin.hero:SetAbilityManacost(consecration:GetId(), 22)
+    Paladin.hero:SetAbilityCooldown(consecration:GetId(), 8.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4872,13 +4929,13 @@ function Paladin.CastJudgementOfLight()
 end
 
 function Paladin.IsJudgementOfLight()
-    return GetSpellAbilityId() == JUDGEMENT_OF_LIGHT_TR
+    return judgement_of_light_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfLight()
-    Ability(JUDGEMENT_OF_LIGHT_TR, judgement_of_light_tooltip, judgement_of_light_desc)
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+    judgement_of_light_tr:Init()
+    Paladin.hero:SetAbilityManacost(judgement_of_light_tr:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(judgement_of_light_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
@@ -4937,13 +4994,13 @@ function Paladin.CastJudgementOfWisdom()
 end
 
 function Paladin.IsJudgementOfWisdom()
-    return GetSpellAbilityId() == JUDGEMENT_OF_WISDOM_TR
+    return judgement_of_wisdom_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    Ability(JUDGEMENT_OF_WISDOM_TR, judgement_of_wisdom_tooltip, judgement_of_wisdom_desc)
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+    judgement_of_wisdom_tr:Init()
+    Paladin.hero:SetAbilityManacost(judgement_of_wisdom_tr:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(judgement_of_wisdom_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
@@ -4968,13 +5025,13 @@ function Paladin.ShieldOfRighteousness()
 end
 
 function Paladin.IsShieldOfRighteousness()
-    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+    return shield_of_righteousness:SpellCasted()
 end
 
 function Paladin.InitShieldOfRighteousness()
-    Ability(SHIELD_OF_RIGHTEOUSNESS, shield_of_righteousness_tooltip, shield_of_righteousness_desc)
-    Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
-    Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
+    shield_of_righteousness:Init()
+    Paladin.hero:SetAbilityManacost(shield_of_righteousness:GetId(), 6)
+    Paladin.hero:SetAbilityCooldown(shield_of_righteousness:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5006,13 +5063,13 @@ function Priest.CastCircleOfHealing()
 end
 
 function Priest.IsCircleOfHealing()
-    return GetSpellAbilityId() == CIRCLE_OF_HEALING
+    return circle_of_healing:SpellCasted()
 end
 
 function Priest.InitCircleOfHealing()
     circle_of_healing:Init()
-    Priest.hero:SetAbilityManacost(CIRCLE_OF_HEALING, 21)
-    Priest.hero:SetAbilityCooldown(CIRCLE_OF_HEALING, 6.)
+    Priest.hero:SetAbilityManacost(circle_of_healing:GetId(), 21)
+    Priest.hero:SetAbilityCooldown(circle_of_healing:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5044,13 +5101,13 @@ function Priest.CastFlashHeal()
 end
 
 function Priest.IsFlashHeal()
-    return GetSpellAbilityId() == FLASH_HEAL
+    return flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal()
     flash_heal:Init()
-    Priest.hero:SetAbilityManacost(FLASH_HEAL, 18)
-    Priest.hero:SetAbilityCooldown(FLASH_HEAL, 1.5)
+    Priest.hero:SetAbilityManacost(flash_heal:GetId(), 18)
+    Priest.hero:SetAbilityCooldown(flash_heal:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5097,13 +5154,13 @@ function Priest.CastGuardianSpirit()
 end
 
 function Priest.IsGuardianSpirit()
-    return GetSpellAbilityId() == GUARDIAN_SPIRIT
+    return guardian_spirit:SpellCasted()
 end
 
 function Priest.InitGuardianSpirit()
     guardian_spirit:Init()
-    Priest.hero:SetAbilityManacost(GUARDIAN_SPIRIT, 6)
-    Priest.hero:SetAbilityCooldown(GUARDIAN_SPIRIT, 180.)
+    Priest.hero:SetAbilityManacost(guardian_spirit:GetId(), 6)
+    Priest.hero:SetAbilityCooldown(guardian_spirit:GetId(), 180.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5216,13 +5273,13 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return GetSpellAbilityId() == POWER_WORD_SHIELD
+    return power_word_shield:SpellCasted()
 end
 
 function Priest.InitPowerWordShield()
     power_word_shield:Init()
-    Priest.hero:SetAbilityManacost(POWER_WORD_SHIELD, 23)
-    Priest.hero:SetAbilityCooldown(POWER_WORD_SHIELD, 4.)
+    Priest.hero:SetAbilityManacost(power_word_shield:GetId(), 23)
+    Priest.hero:SetAbilityCooldown(power_word_shield:GetId(), 4.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5305,13 +5362,13 @@ function Priest.CastPrayerOfMending()
 end
 
 function Priest.IsPrayerOfMending()
-    return GetSpellAbilityId() == PRAYER_OF_MENDING
+    return prayer_of_mending:SpellCasted()
 end
 
 function Priest.InitPrayerOfMending()
     prayer_of_mending:Init()
-    Priest.hero:SetAbilityManacost(PRAYER_OF_MENDING, 15)
-    Priest.hero:SetAbilityCooldown(PRAYER_OF_MENDING, 10.)
+    Priest.hero:SetAbilityManacost(prayer_of_mending:GetId(), 15)
+    Priest.hero:SetAbilityCooldown(prayer_of_mending:GetId(), 10.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5337,13 +5394,13 @@ function Priest.CastRenew()
 end
 
 function Priest.IsRenew()
-    return GetSpellAbilityId() == RENEW
+    return renew:SpellCasted()
 end
 
 function Priest.InitRenew()
     renew:Init()
-    Priest.hero:SetAbilityManacost(RENEW, 17)
-    Priest.hero:SetAbilityCooldown(RENEW, 1.5)
+    Priest.hero:SetAbilityManacost(renew:GetId(), 17)
+    Priest.hero:SetAbilityCooldown(renew:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

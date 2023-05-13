@@ -31,7 +31,8 @@ local param = {
         --
         [[\libs\wrappers.lua]],
         -- система выбора героев
-        [[\libs\heroSelector.lua]],
+        [[\libs\HeroSelector\frames_desc.lua]],
+        [[\libs\HeroSelector\heroSelector.lua]],
         -- реализация боссов, героев и пр.
         [[\src\abilities.lua]],
         [[\src\dummy]],

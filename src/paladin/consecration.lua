@@ -10,7 +10,8 @@ function Paladin.EnableConsecration()
     while Paladin.consecration_effect do
         location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)
+        )
         Paladin.hero:DealMagicDamageLoc {
             damage = damage,
             overtime = 1.,
@@ -36,13 +37,13 @@ function Paladin.Consecration()
 end
 
 function Paladin.IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION
+    return consecration:SpellCasted()
 end
 
 function Paladin.InitConsecration()
-    Ability(CONSECRATION, consecration_tooltip, consecration_desc)
-    Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
-    Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
+    consecration:Init()
+    Paladin.hero:SetAbilityManacost(consecration:GetId(), 22)
+    Paladin.hero:SetAbilityCooldown(consecration:GetId(), 8.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

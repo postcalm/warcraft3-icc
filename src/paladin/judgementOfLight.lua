@@ -43,13 +43,13 @@ function Paladin.CastJudgementOfLight()
 end
 
 function Paladin.IsJudgementOfLight()
-    return GetSpellAbilityId() == JUDGEMENT_OF_LIGHT_TR
+    return judgement_of_light_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfLight()
-    Ability(JUDGEMENT_OF_LIGHT_TR, judgement_of_light_tooltip, judgement_of_light_desc)
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+    judgement_of_light_tr:Init()
+    Paladin.hero:SetAbilityManacost(judgement_of_light_tr:GetId(), 5)
+    Paladin.hero:SetAbilityCooldown(judgement_of_light_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
