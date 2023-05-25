@@ -146,3 +146,12 @@ circle_of_healing = Ability(
                 "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
         "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
 )
+
+prayer_of_fortitude = Ability(
+        PRAYER_OF_FORTITUDE,
+        "Молитва стойкости",
+        "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
+        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+        "Молитва стойкости",
+        "Выносливость повышена на 165."
+)

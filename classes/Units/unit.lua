@@ -29,7 +29,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Damage
+-- Всё что связано с уроном
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -148,7 +148,7 @@ function Unit:DealCleanDamage(target, damage)
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
--- Ability
+-- Способности
 
 --- Выдать юниту указанные способности
 ---@param ability ability Список способностей (через запятую)
@@ -247,7 +247,27 @@ function Unit:ShowAbility(ability)
     BlzUnitHideAbility(self.unit, ability, false)
 end
 
--- Mana
+--- Использовать способность-функцию
+---@param func function Способность-функция
+---@param location location Место применения
+---@param radius real Радиус применения (в метрах)
+---@return nil
+function Unit:UseSpellFunc(args)
+    local meters = METER * args.radius
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+    ForGroupBJ(group, args.func)
+    TriggerSleepAction(0.)
+    DestroyGroup(group)
+end
+
+--- Проверить есть ли баф на юните
+---@param buff ability Название бафа
+---@return boolean
+function Unit:HasBuff(buff)
+    return GetUnitAbilityLevel(self.unit, buff) > 0
+end
+
+-- Мана
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -335,7 +355,7 @@ function Unit:GetBaseMana()
     return self.basemana
 end
 
--- Health
+-- Здоровье
 
 --- Потратить указанное количество хп
 ---@param life real Количество хп в абсолютных величинах
@@ -346,7 +366,7 @@ function Unit:LoseLife(arg)
     self:SetLife(self:GetCurrentLife() - l)
 end
 
---- Получить хп количественно или в процентах от максимума
+--- Дать хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
 ---@param show boolean Показывать ли исцеление
@@ -357,22 +377,6 @@ function Unit:GainLife(arg)
     if arg.show then
         TextTag(l, self:GetId()):Preset("heal")
     end
-end
-
---- Реген HP по площади
----@param func function Функция исцеления
----@param overtime real Частота исцеления. По умолчанию 0
----@param location location Место исцеления
----@param radius real Радиус в метрах
----@return nil
-function Unit:HealNear(args)
-    local meters = METER * args.radius
-    local ot = args.overtime or 0.
-    local group = GetUnitsInRangeOfLocAll(meters, args.location)
-
-    ForGroupBJ(group, args.func)
-    TriggerSleepAction(ot)
-    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
@@ -420,7 +424,7 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
--- Movement
+-- Передвижение
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
@@ -482,7 +486,7 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
--- Animation
+-- Анимации
 
 --- Добавить тэг анимации
 ---@param tag string Название тэга
@@ -498,7 +502,7 @@ function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
 end
 
--- Meta
+-- Прочие методы
 
 --- Проверяет является ли юнит героем
 ---@return boolean

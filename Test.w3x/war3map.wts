@@ -677,3 +677,45 @@ STRING 234
 R
 }
 
+STRING 235
+// Способности: A00Y (Spellbook_Priest), Name (Название)
+{
+Spellbook_Priest
+}
+
+STRING 236
+// Способности: A00Y (Spellbook_Priest), Tip (Подсказка: используется, нормальная)
+{
+Книга заклинаний (X)
+}
+
+STRING 237
+// Способности: A00Y (Spellbook_Priest), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 238
+// Способности: A00Z (Prayer of Fortitude), Name (Название)
+{
+Prayer of Fortitude
+}
+
+STRING 239
+// Заклинания/эффекты: B006 (Prayer of Fortitude), EditorName (Название (только для Редактора))
+{
+Prayer of Fortitude
+}
+
+STRING 240
+// Предметы: I007 (prayer_of_fortitude), Name (Название)
+{
+prayer_of_fortitude
+}
+
+STRING 241
+// Способности: A010 (hp_165_pof), Name (Название)
+{
+hp_165_pof
+}
+

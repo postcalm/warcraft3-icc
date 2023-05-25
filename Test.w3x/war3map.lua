@@ -11,17 +11,22 @@ end
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
 JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
+--Priest
+PRAYER_OF_FORTITUDE_BUFF = FourCC("B006")
+
 
 -- Copyright (c) meiso
 
 Items = {}
-Items["ARMOR_ITEM"]              = FourCC("I001")
-Items["ATTACK_ITEM"]             = FourCC("I000")
-Items["HP_ITEM"]                 = FourCC("I002")
-Items["MAGICARMOR_ITEM"]         = FourCC("I003")
-Items["DEC_DMG_ITEM"]            = FourCC("I004")
-Items["BLESSING_OF_WISDOM_ITEM"] = FourCC("I005")
-Items["MP_ITEM"]                 = FourCC("I006")
+Items["ARMOR_ITEM"]                 = FourCC("I001")
+Items["ATTACK_ITEM"]                = FourCC("I000")
+Items["HP_ITEM"]                    = FourCC("I002")
+Items["MAGICARMOR_ITEM"]            = FourCC("I003")
+Items["DEC_DMG_ITEM"]               = FourCC("I004")
+Items["BLESSING_OF_WISDOM_ITEM"]    = FourCC("I005")
+Items["MP_ITEM"]                    = FourCC("I006")
+Items["PRAYER_OF_FORTITUDE_ITEM"]   = FourCC("I007")
+
 
 ItemsSpells = {}
 ItemsSpells["ARMOR_500"]          = { int = FourCC("A008"), str = "A008" }
@@ -31,6 +36,7 @@ ItemsSpells["MAGICARMOR_500"]     = { int = FourCC("A00I"), str = "A00I" }
 ItemsSpells["DECREASE_DMG"]       = { int = FourCC("A00K"), str = "A00K" }
 ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC("A00F"), str = "A00F" }
 ItemsSpells["MP_50K"]             = { int = FourCC("A00W"), str = "A00W" }
+ItemsSpells["HP_165_POF"]         = { int = FourCC("A010"), str = "A010" }
 
 -- Copyright (c) meiso
 
@@ -155,6 +161,8 @@ CIRCLE_OF_HEALING       = FourCC("A00U")
 PRAYER_OF_MENDING       = FourCC("A009")
 POWER_WORD_SHIELD       = FourCC("A00V")
 GUARDIAN_SPIRIT         = FourCC("A00X")
+SPELLBOOK_PRIEST        = FourCC("A00Y")
+PRAYER_OF_FORTITUDE     = FourCC("A00Z")
 
 -- Copyright (c)  meiso
 
@@ -651,6 +659,14 @@ end
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
+end
+
+function EventsUnit:RegisterWithinRange(range)
+    TriggerRegisterUnitInRange(self.trigger, self.unit, range * METER, nil)
+end
+
+function EventsUnit:RegisterUnitLife(life)
+    TriggerRegisterUnitLifeEvent(self.trigger, self.unit, GREATER_THAN_OR_EQUAL, life)
 end
 
 -- далее идут бессмысленные обёртки над методами родителя
@@ -1264,7 +1280,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Damage
+-- Всё что связано с уроном
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -1383,7 +1399,7 @@ function Unit:DealCleanDamage(target, damage)
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
--- Ability
+-- Способности
 
 --- Выдать юниту указанные способности
 ---@param ability ability Список способностей (через запятую)
@@ -1482,7 +1498,27 @@ function Unit:ShowAbility(ability)
     BlzUnitHideAbility(self.unit, ability, false)
 end
 
--- Mana
+--- Использовать способность-функцию
+---@param func function Способность-функция
+---@param location location Место применения
+---@param radius real Радиус применения (в метрах)
+---@return nil
+function Unit:UseSpellFunc(args)
+    local meters = METER * args.radius
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+    ForGroupBJ(group, args.func)
+    TriggerSleepAction(0.)
+    DestroyGroup(group)
+end
+
+--- Проверить есть ли баф на юните
+---@param buff ability Название бафа
+---@return boolean
+function Unit:HasBuff(buff)
+    return GetUnitAbilityLevel(self.unit, buff) > 0
+end
+
+-- Мана
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -1570,7 +1606,7 @@ function Unit:GetBaseMana()
     return self.basemana
 end
 
--- Health
+-- Здоровье
 
 --- Потратить указанное количество хп
 ---@param life real Количество хп в абсолютных величинах
@@ -1581,7 +1617,7 @@ function Unit:LoseLife(arg)
     self:SetLife(self:GetCurrentLife() - l)
 end
 
---- Получить хп количественно или в процентах от максимума
+--- Дать хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
 ---@param show boolean Показывать ли исцеление
@@ -1592,22 +1628,6 @@ function Unit:GainLife(arg)
     if arg.show then
         TextTag(l, self:GetId()):Preset("heal")
     end
-end
-
---- Реген HP по площади
----@param func function Функция исцеления
----@param overtime real Частота исцеления. По умолчанию 0
----@param location location Место исцеления
----@param radius real Радиус в метрах
----@return nil
-function Unit:HealNear(args)
-    local meters = METER * args.radius
-    local ot = args.overtime or 0.
-    local group = GetUnitsInRangeOfLocAll(meters, args.location)
-
-    ForGroupBJ(group, args.func)
-    TriggerSleepAction(ot)
-    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
@@ -1655,7 +1675,7 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
--- Movement
+-- Передвижение
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
@@ -1717,7 +1737,7 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
--- Animation
+-- Анимации
 
 --- Добавить тэг анимации
 ---@param tag string Название тэга
@@ -1733,7 +1753,7 @@ function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
 end
 
--- Meta
+-- Прочие методы
 
 --- Проверяет является ли юнит героем
 ---@return boolean
@@ -3826,7 +3846,7 @@ guardian_spirit = Ability(
                 "50 ее максимального запаса здоровья. Время действия – 10 сек.",
         "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
         "Оберегающий дух",
-        "Получаемое исцеление увеличено на 40.\nПредотвращает один смертельный удар."
+        "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
 )
 
 prayer_of_mending = Ability(
@@ -3847,6 +3867,15 @@ circle_of_healing = Ability(
         "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
                 "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
         "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
+)
+
+prayer_of_fortitude = Ability(
+        PRAYER_OF_FORTITUDE,
+        "Молитва стойкости",
+        "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
+        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+        "Молитва стойкости",
+        "Выносливость повышена на 165."
 )
 
 
@@ -5019,7 +5048,7 @@ function Priest.CastCircleOfHealing()
         end
     end
 
-    Priest.hero:HealNear {
+    Priest.hero:UseSpellFunc {
         location = Priest.hero:GetLoc(),
         radius = 15,
         func = act
@@ -5142,11 +5171,11 @@ function Priest.Init(location)
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     EquipSystem.RegisterItems(items, items_spells)
-    EquipSystem.AddItemsToUnit(Priest.hero, items)
+    --EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(1)
+    Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
@@ -5156,8 +5185,10 @@ function Priest.Init(location)
             CIRCLE_OF_HEALING,
             PRAYER_OF_MENDING,
             POWER_WORD_SHIELD,
-            GUARDIAN_SPIRIT
+            GUARDIAN_SPIRIT,
+            SPELLBOOK_PRIEST
     )
+    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
@@ -5165,6 +5196,7 @@ function Priest.Init(location)
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
+    Priest.InitPrayerOfFortitude()
 end
 
 -- Copyright (c) meiso
@@ -5249,6 +5281,42 @@ function Priest.InitPowerWordShield()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)
     event:AddAction(Priest.CastPowerWordShield)
+end
+
+-- Copyright (c) meiso
+
+function Priest.SetPrayerOfFortitude()
+    --TODO: пока что даём как есть. потом отскалируем
+    local items = { "PRAYER_OF_FORTITUDE_ITEM" }
+    local items_spells = { "HP_165_POF" }
+
+    EquipSystem.RegisterItems(items, items_spells)
+
+    local function act()
+        local u = Unit(GetEnumUnit())
+        EquipSystem.RemoveItemsToUnit(u, items)
+        if u:HasBuff(PRAYER_OF_FORTITUDE_BUFF) then
+            EquipSystem.AddItemsToUnit(u, items)
+        end
+    end
+
+    Priest.hero:UseSpellFunc {
+        location = Priest.hero:GetLoc(),
+        --а здесь наоборот должна быть больше
+        radius = 30,
+        func = act
+    }
+end
+
+function Priest.InitPrayerOfFortitude()
+    --эта кастомная аура по сути перманентна
+    prayer_of_fortitude:Init()
+
+    local set_buff = EventsUnit(Priest.hero)
+    --здесь дистанция прока ауры должна быть меньше чем задана в редакторе,
+    --иначе ивент не будет цеплять юнитов на краю зоны ауры
+    set_buff:RegisterWithinRange(19.)
+    set_buff:AddAction(Priest.SetPrayerOfFortitude)
 end
 
 -- Copyright (c) meiso

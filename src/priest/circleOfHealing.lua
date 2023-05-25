@@ -14,7 +14,7 @@ function Priest.CastCircleOfHealing()
         end
     end
 
-    Priest.hero:HealNear {
+    Priest.hero:UseSpellFunc {
         location = Priest.hero:GetLoc(),
         radius = 15,
         func = act

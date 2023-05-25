@@ -8,11 +8,11 @@ function Priest.Init(location)
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     EquipSystem.RegisterItems(items, items_spells)
-    EquipSystem.AddItemsToUnit(Priest.hero, items)
+    --EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(1)
+    Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
@@ -22,8 +22,10 @@ function Priest.Init(location)
             CIRCLE_OF_HEALING,
             PRAYER_OF_MENDING,
             POWER_WORD_SHIELD,
-            GUARDIAN_SPIRIT
+            GUARDIAN_SPIRIT,
+            SPELLBOOK_PRIEST
     )
+    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
@@ -31,4 +33,5 @@ function Priest.Init(location)
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
+    Priest.InitPrayerOfFortitude()
 end

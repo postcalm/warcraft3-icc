@@ -41,6 +41,13 @@ function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
+--- Регистриует событие, когда юнит входит в область юнита
+---@param range integer Дистанция
+---@return nil
+function EventsUnit:RegisterWithinRange(range)
+    TriggerRegisterUnitInRange(self.trigger, self.unit, range * METER, nil)
+end
+
 -- далее идут бессмысленные обёртки над методами родителя
 -- и нужны только для того, чтобы методы показывались в IDE
 
