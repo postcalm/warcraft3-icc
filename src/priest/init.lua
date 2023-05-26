@@ -3,11 +3,9 @@
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
     local items = { "ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM" }
-    local items_spells = { "ARMOR_500", "ATTACK_1500", "HP_90K" }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    EquipSystem.RegisterItems(items, items_spells)
     --EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)

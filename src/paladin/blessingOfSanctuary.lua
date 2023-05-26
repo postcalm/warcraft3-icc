@@ -12,10 +12,8 @@ end
 function Paladin.BlessingOfSanctuary()
     local unit = GetSpellTargetUnit()
     local items_list = { "DEC_DMG_ITEM" }
-    local items_spells_list = { "DECREASE_DMG" }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)

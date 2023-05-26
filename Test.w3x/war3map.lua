@@ -11,32 +11,18 @@ end
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
 JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
---Priest
-PRAYER_OF_FORTITUDE_BUFF = FourCC("B006")
-
-
 -- Copyright (c) meiso
 
-Items = {}
-Items["ARMOR_ITEM"]                 = FourCC("I001")
-Items["ATTACK_ITEM"]                = FourCC("I000")
-Items["HP_ITEM"]                    = FourCC("I002")
-Items["MAGICARMOR_ITEM"]            = FourCC("I003")
-Items["DEC_DMG_ITEM"]               = FourCC("I004")
-Items["BLESSING_OF_WISDOM_ITEM"]    = FourCC("I005")
-Items["MP_ITEM"]                    = FourCC("I006")
-Items["PRAYER_OF_FORTITUDE_ITEM"]   = FourCC("I007")
-
-
-ItemsSpells = {}
-ItemsSpells["ARMOR_500"]          = { int = FourCC("A008"), str = "A008" }
-ItemsSpells["ATTACK_1500"]        = { int = FourCC("A007"), str = "A007" }
-ItemsSpells["HP_90K"]             = { int = FourCC("A00D"), str = "A00D" }
-ItemsSpells["MAGICARMOR_500"]     = { int = FourCC("A00I"), str = "A00I" }
-ItemsSpells["DECREASE_DMG"]       = { int = FourCC("A00K"), str = "A00K" }
-ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC("A00F"), str = "A00F" }
-ItemsSpells["MP_50K"]             = { int = FourCC("A00W"), str = "A00W" }
-ItemsSpells["HP_165_POF"]         = { int = FourCC("A010"), str = "A010" }
+Items = {
+    ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
+    ATTACK_ITEM                 = { item = FourCC("I000"), spell = FourCC("A007"), str = "A007" },
+    HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
+    MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
+    DEC_DMG_ITEM                = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
+    BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
+    MP_ITEM                     = { item = FourCC("I006"), spell = FourCC("A00W"), str = "A00W" },
+    POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
+}
 
 -- Copyright (c) meiso
 
@@ -2835,11 +2821,10 @@ EquipSystem = {}
 ---@param items string Список предметов
 ---@param items_spells string Список способностей предметов
 ---@return nil
-function EquipSystem.RegisterItems(items, items_spells)
+function EquipSystem.RegisterItems()
     local count = 1
-    local items_ = zip(items, items_spells)
-    for _, item in pairs({ table.unpack(items_) }) do
-        reg_item_eq(Items[item[1]], ItemsSpells[item[2]].str, count)
+    for _, item in pairs(Items) do
+        reg_item_eq(item.item, item.str, count)
     end
 end
 
@@ -2854,8 +2839,9 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
     if isTable(unit) then
         u = unit:GetId()
     end
+    print(#items)
     for _, item in pairs(items) do
-        equip_items_id(u, Items[item], c)
+        equip_items_id(u, Items[item].item, c)
     end
 end
 
@@ -2871,7 +2857,7 @@ function EquipSystem.RemoveItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        unequip_item_id(u, Items[item], c)
+        unequip_item_id(u, Items[item].item, c)
     end
 end
 
@@ -4131,12 +4117,10 @@ end
 
 function LordMarrowgar.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
     LordMarrowgar.unit:SetLevel(83)
@@ -4344,14 +4328,12 @@ end
 
 function LadyDeathwhisper.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
 
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(500)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
     --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
 
@@ -4591,14 +4573,13 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfKings(unit, stat, timer)
+function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfKings()
@@ -4623,7 +4604,8 @@ function Paladin.BlessingOfKings()
     --создаем лямбду для снятия бафа
     local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfKings(unit, stat, timer)
+        Paladin.RemoveBlessingOfKings(unit, stat)
+        DestroyTimer(timer)
     end
 
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
@@ -4708,10 +4690,8 @@ end
 function Paladin.BlessingOfSanctuary()
     local unit = GetSpellTargetUnit()
     local items_list = { "DEC_DMG_ITEM" }
-    local items_spells_list = { "DECREASE_DMG" }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)
@@ -4748,21 +4728,18 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+function Paladin.RemoveBlessingOfWisdom(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_wisdom)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
     local items_list = { "BLESSING_OF_WISDOM_ITEM" }
-    local items_spells_list = { "BLESSING_OF_WISDOM" }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_wisdom)
@@ -4772,7 +4749,8 @@ function Paladin.BlessingOfWisdom()
 
     local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+        Paladin.RemoveBlessingOfWisdom(unit, items_list)
+        DestroyTimer(timer)
     end
     BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
 
@@ -4852,11 +4830,9 @@ end
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
     Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
@@ -5177,11 +5153,9 @@ end
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
     local items = { "ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM" }
-    local items_spells = { "ARMOR_500", "ATTACK_1500", "HP_90K" }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    EquipSystem.RegisterItems(items, items_spells)
     --EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
@@ -5212,7 +5186,7 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemovePowerWordFortitude(unit, items_list, timer)
+function Priest.RemovePowerWordFortitude(unit, items_list, timer)
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, power_word_fortitude)
@@ -5223,12 +5197,9 @@ end
 function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
     local unit = GetSpellTargetUnit()
-    local items = { "PRAYER_OF_FORTITUDE_ITEM" }
-    local items_spells = { "HP_165_POF" }
-    print("set buff")
+    local items = { "POWER_WORD_FORTITUDE_ITEM" }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items, items_spells)
 
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_fortitude)
@@ -5238,15 +5209,14 @@ function Priest.PowerWordFortitude()
 
     local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemovePowerWordFortitude(unit, items, timer)
+        Paladin.RemovePowerWordFortitude(unit, items)
     end
     BuffSystem.AddBuffToHero(unit, power_word_fortitude, remove_buff)
 
     TimerStart(timer, 600., false, remove_buff)
-
 end
 
-function Paladin.IsPowerWordFortitude()
+function Priest.IsPowerWordFortitude()
     return power_word_fortitude:SpellCasted()
 end
 
@@ -5471,11 +5441,9 @@ end
 function DeathKnight.Init(location)
     local loc = location or Location(4000., 150.)
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
 
     DeathKnight.hero = Unit(GetLocalPlayer(), DEATH_KNIGHT, loc)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(DeathKnight.hero, items_list)
 
     DeathKnight.hero:SetLevel(80)
@@ -5498,6 +5466,7 @@ function EntryPoint()
 
     -- Механики
     BattleSystem.Init()
+    EquipSystem.RegisterItems()
 
     -- Боссы
     LordMarrowgar.Init()
@@ -5521,6 +5490,7 @@ function TestEntryPoint()
 
     -- Механики
     BattleSystem.Init()
+    EquipSystem.RegisterItems()
 
     --SaveSystem.InitNewHeroEvent()
     SaveSystem.gamecache = InitGameCache("savesystem")

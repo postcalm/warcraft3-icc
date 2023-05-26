@@ -1,20 +1,17 @@
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+function Paladin.RemoveBlessingOfWisdom(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_wisdom)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
     local items_list = { "BLESSING_OF_WISDOM_ITEM" }
-    local items_spells_list = { "BLESSING_OF_WISDOM" }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_wisdom)
@@ -24,7 +21,8 @@ function Paladin.BlessingOfWisdom()
 
     local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
+        Paladin.RemoveBlessingOfWisdom(unit, items_list)
+        DestroyTimer(timer)
     end
     BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
 

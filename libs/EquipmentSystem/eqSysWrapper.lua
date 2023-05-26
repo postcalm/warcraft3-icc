@@ -9,11 +9,10 @@ EquipSystem = {}
 ---@param items string Список предметов
 ---@param items_spells string Список способностей предметов
 ---@return nil
-function EquipSystem.RegisterItems(items, items_spells)
+function EquipSystem.RegisterItems()
     local count = 1
-    local items_ = zip(items, items_spells)
-    for _, item in pairs({ table.unpack(items_) }) do
-        reg_item_eq(Items[item[1]], ItemsSpells[item[2]].str, count)
+    for _, item in pairs(Items) do
+        reg_item_eq(item.item, item.str, count)
     end
 end
 
@@ -28,8 +27,9 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
     if isTable(unit) then
         u = unit:GetId()
     end
+    print(#items)
     for _, item in pairs(items) do
-        equip_items_id(u, Items[item], c)
+        equip_items_id(u, Items[item].item, c)
     end
 end
 
@@ -45,6 +45,6 @@ function EquipSystem.RemoveItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        unequip_item_id(u, Items[item], c)
+        unequip_item_id(u, Items[item].item, c)
     end
 end

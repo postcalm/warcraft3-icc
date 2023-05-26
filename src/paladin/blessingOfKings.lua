@@ -1,13 +1,12 @@
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfKings(unit, stat, timer)
+function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
         SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
         SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfKings()
@@ -32,7 +31,8 @@ function Paladin.BlessingOfKings()
     --создаем лямбду для снятия бафа
     local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfKings(unit, stat, timer)
+        Paladin.RemoveBlessingOfKings(unit, stat)
+        DestroyTimer(timer)
     end
 
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)

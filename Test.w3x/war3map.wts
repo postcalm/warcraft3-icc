@@ -696,9 +696,9 @@ X
 }
 
 STRING 240
-// Предметы: I007 (power_word_fortitude), Name (Название)
+// Предметы: I007 (prayer_of_fortitude), Name (Название)
 {
-power_word_fortitude
+prayer_of_fortitude
 }
 
 STRING 241
@@ -715,12 +715,6 @@ Z
 
 STRING 244
 // Способности: A011 (Power Word: Fortitude), Name (Название)
-{
-Power Word: Fortitude
-}
-
-STRING 245
-// Заклинания/эффекты: B006 (Power Word: Fortitude), EditorName (Название (только для Редактора))
 {
 Power Word: Fortitude
 }

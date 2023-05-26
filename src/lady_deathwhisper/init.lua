@@ -1,14 +1,12 @@
 
 function LadyDeathwhisper.Init()
     local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
 
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(500)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
     --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
 
