@@ -162,7 +162,7 @@ PRAYER_OF_MENDING       = FourCC("A009")
 POWER_WORD_SHIELD       = FourCC("A00V")
 GUARDIAN_SPIRIT         = FourCC("A00X")
 SPELLBOOK_PRIEST        = FourCC("A00Y")
-PRAYER_OF_FORTITUDE     = FourCC("A00Z")
+POWER_WORD_FORTITUDE     = FourCC("A011")
 
 -- Copyright (c)  meiso
 
@@ -559,13 +559,25 @@ function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
---- Регистриует событие нанесения урона юнитом игрока
+--- Регистриует событие прекращения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellEndcast()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_ENDCAST, nil)
+end
+
+--- Регистриует событие завершения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellFinish()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_FINISH, nil)
+end
+
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
---- Регистриует событие получения урона юнитом игрока
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
@@ -661,12 +673,11 @@ function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
+--- Регистриует событие, когда юнит входит в область юнита
+---@param range integer Дистанция
+---@return nil
 function EventsUnit:RegisterWithinRange(range)
     TriggerRegisterUnitInRange(self.trigger, self.unit, range * METER, nil)
-end
-
-function EventsUnit:RegisterUnitLife(life)
-    TriggerRegisterUnitLifeEvent(self.trigger, self.unit, GREATER_THAN_OR_EQUAL, life)
 end
 
 -- далее идут бессмысленные обёртки над методами родителя
@@ -3869,8 +3880,8 @@ circle_of_healing = Ability(
         "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
 )
 
-prayer_of_fortitude = Ability(
-        PRAYER_OF_FORTITUDE,
+power_word_fortitude = Ability(
+        POWER_WORD_FORTITUDE,
         "Молитва стойкости",
         "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
         "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
@@ -5196,7 +5207,58 @@ function Priest.Init(location)
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
-    Priest.InitPrayerOfFortitude()
+    Priest.InitPowerWordFortitude()
+end
+
+-- Copyright (c) meiso
+
+function Paladin.RemovePowerWordFortitude(unit, items_list, timer)
+    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
+        EquipSystem.RemoveItemsToUnit(unit, items_list)
+        BuffSystem.RemoveBuffFromHero(unit, power_word_fortitude)
+    end
+    DestroyTimer(timer)
+end
+
+function Priest.PowerWordFortitude()
+    --TODO: пока что даём как есть. потом отскалируем
+    local unit = GetSpellTargetUnit()
+    local items = { "PRAYER_OF_FORTITUDE_ITEM" }
+    local items_spells = { "HP_165_POF" }
+    print("set buff")
+
+    BuffSystem.RegisterHero(unit)
+    EquipSystem.RegisterItems(items, items_spells)
+
+    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_fortitude)
+    end
+
+    EquipSystem.AddItemsToUnit(unit, items)
+
+    local timer = CreateTimer()
+    local remove_buff = function()
+        Paladin.RemovePowerWordFortitude(unit, items, timer)
+    end
+    BuffSystem.AddBuffToHero(unit, power_word_fortitude, remove_buff)
+
+    TimerStart(timer, 600., false, remove_buff)
+
+end
+
+function Paladin.IsPowerWordFortitude()
+    return power_word_fortitude:SpellCasted()
+end
+
+function Priest.InitPowerWordFortitude()
+    power_word_fortitude:Init()
+    Priest.hero:SetAbilityManacost(power_word_fortitude:GetId(), 27)
+    Priest.hero:SetAbilityCooldown(power_word_fortitude:GetId(), 1.5)
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPowerWordFortitude)
+    event:AddAction(Priest.PowerWordFortitude)
 end
 
 -- Copyright (c) meiso
@@ -5281,42 +5343,6 @@ function Priest.InitPowerWordShield()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)
     event:AddAction(Priest.CastPowerWordShield)
-end
-
--- Copyright (c) meiso
-
-function Priest.SetPrayerOfFortitude()
-    --TODO: пока что даём как есть. потом отскалируем
-    local items = { "PRAYER_OF_FORTITUDE_ITEM" }
-    local items_spells = { "HP_165_POF" }
-
-    EquipSystem.RegisterItems(items, items_spells)
-
-    local function act()
-        local u = Unit(GetEnumUnit())
-        EquipSystem.RemoveItemsToUnit(u, items)
-        if u:HasBuff(PRAYER_OF_FORTITUDE_BUFF) then
-            EquipSystem.AddItemsToUnit(u, items)
-        end
-    end
-
-    Priest.hero:UseSpellFunc {
-        location = Priest.hero:GetLoc(),
-        --а здесь наоборот должна быть больше
-        radius = 30,
-        func = act
-    }
-end
-
-function Priest.InitPrayerOfFortitude()
-    --эта кастомная аура по сути перманентна
-    prayer_of_fortitude:Init()
-
-    local set_buff = EventsUnit(Priest.hero)
-    --здесь дистанция прока ауры должна быть меньше чем задана в редакторе,
-    --иначе ивент не будет цеплять юнитов на краю зоны ауры
-    set_buff:RegisterWithinRange(19.)
-    set_buff:AddAction(Priest.SetPrayerOfFortitude)
 end
 
 -- Copyright (c) meiso

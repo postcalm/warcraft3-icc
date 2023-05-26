@@ -147,8 +147,8 @@ circle_of_healing = Ability(
         "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
 )
 
-prayer_of_fortitude = Ability(
-        PRAYER_OF_FORTITUDE,
+power_word_fortitude = Ability(
+        POWER_WORD_FORTITUDE,
         "Молитва стойкости",
         "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
         "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",

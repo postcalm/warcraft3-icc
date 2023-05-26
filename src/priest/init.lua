@@ -33,5 +33,5 @@ function Priest.Init(location)
     Priest.InitPrayerOfMending()
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
-    Priest.InitPrayerOfFortitude()
+    Priest.InitPowerWordFortitude()
 end
