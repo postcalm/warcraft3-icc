@@ -14,7 +14,6 @@ function LadyDeathwhisper.FrostBolt()
         fb:MoveToUnit(enemy)
         if fb:NearTarget(enemy) then
             local damage = GetRandomInt(100., 120.)
-            print("FrostBolt", damage)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
             enemy:SetMoveSpeed(enemy_movespeed / 2)
             break

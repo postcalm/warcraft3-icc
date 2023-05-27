@@ -27,7 +27,6 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
     if isTable(unit) then
         u = unit:GetId()
     end
-    print(#items)
     for _, item in pairs(items) do
         equip_items_id(u, Items[item].item, c)
     end

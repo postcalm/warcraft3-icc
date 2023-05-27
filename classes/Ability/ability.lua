@@ -5,6 +5,7 @@
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка
+---@param key string Кнопка использования
 ---@param buff_tooltip string Название бафа
 ---@param buff_desc string Описание бафа
 Ability = {}
@@ -19,13 +20,15 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text, icon, buff_tooltip, buff_desc)
-    self.ability = ability
-    self.tooltip = tooltip
-    self.text = text
-    self.icon = icon
-    self.buff_tooltip = buff_tooltip or tooltip
-    self.buff_desc = buff_desc or text
+function Ability:_init(args)
+    print(args)
+    self.ability = args.ability
+    self.tooltip = args.tooltip
+    self.text = args.text
+    self.icon = args.icon
+    self.key = args.key
+    self.buff_tooltip = args.buff_tooltip or args.tooltip
+    self.buff_desc = args.buff_desc or args.text
 end
 
 --- Проинициализировать способность.
@@ -41,6 +44,7 @@ end
 ---@return nil
 function Ability:SetTooltip(tooltip)
     local t = tooltip or self.tooltip
+    t = t .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
     BlzSetAbilityTooltip(self.ability, t, 0)
 end
 

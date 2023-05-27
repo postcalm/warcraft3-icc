@@ -13,6 +13,29 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Copyright (c) meiso
 
+function _dec2hex(red, green, blue)
+    red = string.format("%x", red)
+    green = string.format("%x", green)
+    blue = string.format("%x", blue)
+    return "00" .. red .. green .. blue
+end
+
+-- Формат: transparency-red-green-blue
+Color = {
+    dec2hex = _dec2hex,
+    ORANGE = _dec2hex(235, 185, 60),
+    RED = _dec2hex(255, 0, 0),
+}
+
+--- Задать цвет тексту
+---@param color Color Цвет
+function set_color(text, color)
+    return "|c" .. color .. text .. "|r"
+end
+
+
+-- Copyright (c) meiso
+
 Items = {
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
     ATTACK_ITEM                 = { item = FourCC("I000"), spell = FourCC("A007"), str = "A007" },
@@ -245,6 +268,7 @@ PRIEST              = FourCC("Hblm")
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка
+---@param key string Кнопка использования
 ---@param buff_tooltip string Название бафа
 ---@param buff_desc string Описание бафа
 Ability = {}
@@ -259,13 +283,15 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text, icon, buff_tooltip, buff_desc)
-    self.ability = ability
-    self.tooltip = tooltip
-    self.text = text
-    self.icon = icon
-    self.buff_tooltip = buff_tooltip or tooltip
-    self.buff_desc = buff_desc or text
+function Ability:_init(args)
+    print(args)
+    self.ability = args.ability
+    self.tooltip = args.tooltip
+    self.text = args.text
+    self.icon = args.icon
+    self.key = args.key
+    self.buff_tooltip = args.buff_tooltip or args.tooltip
+    self.buff_desc = args.buff_desc or args.text
 end
 
 --- Проинициализировать способность.
@@ -281,7 +307,12 @@ end
 ---@return nil
 function Ability:SetTooltip(tooltip)
     local t = tooltip or self.tooltip
+    t = t .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
     BlzSetAbilityTooltip(self.ability, t, 0)
+end
+
+function Ability:SetHotkey(hotkey)
+
 end
 
 --- Установить описание для способности
@@ -2839,7 +2870,6 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
     if isTable(unit) then
         u = unit:GetId()
     end
-    print(#items)
     for _, item in pairs(items) do
         equip_items_id(u, Items[item].item, c)
     end
@@ -3719,161 +3749,169 @@ end
 
 -- Copyright (c) meiso
 
-avengers_shield = Ability(
-        AVENGERS_SHIELD,
-        "Щит мстителя (C)",
-        "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
-                "Щит затем перескакивает на других находящихся поблизости противников. " ..
-                "Способен воздействовать на 3 цели.",
-        "ReplaceableTextures/CommandButtons/avengers_shield.tga"
-)
+avengers_shield = Ability {
+    ability = AVENGERS_SHIELD,
+    tooltip = "Щит мстителя",
+    key = "C",
+    text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
+            "Щит затем перескакивает на других находящихся поблизости противников. " ..
+            "Способен воздействовать на 3 цели.",
+    icon = "ReplaceableTextures/CommandButtons/avengers_shield.tga"
+}
 
-blessing_of_kings = Ability(
-        BLESSING_OF_KINGS,
-        "Благословение королей (Z)",
-        "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
-        "Благословение королей",
-        "Все характеристики повышены на 10."
-)
+blessing_of_kings = Ability {
+    ability = BLESSING_OF_KINGS,
+    tooltip = "Благословение королей",
+    key = "Q",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
+    buff_desc = "Все характеристики повышены на 10."
+}
 
-blessing_of_might = Ability(
-        BLESSING_OF_MIGHT,
-        "Благословение могущества (V)",
-        "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
-        "Благословение могущества",
-        "Сила атаки увеличена на 550."
-)
+blessing_of_might = Ability {
+    ability = BLESSING_OF_MIGHT,
+    tooltip = "Благословение могущества",
+    key = "W",
+    text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
+    buff_desc = "Сила атаки увеличена на 550."
+}
 
-blessing_of_wisdom = Ability(
-        BLESSING_OF_WISDOM,
-        "Благословение мудрости (C)",
-        "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
-        "Благословение мудрости",
-        "Восполнение 92 ед. маны раз в 5 сек."
-)
+blessing_of_wisdom = Ability {
+    ability = BLESSING_OF_WISDOM,
+    tooltip = "Благословение мудрости",
+    key = "E",
+    text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
+    buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
+}
 
-blessing_of_sanctuary = Ability(
-        BLESSING_OF_SANCTUARY,
-        "Благословение неприкосновенности (X)",
-        "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-                "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
-        "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
-        "Благословение неприкосновенности",
-        "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
-                "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
-)
+blessing_of_sanctuary = Ability {
+    ability = BLESSING_OF_SANCTUARY,
+    tooltip = "Благословение неприкосновенности",
+    key = "R",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+            "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
+    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
+}
 
-consecration = Ability(
-        CONSECRATION,
-        "Освящение (R)",
-        "Освящает участок земли, на котором стоит паладин, " ..
-                "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
-        "ReplaceableTextures/CommandButtons/consecration.tga"
-)
+consecration = Ability {
+    ability = CONSECRATION,
+    tooltip = "Освящение",
+    key = "R",
+    text = "Освящает участок земли, на котором стоит паладин, " ..
+            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
+    icon = "ReplaceableTextures/CommandButtons/consecration.tga"
+}
 
-judgement_of_light_tr = Ability(
-        JUDGEMENT_OF_LIGHT_TR,
-        "Правосудие света (D)",
-        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
-        "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
-)
+judgement_of_light_tr = Ability {
+    ability = JUDGEMENT_OF_LIGHT_TR,
+    tooltip = "Правосудие света",
+    key = "D",
+    text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
+}
 
-judgement_of_wisdom_tr = Ability(
-        JUDGEMENT_OF_WISDOM_TR,
-        "Правосудие мудрости (F)",
-        "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
-        "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
-)
+judgement_of_wisdom_tr = Ability {
+    ability = JUDGEMENT_OF_WISDOM_TR,
+    tooltip = "Правосудие мудрости",
+    key = "F",
+    text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
+}
 
-shield_of_righteousness = Ability(
-        SHIELD_OF_RIGHTEOUSNESS,
-        "Щит праведности (W)",
-        "Мощный удар щитом, наносящий урон от светлой магии. " ..
-                "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
-        "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
-)
+shield_of_righteousness = Ability {
+    ability = SHIELD_OF_RIGHTEOUSNESS,
+    tooltip = "Щит праведности",
+    key = "W",
+    text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
+            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
+    icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
+}
 
 -------------------------------------------
 
-flash_heal = Ability(
-        FLASH_HEAL,
-        "Быстрое исцеление (Q)",
-        "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
-        "ReplaceableTextures/CommandButtons/flash_heal.tga"
-)
+flash_heal = Ability {
+    ability = FLASH_HEAL,
+    tooltip = "Быстрое исцеление",
+    key = "Q",
+    text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
+    icon = "ReplaceableTextures/CommandButtons/flash_heal.tga"
+}
 
-renew = Ability(
-        RENEW,
-        "Обновление (E)",
-        "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
-        "ReplaceableTextures/CommandButtons/renew.tga",
-        "Обновление",
-        "Восстановление 280 ед. здоровья раз в 3 с."
-)
+renew = Ability {
+    ability = RENEW,
+    tooltip = "Обновление",
+    key = "E",
+    text = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
+    icon = "ReplaceableTextures/CommandButtons/renew.tga",
+    buff_desc = "Восстановление 280 ед. здоровья раз в 3 с."
+}
 
-power_word_shield = Ability(
-        POWER_WORD_SHIELD,
-        "Слово силы: Щит (S)",
-        "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
-                "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
-                "получением урона. Повторно наложить щит можно только через 15 сек.",
-        "ReplaceableTextures/CommandButtons/power_word_shield.tga",
-        "Слово силы: Щит",
-        "Поглощение урона."
-)
+power_word_shield = Ability {
+    ability = POWER_WORD_SHIELD,
+    tooltip = "Слово силы: Щит",
+    key = "S",
+    text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
+            "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
+            "получением урона. Повторно наложить щит можно только через 15 сек.",
+    icon = "ReplaceableTextures/CommandButtons/power_word_shield.tga",
+    buff_desc = "Поглощение урона."
+}
 
-weakened_soul = Ability(
-        "",
-        "Ослабленная душа",
-        "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
-        "ReplaceableTextures/CommandButtons/weakened_soul.tga"
-)
+weakened_soul = Ability {
+    ability = "",
+    tooltip = "Ослабленная душа",
+    key = "Q",
+    text = "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
+    icon = "ReplaceableTextures/CommandButtons/weakened_soul.tga"
+}
 
-guardian_spirit = Ability(
-        GUARDIAN_SPIRIT,
-        "Оберегающий дух (R)",
-        "Призывает оберегающего духа для охраны дружественной цели. " ..
-                "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
-                "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-                "50 ее максимального запаса здоровья. Время действия – 10 сек.",
-        "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
-        "Оберегающий дух",
-        "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
-)
+guardian_spirit = Ability {
+    ability = GUARDIAN_SPIRIT,
+    tooltip = "Оберегающий дух",
+    key = "R",
+    text = "Призывает оберегающего духа для охраны дружественной цели. " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
+            "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
+            "50 ее максимального запаса здоровья. Время действия – 10 сек.",
+    icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
+    buff_desc = "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
+}
 
-prayer_of_mending = Ability(
-        PRAYER_OF_MENDING,
-        "Молитва восстановления (D)",
-        "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
-                "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
-                "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
-                "только на одну цель одновременно.",
-        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
-        "Молитва восстановления",
-        "Восстанавливает 1043 ед. здоровья при последующем получении урона."
-)
+prayer_of_mending = Ability {
+    ability = PRAYER_OF_MENDING,
+    tooltip = "Молитва восстановления",
+    key = "D",
+    text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
+            "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
+            "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
+            "только на одну цель одновременно.",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    buff_desc = "Восстанавливает 1043 ед. здоровья при последующем получении урона."
+}
 
-circle_of_healing = Ability(
-        CIRCLE_OF_HEALING,
-        "Круг исцеления (W)",
-        "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
-                "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
-        "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
-)
+circle_of_healing = Ability {
+    ability = CIRCLE_OF_HEALING,
+    tooltip = "Круг исцеления",
+    key = "W",
+    text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
+            "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
+    icon = "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
+}
 
-power_word_fortitude = Ability(
-        POWER_WORD_FORTITUDE,
-        "Молитва стойкости",
-        "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
-        "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
-        "Молитва стойкости",
-        "Выносливость повышена на 165."
-)
+power_word_fortitude = Ability {
+    ability = POWER_WORD_FORTITUDE,
+    tooltip = "Молитва стойкости",
+    key = "Q",
+    text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    buff_desc = "Выносливость повышена на 165."
+}
 
 
 function DummyForDPS(location)
@@ -4250,7 +4288,6 @@ function LadyDeathwhisper.FrostBolt()
         fb:MoveToUnit(enemy)
         if fb:NearTarget(enemy) then
             local damage = GetRandomInt(100., 120.)
-            print("FrostBolt", damage)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
             enemy:SetMoveSpeed(enemy_movespeed / 2)
             break
