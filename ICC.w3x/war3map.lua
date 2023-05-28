@@ -347,10 +347,6 @@ function Ability:SetTooltip(tooltip)
     BlzSetAbilityTooltip(self.ability, t, 0)
 end
 
-function Ability:SetHotkey(hotkey)
-
-end
-
 --- Установить описание для способности
 ---@param text string
 ---@return nil
@@ -1283,7 +1279,11 @@ function TextTag:Destroy()
     DestroyTextTag(self.texttag)
 end
 
+-- Copyright (c) meiso
 
+--- Класс создания таймера
+---@param timeout real Время действия
+---@param func function Функция
 Timer = {}
 Timer.__index = Timer
 
@@ -1295,22 +1295,42 @@ setmetatable(Timer, {
     end,
 })
 
----@param timeout real
----@param func function
 function Timer:_init(timeout, func)
     self.timer = CreateTimer()
     self.timeout = timeout
-    self.func = function() func() end
+    self.func = func
 end
 
 --- Запустить таймер
+---@return nil
 function Timer:Start()
-    TimerStart(self.timer, self.timeout, false, self.func())
+    TimerStart(self.timer, self.timeout, false, self.func)
+end
+
+--- Задать время действия
+---@param timeout real Время действия
+---@return nil
+function Timer:SetTimeout(timeout)
+    self.timeout = timeout
+end
+
+--- Задать функцию
+---@param func function Функция
+---@return nil
+function Timer:SetFunc(func)
+    self.func = func
 end
 
 --- Уничтожить таймер
+---@return nil
 function Timer:Destroy()
     DestroyTimer(self.timer)
+end
+
+--- Уничтожить первый истёкший таймер
+---@return nil
+function Timer:DestroyExpired()
+    DestroyTimer(GetExpiredTimer())
 end
 
 -- Copyright (c) meiso
@@ -1353,6 +1373,14 @@ end
 function Unit:SetBaseDamage(value, index)
     local i = index or 0
     BlzSetUnitBaseDamage(self.unit, value, i)
+end
+
+--- Получить базовый урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return integer
+function Unit:GetBaseDamage(index)
+    index = index or 0
+    return BlzGetUnitBaseDamage(self.unit, index)
 end
 
 --- Нанести физический урон.
@@ -4209,25 +4237,27 @@ end
 
 -- Copyright (c) meiso
 
-function LordMarrowgar.ResetAnimation()
-    if LordMarrowgar.whirlwind_effect then
-        LordMarrowgar.whirlwind_effect = false
-    end
-    DestroyTimer(GetExpiredTimer())
-end
-
 function LordMarrowgar.Whirlwind()
-    local whirlwind_timer = CreateTimer()
+    local whirlwind_timer = Timer(GetRandomReal(20., 30.))
+    local timer_reset = Timer(5.)
+
+    local function reset_anim()
+        if LordMarrowgar.whirlwind_effect then
+            LordMarrowgar.whirlwind_effect = false
+        end
+        timer_reset:Destroy()
+    end
 
     local function action()
-        local timer_reset = CreateTimer()
         IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
-        TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
-        DestroyTimer(whirlwind_timer)
+        timer_reset:SetFunc(reset_anim)
+        timer_reset:Start()
+        whirlwind_timer:Destroy()
     end
 
     if LordMarrowgar.whirlwind_effect then
-        TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
+        whirlwind_timer:SetFunc(action)
+        whirlwind_timer:Start()
     end
 end
 
@@ -4657,6 +4687,7 @@ end
 
 function Paladin.BlessingOfKings()
     local unit = GetSpellTargetUnit()
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
@@ -4674,18 +4705,13 @@ function Paladin.BlessingOfKings()
     SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
     SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
 
-    --создаем лямбду для снятия бафа
-    local timer = CreateTimer()
     local remove_buff = function()
         Paladin.RemoveBlessingOfKings(unit, stat)
-        DestroyTimer(timer)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
-
-    --скидываем баф через 10 минут
-    TimerStart(timer, 600., false, remove_buff)
-
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfKings()
@@ -4705,33 +4731,31 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfMight(unit, timer)
+function Paladin.RemoveBlessingOfMight(unit)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
+        unit:SetBaseDamage(unit:GetBaseDamage() - 550 // DPS)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfMight()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
     end
 
-    -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
-    SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+    unit:SetBaseDamage(unit:GetBaseDamage() + 550 // DPS)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfMight(unit, timer)
+        Paladin.RemoveBlessingOfMight(unit)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfMight()
@@ -4751,17 +4775,17 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
+function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
         SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfSanctuary()
     local unit = GetSpellTargetUnit()
+    local timer = Timer(600.)
     local items_list = { "DEC_DMG_ITEM" }
 
     BuffSystem.RegisterHero(unit)
@@ -4774,14 +4798,13 @@ function Paladin.BlessingOfSanctuary()
     local stat = R2I(GetHeroStr(unit, false) * 0.1)
     SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
+        Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(unit, blessing_of_sanctuary, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfSanctuary()
@@ -4810,6 +4833,7 @@ end
 
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
+    local timer = Timer(600.)
     local items_list = { "BLESSING_OF_WISDOM_ITEM" }
 
     BuffSystem.RegisterHero(unit)
@@ -4820,14 +4844,13 @@ function Paladin.BlessingOfWisdom()
 
     EquipSystem.AddItemsToUnit(unit, items_list)
 
-    local timer = CreateTimer()
     local remove_buff = function()
         Paladin.RemoveBlessingOfWisdom(unit, items_list)
-        DestroyTimer(timer)
+        timer:Destroy()
     end
     BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfWisdom()
@@ -4868,18 +4891,18 @@ function Paladin.EnableConsecration()
     end
 end
 
-function Paladin.DisableConsecration()
-    DestroyTimer(GetExpiredTimer())
-    DestroyEffect(Paladin.consecration_effect)
-    Paladin.consecration_effect = nil
-end
-
 function Paladin.Consecration()
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
-    local timer = CreateTimer()
+    local timer = Timer(8.)
+    local function remove_effect()
+        DestroyEffect(Paladin.consecration_effect)
+        Paladin.consecration_effect = nil
+        timer:Destroy()
+    end
     Paladin.consecration_effect = AddSpecialEffectLoc(model, loc)
-    TimerStart(timer, 8., false, Paladin.DisableConsecration)
+    timer:SetFunc(remove_effect)
+    timer:Start()
     Paladin.EnableConsecration()
 end
 
@@ -4939,12 +4962,11 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveJudgementOfLight(target, timer)
+function Paladin.RemoveJudgementOfLight(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
         BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_LIGHT)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfLight()
@@ -4955,11 +4977,12 @@ function Paladin.JudgementOfLight()
 end
 
 function Paladin.IsJudgementOfLightDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_LIGHT_BUFF)
 end
 
 function Paladin.CastJudgementOfLight()
     local target = GetSpellTargetUnit()
+    local timer = Timer(20.)
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
@@ -4971,13 +4994,13 @@ function Paladin.CastJudgementOfLight()
     jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
     jol_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveJudgementOfLight(target, timer)
+        Paladin.RemoveJudgementOfLight(target)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jol_unit:ApplyTimedLife(2.)
 end
 
@@ -5006,12 +5029,11 @@ end
 
 -- Copyright (c) meiso
 
-function Paladin.RemoveJudgementOfWisdom(target, timer)
+function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
         BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_WISDOM)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfWisdom()
@@ -5022,11 +5044,12 @@ function Paladin.JudgementOfWisdom()
 end
 
 function Paladin.IsJudgementOfWisdomDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_WISDOM_BUFF)
 end
 
 function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
+    local timer = Timer(20.)
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_WISDOM)
@@ -5036,13 +5059,13 @@ function Paladin.CastJudgementOfWisdom()
     jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
     jow_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveJudgementOfWisdom(target, timer)
+        Paladin.RemoveJudgementOfWisdom(target)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jow_unit:ApplyTimedLife(2.)
 end
 
@@ -5176,14 +5199,14 @@ function Priest.CastGuardianSpirit()
 
     BuffSystem.RegisterHero(unit)
 
-    local timer = CreateTimer()
+    local timer = Timer(10.)
     local gs_effect = Effect(Priest.hero, model, "origin")
     local event = EventsUnit(unit)
     event:RegisterDamaged()
 
     local remove_buff = function()
         BuffSystem.RemoveBuffFromHero(unit, guardian_spirit)
-        DestroyTimer(timer)
+        timer:Destroy()
         gs_effect:Destroy()
         event:Destroy()
     end
@@ -5198,10 +5221,9 @@ function Priest.CastGuardianSpirit()
         local current_hp = unit:GetCurrentLife()
         return current_hp < damage
     end
-
     BuffSystem.AddBuffToHero(unit, guardian_spirit)
-    TimerStart(timer, 10., false, remove_buff)
-
+    timer:SetFunc(remove_buff)
+    timer:Start()
     event:AddCondition(GetLife)
     event:AddAction(SaveHero)
 end
@@ -5259,17 +5281,17 @@ end
 
 -- Copyright (c) meiso
 
-function Priest.RemovePowerWordFortitude(unit, items_list, timer)
+function Priest.RemovePowerWordFortitude(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, power_word_fortitude)
     end
-    DestroyTimer(timer)
 end
 
 function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
     local unit = GetSpellTargetUnit()
+    local timer = Timer(600.)
     local items = { "POWER_WORD_FORTITUDE_ITEM" }
 
     BuffSystem.RegisterHero(unit)
@@ -5277,16 +5299,15 @@ function Priest.PowerWordFortitude()
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_fortitude)
     end
-
     EquipSystem.AddItemsToUnit(unit, items)
 
-    local timer = CreateTimer()
     local remove_buff = function()
         Paladin.RemovePowerWordFortitude(unit, items)
+        timer:Destroy()
     end
     BuffSystem.AddBuffToHero(unit, power_word_fortitude, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Priest.IsPowerWordFortitude()
@@ -5315,6 +5336,8 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
+    local buff_timer = Timer(30.)
+    local debuff_timer = Timer(15.)
     local absorb = 2230
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
 
@@ -5329,21 +5352,19 @@ function Priest.CastPowerWordShield()
         BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_shield)
     end
 
-    local timer = CreateTimer()
-    local debuff_timer = CreateTimer()
     local pws_effect = Effect(unit, model, "origin")
     event:RegisterDamaged()
 
     local remove_buff = function()
         Priest.RemovePowerWordShield(unit)
-        DestroyTimer(timer)
+        buff_timer:Destroy()
         event:Destroy()
         pws_effect:Destroy()
     end
 
     local remove_debuff = function()
         BuffSystem.RemoveBuffFromHero(unit, weakened_soul)
-        DestroyTimer(debuff_timer)
+        debuff_timer:Destroy()
     end
 
     local function Shield()
@@ -5365,9 +5386,10 @@ function Priest.CastPowerWordShield()
     BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
     --фиксируем дебаф на юните
     BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
-    TimerStart(timer, 30., false, remove_buff)
-    --сбрасываем сам дебаф через 15 сек
-    TimerStart(debuff_timer, 15., false, remove_debuff)
+    buff_timer:SetFunc(remove_buff)
+    debuff_timer:SetFunc(remove_debuff)
+    buff_timer:Start()
+    debuff_timer:Start()
 
     event:AddCondition(UsingShield)
     event:AddAction(Shield)
@@ -5390,11 +5412,10 @@ end
 
 -- Copyright (c) meiso
 
-function Priest.RemovePrayerOfMending(unit, timer)
+function Priest.RemovePrayerOfMending(unit)
     if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
         BuffSystem.RemoveBuffFromHero(unit, prayer_of_mending)
     end
-    DestroyTimer(timer)
 end
 
 function Priest.CastPrayerOfMending()
@@ -5421,14 +5442,14 @@ function Priest.CastPrayerOfMending()
             event = EventsUnit(unit)
             event:RegisterDamaged()
 
-            local timer = CreateTimer()
+            local timer = Timer(30.)
             local remove_buff = function()
-                Priest.RemovePrayerOfMending(unit, timer)
+                Priest.RemovePrayerOfMending(unit)
+                timer:Destroy()
             end
-
             BuffSystem.AddBuffToHero(unit, prayer_of_mending, remove_buff)
-            --баф снимется сам через 30 сек
-            TimerStart(timer, 30., remove_buff)
+            timer:SetFunc(remove_buff)
+            timer:Start()
 
             event:AddCondition(function()
                 return BuffSystem.IsBuffOnHero(unit, prayer_of_mending)
@@ -5438,7 +5459,7 @@ function Priest.CastPrayerOfMending()
                 heal = BuffSystem.ImproveSpell(unit, heal)
                 Unit(unit):GainLife { life = heal, show = true }
                 cured = true
-                Priest.RemovePrayerOfMending(unit, timer)
+                remove_buff()
             end)
         end
         if cured and last_unit == unit then

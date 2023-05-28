@@ -1,10 +1,9 @@
 -- Copyright (c) meiso
 
-function Priest.RemovePrayerOfMending(unit, timer)
+function Priest.RemovePrayerOfMending(unit)
     if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
         BuffSystem.RemoveBuffFromHero(unit, prayer_of_mending)
     end
-    DestroyTimer(timer)
 end
 
 function Priest.CastPrayerOfMending()
@@ -31,14 +30,14 @@ function Priest.CastPrayerOfMending()
             event = EventsUnit(unit)
             event:RegisterDamaged()
 
-            local timer = CreateTimer()
+            local timer = Timer(30.)
             local remove_buff = function()
-                Priest.RemovePrayerOfMending(unit, timer)
+                Priest.RemovePrayerOfMending(unit)
+                timer:Destroy()
             end
-
             BuffSystem.AddBuffToHero(unit, prayer_of_mending, remove_buff)
-            --баф снимется сам через 30 сек
-            TimerStart(timer, 30., remove_buff)
+            timer:SetFunc(remove_buff)
+            timer:Start()
 
             event:AddCondition(function()
                 return BuffSystem.IsBuffOnHero(unit, prayer_of_mending)
@@ -48,7 +47,7 @@ function Priest.CastPrayerOfMending()
                 heal = BuffSystem.ImproveSpell(unit, heal)
                 Unit(unit):GainLife { life = heal, show = true }
                 cured = true
-                Priest.RemovePrayerOfMending(unit, timer)
+                remove_buff()
             end)
         end
         if cured and last_unit == unit then

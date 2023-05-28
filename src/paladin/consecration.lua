@@ -21,18 +21,18 @@ function Paladin.EnableConsecration()
     end
 end
 
-function Paladin.DisableConsecration()
-    DestroyTimer(GetExpiredTimer())
-    DestroyEffect(Paladin.consecration_effect)
-    Paladin.consecration_effect = nil
-end
-
 function Paladin.Consecration()
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
-    local timer = CreateTimer()
+    local timer = Timer(8.)
+    local function remove_effect()
+        DestroyEffect(Paladin.consecration_effect)
+        Paladin.consecration_effect = nil
+        timer:Destroy()
+    end
     Paladin.consecration_effect = AddSpecialEffectLoc(model, loc)
-    TimerStart(timer, 8., false, Paladin.DisableConsecration)
+    timer:SetFunc(remove_effect)
+    timer:Start()
     Paladin.EnableConsecration()
 end
 

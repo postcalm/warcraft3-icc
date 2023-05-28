@@ -1,32 +1,30 @@
 -- Copyright (c) meiso
 
-function Paladin.RemoveBlessingOfMight(unit, timer)
+function Paladin.RemoveBlessingOfMight(unit)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
+        unit:SetBaseDamage(unit:GetBaseDamage() - 550 // DPS)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfMight()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
         BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
     end
 
-    -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
-    SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+    unit:SetBaseDamage(unit:GetBaseDamage() + 550 // DPS)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveBlessingOfMight(unit, timer)
+        Paladin.RemoveBlessingOfMight(unit)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfMight()

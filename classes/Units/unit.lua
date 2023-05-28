@@ -40,6 +40,14 @@ function Unit:SetBaseDamage(value, index)
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
+--- Получить базовый урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return integer
+function Unit:GetBaseDamage(index)
+    index = index or 0
+    return BlzGetUnitBaseDamage(self.unit, index)
+end
+
 --- Нанести физический урон.
 --- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель

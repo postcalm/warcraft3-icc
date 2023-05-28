@@ -130,7 +130,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -178,7 +178,7 @@ decrease_dmg
 }
 
 STRING 117
-// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
 {
 X
 }
@@ -283,12 +283,6 @@ STRING 135
 // Способности: A00M (Blessing of Might), Ubertip (Подсказка: используется, подробная)
 {
 Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.
-}
-
-STRING 136
-// Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
-{
-V
 }
 
 STRING 137
@@ -430,13 +424,13 @@ Renew
 }
 
 STRING 183
-// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
 {
 E
 }
 
 STRING 185
-// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
+// Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
 {
 W
 }
@@ -599,20 +593,14 @@ STRING 220
 Z
 }
 
-STRING 221
-// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
-{
-Z
-}
-
 STRING 222
-// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
 {
 Q
 }
 
 STRING 223
-// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
 {
 W
 }
@@ -642,7 +630,7 @@ Concecration
 }
 
 STRING 228
-// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+// Способности: A00L (Spellbook_Paladin), Unhotkey (Горячая клавиша: не используется)
 {
 X
 }
@@ -672,7 +660,7 @@ Guardian Spirit
 }
 
 STRING 234
-// Способности: A00X (Guardian Spirit), Hotkey (Горячая клавиша: используется)
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -707,15 +695,45 @@ STRING 241
 hp_165_pof
 }
 
-STRING 243
-// Способности: A011 (Power Word: Fortitude), Hotkey (Горячая клавиша: используется)
-{
-Z
-}
-
 STRING 244
 // Способности: A011 (Power Word: Fortitude), Name (Название)
 {
 Power Word: Fortitude
+}
+
+STRING 245
+// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 246
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 247
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+
+STRING 248
+// Способности: A00X (Guardian Spirit), Hotkey (Горячая клавиша: используется)
+{
+R
+}
+
+STRING 249
+// Способности: A00Y (Spellbook_Priest), Unhotkey (Горячая клавиша: не используется)
+{
+X
+}
+
+STRING 250
+// Способности: A011 (Power Word: Fortitude), Hotkey (Горячая клавиша: используется)
+{
+Q
 }
 

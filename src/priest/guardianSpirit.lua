@@ -6,14 +6,14 @@ function Priest.CastGuardianSpirit()
 
     BuffSystem.RegisterHero(unit)
 
-    local timer = CreateTimer()
+    local timer = Timer(10.)
     local gs_effect = Effect(Priest.hero, model, "origin")
     local event = EventsUnit(unit)
     event:RegisterDamaged()
 
     local remove_buff = function()
         BuffSystem.RemoveBuffFromHero(unit, guardian_spirit)
-        DestroyTimer(timer)
+        timer:Destroy()
         gs_effect:Destroy()
         event:Destroy()
     end
@@ -28,10 +28,9 @@ function Priest.CastGuardianSpirit()
         local current_hp = unit:GetCurrentLife()
         return current_hp < damage
     end
-
     BuffSystem.AddBuffToHero(unit, guardian_spirit)
-    TimerStart(timer, 10., false, remove_buff)
-
+    timer:SetFunc(remove_buff)
+    timer:Start()
     event:AddCondition(GetLife)
     event:AddAction(SaveHero)
 end

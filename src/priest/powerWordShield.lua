@@ -9,6 +9,8 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
+    local buff_timer = Timer(30.)
+    local debuff_timer = Timer(15.)
     local absorb = 2230
     local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
 
@@ -23,21 +25,19 @@ function Priest.CastPowerWordShield()
         BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_shield)
     end
 
-    local timer = CreateTimer()
-    local debuff_timer = CreateTimer()
     local pws_effect = Effect(unit, model, "origin")
     event:RegisterDamaged()
 
     local remove_buff = function()
         Priest.RemovePowerWordShield(unit)
-        DestroyTimer(timer)
+        buff_timer:Destroy()
         event:Destroy()
         pws_effect:Destroy()
     end
 
     local remove_debuff = function()
         BuffSystem.RemoveBuffFromHero(unit, weakened_soul)
-        DestroyTimer(debuff_timer)
+        debuff_timer:Destroy()
     end
 
     local function Shield()
@@ -59,9 +59,10 @@ function Priest.CastPowerWordShield()
     BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
     --фиксируем дебаф на юните
     BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
-    TimerStart(timer, 30., false, remove_buff)
-    --сбрасываем сам дебаф через 15 сек
-    TimerStart(debuff_timer, 15., false, remove_debuff)
+    buff_timer:SetFunc(remove_buff)
+    debuff_timer:SetFunc(remove_debuff)
+    buff_timer:Start()
+    debuff_timer:Start()
 
     event:AddCondition(UsingShield)
     event:AddAction(Shield)

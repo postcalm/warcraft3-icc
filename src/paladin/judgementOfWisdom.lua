@@ -1,11 +1,10 @@
 -- Copyright (c) meiso
 
-function Paladin.RemoveJudgementOfWisdom(target, timer)
+function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
         BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_WISDOM)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfWisdom()
@@ -16,11 +15,12 @@ function Paladin.JudgementOfWisdom()
 end
 
 function Paladin.IsJudgementOfWisdomDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_WISDOM_BUFF)
 end
 
 function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
+    local timer = Timer(20.)
     BuffSystem.RegisterHero(target)
     if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
         BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_WISDOM)
@@ -30,13 +30,13 @@ function Paladin.CastJudgementOfWisdom()
     jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
     jow_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
     local remove_buff = function()
-        Paladin.RemoveJudgementOfWisdom(target, timer)
+        Paladin.RemoveJudgementOfWisdom(target)
+        timer:Destroy()
     end
-
     BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jow_unit:ApplyTimedLife(2.)
 end
 
