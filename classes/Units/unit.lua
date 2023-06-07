@@ -29,7 +29,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Всё что связано с уроном
+-- Характеристики
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -47,6 +47,93 @@ function Unit:GetBaseDamage(index)
     index = index or 0
     return BlzGetUnitBaseDamage(self.unit, index)
 end
+
+--- Установить количество брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Добавить силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddStr(value, permanent)
+    permanent = permanent or false
+    self:SetStr(self:GetStr() + value, permanent)
+end
+
+--- Добавить ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddAgi(value, permanent)
+    permanent = permanent or false
+    self:SetAgi(self:GetAgi() + value, permanent)
+end
+
+--- Добавить интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddInt(value, permanent)
+    permanent = permanent or false
+    self:SetInt(self:GetInt() + value, permanent)
+end
+
+--- Задать значение силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetStr(value, permanent)
+    permanent = permanent or false
+    SetHeroStr(self.unit, value, permanent)
+end
+
+--- Задать значение ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetAgi(value, permanent)
+    permanent = permanent or false
+    SetHeroAgi(self.unit, value, permanent)
+end
+
+--- Задать значение интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetInt(value, permanent)
+    permanent = permanent or false
+    SetHeroInt(self.unit, value, permanent)
+end
+
+--- Получить текущее значение силы
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetStr(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroStr(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение ловкости
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetAgi(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroAgi(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение интеллекта
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetInt(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroInt(self.unit, include_bonuses)
+end
+
+-- Всё, что связано с нанесением урона
 
 --- Нанести физический урон.
 --- Урон снижается как от количества защиты, так и от её типа
@@ -555,13 +642,6 @@ end
 ---@return nil
 function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
-end
-
---- Установить количество брони
----@param armor real Количество брони в абсолютных величинах
----@return nil
-function Unit:SetArmor(armor)
-    BlzSetUnitArmor(self.unit, armor)
 end
 
 --- Установить время жизни юнита

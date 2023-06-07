@@ -128,6 +128,7 @@ ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 CHANNEL_EFFECT = "Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl"
 
 -- Copyright (c) meiso
+
 Paladin = {
     hero = nil,
     consecration_effect = nil,
@@ -1380,31 +1381,6 @@ function Unit:SetBaseDamage(value, index)
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
---- Установить количество брони
----@param armor real Количество брони в абсолютных величинах
----@return nil
-function Unit:SetArmor(armor)
-    BlzSetUnitArmor(self.unit, armor)
-end
-
-function Unit:SetStr(value)
-
-end
-
-function Unit:GetStr(value)
-
-end
-
-function Unit:SetAgi(value)
-
-end
-
-function Unit:SetInt(value)
-
-end
-
--- Всё что связано с уроном
-
 --- Получить базовый урон
 ---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
 ---@return integer
@@ -1412,6 +1388,93 @@ function Unit:GetBaseDamage(index)
     index = index or 0
     return BlzGetUnitBaseDamage(self.unit, index)
 end
+
+--- Установить количество брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Добавить силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddStr(value, permanent)
+    permanent = permanent or false
+    self:SetStr(self:GetStr() + value, permanent)
+end
+
+--- Добавить ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddAgi(value, permanent)
+    permanent = permanent or false
+    self:SetAgi(self:GetAgi() + value, permanent)
+end
+
+--- Добавить интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddInt(value, permanent)
+    permanent = permanent or false
+    self:SetInt(self:GetInt() + value, permanent)
+end
+
+--- Задать значение силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetStr(value, permanent)
+    permanent = permanent or false
+    SetHeroStr(self.unit, value, permanent)
+end
+
+--- Задать значение ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetAgi(value, permanent)
+    permanent = permanent or false
+    SetHeroAgi(self.unit, value, permanent)
+end
+
+--- Задать значение интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetInt(value, permanent)
+    permanent = permanent or false
+    SetHeroInt(self.unit, value, permanent)
+end
+
+--- Получить текущее значение силы
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetStr(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroStr(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение ловкости
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetAgi(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroAgi(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение интеллекта
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetInt(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroInt(self.unit, include_bonuses)
+end
+
+-- Всё, что связано с нанесением урона
 
 --- Нанести физический урон.
 --- Урон снижается как от количества защиты, так и от её типа
@@ -4718,15 +4781,15 @@ end
 
 function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
-        SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
-        SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
+        unit:AddStr(-stat[1])
+        unit:AddAgi(-stat[2])
+        unit:AddInt(-stat[3])
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
 end
 
 function Paladin.BlessingOfKings()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
@@ -4736,14 +4799,14 @@ function Paladin.BlessingOfKings()
 
     --массив с доп. статами
     local stat = {
-        R2I(GetHeroStr(unit, false) * 0.1),
-        R2I(GetHeroAgi(unit, false) * 0.1),
-        R2I(GetHeroInt(unit, false) * 0.1)
+        R2I(unit:GetStr() * 0.1),
+        R2I(unit:GetAgi() * 0.1),
+        R2I(unit:GetInt() * 0.1),
     }
     --бафаем цель
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
-    SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
-    SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+    unit:AddStr(stat[1])
+    unit:AddAgi(stat[2])
+    unit:AddInt(stat[3])
 
     local remove_buff = function()
         Paladin.RemoveBlessingOfKings(unit, stat)

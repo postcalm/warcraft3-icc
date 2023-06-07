@@ -2,15 +2,15 @@
 
 function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
-        SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
-        SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
+        unit:AddStr(-stat[1])
+        unit:AddAgi(-stat[2])
+        unit:AddInt(-stat[3])
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
 end
 
 function Paladin.BlessingOfKings()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
@@ -20,14 +20,14 @@ function Paladin.BlessingOfKings()
 
     --массив с доп. статами
     local stat = {
-        R2I(GetHeroStr(unit, false) * 0.1),
-        R2I(GetHeroAgi(unit, false) * 0.1),
-        R2I(GetHeroInt(unit, false) * 0.1)
+        R2I(unit:GetStr() * 0.1),
+        R2I(unit:GetAgi() * 0.1),
+        R2I(unit:GetInt() * 0.1),
     }
     --бафаем цель
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
-    SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
-    SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+    unit:AddStr(stat[1])
+    unit:AddAgi(stat[2])
+    unit:AddInt(stat[3])
 
     local remove_buff = function()
         Paladin.RemoveBlessingOfKings(unit, stat)
