@@ -1,9 +1,9 @@
 -- Copyright (c) meiso
 
 function Paladin.RemoveJudgementOfLight(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_light_tr)
     end
 end
 
@@ -20,12 +20,15 @@ end
 
 function Paladin.CastJudgementOfLight()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest.mdl"
+    local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_light_tr)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -36,10 +39,12 @@ function Paladin.CastJudgementOfLight()
         Paladin.RemoveJudgementOfLight(target)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
+
+    BuffSystem.AddBuffToHero(target, judgement_of_light_tr, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
     jol_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfLight()

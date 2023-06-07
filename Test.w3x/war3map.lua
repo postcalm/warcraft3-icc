@@ -13,6 +13,7 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Copyright (c) meiso
 
+-- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)
     red = string.format("%x", red)
     green = string.format("%x", green)
@@ -20,8 +21,9 @@ function _dec2hex(red, green, blue)
     return "00" .. red .. green .. blue
 end
 
--- Формат: transparency-red-green-blue
+
 Color = {
+    --- Конвертирует цвет из десятичной в шестнадцатеричную систему
     dec2hex = _dec2hex,
     ORANGE = _dec2hex(235, 185, 60),
     RED = _dec2hex(255, 0, 0),
@@ -32,7 +34,6 @@ Color = {
 function set_color(text, color)
     return "|c" .. color .. text .. "|r"
 end
-
 
 -- Copyright (c) meiso
 
@@ -171,7 +172,8 @@ PRAYER_OF_MENDING       = FourCC("A009")
 POWER_WORD_SHIELD       = FourCC("A00V")
 GUARDIAN_SPIRIT         = FourCC("A00X")
 SPELLBOOK_PRIEST        = FourCC("A00Y")
-POWER_WORD_FORTITUDE     = FourCC("A011")
+POWER_WORD_FORTITUDE    = FourCC("A011")
+INNER_FIRE              = FourCC("A00Z")
 
 -- Copyright (c)  meiso
 
@@ -267,10 +269,10 @@ PRIEST              = FourCC("Hblm")
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
----@param icon string Иконка
+---@param icon string Иконка. По умолчанию дефолтная, выбранная в редакторе
 ---@param key string Кнопка использования
----@param buff_tooltip string Название бафа
----@param buff_desc string Описание бафа
+---@param buff_tooltip string Название бафа. По умолчанию название способности
+---@param buff_desc string Описание бафа. По умолчанию описание способности
 Ability = {}
 Ability.__index = Ability
 
@@ -284,11 +286,10 @@ setmetatable(Ability, {
 
 --- Конструктор класса
 function Ability:_init(args)
-    print(args)
     self.ability = args.ability
     self.tooltip = args.tooltip
     self.text = args.text
-    self.icon = args.icon
+    self.icon = args.icon or ""
     self.key = args.key
     self.buff_tooltip = args.buff_tooltip or args.tooltip
     self.buff_desc = args.buff_desc or args.text
@@ -306,27 +307,31 @@ end
 ---@param tooltip string
 ---@return nil
 function Ability:SetTooltip(tooltip)
-    local t = tooltip or self.tooltip
-    t = t .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
-    BlzSetAbilityTooltip(self.ability, t, 0)
+    tooltip = tooltip or self.tooltip
+    tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 
 --- Установить описание для способности
 ---@param text string
 ---@return nil
 function Ability:SetText(text)
-    local t = text or self.text
-    BlzSetAbilityExtendedTooltip(self.ability, t, 0)
+    text = text or self.text
+    BlzSetAbilityExtendedTooltip(self.ability, text, 0)
 end
 
 --- Установить иконку способности
 ---@param icon string Путь до текстуры
 ---@return nil
 function Ability:SetIcon(icon)
-    local i = icon or self.icon
-    BlzSetAbilityIcon(self.ability, i)
+    icon = icon or self.icon
+    if icon ~= "" then
+        BlzSetAbilityIcon(self.ability, icon)
+    end
 end
 
+--- Проверить, что спелл скастован
+---@return boolean
 function Ability:SpellCasted()
     return GetSpellAbilityId() == self.ability
 end
@@ -1328,7 +1333,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Всё что связано с уроном
+-- Характеристики
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -1338,6 +1343,31 @@ function Unit:SetBaseDamage(value, index)
     local i = index or 0
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
+
+--- Установить количество брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+function Unit:SetStr(value)
+
+end
+
+function Unit:GetStr(value)
+
+end
+
+function Unit:SetAgi(value)
+
+end
+
+function Unit:SetInt(value)
+
+end
+
+-- Всё что связано с уроном
 
 --- Получить базовый урон
 ---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
@@ -1854,13 +1884,6 @@ end
 ---@return nil
 function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
-end
-
---- Установить количество брони
----@param armor real Количество брони в абсолютных величинах
----@return nil
-function Unit:SetArmor(armor)
-    BlzSetUnitArmor(self.unit, armor)
 end
 
 --- Установить время жизни юнита
@@ -3777,6 +3800,8 @@ end
 
 -- Copyright (c) meiso
 
+------------------------------Paladin------------------------------
+
 avengers_shield = Ability {
     ability = AVENGERS_SHIELD,
     tooltip = "Щит мстителя",
@@ -3840,7 +3865,8 @@ judgement_of_light_tr = Ability {
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga",
+    buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
 
 judgement_of_wisdom_tr = Ability {
@@ -3849,7 +3875,8 @@ judgement_of_wisdom_tr = Ability {
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga",
+    buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
 
 shield_of_righteousness = Ability {
@@ -3861,7 +3888,7 @@ shield_of_righteousness = Ability {
     icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 }
 
--------------------------------------------
+------------------------------Priest------------------------------
 
 flash_heal = Ability {
     ability = FLASH_HEAL,
@@ -3940,6 +3967,19 @@ power_word_fortitude = Ability {
     icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
     buff_desc = "Выносливость повышена на 165."
 }
+
+inner_fire = Ability {
+    ability = INNER_FIRE,
+    tooltip = "Внутренний огонь",
+    key = "W",
+    text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
+            "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
+            "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
+    icon = "",
+    buff_desc = "Броня усилена на 2440, а сила заклинаний увеличена на 120."
+}
+
+------------------------------XXXXXXX------------------------------
 
 
 function DummyForDPS(location)
@@ -4927,9 +4967,9 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveJudgementOfLight(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_light_tr)
     end
 end
 
@@ -4946,12 +4986,15 @@ end
 
 function Paladin.CastJudgementOfLight()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest.mdl"
+    local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_light_tr)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -4962,10 +5005,12 @@ function Paladin.CastJudgementOfLight()
         Paladin.RemoveJudgementOfLight(target)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
+
+    BuffSystem.AddBuffToHero(target, judgement_of_light_tr, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
     jol_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfLight()
@@ -4994,9 +5039,9 @@ end
 -- Copyright (c) meiso
 
 function Paladin.RemoveJudgementOfWisdom(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-        BuffSystem.RemoveBuffFromHero(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
     end
 end
 
@@ -5013,10 +5058,13 @@ end
 
 function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest_blue.mdl"
+    local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
-        BuffSystem.RemoveBuffFromHeroByFunc(target, JUDGEMENT_OF_WISDOM)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_wisdom_tr)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -5027,10 +5075,12 @@ function Paladin.CastJudgementOfWisdom()
         Paladin.RemoveJudgementOfWisdom(target)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
+
+    BuffSystem.AddBuffToHero(target, judgement_of_wisdom_tr, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
     jow_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfWisdom()
@@ -5241,6 +5291,41 @@ function Priest.Init(location)
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
     Priest.InitPowerWordFortitude()
+    Priest.InitInnerFire()
+end
+
+-- Copyright (c) meiso
+
+function Priest.RemoveInnerFire(unit)
+
+end
+
+function Priest.InnerFire()
+    local stack = 20
+    local timer = Timer(60. * 30)  --баф висит полчаса
+    local spd = 120 * SPD
+
+    timer:SetFunc()
+    timer:Start()
+
+    while stack > 0 do
+
+    end
+end
+
+function Priest.IsInnerFire()
+    return inner_fire.SpellCasted()
+end
+
+function Priest.InitInnerFire()
+    inner_fire:Init()
+    Priest.hero:SetAbilityManacost(inner_fire:GetId(), 14)
+    Priest.hero:SetAbilityCooldown(inner_fire:GetId(), 1.5)
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsInnerFire)
+    event:AddAction(Priest.InnerFire)
 end
 
 -- Copyright (c) meiso

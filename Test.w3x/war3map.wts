@@ -737,3 +737,9 @@ STRING 250
 Q
 }
 
+STRING 251
+// Способности: A00Z (Inner Fire), Name (Название)
+{
+Inner Fire
+}
+

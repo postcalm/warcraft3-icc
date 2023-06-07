@@ -1,5 +1,7 @@
 -- Copyright (c) meiso
 
+------------------------------Paladin------------------------------
+
 avengers_shield = Ability {
     ability = AVENGERS_SHIELD,
     tooltip = "Щит мстителя",
@@ -63,7 +65,8 @@ judgement_of_light_tr = Ability {
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga"
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga",
+    buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
 
 judgement_of_wisdom_tr = Ability {
@@ -72,7 +75,8 @@ judgement_of_wisdom_tr = Ability {
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga"
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga",
+    buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
 
 shield_of_righteousness = Ability {
@@ -84,7 +88,7 @@ shield_of_righteousness = Ability {
     icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 }
 
--------------------------------------------
+------------------------------Priest------------------------------
 
 flash_heal = Ability {
     ability = FLASH_HEAL,
@@ -163,3 +167,16 @@ power_word_fortitude = Ability {
     icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
     buff_desc = "Выносливость повышена на 165."
 }
+
+inner_fire = Ability {
+    ability = INNER_FIRE,
+    tooltip = "Внутренний огонь",
+    key = "W",
+    text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
+            "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
+            "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
+    icon = "",
+    buff_desc = "Броня усилена на 2440, а сила заклинаний увеличена на 120."
+}
+
+------------------------------XXXXXXX------------------------------
