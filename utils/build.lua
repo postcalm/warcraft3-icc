@@ -100,7 +100,7 @@ customCode:close()
 local skip_files = { "template.fdf", "readme.html" }
 local files_rel = {
     [[\frames]],
-    [[\models\creature]],
+    [[\models\creatures]],
 }
 
 if IsRunGame or IsRunEditor then
@@ -115,7 +115,7 @@ end
 
 local files_test = {
     [[\frames]],
-    [[\models\spell\Paladin]],
+    [[\models\spells\Paladin]],
 }
 for _, model in pairs(files_test) do
     print("Copying " .. model .. " to a test map ...")
