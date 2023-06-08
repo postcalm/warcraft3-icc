@@ -3,6 +3,10 @@
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
+    -- если в пати менее трёх игроков - шип не бросаем
+    if CountUnitsInGroup(gr) < 3 then
+        return
+    end
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
