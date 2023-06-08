@@ -4180,6 +4180,10 @@ end
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
+    -- если в пати менее трёх игроков - шип не бросаем
+    if CountUnitsInGroup(gr) < 3 then
+        return
+    end
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
@@ -4844,14 +4848,14 @@ end
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
+        unit:AddStr(-stat)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
         BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
     end
 end
 
 function Paladin.BlessingOfSanctuary()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     local items_list = { "DEC_DMG_ITEM" }
 
@@ -4862,8 +4866,8 @@ function Paladin.BlessingOfSanctuary()
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
-    local stat = R2I(GetHeroStr(unit, false) * 0.1)
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
+    local stat = R2I(unit:GetStr() * 0.1)
+    unit:AddStr(stat)
 
     local remove_buff = function()
         Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
@@ -5616,7 +5620,9 @@ function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
     local heal = 280
     local unit = Unit(GetSpellTargetUnit())
-
+    local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
+    local effect = Effect(unit, model, "origin")
+    effect:Destroy()
     if not Priest.hero:LoseMana { percent = 17 } then
         return
     end
