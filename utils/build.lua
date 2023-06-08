@@ -98,14 +98,13 @@ customCode:write(param.tag)
 customCode:close()
 
 local skip_files = { "template.fdf", "readme.html" }
-local files = {
+local files_rel = {
     [[\frames]],
-    [[\models\creature\]],
-    [[\models\spell\Paladin]],
+    [[\models\creature]],
 }
 
 if IsRunGame or IsRunEditor then
-    for _, model in pairs(files) do
+    for _, model in pairs(files_rel) do
         print("Copying " .. model .. " to a release map ...")
         CopyFiles(param.current_dir .. model,
                 param.current_dir .. param.map,
@@ -114,7 +113,11 @@ if IsRunGame or IsRunEditor then
     print("Success")
 end
 
-for _, model in pairs(files) do
+local files_test = {
+    [[\frames]],
+    [[\models\spell\Paladin]],
+}
+for _, model in pairs(files_test) do
     print("Copying " .. model .. " to a test map ...")
     CopyFiles(param.current_dir .. model,
             param.current_dir .. param.test_map,
