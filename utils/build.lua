@@ -1,13 +1,15 @@
 require 'lfs' -- подключаем LuaFileSystem https://keplerproject.github.io/luafilesystem/manual.html
-require 'utils/tools'
+require "utils.lib.DirTree"
+require "utils.lib.FileContent"
+require 'utils.tools'
 
 local param = {
-    game_dirs  = { [[E:\Warcraft III\x86_64]], [[E:\Games\Warcraft III\x86_64]] }, -- папка с игрой
-    map        = [[\ICC.w3x]], -- папка с картой
-    test_map   = [[\Test.w3x]], -- карта для тестов
+    game_dirs = { [[E:\Warcraft III\x86_64]], [[E:\Games\Warcraft III\x86_64]] }, -- папка с игрой
+    map = [[\ICC.w3x]], -- папка с картой
+    test_map = [[\Test.w3x]], -- карта для тестов
     customCode = [[\custom-code.lua]], -- файл, в который собирается весь код
-    patcher    = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
-    files      = { -- порядок сборки файлов
+    patcher = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
+    files = { -- порядок сборки файлов
         -- различные алиасы и тулсеты
         [[\common]],
         -- кастомные классы для работы с юнитами, эффектами и т.д.
@@ -47,18 +49,18 @@ local param = {
         -- тесты
         [[\tests]],
     },
-    tag        = [[--CUSTOM_CODE]], -- тэг для вставки кода
-    current_dir    = lfs.currentdir() -- текущая папка проекта
+    tag = [[--CUSTOM_CODE]], -- тэг для вставки кода
+    current_dir = lfs.currentdir() -- текущая папка проекта
 }
 
 function ReplaceInMap(map)
     -- заменяем код в war3map.lua
-    local path    = param.current_dir .. map .. '\\war3map.lua'
+    local path = param.current_dir .. map .. '\\war3map.lua'
     local war3map = io.open(path, 'r')
-    local customCode    = io.open(param.current_dir .. param.customCode, 'r')
+    local customCode = io.open(param.current_dir .. param.customCode, 'r')
     local content = war3map:read('*a')
     war3map:close()
-    war3map           = io.open(path, 'w+')
+    war3map = io.open(path, 'w+')
     local repl, count = string.gsub(content, param.tag .. '.*' .. param.tag, customCode:read('*a'))
     war3map:write(repl)
     war3map:close()
@@ -72,8 +74,9 @@ function ReplaceInMap(map)
 end
 
 -- подключаем нужные функции
-dofile(param.current_dir .. [[\utils\lib\DirTree.lua]])
-dofile(param.current_dir .. [[\utils\lib\FileContent.lua]])
+
+--dofile(param.current_dir .. [[\utils\lib\DirTree.lua]])
+--dofile(param.current_dir .. [[\utils\lib\FileContent.lua]])
 
 -- собираем всё в один файл
 local customCode = io.open(param.current_dir .. param.customCode, 'w+')
@@ -85,7 +88,7 @@ for i = 1, #param.files do
         WriteToFile(customCode, path)
     else
         for filepath, attr in DirTree(path) do
-            if (attr.mode == 'file') then
+            if attr.mode == 'file' then
                 WriteToFile(customCode, filepath)
             end
         end
@@ -94,13 +97,30 @@ end
 customCode:write(param.tag)
 customCode:close()
 
-local skip_files = {"template.fdf"}
-CopyFiles(param.current_dir .. [[\frames]],
-          param.current_dir .. param.map,
-          skip_files)
-CopyFiles(param.current_dir .. [[\frames]],
-          param.current_dir .. param.test_map,
-          skip_files)
+local skip_files = { "template.fdf", "readme.html" }
+local files = {
+    [[\frames]],
+    [[\models\creature\]],
+    [[\models\spell\Paladin]],
+}
+
+if IsRunGame or IsRunEditor then
+    for _, model in pairs(files) do
+        print("Copying " .. model .. " to a release map ...")
+        CopyFiles(param.current_dir .. model,
+                param.current_dir .. param.map,
+                skip_files)
+    end
+    print("Success")
+end
+
+for _, model in pairs(files) do
+    print("Copying " .. model .. " to a test map ...")
+    CopyFiles(param.current_dir .. model,
+            param.current_dir .. param.test_map,
+            skip_files)
+end
+print("Success")
 
 ReplaceInMap(param.map)
 ReplaceInMap(param.test_map)
