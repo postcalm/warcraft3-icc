@@ -32,4 +32,5 @@ function Priest.Init(location)
     Priest.InitPowerWordShield()
     Priest.InitGuardianSpirit()
     Priest.InitPowerWordFortitude()
+    Priest.InitInnerFire()
 end

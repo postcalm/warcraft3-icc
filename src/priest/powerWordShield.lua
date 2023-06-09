@@ -12,7 +12,7 @@ function Priest.CastPowerWordShield()
     local buff_timer = Timer(30.)
     local debuff_timer = Timer(15.)
     local absorb = 2230
-    local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
+    local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
 

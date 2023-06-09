@@ -48,11 +48,24 @@ function Unit:GetBaseDamage(index)
     return BlzGetUnitBaseDamage(self.unit, index)
 end
 
---- Установить количество брони
+--- Добавить брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:AddArmor(armor)
+    BlzSetUnitArmor(self.unit, self:GetArmor() + armor)
+end
+
+--- Установить значение брони
 ---@param armor real Количество брони в абсолютных величинах
 ---@return nil
 function Unit:SetArmor(armor)
     BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Получить текущее значение брони
+---@return integer
+function Unit:GetArmor()
+    return BlzGetUnitArmor(self.unit)
 end
 
 --- Добавить силы

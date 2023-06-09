@@ -98,11 +98,11 @@ customCode:write(param.tag)
 customCode:close()
 
 local skip_files = { "template.fdf", "readme.html" }
+
 local files_rel = {
     [[\frames]],
     [[\models\creatures]],
 }
-
 if IsRunGame or IsRunEditor then
     for _, model in pairs(files_rel) do
         print("Copying " .. model .. " to a release map ...")

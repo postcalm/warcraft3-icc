@@ -743,3 +743,9 @@ STRING 251
 Inner Fire
 }
 
+STRING 252
+// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+

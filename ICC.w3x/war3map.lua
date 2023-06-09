@@ -1389,11 +1389,24 @@ function Unit:GetBaseDamage(index)
     return BlzGetUnitBaseDamage(self.unit, index)
 end
 
---- Установить количество брони
+--- Добавить брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:AddArmor(armor)
+    BlzSetUnitArmor(self.unit, self:GetArmor() + armor)
+end
+
+--- Установить значение брони
 ---@param armor real Количество брони в абсолютных величинах
 ---@return nil
 function Unit:SetArmor(armor)
     BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Получить текущее значение брони
+---@return integer
+function Unit:GetArmor()
+    return BlzGetUnitArmor(self.unit)
 end
 
 --- Добавить силы
@@ -4074,7 +4087,7 @@ inner_fire = Ability {
     text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
             "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
             "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
-    icon = "",
+    icon = "ReplaceableTextures/CommandButtons/BTNInnerFire.blp",
     buff_desc = "Броня усилена на 2440, а сила заклинаний увеличена на 120."
 }
 
@@ -5399,25 +5412,50 @@ end
 
 -- Copyright (c) meiso
 
-function Priest.RemoveInnerFire(unit)
-
-end
-
 function Priest.InnerFire()
+    local event = EventsUnit(Priest.hero)
     local stack = 20
     local timer = Timer(60. * 30)  --баф висит полчаса
     local spd = 120 * SPD
+    local armor = 2440
 
-    timer:SetFunc()
+    BuffSystem.RegisterHero(Priest.hero)
+
+    if BuffSystem.IsBuffOnHero(Priest.hero, inner_fire) then
+        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, inner_fire)
+    end
+
+    event:RegisterDamaged()
+
+    Priest.hero:AddInt(spd)
+    Priest.hero:AddArmor(armor)
+    local remove_buff =  function()
+        Priest.hero:AddInt(-spd)
+        Priest.hero:AddArmor(-armor)
+        event:Destroy()
+    end
+    BuffSystem.AddBuffToHero(Priest.hero, inner_fire, remove_buff)
+    timer:SetFunc(remove_buff)
     timer:Start()
 
-    while stack > 0 do
-
+    local function InnerFire()
+        TriggerSleepAction(0.)
+        local damage = GetEventDamage()
+        print(damage)
+        if damage > 0. then
+            stack = stack - 1
+        end
+        print(stack)
     end
+
+    event:AddAction(InnerFire)
+    event:AddAction(function()
+        if stack == 0 then remove_buff() end
+    end)
 end
 
 function Priest.IsInnerFire()
-    return inner_fire.SpellCasted()
+    return inner_fire:SpellCasted()
 end
 
 function Priest.InitInnerFire()
@@ -5491,7 +5529,7 @@ function Priest.CastPowerWordShield()
     local buff_timer = Timer(30.)
     local debuff_timer = Timer(15.)
     local absorb = 2230
-    local model = "Abilities\\Spells\\Human\\ManaShield\\ManaShieldCaster.mdx"
+    local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
 
