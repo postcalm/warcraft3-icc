@@ -115,6 +115,8 @@ end
 
 local files_test = {
     [[\frames]],
+    [[\models\creatures\Paladin]],
+    [[\models\creatures\Priest]],
     [[\models\spells\Paladin]],
 }
 for _, model in pairs(files_test) do
@@ -145,3 +147,5 @@ end
 if EditTestMap then
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.test_map .. '"')
 end
+
+print("Successful")

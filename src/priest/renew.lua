@@ -6,7 +6,6 @@ function Priest.CastRenew()
     local unit = Unit(GetSpellTargetUnit())
     local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
     local effect = Effect(unit, model, "origin")
-    effect:Destroy()
     if not Priest.hero:LoseMana { percent = 17 } then
         return
     end
@@ -15,6 +14,7 @@ function Priest.CastRenew()
         unit:GainLife { life = heal, show = true }
         TriggerSleepAction(3.)
     end
+    effect:Destroy()
 end
 
 function Priest.IsRenew()
