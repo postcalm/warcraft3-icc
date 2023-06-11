@@ -10,7 +10,7 @@ function Priest.SORShowOffUnit(u_sor)
     u_sor:SetName(Priest.hero:GetName())
     u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        Priest.hero:SetAbilityManacost(spell, 0.)
+        Priest.hero:SetAbilityManacost(spell, 0)
     end
 end
 

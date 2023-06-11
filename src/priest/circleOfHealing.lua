@@ -1,9 +1,6 @@
 ---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
-    if not Priest.hero:LoseMana { percent = 21 } then
-        return
-    end
     local heal = GetRandomInt(958, 1058)
 
     local function act()

@@ -6,9 +6,7 @@ function Priest.CastRenew()
     local unit = Unit(GetSpellTargetUnit())
     local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
     local effect = Effect(unit, model, "origin")
-    if not Priest.hero:LoseMana { percent = 17 } then
-        return
-    end
+
     for _ = 1, 5 do
         heal = BuffSystem.ImproveSpell(unit, heal)
         unit:GainLife { life = heal, show = true }

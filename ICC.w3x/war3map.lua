@@ -5347,9 +5347,6 @@ end
 ---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
-    if not Priest.hero:LoseMana { percent = 21 } then
-        return
-    end
     local heal = GetRandomInt(958, 1058)
 
     local function act()
@@ -5391,9 +5388,6 @@ function Priest.CastFlashHeal()
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
     heal = BuffSystem.ImproveSpell(target, heal)
-
-    -- проверяем есть ли мана
-    if not Priest.hero:LoseMana{ percent = 18 } then return end
 
     -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
@@ -5786,9 +5780,7 @@ function Priest.CastRenew()
     local unit = Unit(GetSpellTargetUnit())
     local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
     local effect = Effect(unit, model, "origin")
-    if not Priest.hero:LoseMana { percent = 17 } then
-        return
-    end
+
     for _ = 1, 5 do
         heal = BuffSystem.ImproveSpell(unit, heal)
         unit:GainLife { life = heal, show = true }
@@ -5824,7 +5816,7 @@ function Priest.SORShowOffUnit(u_sor)
     u_sor:SetName(Priest.hero:GetName())
     u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        u_sor:SetAbilityManacost(spell, 0.)
+        Priest.hero:SetAbilityManacost(spell, 0)
     end
 end
 
