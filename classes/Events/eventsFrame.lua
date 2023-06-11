@@ -1,6 +1,7 @@
 ---@author meiso
 
 --- Класс регистрации событий фрейма
+---@class EventsFrame
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame

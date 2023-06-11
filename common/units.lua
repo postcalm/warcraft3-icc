@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --Bosses
 LORD_MARROWGAR      = FourCC("U001")
@@ -23,3 +23,4 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
+PRIEST_SOR          = FourCC("h006")

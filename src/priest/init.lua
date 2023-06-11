@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
@@ -7,22 +7,14 @@ function Priest.Init(location)
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     --EquipSystem.AddItemsToUnit(Priest.hero, items)
-
+    Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
     Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-    Priest.hero:AddAbilities(
-            FLASH_HEAL,
-            RENEW,
-            CIRCLE_OF_HEALING,
-            PRAYER_OF_MENDING,
-            POWER_WORD_SHIELD,
-            GUARDIAN_SPIRIT,
-            SPELLBOOK_PRIEST
-    )
+    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
@@ -33,4 +25,5 @@ function Priest.Init(location)
     Priest.InitGuardianSpirit()
     Priest.InitPowerWordFortitude()
     Priest.InitInnerFire()
+    Priest.InitSpiritOfRedemption()
 end

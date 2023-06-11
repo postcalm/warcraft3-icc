@@ -1,6 +1,7 @@
 ---@author meiso
 
 --- Класс создания фреймов
+---@class Frame
 ---@param name string Название фрейма из fdf-шаблона
 ---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
 ---@param simple boolean Создать простой фрейм. По умолчанию false

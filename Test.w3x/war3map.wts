@@ -750,13 +750,13 @@ W
 }
 
 STRING 253
-// Войска: H005 (Spirit of Redemption), Name (Название)
+// Войска: h006 (Spirit of Redemption), Name (Название)
 {
 Spirit of Redemption
 }
 
 STRING 254
-// Войска: h006 (Spirit of Redemption), Name (Название)
+// Способности: A012 (Spirit of Redemption), Name (Название)
 {
 Spirit of Redemption
 }
@@ -777,11 +777,5 @@ STRING 257
 // Войска: Hblm (Priest), Propernames (Имена собственные)
 {
 Элринг Полуденный,Тано Ястреб,Гилтанас Ворон,Гэл Стремительный,Эрвин Крылатый,Сильвар Ветрогон,Келен Яростный
-}
-
-STRING 258
-// Способности: A012 (Spirit of Redemption), Name (Название)
-{
-Spirit of Redemption
 }
 

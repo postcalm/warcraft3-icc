@@ -1,5 +1,6 @@
 --- Created by meiso.
 
+---@class Line
 Line = {}
 Line.__index = Line
 

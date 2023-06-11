@@ -2,6 +2,7 @@
 
 --- Класс создания дамми-юнита.
 --- Юнит используется для применения способностей
+---@class UnitSpell
 ---@param owner unit
 ---@param location location
 UnitSpell = {}

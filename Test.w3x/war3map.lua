@@ -5,13 +5,13 @@ function InitGlobals()
 end
 
 --CUSTOM_CODE
--- Copyright (c) meiso
+---@author meiso
 
 --Paladin
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
 JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
--- Copyright (c) meiso
+---@author meiso
 
 -- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)
@@ -35,7 +35,7 @@ function set_color(text, color)
     return "|c" .. color .. text .. "|r"
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 Items = {
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
@@ -48,7 +48,7 @@ Items = {
     POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
 }
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Метр. Равен 20 игровым единицам
 METER = 20
@@ -71,7 +71,7 @@ DPS = 3.5
 -- Сила
 --STRENGTH = 1.
 
--- Copyright (c) meiso
+---@author meiso
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
@@ -81,7 +81,7 @@ DUMMY       = FourCC('h002')
 SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
 
--- Copyright (c) meiso
+---@author meiso
 
 PLAYER_1   = Player(0)
 PLAYER_2   = Player(1)
@@ -91,7 +91,7 @@ COMMON_TIMER = FourCC("BTLF")
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
 CHANNEL_EFFECT = "Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl"
 
--- Copyright (c) meiso
+---@author meiso
 
 Paladin = {
     hero = nil,
@@ -143,7 +143,7 @@ CultFanatic = {
 --- Кэш для системы экипировки
 EQUIP_CACHE = nil
 
--- Copyright (c) meiso
+---@author meiso
 
 --Lord Marrowgar
 COLDFLAME               = FourCC("A001")
@@ -178,7 +178,22 @@ POWER_WORD_FORTITUDE    = FourCC("A011")
 INNER_FIRE              = FourCC("A00Z")
 SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
--- Copyright (c)  meiso
+----------------------------------------------------
+
+ALL_MAIN_PALADIN_SPELLS = {
+
+}
+
+ALL_MAIN_PRIEST_SPELLS = {
+    FLASH_HEAL,
+    RENEW,
+    CIRCLE_OF_HEALING,
+    PRAYER_OF_MENDING,
+    POWER_WORD_SHIELD,
+    GUARDIAN_SPIRIT,
+}
+
+---@author meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -241,7 +256,7 @@ function isTable(object)
     return type(object) == "table"
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --Bosses
 LORD_MARROWGAR      = FourCC("U001")
@@ -266,10 +281,12 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
+PRIEST_SOR          = FourCC("h006")
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс конфигурирования способностей
+---@class Ability
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
@@ -312,7 +329,9 @@ end
 ---@return nil
 function Ability:SetTooltip(tooltip)
     tooltip = tooltip or self.tooltip
-    tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    if self.key ~= nil then
+        tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    end
     BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 
@@ -346,7 +365,7 @@ function Ability:GetId()
     return self.ability
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
@@ -383,9 +402,10 @@ function Effect:Destroy()
     DestroyEffect(self.effect)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Базовый класс событий
+---@class Events
 Events = {}
 Events.__index = Events
 
@@ -435,9 +455,10 @@ function Events:Destroy()
     DestroyTrigger(self.trigger)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий фрейма
+---@class EventsFrame
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
@@ -534,9 +555,10 @@ function EventsFrame:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий игрока
+---@class EventsPlayer
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -652,9 +674,10 @@ function EventsPlayer:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий юнита
+---@class EventsUnit
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -737,9 +760,10 @@ function EventsUnit:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания фреймов
+---@class Frame
 ---@param name string Название фрейма из fdf-шаблона
 ---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
 ---@param simple boolean Создать простой фрейм. По умолчанию false
@@ -1021,6 +1045,7 @@ end
 
 --- Created by meiso.
 
+---@class Line
 Line = {}
 Line.__index = Line
 
@@ -1080,9 +1105,10 @@ function Line:getLength()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания точек
+---@class Point
 ---@param X real Координата X. По умолчанию 0
 ---@param Y real Координата Y. По умолчанию 0
 ---@param Z real Координата Z. По умолчанию 0
@@ -1129,9 +1155,10 @@ function Point:atPoint(point, inaccuracy)
     return false
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс для создания "плавающего" текста
+---@class TextTag
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z
@@ -1252,9 +1279,10 @@ function TextTag:Destroy()
     DestroyTextTag(self.texttag)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания таймера
+---@class Timer
 ---@param timeout real Время действия
 ---@param func function Функция
 Timer = {}
@@ -1306,9 +1334,10 @@ function Timer:DestroyExpired()
     DestroyTimer(GetExpiredTimer())
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания юнита
+---@class Unit
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -1570,7 +1599,10 @@ end
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:AddAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
         UnitAddAbility(self.unit, ability)
     end
@@ -1580,7 +1612,10 @@ end
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:RemoveAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
         UnitRemoveAbility(self.unit, ability)
     end
@@ -1854,10 +1889,6 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
-function Unit:Pause(flag)
-    PauseUnit(self.unit, flag)
-end
-
 -- Передвижение
 
 --- Установить скорость передвижения юнита
@@ -2013,9 +2044,42 @@ function Unit:GetOwner()
 end
 
 --- Установить имя юниту
+---@param name string Имя юнита
 ---@return nil
 function Unit:SetName(name)
-    BlzSetUnitName(self.unit, name)
+    if self:IsHero() then
+        BlzSetHeroProperName(self.unit, name)
+    else
+        BlzSetUnitName(self.unit, name)
+    end
+end
+
+--- Получить имя юнита
+---@return string
+function Unit:GetName()
+    if self:IsHero() then
+        return GetHeroProperName(self.unit)
+    end
+    return GetUnitName(self.unit)
+end
+
+--- Активировать/деактивировать юнита
+---@param flag boolean true or false
+---@return nil
+function Unit:Pause(flag)
+    PauseUnit(self.unit, flag)
+end
+
+--- Отобразить юнита
+---@return nil
+function Unit:Show()
+    ShowUnitShow(self.unit)
+end
+
+--- Скрыть юнита
+---@return nil
+function Unit:Hide()
+    ShowUnitHide(self.unit)
 end
 
 --- Убить юнита
@@ -2030,10 +2094,11 @@ function Unit:Remove()
     RemoveUnit(self.unit)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания дамми-юнита.
 --- Юнит используется для применения способностей
+---@class UnitSpell
 ---@param owner unit
 ---@param location location
 UnitSpell = {}
@@ -2072,8 +2137,8 @@ function UnitSpell:NearTarget(target)
     return target_point:atPoint(unit_point, true)
 end
 
--- Copyright (c) Vlod www.xgm.ru
--- Copyright (c) meiso
+---@author Vlod www.xgm.ru
+---@author meiso
 
 --- Система сохранений
 SaveSystem = {
@@ -2150,7 +2215,7 @@ HEROES = {
     priest  = PRIEST,
 }
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Проверяет создан ли герой для игрока
 ---@return boolean
@@ -2161,7 +2226,7 @@ function SaveSystem.IsHeroNotCreated()
     return false
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Возвращает итератор на следующую область для считывания данных
 ---@param index int Текущее значение итератора
@@ -2213,7 +2278,7 @@ function SaveSystem.generation2()
     return SaveSystem.hash2
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
@@ -2299,7 +2364,7 @@ function SaveSystem.LoadUserData()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Сохранаяет информацию о характеристиках, способностях и предметах
 ---@param i integer Текущий итератор
@@ -2556,7 +2621,7 @@ function SaveSystem.LoadBaseState(pl)
     end
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Создает юнита из полученных данных
 ---@return nil
@@ -2864,7 +2929,7 @@ function SaveSystem.Save()
     end
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Возрождает юнита
 ---@return nil
@@ -2924,7 +2989,7 @@ function SaveSystem.AddHeroAbilities(class)
     hero:SetLevel(80)
 end
 
--- Copyright (c)  meiso
+---@author meiso
 
 --- Добавляет нового юнита игроку
 ---@return nil
@@ -2952,7 +3017,7 @@ function SaveSystem.InitNewHeroEvent()
     event:AddAction(SaveSystem.AddNewHero)
 end
 
--- Copyright (c)  meiso
+---@author meiso
 
 --- Сохраняет юнита игрока
 ---@return nil
@@ -2970,7 +3035,7 @@ function SaveSystem.InitSaveEvent()
     event:AddAction(SaveSystem.SaveHero)
 end
 
--- Copyright (c)  meiso
+---@author meiso
 
 --- Загружает юнита
 ---@return nil
@@ -2989,7 +3054,7 @@ function SaveSystem.InitLoadEvent()
     event:AddAction(SaveSystem.LoadHero)
 end
 
--- Copyright (c)  meiso
+---@author meiso
 
 --Обёртка над системой экипировки
 
@@ -3256,7 +3321,7 @@ function unequip_item_id(hero, id, c)
     end
 end
 
--- Copyright (c)  meiso
+---@author meiso
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
@@ -3565,7 +3630,7 @@ function BuffSystem._ShowDebuffs(u)
     end
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 BattleSystem = {
     target = nil,
@@ -3613,7 +3678,7 @@ function BattleSystem.ShowDamage()
     end
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 -- Обертки над близовскими функциями для работы с областями и их переделка под себя
 
@@ -3664,7 +3729,7 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
     return Location(vector_x, vector_y)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 -- Описания классов
 
@@ -3756,7 +3821,7 @@ shield_of_righteousness_tooltip = "Щит праведности (W)"
 shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
         "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
 
--- Copyright (c) meiso
+---@author meiso
 
 HeroSelector = {
     table = nil,
@@ -3898,7 +3963,7 @@ function HeroSelector.Close()
     HeroSelector.table:Destroy()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 ------------------------------Paladin------------------------------
 
@@ -3916,9 +3981,9 @@ blessing_of_kings = Ability {
     ability = BLESSING_OF_KINGS,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10"
+    buff_desc = "Все характеристики повышены на 10."
 }
 
 blessing_of_might = Ability {
@@ -3943,11 +4008,11 @@ blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
     tooltip = "Благословение неприкосновенности",
     key = "R",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-            "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
+            "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -4031,11 +4096,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50 ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -4082,8 +4147,7 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    key = "",
-    text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+    text = "Повышает дух на 5. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -4223,7 +4287,7 @@ function CultFanatic.Init(location, face)
     CultFanatic.InitDarkMartyrdom()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
@@ -4288,7 +4352,7 @@ function LordMarrowgar.InitBoneSpike()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
@@ -4354,7 +4418,7 @@ function LordMarrowgar.Init()
     --LordMarrowgar.InitWhirlwind()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.Whirlwind()
     local whirlwind_timer = Timer(GetRandomReal(20., 30.))
@@ -4395,7 +4459,7 @@ function LordMarrowgar.InitWhirlwind()
     event:AddAction(LordMarrowgar.Whirlwind)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
@@ -4427,7 +4491,7 @@ function LadyDeathwhisper.InitDeathAndDecay()
     event:AddAction(LadyDeathwhisper.DeathAndDecay)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.DominateMind()
     --TODO: исправить на нормальную реализацию
@@ -4457,7 +4521,7 @@ function LadyDeathwhisper.InitDominateMind()
     event:AddAction(LadyDeathwhisper.DominateMind)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.FrostBolt()
     --TriggerSleepAction(10.)
@@ -4497,7 +4561,7 @@ function LadyDeathwhisper.InitFrostBolt()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.FrostBoltVolley()
     TriggerSleepAction(15.)
@@ -4574,7 +4638,7 @@ function LadyDeathwhisper.Init()
     --LadyDeathwhisper.InitFrostBoltVolley()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)
@@ -4632,7 +4696,7 @@ function LadyDeathwhisper.InitManaShield()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.ShadowBolt()
     TriggerSleepAction(10.)
@@ -4670,7 +4734,7 @@ function LadyDeathwhisper.InitShadowBolt()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned and not CultFanatic.summoned then
@@ -4707,7 +4771,7 @@ function LadyDeathwhisper.InitSummoning()
     event:AddAction(LadyDeathwhisper.Summoning)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.AvengersShield()
     local target = Unit(GetSpellTargetUnit())
@@ -4793,7 +4857,7 @@ function Paladin.InitAvengersShield()
     event:AddAction(Paladin.AvengersShield)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
@@ -4848,7 +4912,7 @@ function Paladin.InitBlessingOfKings()
     event:AddAction(Paladin.BlessingOfKings)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfMight(unit)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
@@ -4892,7 +4956,7 @@ function Paladin.InitBlessingOfMight()
     event:AddAction(Paladin.BlessingOfMight)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
@@ -4941,7 +5005,7 @@ function Paladin.InitBlessingOfSanctuary()
     event:AddAction(Paladin.BlessingOfSanctuary)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfWisdom(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
@@ -4987,7 +5051,7 @@ function Paladin.InitBlessingOfWisdom()
     event:AddAction(Paladin.BlessingOfWisdom)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.EnableConsecration()
     local location
@@ -5040,7 +5104,7 @@ function Paladin.InitConsecration()
     event:AddAction(Paladin.Consecration)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
@@ -5079,7 +5143,7 @@ function Paladin.Init(location)
     Paladin.InitAvengersShield()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveJudgementOfLight(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
@@ -5151,7 +5215,7 @@ function Paladin.InitJudgementOfLight()
     event_jol:AddAction(Paladin.JudgementOfLight)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
@@ -5221,10 +5285,10 @@ function Paladin.InitJudgementOfWisdom()
     event_jow:AddAction(Paladin.JudgementOfWisdom)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -5244,7 +5308,7 @@ function Paladin.InitShieldOfRighteousness()
     event:AddAction(Paladin.ShieldOfRighteousness)
 end
 
--- Copyright (c) Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
     if not Priest.hero:LoseMana { percent = 21 } then
@@ -5282,7 +5346,7 @@ function Priest.InitCircleOfHealing()
     event:AddAction(Priest.CastCircleOfHealing)
 end
 
--- Copyright (c) Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5
@@ -5320,7 +5384,7 @@ function Priest.InitFlashHeal()
     event:AddAction(Priest.CastFlashHeal)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.CastGuardianSpirit()
     local unit = Unit(GetSpellTargetUnit())
@@ -5372,7 +5436,7 @@ function Priest.InitGuardianSpirit()
     event:AddAction(Priest.CastGuardianSpirit)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
@@ -5381,22 +5445,14 @@ function Priest.Init(location)
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     --EquipSystem.AddItemsToUnit(Priest.hero, items)
-
+    Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
     Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-    Priest.hero:AddAbilities(
-            FLASH_HEAL,
-            RENEW,
-            CIRCLE_OF_HEALING,
-            PRAYER_OF_MENDING,
-            POWER_WORD_SHIELD,
-            GUARDIAN_SPIRIT,
-            SPELLBOOK_PRIEST
-    )
+    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
@@ -5410,7 +5466,7 @@ function Priest.Init(location)
     Priest.InitSpiritOfRedemption()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.InnerFire()
     local event = EventsUnit(Priest.hero)
@@ -5467,7 +5523,7 @@ function Priest.InitInnerFire()
     event:AddAction(Priest.InnerFire)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePowerWordFortitude(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
@@ -5513,7 +5569,7 @@ function Priest.InitPowerWordFortitude()
     event:AddAction(Priest.PowerWordFortitude)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePowerWordShield(unit)
     if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
@@ -5598,7 +5654,7 @@ function Priest.InitPowerWordShield()
     event:AddAction(Priest.CastPowerWordShield)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePrayerOfMending(unit)
     if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
@@ -5686,7 +5742,7 @@ function Priest.InitPrayerOfMending()
     event:AddAction(Priest.CastPrayerOfMending)
 end
 
--- Copyright (c) Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек
@@ -5720,33 +5776,53 @@ function Priest.InitRenew()
     event:AddAction(Priest.CastRenew)
 end
 
--- Copyright (c) meiso
+---@author meiso
+
+function Priest.SORHideMainUnit()
+    Priest.hero:Pause(true)
+    Priest.hero:Hide()
+    Priest.hero:SetPathing(true)
+end
+
+function Priest.SORShowOffUnit(u_sor)
+    u_sor:SetName(Priest.hero:GetName())
+    u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        u_sor:SetAbilityManacost(spell, 0.)
+    end
+end
 
 function Priest.SpiritOfRedemption()
-    local event = EventsUnit(Priest.hero)
-    event:RegisterDamaged()
-    event:AddAction(function()
-        BlzSetEventDamage(0.)
-    end)
+    local timer = Timer(15.)
+    local u_sor = Unit(
+            Priest.hero:GetOwner(),
+            PRIEST_SOR,
+            Priest.hero:GetLoc(),
+            Priest.hero:GetFacing()
+    )
+
+    Priest.SORHideMainUnit()
     TriggerSleepAction(0.)
-    --Priest.hero:UseAbility("metamorphosis")
-    --Priest.hero:AddAbilities(
-    --        FLASH_HEAL,
-    --        RENEW,
-    --        CIRCLE_OF_HEALING,
-    --        PRAYER_OF_MENDING,
-    --        POWER_WORD_SHIELD,
-    --        GUARDIAN_SPIRIT,
-    --        SPELLBOOK_PRIEST
-    --)
-    Priest.hero:SetPathing(true)
-    Priest.hero:ApplyTimedLife(15.)
-    print("ok")
+    Priest.SORShowOffUnit(u_sor)
+
+    timer:SetFunc(function()
+        Priest.hero:Pause(false)
+        Priest.hero:Show()
+        Priest.hero:Kill()
+        Priest.spirit_of_redemption = false
+        u_sor:Hide()
+        u_sor:Remove()
+    end)
+    timer:Start()
 end
 
 function Priest.IsSpiritOfRedemption()
+    -- берём проверку на смерть в свои руки,
+    -- чтобы лишний раз не триггерить воскрешение (да и вообще не париться с ним)
     local dmg = GetEventDamage()
+    local dmg_target = BlzGetEventDamageTarget()
     if Priest.hero:GetCurrentLife() - dmg <= 1. and
+            dmg_target == Priest.hero:GetId() and
             not Priest.spirit_of_redemption then
         Priest.spirit_of_redemption = true
         BlzSetEventDamage(0.)
@@ -5767,7 +5843,7 @@ function Priest.InitSpiritOfRedemption()
     event:AddAction(Priest.SpiritOfRedemption)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function DeathKnight.Init(location)
     local loc = location or Location(4000., 150.)
@@ -5782,7 +5858,7 @@ function DeathKnight.Init(location)
     DeathKnight.Runes()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function DeathKnight.Runes()
     local runes = Frame("Runes")

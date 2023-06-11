@@ -1,6 +1,7 @@
 ---@author meiso
 
 --- Класс для создания "плавающего" текста
+---@class TextTag
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z

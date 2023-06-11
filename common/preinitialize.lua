@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 Paladin = {
     hero = nil,
@@ -7,6 +7,7 @@ Paladin = {
 
 Priest = {
     hero = nil,
+    spirit_of_redemption = false,
 }
 
 DeathKnight = {

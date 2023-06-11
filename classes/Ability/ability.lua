@@ -1,6 +1,7 @@
 ---@author meiso
 
 --- Класс конфигурирования способностей
+---@class Ability
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
@@ -43,7 +44,9 @@ end
 ---@return nil
 function Ability:SetTooltip(tooltip)
     tooltip = tooltip or self.tooltip
-    tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    if self.key ~= nil then
+        tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    end
     BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 

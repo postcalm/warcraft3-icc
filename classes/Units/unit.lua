@@ -1,6 +1,7 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания юнита
+---@class Unit
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -262,7 +263,10 @@ end
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:AddAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
         UnitAddAbility(self.unit, ability)
     end
@@ -272,7 +276,10 @@ end
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:RemoveAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
         UnitRemoveAbility(self.unit, ability)
     end
@@ -292,7 +299,7 @@ function Unit:AddSpellbook(spellbook)
 end
 
 --- Применить способность
----@param ability string Id способности
+---@param ability string Строковое ID способности
 ---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
@@ -353,6 +360,20 @@ end
 ---@return nil
 function Unit:ShowAbility(ability)
     BlzUnitHideAbility(self.unit, ability, false)
+end
+
+--- Отключить способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:DisableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, true, false)
+end
+
+--- Активировать способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:EnableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, false, false)
 end
 
 --- Использовать способность-функцию
@@ -687,9 +708,42 @@ function Unit:GetOwner()
 end
 
 --- Установить имя юниту
+---@param name string Имя юнита
 ---@return nil
 function Unit:SetName(name)
-    BlzSetUnitName(self.unit, name)
+    if self:IsHero() then
+        BlzSetHeroProperName(self.unit, name)
+    else
+        BlzSetUnitName(self.unit, name)
+    end
+end
+
+--- Получить имя юнита
+---@return string
+function Unit:GetName()
+    if self:IsHero() then
+        return GetHeroProperName(self.unit)
+    end
+    return GetUnitName(self.unit)
+end
+
+--- Активировать/деактивировать юнита
+---@param flag boolean true or false
+---@return nil
+function Unit:Pause(flag)
+    PauseUnit(self.unit, flag)
+end
+
+--- Отобразить юнита
+---@return nil
+function Unit:Show()
+    ShowUnitShow(self.unit)
+end
+
+--- Скрыть юнита
+---@return nil
+function Unit:Hide()
+    ShowUnitHide(self.unit)
 end
 
 --- Убить юнита

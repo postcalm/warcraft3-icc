@@ -227,7 +227,6 @@ ALL_MAIN_PRIEST_SPELLS = {
     PRAYER_OF_MENDING,
     POWER_WORD_SHIELD,
     GUARDIAN_SPIRIT,
-    SPELLBOOK_PRIEST,
 }
 
 ---@author meiso
@@ -318,12 +317,12 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
---PRIEST_SOR          = FourCC("H005")
 PRIEST_SOR          = FourCC("h006")
 
 ---@author meiso
 
 --- Класс конфигурирования способностей
+---@class Ability
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
@@ -366,7 +365,9 @@ end
 ---@return nil
 function Ability:SetTooltip(tooltip)
     tooltip = tooltip or self.tooltip
-    tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    if self.key ~= nil then
+        tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    end
     BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 
@@ -440,6 +441,7 @@ end
 ---@author meiso
 
 --- Базовый класс событий
+---@class Events
 Events = {}
 Events.__index = Events
 
@@ -492,6 +494,7 @@ end
 ---@author meiso
 
 --- Класс регистрации событий фрейма
+---@class EventsFrame
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
@@ -591,6 +594,7 @@ end
 ---@author meiso
 
 --- Класс регистрации событий игрока
+---@class EventsPlayer
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -709,6 +713,7 @@ end
 ---@author meiso
 
 --- Класс регистрации событий юнита
+---@class EventsUnit
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -794,6 +799,7 @@ end
 ---@author meiso
 
 --- Класс создания фреймов
+---@class Frame
 ---@param name string Название фрейма из fdf-шаблона
 ---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
 ---@param simple boolean Создать простой фрейм. По умолчанию false
@@ -1075,6 +1081,7 @@ end
 
 --- Created by meiso.
 
+---@class Line
 Line = {}
 Line.__index = Line
 
@@ -1137,6 +1144,7 @@ end
 ---@author meiso
 
 --- Класс создания точек
+---@class Point
 ---@param X real Координата X. По умолчанию 0
 ---@param Y real Координата Y. По умолчанию 0
 ---@param Z real Координата Z. По умолчанию 0
@@ -1186,6 +1194,7 @@ end
 ---@author meiso
 
 --- Класс для создания "плавающего" текста
+---@class TextTag
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z
@@ -1309,6 +1318,7 @@ end
 ---@author meiso
 
 --- Класс создания таймера
+---@class Timer
 ---@param timeout real Время действия
 ---@param func function Функция
 Timer = {}
@@ -1363,6 +1373,7 @@ end
 ---@author meiso
 
 --- Класс создания юнита
+---@class Unit
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -2069,9 +2080,23 @@ function Unit:GetOwner()
 end
 
 --- Установить имя юниту
+---@param name string Имя юнита
 ---@return nil
 function Unit:SetName(name)
-    BlzSetUnitName(self.unit, name)
+    if self:IsHero() then
+        BlzSetHeroProperName(self.unit, name)
+    else
+        BlzSetUnitName(self.unit, name)
+    end
+end
+
+--- Получить имя юнита
+---@return string
+function Unit:GetName()
+    if self:IsHero() then
+        return GetHeroProperName(self.unit)
+    end
+    return GetUnitName(self.unit)
 end
 
 --- Активировать/деактивировать юнита
@@ -2109,6 +2134,7 @@ end
 
 --- Класс создания дамми-юнита.
 --- Юнит используется для применения способностей
+---@class UnitSpell
 ---@param owner unit
 ---@param location location
 UnitSpell = {}
@@ -4157,7 +4183,6 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    key = "",
     text = "Повышает дух на 5. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
@@ -5456,7 +5481,7 @@ function Priest.Init(location)
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
     --EquipSystem.AddItemsToUnit(Priest.hero, items)
-
+    Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
     Priest.hero:SetLife(100)
@@ -5793,17 +5818,14 @@ function Priest.SORHideMainUnit()
     Priest.hero:Pause(true)
     Priest.hero:Hide()
     Priest.hero:SetPathing(true)
-    --Priest.hero:ApplyTimedLife(15.)
 end
 
 function Priest.SORShowOffUnit(u_sor)
-    local event = EventsUnit(u_sor)
-    event:RegisterDamaged()
-    event:AddAction(function()
-        BlzSetEventDamage(0.)
-    end)
-
+    u_sor:SetName(Priest.hero:GetName())
     u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        u_sor:SetAbilityManacost(spell, 0.)
+    end
 end
 
 function Priest.SpiritOfRedemption()
@@ -5814,6 +5836,7 @@ function Priest.SpiritOfRedemption()
             Priest.hero:GetLoc(),
             Priest.hero:GetFacing()
     )
+
     Priest.SORHideMainUnit()
     TriggerSleepAction(0.)
     Priest.SORShowOffUnit(u_sor)
@@ -5822,15 +5845,20 @@ function Priest.SpiritOfRedemption()
         Priest.hero:Pause(false)
         Priest.hero:Show()
         Priest.hero:Kill()
-        --u_sor:Hide()
+        Priest.spirit_of_redemption = false
+        u_sor:Hide()
         u_sor:Remove()
     end)
     timer:Start()
 end
 
 function Priest.IsSpiritOfRedemption()
+    -- берём проверку на смерть в свои руки,
+    -- чтобы лишний раз не триггерить воскрешение (да и вообще не париться с ним)
     local dmg = GetEventDamage()
+    local dmg_target = BlzGetEventDamageTarget()
     if Priest.hero:GetCurrentLife() - dmg <= 1. and
+            dmg_target == Priest.hero:GetId() and
             not Priest.spirit_of_redemption then
         Priest.spirit_of_redemption = true
         BlzSetEventDamage(0.)
