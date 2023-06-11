@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс для создания "плавающего" текста
 ---@param text string Текст

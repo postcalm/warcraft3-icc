@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий фрейма
 ---@param frame framehandle Хэндл фрейма

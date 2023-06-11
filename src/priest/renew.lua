@@ -1,4 +1,4 @@
--- Copyright (c) Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastRenew()
     --Прибавка каждые 3 секунды в течение 15 сек

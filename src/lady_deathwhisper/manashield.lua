@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)

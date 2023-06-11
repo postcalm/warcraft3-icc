@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий юнита
 ---@param unit unit Id юнита или юнит от класса Unit

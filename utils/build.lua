@@ -97,6 +97,7 @@ end
 customCode:write(param.tag)
 customCode:close()
 
+-- копируем файлы в карту
 local skip_files = { "template.fdf", "readme.html" }
 
 local files_rel = {
@@ -127,15 +128,15 @@ for _, model in pairs(files_test) do
 end
 print("Success")
 
+print("Replacing...")
 ReplaceInMap(param.map)
 ReplaceInMap(param.test_map)
+print("Success")
 
--- запускаем игру
 if IsRunGame then
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'Warcraft III.exe" -loadfile "' .. param.current_dir .. '\\' .. param.map .. '"')
 end
 
--- запускаем редактор
 if IsRunEditor then
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.map .. '"')
 end
@@ -148,4 +149,4 @@ if EditTestMap then
     os.execute('start  "" "' .. GetCatalog(param.game_dirs) .. '\\' .. 'World Editor.exe" -loadfile "' .. param.current_dir .. '\\' .. param.test_map .. '"')
 end
 
-print("Successful")
+print("--- Successful ---")

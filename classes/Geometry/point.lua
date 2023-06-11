@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания точек
 ---@param X real Координата X. По умолчанию 0

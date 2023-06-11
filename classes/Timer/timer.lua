@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания таймера
 ---@param timeout real Время действия

@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePowerWordFortitude(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then

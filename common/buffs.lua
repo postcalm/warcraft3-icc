@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --Paladin
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")

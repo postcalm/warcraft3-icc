@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.FrostBolt()
     --TriggerSleepAction(10.)

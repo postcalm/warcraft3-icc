@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания фреймов
 ---@param name string Название фрейма из fdf-шаблона

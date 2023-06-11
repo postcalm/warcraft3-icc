@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 Items = {
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },

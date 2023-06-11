@@ -100,6 +100,7 @@ Paladin = {
 
 Priest = {
     hero = nil,
+    spirit_of_redemption = false,
 }
 
 DeathKnight = {
@@ -175,6 +176,7 @@ GUARDIAN_SPIRIT         = FourCC("A00X")
 SPELLBOOK_PRIEST        = FourCC("A00Y")
 POWER_WORD_FORTITUDE    = FourCC("A011")
 INNER_FIRE              = FourCC("A00Z")
+SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
 -- Copyright (c)  meiso
 
@@ -231,7 +233,8 @@ function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
---- Проверяет, является ли объектом типом "table"
+--- Проверяет, является ли объект типом "table".
+---По сути проверяет, является ли объект экземпляром класса
 ---@param object type Проверяемый объект
 ---@return boolean
 function isTable(object)
@@ -1597,7 +1600,7 @@ function Unit:AddSpellbook(spellbook)
 end
 
 --- Применить способность
----@param ability string Id способности
+---@param ability string Строковое ID способности
 ---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
@@ -1658,6 +1661,20 @@ end
 ---@return nil
 function Unit:ShowAbility(ability)
     BlzUnitHideAbility(self.unit, ability, false)
+end
+
+--- Отключить способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:DisableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, true, false)
+end
+
+--- Активировать способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:EnableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, false, false)
 end
 
 --- Использовать способность-функцию
@@ -1835,6 +1852,10 @@ end
 ---@return real
 function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
+end
+
+function Unit:Pause(flag)
+    PauseUnit(self.unit, flag)
 end
 
 -- Передвижение
@@ -3368,6 +3389,9 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         end
         if BuffSystem.buffs[u][i].buff_ == buff or
                 BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.main_frame_buff:Destroy()
+            BuffSystem.main_frame_debuff:Destroy()
             BuffSystem.buffs[u][i].func_()
             BuffSystem.buffs[u][i] = nil
         end
@@ -3892,9 +3916,9 @@ blessing_of_kings = Ability {
     ability = BLESSING_OF_KINGS,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10."
+    buff_desc = "Все характеристики повышены на 10"
 }
 
 blessing_of_might = Ability {
@@ -3919,11 +3943,11 @@ blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
     tooltip = "Благословение неприкосновенности",
     key = "R",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-            "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -4007,11 +4031,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50 ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -4053,6 +4077,17 @@ inner_fire = Ability {
             "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
     icon = "ReplaceableTextures/CommandButtons/BTNInnerFire.blp",
     buff_desc = "Броня усилена на 2440, а сила заклинаний увеличена на 120."
+}
+
+spirit_of_redemption = Ability {
+    ability = SPIRIT_OF_REDEMPTION,
+    tooltip = "Дух воздаяния",
+    key = "",
+    text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
+            "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
+            "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
+    icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
 }
 
 ------------------------------XXXXXXX------------------------------
@@ -5189,7 +5224,7 @@ end
 -- Copyright (c) meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -5372,6 +5407,7 @@ function Priest.Init(location)
     Priest.InitGuardianSpirit()
     Priest.InitPowerWordFortitude()
     Priest.InitInnerFire()
+    Priest.InitSpiritOfRedemption()
 end
 
 -- Copyright (c) meiso
@@ -5405,11 +5441,9 @@ function Priest.InnerFire()
     local function InnerFire()
         TriggerSleepAction(0.)
         local damage = GetEventDamage()
-        print(damage)
         if damage > 0. then
             stack = stack - 1
         end
-        print(stack)
     end
 
     event:AddAction(InnerFire)
@@ -5684,6 +5718,53 @@ function Priest.InitRenew()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
     event:AddAction(Priest.CastRenew)
+end
+
+-- Copyright (c) meiso
+
+function Priest.SpiritOfRedemption()
+    local event = EventsUnit(Priest.hero)
+    event:RegisterDamaged()
+    event:AddAction(function()
+        BlzSetEventDamage(0.)
+    end)
+    TriggerSleepAction(0.)
+    --Priest.hero:UseAbility("metamorphosis")
+    --Priest.hero:AddAbilities(
+    --        FLASH_HEAL,
+    --        RENEW,
+    --        CIRCLE_OF_HEALING,
+    --        PRAYER_OF_MENDING,
+    --        POWER_WORD_SHIELD,
+    --        GUARDIAN_SPIRIT,
+    --        SPELLBOOK_PRIEST
+    --)
+    Priest.hero:SetPathing(true)
+    Priest.hero:ApplyTimedLife(15.)
+    print("ok")
+end
+
+function Priest.IsSpiritOfRedemption()
+    local dmg = GetEventDamage()
+    if Priest.hero:GetCurrentLife() - dmg <= 1. and
+            not Priest.spirit_of_redemption then
+        Priest.spirit_of_redemption = true
+        BlzSetEventDamage(0.)
+        return true
+    end
+    return false
+end
+
+function Priest.InitSpiritOfRedemption()
+    spirit_of_redemption:Init()
+    Priest.hero:SetAbilityCooldown(spirit_of_redemption:GetId(), 1.5)
+    Priest.hero:SetAbilityManacost(spirit_of_redemption:GetId(), 0.)
+    Priest.hero:DisableAbility(spirit_of_redemption:GetId())
+
+    local event = EventsPlayer()
+    event:RegisterUnitDamaged()
+    event:AddCondition(Priest.IsSpiritOfRedemption)
+    event:AddAction(Priest.SpiritOfRedemption)
 end
 
 -- Copyright (c) meiso

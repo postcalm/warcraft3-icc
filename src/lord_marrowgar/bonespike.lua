@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))

@@ -1,4 +1,4 @@
--- Copyright (c)  meiso
+---@author meiso
 
 --Обёртка над системой экипировки
 

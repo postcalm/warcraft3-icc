@@ -1,4 +1,4 @@
-// Copyright (c) meiso
+// author meiso
 
 Frame "BACKDROP" "BoxedTextBackgroundTemplate" {
 	DecorateFileNames,

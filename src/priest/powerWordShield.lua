@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePowerWordShield(unit)
     if BuffSystem.IsBuffOnHero(unit, power_word_shield) then

@@ -1,4 +1,4 @@
--- Copyright (c)  meiso
+---@author meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -53,7 +53,8 @@ function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
---- Проверяет, является ли объектом типом "table"
+--- Проверяет, является ли объект типом "table".
+---По сути проверяет, является ли объект экземпляром класса
 ---@param object type Проверяемый объект
 ---@return boolean
 function isTable(object)

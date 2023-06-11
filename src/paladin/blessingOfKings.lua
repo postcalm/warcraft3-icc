@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfKings(unit, stat)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then

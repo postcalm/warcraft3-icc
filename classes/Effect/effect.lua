@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита

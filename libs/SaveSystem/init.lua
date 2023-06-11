@@ -1,5 +1,5 @@
--- Copyright (c) Vlod www.xgm.ru
--- Copyright (c) meiso
+---@author Vlod www.xgm.ru
+---@author meiso
 
 --- Система сохранений
 SaveSystem = {

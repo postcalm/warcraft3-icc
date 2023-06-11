@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.ShieldOfRighteousness()
     -- 42% от силы + 520 ед. урона дополнительно

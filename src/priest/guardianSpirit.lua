@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.CastGuardianSpirit()
     local unit = Unit(GetSpellTargetUnit())

@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 -- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)

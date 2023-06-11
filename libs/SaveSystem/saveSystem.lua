@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Создает юнита из полученных данных
 ---@return nil

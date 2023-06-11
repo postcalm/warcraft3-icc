@@ -1,4 +1,4 @@
--- Copyright (c)  meiso
+---@author meiso
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
@@ -131,6 +131,9 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         end
         if BuffSystem.buffs[u][i].buff_ == buff or
                 BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.main_frame_buff:Destroy()
+            BuffSystem.main_frame_debuff:Destroy()
             BuffSystem.buffs[u][i].func_()
             BuffSystem.buffs[u][i] = nil
         end

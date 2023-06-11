@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс конфигурирования способностей
 ---@param ability ability Способность

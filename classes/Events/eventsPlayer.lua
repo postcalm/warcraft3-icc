@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок

@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.Whirlwind()
     local whirlwind_timer = Timer(GetRandomReal(20., 30.))

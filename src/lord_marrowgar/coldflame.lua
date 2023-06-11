@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))

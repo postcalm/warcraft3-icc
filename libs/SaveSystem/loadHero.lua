@@ -1,4 +1,4 @@
--- Copyright (c)  meiso
+---@author meiso
 
 --- Загружает юнита
 ---@return nil

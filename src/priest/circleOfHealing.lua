@@ -1,4 +1,4 @@
--- Copyright (c) Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
     if not Priest.hero:LoseMana { percent = 21 } then

@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"

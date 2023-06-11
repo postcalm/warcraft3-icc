@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')

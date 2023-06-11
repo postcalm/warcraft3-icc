@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 PLAYER_1   = Player(0)
 PLAYER_2   = Player(1)

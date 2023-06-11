@@ -525,7 +525,7 @@ Enter -new "class name", e.c. -new paladin
 }
 
 STRING 207
-// Войска: Hpal (Паладин), Propernames (Имена собственные)
+// Войска: Hpal (Paladin), Propernames (Имена собственные)
 {
 Сеймур Правдивый,Малак Справедливый,Морлун Могучий,Агамонд Заступник,Занн Бесстрашный,Ариус Храбрый,Рогволд Бесстрашный
 }
@@ -747,5 +747,41 @@ STRING 252
 // Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
 {
 W
+}
+
+STRING 253
+// Войска: H005 (Spirit of Redemption), Name (Название)
+{
+Spirit of Redemption
+}
+
+STRING 254
+// Войска: h006 (Spirit of Redemption), Name (Название)
+{
+Spirit of Redemption
+}
+
+STRING 255
+// Войска: Hpal (Paladin), Name (Название)
+{
+Paladin
+}
+
+STRING 256
+// Войска: Hblm (Priest), Name (Название)
+{
+Priest
+}
+
+STRING 257
+// Войска: Hblm (Priest), Propernames (Имена собственные)
+{
+Элринг Полуденный,Тано Ястреб,Гилтанас Ворон,Гэл Стремительный,Эрвин Крылатый,Сильвар Ветрогон,Келен Яростный
+}
+
+STRING 258
+// Способности: A012 (Spirit of Redemption), Name (Название)
+{
+Spirit of Redemption
 }
 

@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.RemovePrayerOfMending(unit)
     if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then

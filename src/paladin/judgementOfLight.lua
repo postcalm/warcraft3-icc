@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveJudgementOfLight(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then

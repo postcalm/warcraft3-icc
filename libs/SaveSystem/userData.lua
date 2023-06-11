@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока

@@ -1,4 +1,4 @@
--- Copyright (c)  meiso
+---@author meiso
 
 --- Добавляет нового юнита игроку
 ---@return nil

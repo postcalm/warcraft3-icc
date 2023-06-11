@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function DeathKnight.Init(location)
     local loc = location or Location(4000., 150.)

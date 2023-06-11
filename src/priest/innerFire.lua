@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Priest.InnerFire()
     local event = EventsUnit(Priest.hero)
@@ -29,11 +29,9 @@ function Priest.InnerFire()
     local function InnerFire()
         TriggerSleepAction(0.)
         local damage = GetEventDamage()
-        print(damage)
         if damage > 0. then
             stack = stack - 1
         end
-        print(stack)
     end
 
     event:AddAction(InnerFire)

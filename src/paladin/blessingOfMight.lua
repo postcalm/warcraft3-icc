@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfMight(unit)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then

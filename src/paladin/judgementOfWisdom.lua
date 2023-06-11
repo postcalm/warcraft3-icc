@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then

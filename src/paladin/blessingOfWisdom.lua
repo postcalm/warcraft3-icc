@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function Paladin.RemoveBlessingOfWisdom(unit, items_list)
     if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then

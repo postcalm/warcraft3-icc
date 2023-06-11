@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 --- Метр. Равен 20 игровым единицам
 METER = 20
