@@ -1,8 +1,7 @@
 ---@author meiso
 
---- Класс создания дамми-юнита.
---- Юнит используется для применения способностей
----@class UnitSpell
+---@class UnitSpell Класс создания дамми-юнита.
+---Юнит используется для применения способностей
 ---@param owner unit
 ---@param location location
 UnitSpell = {}

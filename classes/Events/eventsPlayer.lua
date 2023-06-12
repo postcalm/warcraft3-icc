@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Класс регистрации событий игрока
----@class EventsPlayer
+---@class EventsPlayer Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer

@@ -12,7 +12,10 @@ function Priest.PowerWordFortitude()
     local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
     local items = { "POWER_WORD_FORTITUDE_ITEM" }
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
+    local effect = Effect(unit, model, "overhead")
 
+    Timer(2., function() effect:Destroy() end):Start()
     BuffSystem.RegisterHero(unit)
 
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then

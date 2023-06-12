@@ -1,6 +1,6 @@
 ---@author meiso
 
---- Класс создания эффектов на юнитах
+---@class Effect Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект

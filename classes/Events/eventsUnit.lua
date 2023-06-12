@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Класс регистрации событий юнита
----@class EventsUnit
+---@class EventsUnit Класс регистрации событий юнита
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit

@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Класс создания таймера
----@class Timer
+---@class Timer Класс создания таймера
 ---@param timeout real Время действия
 ---@param func function Функция
 Timer = {}

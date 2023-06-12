@@ -3,6 +3,7 @@
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/Items/AIhe/AIheTarget.mdl"
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
@@ -16,6 +17,8 @@ function Priest.CastFlashHeal()
 
     -- даем хп указанному юниту
     target:GainLife { life = heal, show = true}
+    local effect = Effect(target, model, "origin")
+    Timer(1., function() effect:Destroy() end):Start()
 end
 
 function Priest.IsFlashHeal()

@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Класс создания юнита
----@class Unit
+---@class Unit Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита

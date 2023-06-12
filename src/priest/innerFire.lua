@@ -6,12 +6,16 @@ function Priest.InnerFire()
     local timer = Timer(60. * 30)  --баф висит полчаса
     local spd = 120 * SPD
     local armor = 2440
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
 
     BuffSystem.RegisterHero(Priest.hero)
 
     if BuffSystem.IsBuffOnHero(Priest.hero, inner_fire) then
         BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, inner_fire)
     end
+
+    local effect = Effect(Priest.hero, model)
+    Timer(2., function() effect:Destroy() end):Start()
 
     event:RegisterDamaged()
 
@@ -21,6 +25,7 @@ function Priest.InnerFire()
         Priest.hero:AddInt(-spd)
         Priest.hero:AddArmor(-armor)
         event:Destroy()
+        timer:Destroy()
     end
     BuffSystem.AddBuffToHero(Priest.hero, inner_fire, remove_buff)
     timer:SetFunc(remove_buff)

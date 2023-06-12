@@ -1,6 +1,6 @@
 --- Created by meiso.
 
----@class Line
+---@class Line Класс представляющий линию в пространстве
 Line = {}
 Line.__index = Line
 

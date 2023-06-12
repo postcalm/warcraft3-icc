@@ -8,6 +8,8 @@ end
 
 function Priest.CastPrayerOfMending()
     local unit = GetSpellTargetUnit()
+    local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
+    local effect
     local last_unit
     local event
     local cured = false
@@ -24,6 +26,9 @@ function Priest.CastPrayerOfMending()
         if unit ~= last_unit then
             POM_JUMP_COUNT = POM_JUMP_COUNT - 1
             last_unit = unit
+
+            effect = Effect(last_unit, model)
+            Timer(2., function() effect:Destroy() end):Start()
 
             if event then event:Destroy() end
             BuffSystem.RegisterHero(unit)

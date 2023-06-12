@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Базовый класс событий
----@class Events
+---@class Events Базовый класс событий
 Events = {}
 Events.__index = Events
 

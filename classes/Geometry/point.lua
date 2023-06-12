@@ -1,7 +1,6 @@
 ---@author meiso
 
---- Класс создания точек
----@class Point
+---@class Point Простой point-класс
 ---@param X real Координата X. По умолчанию 0
 ---@param Y real Координата Y. По умолчанию 0
 ---@param Z real Координата Z. По умолчанию 0

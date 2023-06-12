@@ -2,12 +2,12 @@
 
 function Priest.CastGuardianSpirit()
     local unit = Unit(GetSpellTargetUnit())
-    local model = "Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl"
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
 
     BuffSystem.RegisterHero(unit)
 
     local timer = Timer(10.)
-    local gs_effect = Effect(Priest.hero, model, "origin")
+    local gs_effect = Effect(Priest.hero, model)
     local event = EventsUnit(unit)
     event:RegisterDamaged()
 
@@ -21,6 +21,7 @@ function Priest.CastGuardianSpirit()
     local function SaveHero()
         BlzSetEventDamage(0.)
         unit:SetLife(unit:GetPercentLifeOfMax(50.))
+        remove_buff()
     end
 
     local function GetLife()

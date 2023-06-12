@@ -34,6 +34,7 @@ function Priest.SpiritOfRedemption()
         Priest.spirit_of_redemption = false
         u_sor:Hide()
         u_sor:Remove()
+        timer:Destroy()
     end)
     timer:Start()
 end

@@ -285,8 +285,7 @@ PRIEST_SOR          = FourCC("h006")
 
 ---@author meiso
 
---- Класс конфигурирования способностей
----@class Ability
+---@class Ability Класс конфигурирования способностей
 ---@param ability ability Способность
 ---@param tooltip string Название способности
 ---@param text string Описание способности
@@ -367,7 +366,7 @@ end
 
 ---@author meiso
 
---- Класс создания эффектов на юнитах
+---@class Effect Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект
@@ -396,6 +395,13 @@ function Effect:_init(unit, model, attach_point, scale)
     end
 end
 
+--- Задать время жизни эффект
+---@param time float Время жизни
+---@return nil
+function Effect:ApplyTime(time)
+    BlzSetSpecialEffectTime(self.effect, time)
+end
+
 --- Уничтожить эффект
 ---@return nil
 function Effect:Destroy()
@@ -404,8 +410,7 @@ end
 
 ---@author meiso
 
---- Базовый класс событий
----@class Events
+---@class Events Базовый класс событий
 Events = {}
 Events.__index = Events
 
@@ -457,8 +462,7 @@ end
 
 ---@author meiso
 
---- Класс регистрации событий фрейма
----@class EventsFrame
+---@class EventsFrame Класс регистрации событий фрейма
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
@@ -557,8 +561,7 @@ end
 
 ---@author meiso
 
---- Класс регистрации событий игрока
----@class EventsPlayer
+---@class EventsPlayer Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -676,8 +679,7 @@ end
 
 ---@author meiso
 
---- Класс регистрации событий юнита
----@class EventsUnit
+---@class EventsUnit Класс регистрации событий юнита
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -762,8 +764,7 @@ end
 
 ---@author meiso
 
---- Класс создания фреймов
----@class Frame
+---@class Frame Класс создания фреймов
 ---@param name string Название фрейма из fdf-шаблона
 ---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
 ---@param simple boolean Создать простой фрейм. По умолчанию false
@@ -1045,7 +1046,7 @@ end
 
 --- Created by meiso.
 
----@class Line
+---@class Line Класс представляющий линию в пространстве
 Line = {}
 Line.__index = Line
 
@@ -1107,8 +1108,7 @@ end
 
 ---@author meiso
 
---- Класс создания точек
----@class Point
+---@class Point Простой point-класс
 ---@param X real Координата X. По умолчанию 0
 ---@param Y real Координата Y. По умолчанию 0
 ---@param Z real Координата Z. По умолчанию 0
@@ -1157,8 +1157,7 @@ end
 
 ---@author meiso
 
---- Класс для создания "плавающего" текста
----@class TextTag
+---@class TextTag Класс для создания "плавающего" текста
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z
@@ -1281,8 +1280,7 @@ end
 
 ---@author meiso
 
---- Класс создания таймера
----@class Timer
+---@class Timer Класс создания таймера
 ---@param timeout real Время действия
 ---@param func function Функция
 Timer = {}
@@ -1336,8 +1334,7 @@ end
 
 ---@author meiso
 
---- Класс создания юнита
----@class Unit
+---@class Unit Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -2096,9 +2093,8 @@ end
 
 ---@author meiso
 
---- Класс создания дамми-юнита.
---- Юнит используется для применения способностей
----@class UnitSpell
+---@class UnitSpell Класс создания дамми-юнита.
+---Юнит используется для применения способностей
 ---@param owner unit
 ---@param location location
 UnitSpell = {}
@@ -3981,9 +3977,9 @@ blessing_of_kings = Ability {
     ability = BLESSING_OF_KINGS,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10 на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10."
+    buff_desc = "Все характеристики повышены на 10%."
 }
 
 blessing_of_might = Ability {
@@ -4008,11 +4004,11 @@ blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
     tooltip = "Благословение неприкосновенности",
     key = "R",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3 и " ..
-            "повышая ее силу и выносливость на 10. Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10. Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2 от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -4096,11 +4092,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40 и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50 ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50% ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40. Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -4147,7 +4143,7 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    text = "Повышает дух на 5. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+    text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -5312,10 +5308,13 @@ end
 
 function Priest.CastCircleOfHealing()
     local heal = GetRandomInt(958, 1058)
+    local model = "Abilities/Spells/Items/HealingSalve/HealingSalveTarget.mdl"
 
     local function act()
         local u = GetEnumUnit()
         if Priest.hero:IsAlly(u) then
+            local effect = Effect(u, model, "origin")
+            Timer(1., function() effect:Destroy() end):Start()
             heal = BuffSystem.ImproveSpell(u, heal)
             Unit(u):GainLife { life = heal, show = true }
         end
@@ -5348,6 +5347,7 @@ end
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/Items/AIhe/AIheTarget.mdl"
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
@@ -5361,6 +5361,8 @@ function Priest.CastFlashHeal()
 
     -- даем хп указанному юниту
     target:GainLife { life = heal, show = true}
+    local effect = Effect(target, model, "origin")
+    Timer(1., function() effect:Destroy() end):Start()
 end
 
 function Priest.IsFlashHeal()
@@ -5382,12 +5384,12 @@ end
 
 function Priest.CastGuardianSpirit()
     local unit = Unit(GetSpellTargetUnit())
-    local model = "Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl"
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
 
     BuffSystem.RegisterHero(unit)
 
     local timer = Timer(10.)
-    local gs_effect = Effect(Priest.hero, model, "origin")
+    local gs_effect = Effect(Priest.hero, model)
     local event = EventsUnit(unit)
     event:RegisterDamaged()
 
@@ -5401,6 +5403,7 @@ function Priest.CastGuardianSpirit()
     local function SaveHero()
         BlzSetEventDamage(0.)
         unit:SetLife(unit:GetPercentLifeOfMax(50.))
+        remove_buff()
     end
 
     local function GetLife()
@@ -5468,12 +5471,16 @@ function Priest.InnerFire()
     local timer = Timer(60. * 30)  --баф висит полчаса
     local spd = 120 * SPD
     local armor = 2440
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
 
     BuffSystem.RegisterHero(Priest.hero)
 
     if BuffSystem.IsBuffOnHero(Priest.hero, inner_fire) then
         BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, inner_fire)
     end
+
+    local effect = Effect(Priest.hero, model)
+    Timer(2., function() effect:Destroy() end):Start()
 
     event:RegisterDamaged()
 
@@ -5483,6 +5490,7 @@ function Priest.InnerFire()
         Priest.hero:AddInt(-spd)
         Priest.hero:AddArmor(-armor)
         event:Destroy()
+        timer:Destroy()
     end
     BuffSystem.AddBuffToHero(Priest.hero, inner_fire, remove_buff)
     timer:SetFunc(remove_buff)
@@ -5531,7 +5539,10 @@ function Priest.PowerWordFortitude()
     local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
     local items = { "POWER_WORD_FORTITUDE_ITEM" }
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
+    local effect = Effect(unit, model, "overhead")
 
+    Timer(2., function() effect:Destroy() end):Start()
     BuffSystem.RegisterHero(unit)
 
     if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
@@ -5658,6 +5669,8 @@ end
 
 function Priest.CastPrayerOfMending()
     local unit = GetSpellTargetUnit()
+    local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
+    local effect
     local last_unit
     local event
     local cured = false
@@ -5674,6 +5687,9 @@ function Priest.CastPrayerOfMending()
         if unit ~= last_unit then
             POM_JUMP_COUNT = POM_JUMP_COUNT - 1
             last_unit = unit
+
+            effect = Effect(last_unit, model)
+            Timer(2., function() effect:Destroy() end):Start()
 
             if event then event:Destroy() end
             BuffSystem.RegisterHero(unit)
@@ -5804,6 +5820,7 @@ function Priest.SpiritOfRedemption()
         Priest.spirit_of_redemption = false
         u_sor:Hide()
         u_sor:Remove()
+        timer:Destroy()
     end)
     timer:Start()
 end
