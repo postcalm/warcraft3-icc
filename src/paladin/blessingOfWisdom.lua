@@ -10,7 +10,7 @@ end
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
-    local items_list = { "BLESSING_OF_WISDOM_ITEM" }
+    local items_list = { Items.BLESSING_OF_WISDOM_ITEM }
 
     BuffSystem.RegisterHero(unit)
 

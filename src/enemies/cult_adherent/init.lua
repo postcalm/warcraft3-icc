@@ -1,3 +1,4 @@
+---@author meiso
 
 function CultAdherent.Init(location, face)
     local current_hp

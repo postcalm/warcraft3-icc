@@ -38,13 +38,21 @@ end
 ---@author meiso
 
 Items = {
+    --- Даёт 500 брони
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
+    --- Даёт 1.5к урона
     ATTACK_ITEM                 = { item = FourCC("I000"), spell = FourCC("A007"), str = "A007" },
+    --- Даёт 90к хп
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
+    --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    DEC_DMG_ITEM                = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
+    --- Баф "Благословение неприкосновенности" - 3 снижения урона
+    BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
+    --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
+    --- Даёт 50к маны
     MP_ITEM                     = { item = FourCC("I006"), spell = FourCC("A00W"), str = "A00W" },
+    --- Баф "Слово силы: Стойкость" - 165 хп
     POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
 }
 
@@ -393,13 +401,6 @@ function Effect:_init(unit, model, attach_point, scale)
     if scale then
         BlzSetSpecialEffectScale(self.effect, scale)
     end
-end
-
---- Задать время жизни эффект
----@param time float Время жизни
----@return nil
-function Effect:ApplyTime(time)
-    BlzSetSpecialEffectTime(self.effect, time)
 end
 
 --- Уничтожить эффект
@@ -3052,8 +3053,7 @@ end
 
 ---@author meiso
 
---Обёртка над системой экипировки
-
+---@class EquipSystem Обёртка над системой экипировки
 EquipSystem = {}
 
 --- Регистрирует предмет со способностями.
@@ -3080,7 +3080,7 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        equip_items_id(u, Items[item].item, c)
+        equip_items_id(u, item.item, c)
     end
 end
 
@@ -3096,7 +3096,7 @@ function EquipSystem.RemoveItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        unequip_item_id(u, Items[item].item, c)
+        unequip_item_id(u, item.item, c)
     end
 end
 
@@ -4168,12 +4168,15 @@ function DummyForHealing(location)
     d:SetLife(100)
 end
 
+---@author meiso
 
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultAdherent.unit:DealMagicDamageLoc {
-        damage=1504, location=CultAdherent.unit:GetLoc(), radius=8
+        damage = 1504,
+        location = CultAdherent.unit:GetLoc(),
+        radius = 8,
     }
     CultAdherent.summoned = false
     CultAdherent.morphed = false
@@ -4194,6 +4197,7 @@ function CultAdherent.InitDarkMartyrdom()
     event:AddAction(CultAdherent.DarkMartyrdom)
 end
 
+---@author meiso
 
 function CultAdherent.Init(location, face)
     local current_hp
@@ -4227,12 +4231,15 @@ function CultAdherent.Init(location, face)
     CultAdherent.InitDarkMartyrdom()
 end
 
+---@author meiso
 
 function CultFanatic.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultFanatic.unit:DealMagicDamageLoc {
-        damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
+        damage = 1504,
+        location = CultFanatic.unit:GetLoc(),
+        radius = 8,
     }
     CultFanatic.summoned = false
     CultFanatic.morphed = false
@@ -4253,12 +4260,15 @@ function CultFanatic.InitDarkMartyrdom()
     event:AddAction(CultFanatic.DarkMartyrdom)
 end
 
-
+---@author meiso
+---
 function CultFanatic.Init(location, face)
     local current_hp
     --определяем кого суммонить
     local fanatic = CULT_FANATIC
-    if CultFanatic.morphed then fanatic = CULT_FANATIC_MORPH end
+    if CultFanatic.morphed then
+        fanatic = CULT_FANATIC_MORPH
+    end
 
     --если уже призван - уберём и сохраним хп
     if CultFanatic.unit then
@@ -4277,7 +4287,7 @@ function CultFanatic.Init(location, face)
         CultFanatic.unit:SetLife(current_hp)
     end
 
-    --CultFanatic.unit:SetBaseDamage(1881, 1)
+    CultFanatic.unit:SetBaseDamage(1881, 1)
     CultFanatic.unit:SetArmor(220)
 
     CultFanatic.InitDarkMartyrdom()
@@ -4397,7 +4407,7 @@ end
 
 
 function LordMarrowgar.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
@@ -4407,11 +4417,11 @@ function LordMarrowgar.Init()
     LordMarrowgar.unit:SetLevel(83)
 
     LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
-    --LordMarrowgar.unit:AddAbilities(WHIRLWIND)
+    LordMarrowgar.unit:AddAbilities(WHIRLWIND)
 
     LordMarrowgar.InitColdflame()
-    --LordMarrowgar.InitBoneSpike()
-    --LordMarrowgar.InitWhirlwind()
+    LordMarrowgar.InitBoneSpike()
+    LordMarrowgar.InitWhirlwind()
 end
 
 ---@author meiso
@@ -4609,7 +4619,7 @@ end
 
 
 function LadyDeathwhisper.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
@@ -4617,21 +4627,21 @@ function LadyDeathwhisper.Init()
     LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
 
     -- both phase
-    --LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitDeathAndDecay()
     LadyDeathwhisper.InitSummoning()
     -- только в 25-ке
     --LadyDeathwhisper.InitDominateMind()
 
     -- first phase
     LadyDeathwhisper.InitManaShield()
-    --LadyDeathwhisper.InitShadowBolt()
+    LadyDeathwhisper.InitShadowBolt()
 
     -- second phase
-    --LadyDeathwhisper.InitFrostBolt()
-    --LadyDeathwhisper.InitFrostBoltVolley()
+    LadyDeathwhisper.InitFrostBolt()
+    LadyDeathwhisper.InitFrostBoltVolley()
 end
 
 ---@author meiso
@@ -4965,7 +4975,7 @@ end
 function Paladin.BlessingOfSanctuary()
     local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
-    local items_list = { "DEC_DMG_ITEM" }
+    local items_list = { Items.BLESSING_OF_SANCTUARY_ITEM }
 
     BuffSystem.RegisterHero(unit)
 
@@ -5013,7 +5023,7 @@ end
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
-    local items_list = { "BLESSING_OF_WISDOM_ITEM" }
+    local items_list = { Items.BLESSING_OF_WISDOM_ITEM }
 
     BuffSystem.RegisterHero(unit)
 
@@ -5104,7 +5114,7 @@ end
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
@@ -5435,13 +5445,17 @@ end
 
 ---@author meiso
 
+function Priest.Reset()
+
+end
+
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items = { "ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM" }
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    --EquipSystem.AddItemsToUnit(Priest.hero, items)
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
     Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
@@ -5538,7 +5552,7 @@ function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
     local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
-    local items = { "POWER_WORD_FORTITUDE_ITEM" }
+    local items = { Items.POWER_WORD_FORTITUDE_ITEM }
     local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
     local effect = Effect(unit, model, "overhead")
 
@@ -5856,7 +5870,7 @@ end
 
 function DeathKnight.Init(location)
     local loc = location or Location(4000., 150.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     DeathKnight.hero = Unit(GetLocalPlayer(), DEATH_KNIGHT, loc)
 

@@ -2,7 +2,7 @@
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 

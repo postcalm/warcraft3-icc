@@ -1,9 +1,12 @@
+---@author meiso
 
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultAdherent.unit:DealMagicDamageLoc {
-        damage=1504, location=CultAdherent.unit:GetLoc(), radius=8
+        damage = 1504,
+        location = CultAdherent.unit:GetLoc(),
+        radius = 8,
     }
     CultAdherent.summoned = false
     CultAdherent.morphed = false

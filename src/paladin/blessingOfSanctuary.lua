@@ -11,7 +11,7 @@ end
 function Paladin.BlessingOfSanctuary()
     local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
-    local items_list = { "DEC_DMG_ITEM" }
+    local items_list = { Items.BLESSING_OF_SANCTUARY_ITEM }
 
     BuffSystem.RegisterHero(unit)
 

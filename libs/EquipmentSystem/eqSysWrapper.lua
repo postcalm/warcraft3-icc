@@ -1,7 +1,6 @@
 ---@author meiso
 
---Обёртка над системой экипировки
-
+---@class EquipSystem Обёртка над системой экипировки
 EquipSystem = {}
 
 --- Регистрирует предмет со способностями.
@@ -28,7 +27,7 @@ function EquipSystem.AddItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        equip_items_id(u, Items[item].item, c)
+        equip_items_id(u, item.item, c)
     end
 end
 
@@ -44,6 +43,6 @@ function EquipSystem.RemoveItemsToUnit(unit, items, count)
         u = unit:GetId()
     end
     for _, item in pairs(items) do
-        unequip_item_id(u, Items[item].item, c)
+        unequip_item_id(u, item.item, c)
     end
 end
