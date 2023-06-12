@@ -82,8 +82,6 @@ end
 
 function Priest.InitPrayerOfMending()
     prayer_of_mending:Init()
-    Priest.hero:SetAbilityManacost(prayer_of_mending:GetId(), 15)
-    Priest.hero:SetAbilityCooldown(prayer_of_mending:GetId(), 10.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

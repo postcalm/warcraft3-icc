@@ -38,8 +38,6 @@ end
 
 function Priest.InitPowerWordFortitude()
     power_word_fortitude:Init()
-    Priest.hero:SetAbilityManacost(power_word_fortitude:GetId(), 27)
-    Priest.hero:SetAbilityCooldown(power_word_fortitude:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

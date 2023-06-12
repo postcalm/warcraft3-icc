@@ -5,6 +5,8 @@
 avengers_shield = Ability {
     ability = AVENGERS_SHIELD,
     tooltip = "Щит мстителя",
+    manacost = 26,
+    cooldown = 30.,
     key = "C",
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
@@ -14,6 +16,7 @@ avengers_shield = Ability {
 
 blessing_of_kings = Ability {
     ability = BLESSING_OF_KINGS,
+    manacost = 6,
     tooltip = "Благословение королей",
     key = "Q",
     text = "Благословляет дружественную цель, повышая все ее характеристики на 10%% на 10 мин.",
@@ -23,6 +26,7 @@ blessing_of_kings = Ability {
 
 blessing_of_might = Ability {
     ability = BLESSING_OF_MIGHT,
+    manacost = 5,
     tooltip = "Благословение могущества",
     key = "W",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
@@ -32,6 +36,7 @@ blessing_of_might = Ability {
 
 blessing_of_wisdom = Ability {
     ability = BLESSING_OF_WISDOM,
+    manacost = 5,
     tooltip = "Благословение мудрости",
     key = "E",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
@@ -41,6 +46,7 @@ blessing_of_wisdom = Ability {
 
 blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
+    manacost = 7,
     tooltip = "Благословение неприкосновенности",
     key = "R",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3%% и " ..
@@ -52,6 +58,8 @@ blessing_of_sanctuary = Ability {
 
 consecration = Ability {
     ability = CONSECRATION,
+    manacost = 22,
+    cooldown = 8.,
     tooltip = "Освящение",
     key = "R",
     text = "Освящает участок земли, на котором стоит паладин, " ..
@@ -61,6 +69,8 @@ consecration = Ability {
 
 judgement_of_light_tr = Ability {
     ability = JUDGEMENT_OF_LIGHT_TR,
+    manacost = 5,
+    cooldown = 10.,
     tooltip = "Правосудие света",
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
@@ -71,6 +81,8 @@ judgement_of_light_tr = Ability {
 
 judgement_of_wisdom_tr = Ability {
     ability = JUDGEMENT_OF_WISDOM_TR,
+    manacost = 5,
+    cooldown = 10.,
     tooltip = "Правосудие мудрости",
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
@@ -81,6 +93,8 @@ judgement_of_wisdom_tr = Ability {
 
 shield_of_righteousness = Ability {
     ability = SHIELD_OF_RIGHTEOUSNESS,
+    manacost = 6,
+    cooldown = 6.,
     tooltip = "Щит праведности",
     key = "W",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
@@ -88,10 +102,48 @@ shield_of_righteousness = Ability {
     icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 }
 
+divine_shield = Ability {
+    ability = DIVINE_SHIELD,
+    manacost = 3,
+    cooldown = 60. * 5,
+    tooltip = "Божественный щит",
+    key = "Z",
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%%.",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%%."
+}
+
+hammer_righteous = Ability {
+    ability = HAMMER_RIGHTEOUS,
+    manacost = 6,
+    cooldown = 6.,
+    tooltip = "Молот праведника",
+    key = "",
+    text = "Поражает светлой магией текущую цель и до 2 находящихся поблизости целей. " ..
+            "Величина наносимого урона равна урону в секунду от оружия в правой руке, умноженному на 4.",
+}
+
+ALL_MAIN_PALADIN_SPELLS = {
+    divine_shield,
+    hammer_righteous,
+    avengers_shield,
+    consecration,
+    judgement_of_light_tr,
+    judgement_of_wisdom_tr,
+    shield_of_righteousness,
+}
+
+ALL_OFF_PALADIN_SPELLS = {
+    blessing_of_kings,
+    blessing_of_might,
+    blessing_of_wisdom,
+    blessing_of_sanctuary,
+}
+
 ------------------------------Priest------------------------------
 
 flash_heal = Ability {
     ability = FLASH_HEAL,
+    manacost = 18,
     tooltip = "Быстрое исцеление",
     key = "Q",
     text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
@@ -100,6 +152,7 @@ flash_heal = Ability {
 
 renew = Ability {
     ability = RENEW,
+    manacost = 17,
     tooltip = "Обновление",
     key = "E",
     text = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
@@ -109,6 +162,8 @@ renew = Ability {
 
 power_word_shield = Ability {
     ability = POWER_WORD_SHIELD,
+    manacost = 23,
+    cooldown = 4.,
     tooltip = "Слово силы: Щит",
     key = "S",
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
@@ -128,6 +183,8 @@ weakened_soul = Ability {
 
 guardian_spirit = Ability {
     ability = GUARDIAN_SPIRIT,
+    manacost = 6,
+    cooldown = 60. * 3,
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
@@ -140,6 +197,8 @@ guardian_spirit = Ability {
 
 prayer_of_mending = Ability {
     ability = PRAYER_OF_MENDING,
+    manacost = 15,
+    cooldown = 10.,
     tooltip = "Молитва восстановления",
     key = "D",
     text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
@@ -152,6 +211,8 @@ prayer_of_mending = Ability {
 
 circle_of_healing = Ability {
     ability = CIRCLE_OF_HEALING,
+    manacost = 21,
+    cooldown = 6.,
     tooltip = "Круг исцеления",
     key = "W",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
@@ -161,6 +222,7 @@ circle_of_healing = Ability {
 
 power_word_fortitude = Ability {
     ability = POWER_WORD_FORTITUDE,
+    manacost = 27,
     tooltip = "Молитва стойкости",
     key = "Q",
     text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
@@ -170,6 +232,7 @@ power_word_fortitude = Ability {
 
 inner_fire = Ability {
     ability = INNER_FIRE,
+    manacost = 14,
     tooltip = "Внутренний огонь",
     key = "W",
     text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
@@ -187,6 +250,21 @@ spirit_of_redemption = Ability {
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
     icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
+}
+
+ALL_MAIN_PRIEST_SPELLS = {
+    flash_heal,
+    renew,
+    circle_of_healing,
+    prayer_of_mending,
+    power_word_shield,
+    guardian_spirit,
+}
+
+ALL_OFF_PRIEST_SPELLS = {
+    power_word_fortitude,
+    inner_fire,
+    spirit_of_redemption,
 }
 
 ------------------------------XXXXXXX------------------------------

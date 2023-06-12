@@ -1,12 +1,19 @@
 ---@author meiso
 
-function Priest.Reset()
-
+function Priest.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
 end
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM }
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
@@ -30,4 +37,6 @@ function Priest.Init(location)
     Priest.InitPowerWordFortitude()
     Priest.InitInnerFire()
     Priest.InitSpiritOfRedemption()
+
+    Priest.ResetToDefault()
 end

@@ -51,8 +51,6 @@ end
 
 function Priest.InitInnerFire()
     inner_fire:Init()
-    Priest.hero:SetAbilityManacost(inner_fire:GetId(), 14)
-    Priest.hero:SetAbilityCooldown(inner_fire:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

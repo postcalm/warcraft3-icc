@@ -35,8 +35,6 @@ end
 
 function Paladin.InitBlessingOfWisdom()
     blessing_of_wisdom:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_wisdom:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(blessing_of_wisdom:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

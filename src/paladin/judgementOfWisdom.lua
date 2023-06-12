@@ -51,8 +51,6 @@ end
 
 function Paladin.InitJudgementOfWisdom()
     judgement_of_wisdom_tr:Init()
-    Paladin.hero:SetAbilityManacost(judgement_of_wisdom_tr:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(judgement_of_wisdom_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()

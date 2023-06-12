@@ -42,8 +42,6 @@ end
 
 function Paladin.InitConsecration()
     consecration:Init()
-    Paladin.hero:SetAbilityManacost(consecration:GetId(), 22)
-    Paladin.hero:SetAbilityCooldown(consecration:GetId(), 8.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

@@ -33,8 +33,6 @@ end
 
 function Paladin.InitBlessingOfMight()
     blessing_of_might:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_might:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(blessing_of_might:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

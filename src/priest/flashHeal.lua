@@ -27,8 +27,6 @@ end
 
 function Priest.InitFlashHeal()
     flash_heal:Init()
-    Priest.hero:SetAbilityManacost(flash_heal:GetId(), 18)
-    Priest.hero:SetAbilityCooldown(flash_heal:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

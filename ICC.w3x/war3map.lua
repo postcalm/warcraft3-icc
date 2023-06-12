@@ -222,20 +222,6 @@ POWER_WORD_FORTITUDE    = FourCC("A011")
 INNER_FIRE              = FourCC("A00Z")
 SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
-----------------------------------------------------
-
-ALL_MAIN_PALADIN_SPELLS = {
-
-}
-
-ALL_MAIN_PRIEST_SPELLS = {
-    FLASH_HEAL,
-    RENEW,
-    CIRCLE_OF_HEALING,
-    PRAYER_OF_MENDING,
-    POWER_WORD_SHIELD,
-    GUARDIAN_SPIRIT,
-}
 
 ---@author meiso
 
@@ -331,6 +317,8 @@ PRIEST_SOR          = FourCC("h006")
 
 ---@class Ability Класс конфигурирования способностей
 ---@param ability ability Способность
+---@param manacost integer Затраты маны с процентах. По умолчанию 0
+---@param cooldown float Время восстановления способности. По умолчанию 1.5
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка. По умолчанию дефолтная, выбранная в редакторе
@@ -351,6 +339,8 @@ setmetatable(Ability, {
 --- Конструктор класса
 function Ability:_init(args)
     self.ability = args.ability
+    self.manacost = args.manacost or 0
+    self.cooldown = args.cooldown or 1.5
     self.tooltip = args.tooltip
     self.text = args.text
     self.icon = args.icon or ""
@@ -1638,6 +1628,9 @@ function Unit:AddAbilities(...)
         abilities = table.pack(...)
     end
     for _, ability in ipairs(abilities) do
+        if isTable(ability) then
+            ability = ability:GetId()
+        end
         UnitAddAbility(self.unit, ability)
     end
 end
@@ -4002,6 +3995,8 @@ end
 avengers_shield = Ability {
     ability = AVENGERS_SHIELD,
     tooltip = "Щит мстителя",
+    manacost = 26,
+    cooldown = 30.,
     key = "C",
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
@@ -4011,6 +4006,7 @@ avengers_shield = Ability {
 
 blessing_of_kings = Ability {
     ability = BLESSING_OF_KINGS,
+    manacost = 6,
     tooltip = "Благословение королей",
     key = "Q",
     text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
@@ -4020,6 +4016,7 @@ blessing_of_kings = Ability {
 
 blessing_of_might = Ability {
     ability = BLESSING_OF_MIGHT,
+    manacost = 5,
     tooltip = "Благословение могущества",
     key = "W",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
@@ -4029,6 +4026,7 @@ blessing_of_might = Ability {
 
 blessing_of_wisdom = Ability {
     ability = BLESSING_OF_WISDOM,
+    manacost = 5,
     tooltip = "Благословение мудрости",
     key = "E",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
@@ -4038,6 +4036,7 @@ blessing_of_wisdom = Ability {
 
 blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
+    manacost = 7,
     tooltip = "Благословение неприкосновенности",
     key = "R",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
@@ -4049,6 +4048,8 @@ blessing_of_sanctuary = Ability {
 
 consecration = Ability {
     ability = CONSECRATION,
+    manacost = 22,
+    cooldown = 8.,
     tooltip = "Освящение",
     key = "R",
     text = "Освящает участок земли, на котором стоит паладин, " ..
@@ -4058,6 +4059,8 @@ consecration = Ability {
 
 judgement_of_light_tr = Ability {
     ability = JUDGEMENT_OF_LIGHT_TR,
+    manacost = 5,
+    cooldown = 10.,
     tooltip = "Правосудие света",
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
@@ -4068,6 +4071,8 @@ judgement_of_light_tr = Ability {
 
 judgement_of_wisdom_tr = Ability {
     ability = JUDGEMENT_OF_WISDOM_TR,
+    manacost = 5,
+    cooldown = 10.,
     tooltip = "Правосудие мудрости",
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
@@ -4078,6 +4083,8 @@ judgement_of_wisdom_tr = Ability {
 
 shield_of_righteousness = Ability {
     ability = SHIELD_OF_RIGHTEOUSNESS,
+    manacost = 6,
+    cooldown = 6.,
     tooltip = "Щит праведности",
     key = "W",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
@@ -4085,10 +4092,48 @@ shield_of_righteousness = Ability {
     icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 }
 
+divine_shield = Ability {
+    ability = DIVINE_SHIELD,
+    manacost = 3,
+    cooldown = 60. * 5,
+    tooltip = "Божественный щит",
+    key = "Z",
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
+}
+
+hammer_righteous = Ability {
+    ability = HAMMER_RIGHTEOUS,
+    manacost = 6,
+    cooldown = 6.,
+    tooltip = "Молот праведника",
+    key = "",
+    text = "Поражает светлой магией текущую цель и до 2 находящихся поблизости целей. " ..
+            "Величина наносимого урона равна урону в секунду от оружия в правой руке, умноженному на 4.",
+}
+
+ALL_MAIN_PALADIN_SPELLS = {
+    divine_shield,
+    hammer_righteous,
+    avengers_shield,
+    consecration,
+    judgement_of_light_tr,
+    judgement_of_wisdom_tr,
+    shield_of_righteousness,
+}
+
+ALL_OFF_PALADIN_SPELLS = {
+    blessing_of_kings,
+    blessing_of_might,
+    blessing_of_wisdom,
+    blessing_of_sanctuary,
+}
+
 ------------------------------Priest------------------------------
 
 flash_heal = Ability {
     ability = FLASH_HEAL,
+    manacost = 18,
     tooltip = "Быстрое исцеление",
     key = "Q",
     text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
@@ -4097,6 +4142,7 @@ flash_heal = Ability {
 
 renew = Ability {
     ability = RENEW,
+    manacost = 17,
     tooltip = "Обновление",
     key = "E",
     text = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
@@ -4106,6 +4152,8 @@ renew = Ability {
 
 power_word_shield = Ability {
     ability = POWER_WORD_SHIELD,
+    manacost = 23,
+    cooldown = 4.,
     tooltip = "Слово силы: Щит",
     key = "S",
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
@@ -4125,6 +4173,8 @@ weakened_soul = Ability {
 
 guardian_spirit = Ability {
     ability = GUARDIAN_SPIRIT,
+    manacost = 6,
+    cooldown = 60. * 3,
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
@@ -4137,6 +4187,8 @@ guardian_spirit = Ability {
 
 prayer_of_mending = Ability {
     ability = PRAYER_OF_MENDING,
+    manacost = 15,
+    cooldown = 10.,
     tooltip = "Молитва восстановления",
     key = "D",
     text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
@@ -4149,6 +4201,8 @@ prayer_of_mending = Ability {
 
 circle_of_healing = Ability {
     ability = CIRCLE_OF_HEALING,
+    manacost = 21,
+    cooldown = 6.,
     tooltip = "Круг исцеления",
     key = "W",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
@@ -4158,6 +4212,7 @@ circle_of_healing = Ability {
 
 power_word_fortitude = Ability {
     ability = POWER_WORD_FORTITUDE,
+    manacost = 27,
     tooltip = "Молитва стойкости",
     key = "Q",
     text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
@@ -4167,6 +4222,7 @@ power_word_fortitude = Ability {
 
 inner_fire = Ability {
     ability = INNER_FIRE,
+    manacost = 14,
     tooltip = "Внутренний огонь",
     key = "W",
     text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
@@ -4184,6 +4240,21 @@ spirit_of_redemption = Ability {
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
     icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
+}
+
+ALL_MAIN_PRIEST_SPELLS = {
+    flash_heal,
+    renew,
+    circle_of_healing,
+    prayer_of_mending,
+    power_word_shield,
+    guardian_spirit,
+}
+
+ALL_OFF_PRIEST_SPELLS = {
+    power_word_fortitude,
+    inner_fire,
+    spirit_of_redemption,
 }
 
 ------------------------------XXXXXXX------------------------------
@@ -4891,8 +4962,7 @@ end
 
 function Paladin.InitAvengersShield()
     avengers_shield:Init()
-    Paladin.hero:SetAbilityManacost(avengers_shield:GetId(), 26)
-    Paladin.hero:SetAbilityCooldown(avengers_shield:GetId(), 30.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
@@ -4945,8 +5015,6 @@ end
 
 function Paladin.InitBlessingOfKings()
     blessing_of_kings:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_kings:GetId(), 6)
-    Paladin.hero:SetAbilityCooldown(blessing_of_kings:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4989,8 +5057,6 @@ end
 
 function Paladin.InitBlessingOfMight()
     blessing_of_might:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_might:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(blessing_of_might:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5038,8 +5104,6 @@ end
 
 function Paladin.InitBlessingOfSanctuary()
     blessing_of_sanctuary:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_sanctuary:GetId(), 7)
-    Paladin.hero:SetAbilityCooldown(blessing_of_sanctuary:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5084,8 +5148,6 @@ end
 
 function Paladin.InitBlessingOfWisdom()
     blessing_of_wisdom:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_wisdom:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(blessing_of_wisdom:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5137,8 +5199,6 @@ end
 
 function Paladin.InitConsecration()
     consecration:Init()
-    Paladin.hero:SetAbilityManacost(consecration:GetId(), 22)
-    Paladin.hero:SetAbilityCooldown(consecration:GetId(), 8.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5148,30 +5208,30 @@ end
 
 ---@author meiso
 
+function Paladin.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
+
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM}
 
     Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
-    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)
 
-    Paladin.hero:AddAbilities(
-            DIVINE_SHIELD,
-            CONSECRATION,
-            HAMMER_RIGHTEOUS,
-            JUDGEMENT_OF_LIGHT_TR,
-            JUDGEMENT_OF_WISDOM_TR,
-            SHIELD_OF_RIGHTEOUSNESS,
-            AVENGERS_SHIELD,
-            SPELLBOOK_PALADIN
-    )
-
-    --даём паладину книжку с бафами и пассивками
+    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
     Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     Paladin.InitConsecration()
@@ -5183,6 +5243,8 @@ function Paladin.Init(location)
     Paladin.InitJudgementOfWisdom()
     Paladin.InitShieldOfRighteousness()
     Paladin.InitAvengersShield()
+
+    Paladin.ResetToDefault()
 end
 
 ---@author meiso
@@ -5240,8 +5302,6 @@ end
 
 function Paladin.InitJudgementOfLight()
     judgement_of_light_tr:Init()
-    Paladin.hero:SetAbilityManacost(judgement_of_light_tr:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(judgement_of_light_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
@@ -5310,8 +5370,6 @@ end
 
 function Paladin.InitJudgementOfWisdom()
     judgement_of_wisdom_tr:Init()
-    Paladin.hero:SetAbilityManacost(judgement_of_wisdom_tr:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(judgement_of_wisdom_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
@@ -5341,8 +5399,6 @@ end
 
 function Paladin.InitShieldOfRighteousness()
     shield_of_righteousness:Init()
-    Paladin.hero:SetAbilityManacost(shield_of_righteousness:GetId(), 6)
-    Paladin.hero:SetAbilityCooldown(shield_of_righteousness:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5379,8 +5435,6 @@ end
 
 function Priest.InitCircleOfHealing()
     circle_of_healing:Init()
-    Priest.hero:SetAbilityManacost(circle_of_healing:GetId(), 21)
-    Priest.hero:SetAbilityCooldown(circle_of_healing:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5417,8 +5471,6 @@ end
 
 function Priest.InitFlashHeal()
     flash_heal:Init()
-    Priest.hero:SetAbilityManacost(flash_heal:GetId(), 18)
-    Priest.hero:SetAbilityCooldown(flash_heal:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5470,8 +5522,6 @@ end
 
 function Priest.InitGuardianSpirit()
     guardian_spirit:Init()
-    Priest.hero:SetAbilityManacost(guardian_spirit:GetId(), 6)
-    Priest.hero:SetAbilityCooldown(guardian_spirit:GetId(), 180.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5481,13 +5531,20 @@ end
 
 ---@author meiso
 
-function Priest.Reset()
-
+function Priest.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
 end
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM }
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
@@ -5511,6 +5568,8 @@ function Priest.Init(location)
     Priest.InitPowerWordFortitude()
     Priest.InitInnerFire()
     Priest.InitSpiritOfRedemption()
+
+    Priest.ResetToDefault()
 end
 
 ---@author meiso
@@ -5566,8 +5625,6 @@ end
 
 function Priest.InitInnerFire()
     inner_fire:Init()
-    Priest.hero:SetAbilityManacost(inner_fire:GetId(), 14)
-    Priest.hero:SetAbilityCooldown(inner_fire:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5615,8 +5672,6 @@ end
 
 function Priest.InitPowerWordFortitude()
     power_word_fortitude:Init()
-    Priest.hero:SetAbilityManacost(power_word_fortitude:GetId(), 27)
-    Priest.hero:SetAbilityCooldown(power_word_fortitude:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5700,8 +5755,6 @@ end
 
 function Priest.InitPowerWordShield()
     power_word_shield:Init()
-    Priest.hero:SetAbilityManacost(power_word_shield:GetId(), 23)
-    Priest.hero:SetAbilityCooldown(power_word_shield:GetId(), 4.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5793,8 +5846,6 @@ end
 
 function Priest.InitPrayerOfMending()
     prayer_of_mending:Init()
-    Priest.hero:SetAbilityManacost(prayer_of_mending:GetId(), 15)
-    Priest.hero:SetAbilityCooldown(prayer_of_mending:GetId(), 10.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5825,8 +5876,6 @@ end
 
 function Priest.InitRenew()
     renew:Init()
-    Priest.hero:SetAbilityManacost(renew:GetId(), 17)
-    Priest.hero:SetAbilityCooldown(renew:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -5846,7 +5895,7 @@ function Priest.SORShowOffUnit(u_sor)
     u_sor:SetName(Priest.hero:GetName())
     u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        Priest.hero:SetAbilityManacost(spell, 0)
+        Priest.hero:SetAbilityManacost(spell:GetId(), 0)
     end
 end
 
@@ -5871,6 +5920,7 @@ function Priest.SpiritOfRedemption()
         u_sor:Hide()
         u_sor:Remove()
         timer:Destroy()
+        Priest.ResetToDefault()
     end)
     timer:Start()
 end
@@ -5892,8 +5942,6 @@ end
 
 function Priest.InitSpiritOfRedemption()
     spirit_of_redemption:Init()
-    Priest.hero:SetAbilityCooldown(spirit_of_redemption:GetId(), 1.5)
-    Priest.hero:SetAbilityManacost(spirit_of_redemption:GetId(), 0.)
     Priest.hero:DisableAbility(spirit_of_redemption:GetId())
 
     local event = EventsPlayer()
@@ -5946,6 +5994,7 @@ function EntryPoint()
     --DummyForHealing()
 end
 
+---@author meiso
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()

@@ -38,8 +38,6 @@ end
 
 function Paladin.InitBlessingOfSanctuary()
     blessing_of_sanctuary:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_sanctuary:GetId(), 7)
-    Paladin.hero:SetAbilityCooldown(blessing_of_sanctuary:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

@@ -42,8 +42,6 @@ end
 
 function Priest.InitGuardianSpirit()
     guardian_spirit:Init()
-    Priest.hero:SetAbilityManacost(guardian_spirit:GetId(), 6)
-    Priest.hero:SetAbilityCooldown(guardian_spirit:GetId(), 180.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

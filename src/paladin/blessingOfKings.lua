@@ -44,8 +44,6 @@ end
 
 function Paladin.InitBlessingOfKings()
     blessing_of_kings:Init()
-    Paladin.hero:SetAbilityManacost(blessing_of_kings:GetId(), 6)
-    Paladin.hero:SetAbilityCooldown(blessing_of_kings:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

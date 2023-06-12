@@ -1,3 +1,4 @@
+---@author meiso
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()

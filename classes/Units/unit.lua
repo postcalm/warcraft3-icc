@@ -267,6 +267,9 @@ function Unit:AddAbilities(...)
         abilities = table.pack(...)
     end
     for _, ability in ipairs(abilities) do
+        if isTable(ability) then
+            ability = ability:GetId()
+        end
         UnitAddAbility(self.unit, ability)
     end
 end

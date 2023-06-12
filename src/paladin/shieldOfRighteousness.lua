@@ -12,8 +12,6 @@ end
 
 function Paladin.InitShieldOfRighteousness()
     shield_of_righteousness:Init()
-    Paladin.hero:SetAbilityManacost(shield_of_righteousness:GetId(), 6)
-    Paladin.hero:SetAbilityCooldown(shield_of_righteousness:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

@@ -33,17 +33,3 @@ POWER_WORD_FORTITUDE    = FourCC("A011")
 INNER_FIRE              = FourCC("A00Z")
 SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
-----------------------------------------------------
-
-ALL_MAIN_PALADIN_SPELLS = {
-
-}
-
-ALL_MAIN_PRIEST_SPELLS = {
-    FLASH_HEAL,
-    RENEW,
-    CIRCLE_OF_HEALING,
-    PRAYER_OF_MENDING,
-    POWER_WORD_SHIELD,
-    GUARDIAN_SPIRIT,
-}

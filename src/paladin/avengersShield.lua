@@ -76,8 +76,7 @@ end
 
 function Paladin.InitAvengersShield()
     avengers_shield:Init()
-    Paladin.hero:SetAbilityManacost(avengers_shield:GetId(), 26)
-    Paladin.hero:SetAbilityCooldown(avengers_shield:GetId(), 30.)
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)

@@ -21,8 +21,6 @@ end
 
 function Priest.InitRenew()
     renew:Init()
-    Priest.hero:SetAbilityManacost(renew:GetId(), 17)
-    Priest.hero:SetAbilityCooldown(renew:GetId(), 1.5)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

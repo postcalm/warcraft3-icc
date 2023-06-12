@@ -10,7 +10,7 @@ function Priest.SORShowOffUnit(u_sor)
     u_sor:SetName(Priest.hero:GetName())
     u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
     for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        Priest.hero:SetAbilityManacost(spell, 0)
+        Priest.hero:SetAbilityManacost(spell:GetId(), 0)
     end
 end
 
@@ -35,6 +35,7 @@ function Priest.SpiritOfRedemption()
         u_sor:Hide()
         u_sor:Remove()
         timer:Destroy()
+        Priest.ResetToDefault()
     end)
     timer:Start()
 end
@@ -56,8 +57,6 @@ end
 
 function Priest.InitSpiritOfRedemption()
     spirit_of_redemption:Init()
-    Priest.hero:SetAbilityCooldown(spirit_of_redemption:GetId(), 1.5)
-    Priest.hero:SetAbilityManacost(spirit_of_redemption:GetId(), 0.)
     Priest.hero:DisableAbility(spirit_of_redemption:GetId())
 
     local event = EventsPlayer()

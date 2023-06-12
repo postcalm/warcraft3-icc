@@ -27,8 +27,6 @@ end
 
 function Priest.InitCircleOfHealing()
     circle_of_healing:Init()
-    Priest.hero:SetAbilityManacost(circle_of_healing:GetId(), 21)
-    Priest.hero:SetAbilityCooldown(circle_of_healing:GetId(), 6.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

@@ -53,8 +53,6 @@ end
 
 function Paladin.InitJudgementOfLight()
     judgement_of_light_tr:Init()
-    Paladin.hero:SetAbilityManacost(judgement_of_light_tr:GetId(), 5)
-    Paladin.hero:SetAbilityCooldown(judgement_of_light_tr:GetId(), 10.)
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()

@@ -74,8 +74,6 @@ end
 
 function Priest.InitPowerWordShield()
     power_word_shield:Init()
-    Priest.hero:SetAbilityManacost(power_word_shield:GetId(), 23)
-    Priest.hero:SetAbilityCooldown(power_word_shield:GetId(), 4.)
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

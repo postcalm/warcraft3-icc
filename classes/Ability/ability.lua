@@ -2,6 +2,8 @@
 
 ---@class Ability Класс конфигурирования способностей
 ---@param ability ability Способность
+---@param manacost integer Затраты маны с процентах. По умолчанию 0
+---@param cooldown float Время восстановления способности. По умолчанию 1.5
 ---@param tooltip string Название способности
 ---@param text string Описание способности
 ---@param icon string Иконка. По умолчанию дефолтная, выбранная в редакторе
@@ -22,6 +24,8 @@ setmetatable(Ability, {
 --- Конструктор класса
 function Ability:_init(args)
     self.ability = args.ability
+    self.manacost = args.manacost or 0
+    self.cooldown = args.cooldown or 1.5
     self.tooltip = args.tooltip
     self.text = args.text
     self.icon = args.icon or ""
