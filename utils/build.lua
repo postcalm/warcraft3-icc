@@ -73,10 +73,18 @@ function ReplaceInMap(map)
     os.execute('start "" ' .. path_to_patcher .. ' ' .. path_to_wct .. ' ' .. path_to_custom .. '')
 end
 
--- подключаем нужные функции
-
---dofile(param.current_dir .. [[\utils\lib\DirTree.lua]])
---dofile(param.current_dir .. [[\utils\lib\FileContent.lua]])
+function SetVersion()
+    local f = io.open(param.current_dir .. [[\version]])
+    local version = f:read()
+    f:close()
+    f = io.open(param.current_dir .. param.map .. [[\war3map.wts]])
+    local tmp = f:read("*a")
+    f:close()
+    tmp = tmp:gsub("%d%.%d%.%d", version)
+    f = io.open(param.current_dir .. param.map .. [[\war3map.wts]], "w+")
+    f:write(tmp)
+    f:close()
+end
 
 -- собираем всё в один файл
 local customCode = io.open(param.current_dir .. param.customCode, 'w+')
@@ -102,7 +110,9 @@ local skip_files = { "template.fdf", "readme.html" }
 
 local files_rel = {
     [[\frames]],
-    [[\models\creatures]],
+    [[\models\creatures\Paladin]],
+    [[\models\creatures\Priest]],
+    [[\models\spells\Paladin]],
 }
 if IsRunGame or IsRunEditor then
     for _, model in pairs(files_rel) do
@@ -111,6 +121,7 @@ if IsRunGame or IsRunEditor then
                 param.current_dir .. param.map,
                 skip_files)
     end
+    SetVersion()
     print("Success")
 end
 
