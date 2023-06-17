@@ -219,7 +219,6 @@ function SaveSystem.ada(is_player, file_name, u)
             SaveSystem.data[1] = item_data
             SaveSystem.hash1 = key
             SaveSystem.hash2 = key
-
             for i = 1, item_data do
                 encrypted_data = SaveSystem.data[i]
                 raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
@@ -240,6 +239,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                if k == 0 then k = 1 end
                 encrypted_data = SaveSystem.data[i]
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
@@ -256,7 +256,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 if data_copy[i] == nil or SaveSystem.data[i] == nil then
-                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Something is wrong. Pls, contact the developers.")
                     return
                 end
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(data_copy[i]) .. "," .. I2S(SaveSystem.data[i]) .. ") \n //")

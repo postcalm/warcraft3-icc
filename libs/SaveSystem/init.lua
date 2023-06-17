@@ -61,6 +61,7 @@ SaveSystem = {
         seven = 7141,
         eight = 421,
         nine  = 259199,
+        ten   = 8286,
     },
 }
 

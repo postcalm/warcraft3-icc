@@ -12,6 +12,7 @@ Frame "BACKDROP" "frame_name_template" {
 	DecorateFileNames,
 	
 	// использовать кастомный id родителя
+	// !! ДОБАВЛЯТЬ ВООБЩЕ ВСЕГДА, ИНАЧЕ НИ ЧЁ НЕ РАБОТАЕТ !!
 	UseActiveContext,
 	
 	// игнорировать события мыши
@@ -26,7 +27,7 @@ Frame "BACKDROP" "frame_name_template" {
 	Anchor CENTER, 0.1, 0.1,
 	// все точки родителя
 	SetAllPoints,
-	// позииционирование относительно родителя
+	// позиционирование относительно родителя
 	SetPoint CENTER, "Castbar", RIGHT, 0.0, 0.0,
 	
 	// основное изображение

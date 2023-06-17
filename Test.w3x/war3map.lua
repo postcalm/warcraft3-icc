@@ -2190,6 +2190,7 @@ SaveSystem = {
         seven = 7141,
         eight = 421,
         nine  = 259199,
+        ten   = 8286,
     },
 }
 
@@ -2280,7 +2281,8 @@ function SaveSystem.GetUserKey()
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key / 8286 > SaveSystem.magic_number.nine then
+        if public_key <= 0 or
+                public_key / SaveSystem.magic_number.ten > SaveSystem.magic_number.nine then
             return 0
         end
 
@@ -2342,9 +2344,9 @@ function SaveSystem.LoadUserData()
             case = SaveSystem.data[i]
             if case == 1 then
                 local max_count_data = SaveSystem.data[i + 1]
-                local cjlocgn_00000004 = i + 1
+                local obj_i = i + 1
                 for j = 2, max_count_data do
-                    SaveSystem.user_data[j] = SaveSystem.data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = SaveSystem.data[obj_i + j]
                 end
                 SaveSystem.user_data[1] = max_count_data
             end
@@ -2352,7 +2354,6 @@ function SaveSystem.LoadUserData()
         end
     end
 end
-
 
 ---@author meiso
 
@@ -2832,7 +2833,6 @@ function SaveSystem.ada(is_player, file_name, u)
             SaveSystem.data[1] = item_data
             SaveSystem.hash1 = key
             SaveSystem.hash2 = key
-
             for i = 1, item_data do
                 encrypted_data = SaveSystem.data[i]
                 raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
@@ -2853,6 +2853,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                if k == 0 then k = 1 end
                 encrypted_data = SaveSystem.data[i]
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
@@ -2869,7 +2870,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 if data_copy[i] == nil or SaveSystem.data[i] == nil then
-                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Something is wrong. Pls, contact the developers.")
                     return
                 end
                 Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(data_copy[i]) .. "," .. I2S(SaveSystem.data[i]) .. ") \n //")
@@ -3790,26 +3791,6 @@ hunter_text = "Охотники бьют врага на расстоянии и
         "и издалека. Кроме того, охотники очень подвижны. " ..
         "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
 
--- Описания способностей
-----------------------------------------------------
--- Паладин
-
-consecration_tooltip = "Освящение (R)"
-consecration_desc = "Освящает участок земли, на котором стоит паладин, " ..
-        "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
-
-judgement_of_light_tooltip = "Правосудие света (D)"
-judgement_of_light_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-        "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
-
-judgement_of_wisdom_tooltip = "Правосудие мудрости (F)"
-judgement_of_wisdom_desc = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-        "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
-
-shield_of_righteousness_tooltip = "Щит праведности (W)"
-shield_of_righteousness_desc = "Мощный удар щитом, наносящий урон от светлой магии. " ..
-        "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-
 ---@author meiso
 
 HeroSelector = {
@@ -3859,48 +3840,56 @@ end
 function HeroSelector.InitDKSelector()
     HeroSelector.dk = Frame(Frame:GetFrameByName("DeathKnight_Button"))
     HeroSelector.dk:SetTooltip(deathknight_tooltip, deathknight_text)
+    HeroSelector.dk:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.dk)
 end
 
 function HeroSelector.InitDruidSelector()
     HeroSelector.druid = Frame(Frame:GetFrameByName("Druid_Button"))
     HeroSelector.druid:SetTooltip(druid_tooltip, druid_text)
+    HeroSelector.druid:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.druid)
 end
 
 function HeroSelector.InitShamanSelector()
     HeroSelector.shaman = Frame(Frame:GetFrameByName("Shaman_Button"))
     HeroSelector.shaman:SetTooltip(shaman_tooltip, shaman_text)
+    HeroSelector.shaman:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.shaman)
 end
 
 function HeroSelector.InitWarriorSelector()
     HeroSelector.warrior = Frame(Frame:GetFrameByName("Warrior_Button"))
     HeroSelector.warrior:SetTooltip(warrior_tooltip, warrior_text)
+    HeroSelector.warrior:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.warrior)
 end
 
 function HeroSelector.InitMageSelector()
     HeroSelector.mage = Frame(Frame:GetFrameByName("Mage_Button"))
     HeroSelector.mage:SetTooltip(mage_tooltip, mage_text)
+    HeroSelector.mage:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.mage)
 end
 
 function HeroSelector.InitRogueSelector()
     HeroSelector.rogue = Frame(Frame:GetFrameByName("Rogue_Button"))
     HeroSelector.rogue:SetTooltip(rogue_tooltip, rogue_text)
+    HeroSelector.rogue:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.rogue)
 end
 
 function HeroSelector.InitWarlockSelector()
     HeroSelector.warlock = Frame(Frame:GetFrameByName("Warlock_Button"))
     HeroSelector.warlock:SetTooltip(warlock_tooltip, warlock_text)
+    HeroSelector.warlock:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.warlock)
 end
 
 function HeroSelector.InitHunterSelector()
     HeroSelector.hunter = Frame(Frame:GetFrameByName("Hunter_Button"))
     HeroSelector.hunter:SetTooltip(hunter_tooltip, hunter_text)
+    HeroSelector.hunter:Disable()
     HeroSelector.ConfirmCharacter(HeroSelector.hunter)
 end
 
@@ -5964,7 +5953,7 @@ end
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
     BuffSystem.LoadFrame()
 
     -- Механики
