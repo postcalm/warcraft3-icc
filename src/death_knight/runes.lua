@@ -1,4 +1,4 @@
--- Copyright (c) meiso
+---@author meiso
 
 function DeathKnight.Runes()
     local runes = Frame("Runes")

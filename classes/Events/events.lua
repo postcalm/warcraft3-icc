@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Базовый класс событий
+---@class Events Базовый класс событий
 Events = {}
 Events.__index = Events
 

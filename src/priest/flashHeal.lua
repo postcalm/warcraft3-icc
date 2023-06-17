@@ -1,14 +1,13 @@
--- Copyright (c) 2022 Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/Items/AIhe/AIheTarget.mdl"
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-
-    -- проверяем есть ли мана
-    if not Priest.hero:LoseMana{percent=18} then return end
+    heal = BuffSystem.ImproveSpell(target, heal)
 
     -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
@@ -17,14 +16,18 @@ function Priest.CastFlashHeal()
     if Frame:IsDrop() then return end
 
     -- даем хп указанному юниту
-    target:GainLife{life=heal}
+    target:GainLife { life = heal, show = true}
+    local effect = Effect(target, model, "origin")
+    Timer(1., function() effect:Destroy() end):Start()
 end
 
 function Priest.IsFlashHeal()
-    return GetSpellAbilityId() == FLASH_HEAL
+    return flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal()
+    flash_heal:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)

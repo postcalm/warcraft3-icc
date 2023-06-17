@@ -1,3 +1,4 @@
+---@author meiso
 
 function Paladin.AvengersShield()
     local target = Unit(GetSpellTargetUnit())
@@ -17,7 +18,9 @@ function Paladin.AvengersShield()
 
     local function TargetTookDamage(target_, exc)
         for i = 1, #exc do
-            if target_ == exc[i] then return true end
+            if target_ == exc[i] then
+                return true
+            end
         end
         return false
     end
@@ -46,7 +49,9 @@ function Paladin.AvengersShield()
         shield:MoveToUnit(target)
         if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
         if shield:NearTarget(target) then
@@ -55,7 +60,9 @@ function Paladin.AvengersShield()
             TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
     end
@@ -64,19 +71,12 @@ function Paladin.AvengersShield()
 end
 
 function Paladin.IsAvengersShield()
-    return GetSpellAbilityId() == AVENGERS_SHIELD
+    return avengers_shield:SpellCasted()
 end
 
 function Paladin.InitAvengersShield()
-    Ability(
-            AVENGERS_SHIELD,
-            "Щит мстителя (C)",
-            "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
-            "Щит затем перескакивает на других находящихся поблизости противников. " ..
-            "Способен воздействовать на 3 цели."
-    )
-    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
-    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
+    avengers_shield:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)

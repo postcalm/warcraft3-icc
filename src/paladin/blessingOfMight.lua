@@ -1,47 +1,41 @@
+---@author meiso
 
-function Paladin.RemoveBlessingOfMight(unit, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_MIGHT)
+function Paladin.RemoveBlessingOfMight(unit)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+        unit:SetBaseDamage(unit:GetBaseDamage() - 550 // DPS)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfMight()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
     end
 
-    -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
-    SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+    unit:SetBaseDamage(unit:GetBaseDamage() + 550 // DPS)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfMight(unit, timer) end
-
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_MIGHT, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfMight(unit)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfMight()
-    return GetSpellAbilityId() == BLESSING_OF_MIGHT
+    return blessing_of_might:SpellCasted()
 end
 
 function Paladin.InitBlessingOfMight()
-    Ability(
-            BLESSING_OF_MIGHT,
-            "Благословение могущества (V)",
-            "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
+    blessing_of_might:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)
 end
-    

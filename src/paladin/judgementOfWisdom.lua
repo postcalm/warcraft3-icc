@@ -1,55 +1,56 @@
+---@author meiso
 
-function Paladin.RemoveJudgementOfWisdom(target, timer)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
+function Paladin.RemoveJudgementOfWisdom(target)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
-        Paladin.hero:GainMana{percent=2}
+        Paladin.hero:GainMana { percent = 2 }
         TextTag(Paladin.hero:GetPercentManaOfMax(2), Paladin.hero):Preset("mana")
     end
 end
 
 function Paladin.IsJudgementOfWisdomDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_WISDOM_BUFF)
 end
 
 function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest_blue.mdl"
+    local effect = Effect(target, model, "overhead")
+    local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_WISDOM)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_wisdom_tr)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
     jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
     jow_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfWisdom(target)
+        timer:Destroy()
+    end
 
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    BuffSystem.AddBuffToHero(target, judgement_of_wisdom_tr, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jow_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfWisdom()
-    return GetSpellAbilityId() == JUDGEMENT_OF_WISDOM_TR
+    return judgement_of_wisdom_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    Ability(
-            JUDGEMENT_OF_WISDOM_TR,
-            "Правосудие мудрости (F)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего."
-    )
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+    judgement_of_wisdom_tr:Init()
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()

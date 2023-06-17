@@ -1,3 +1,4 @@
+---@author meiso
 
 --- Создает юнита из полученных данных
 ---@return nil
@@ -72,9 +73,9 @@ function SaveSystem.CheckDataIntegrity(author, user)
             end
 
             local result = math.fmod(math.fmod(math.fmod(math.fmod(author, SaveSystem.magic_number.two) *
-                               math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
+                    math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
             if GetPlayerTechMaxAllowed(player_s, -3) == result then
                 return true
             end
@@ -110,7 +111,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preloader("save\\" .. SaveSystem.directory .. "\\" .. file_name)
         end
 
         TriggerSleepAction(0.)
@@ -144,7 +145,7 @@ function SaveSystem.Load()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            save_file = SubString(full_command_from_chat, 6, 16)..".txt"
+            save_file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             save_file = "default.txt"
         end
@@ -152,12 +153,12 @@ function SaveSystem.Load()
         SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, #SaveSystem.data do
-            Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
+            Preload(I2S(SaveSystem.data[i]) .. " data[" .. I2S(i) .. "] < load")
         end
         for j = 1, #SaveSystem.user_data do
-            Preload(I2S(SaveSystem.user_data[j]).." user_data["..I2S(j).."] < load")
+            Preload(I2S(SaveSystem.user_data[j]) .. " user_data[" .. I2S(j) .. "] < load")
         end
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "log_load.txt")
         PreloadGenClear()
     end
 end
@@ -218,7 +219,6 @@ function SaveSystem.ada(is_player, file_name, u)
             SaveSystem.data[1] = item_data
             SaveSystem.hash1 = key
             SaveSystem.hash2 = key
-
             for i = 1, item_data do
                 encrypted_data = SaveSystem.data[i]
                 raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
@@ -239,6 +239,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                if k == 0 then k = 1 end
                 encrypted_data = SaveSystem.data[i]
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
@@ -255,22 +256,22 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 if data_copy[i] == nil or SaveSystem.data[i] == nil then
-                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Something is wrong. Pls, contact the developers.")
                     return
                 end
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(data_copy[i]) .. "," .. I2S(SaveSystem.data[i]) .. ") \n //")
             end
 
             -- сохранение данных в файл
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(key)..") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(item_data) .. ") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-2) .. "," .. I2S(key) .. ") \n //")
             -- смысл этих вычислений скрыт от мира сего
             local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(raw_index, SaveSystem.magic_number.two)
             local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(key, SaveSystem.magic_number.two)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
-            PreloadGenEnd("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-3) .. "," .. I2S(encrypted_data) .. ") \n //")
+            PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. file_name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -295,7 +296,7 @@ function SaveSystem.Save()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            file = SubString(full_command_from_chat, 6, 16)..".txt"
+            file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             file = "default.txt"
         end

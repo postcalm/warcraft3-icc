@@ -1,9 +1,12 @@
-
+---@author meiso
+---
 function CultFanatic.Init(location, face)
     local current_hp
     --определяем кого суммонить
     local fanatic = CULT_FANATIC
-    if CultFanatic.morphed then fanatic = CULT_FANATIC_MORPH end
+    if CultFanatic.morphed then
+        fanatic = CULT_FANATIC_MORPH
+    end
 
     --если уже призван - уберём и сохраним хп
     if CultFanatic.unit then
@@ -22,7 +25,7 @@ function CultFanatic.Init(location, face)
         CultFanatic.unit:SetLife(current_hp)
     end
 
-    --CultFanatic.unit:SetBaseDamage(1881, 1)
+    CultFanatic.unit:SetBaseDamage(1881, 1)
     CultFanatic.unit:SetArmor(220)
 
     CultFanatic.InitDarkMartyrdom()

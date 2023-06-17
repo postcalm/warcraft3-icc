@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс регистрации событий игрока
+---@class EventsPlayer Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -45,13 +45,25 @@ function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
---- Регистриует событие нанесения урона юнитом игрока
+--- Регистриует событие прекращения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellEndcast()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_ENDCAST, nil)
+end
+
+--- Регистриует событие завершения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellFinish()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_FINISH, nil)
+end
+
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
---- Регистриует событие получения урона юнитом игрока
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)

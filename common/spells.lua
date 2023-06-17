@@ -1,3 +1,4 @@
+---@author meiso
 
 --Lord Marrowgar
 COLDFLAME               = FourCC("A001")
@@ -24,3 +25,11 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")
+POWER_WORD_SHIELD       = FourCC("A00V")
+GUARDIAN_SPIRIT         = FourCC("A00X")
+SPELLBOOK_PRIEST        = FourCC("A00Y")
+POWER_WORD_FORTITUDE    = FourCC("A011")
+INNER_FIRE              = FourCC("A00Z")
+SPIRIT_OF_REDEMPTION    = FourCC("A012")
+

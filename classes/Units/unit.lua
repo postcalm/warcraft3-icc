@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания юнита
+---@class Unit Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -29,7 +29,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Damage
+-- Характеристики
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -40,8 +40,116 @@ function Unit:SetBaseDamage(value, index)
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
+--- Получить базовый урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return integer
+function Unit:GetBaseDamage(index)
+    index = index or 0
+    return BlzGetUnitBaseDamage(self.unit, index)
+end
+
+--- Добавить брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:AddArmor(armor)
+    BlzSetUnitArmor(self.unit, self:GetArmor() + armor)
+end
+
+--- Установить значение брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Получить текущее значение брони
+---@return integer
+function Unit:GetArmor()
+    return BlzGetUnitArmor(self.unit)
+end
+
+--- Добавить силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddStr(value, permanent)
+    permanent = permanent or false
+    self:SetStr(self:GetStr() + value, permanent)
+end
+
+--- Добавить ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddAgi(value, permanent)
+    permanent = permanent or false
+    self:SetAgi(self:GetAgi() + value, permanent)
+end
+
+--- Добавить интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddInt(value, permanent)
+    permanent = permanent or false
+    self:SetInt(self:GetInt() + value, permanent)
+end
+
+--- Задать значение силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetStr(value, permanent)
+    permanent = permanent or false
+    SetHeroStr(self.unit, value, permanent)
+end
+
+--- Задать значение ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetAgi(value, permanent)
+    permanent = permanent or false
+    SetHeroAgi(self.unit, value, permanent)
+end
+
+--- Задать значение интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetInt(value, permanent)
+    permanent = permanent or false
+    SetHeroInt(self.unit, value, permanent)
+end
+
+--- Получить текущее значение силы
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetStr(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroStr(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение ловкости
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetAgi(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroAgi(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение интеллекта
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetInt(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroInt(self.unit, include_bonuses)
+end
+
+-- Всё, что связано с нанесением урона
+
 --- Нанести физический урон.
---- Урон снижает как от количества защиты, так и от её типа
+--- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель
 ---@param damage real Урон
 ---@param attack_type attacktype Тип атаки. По умолчанию ближняя
@@ -49,7 +157,9 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
@@ -62,7 +172,9 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -73,7 +185,9 @@ end
 ---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
     TextTag(damage, self.unit):Preset("spell")
@@ -110,7 +224,9 @@ end
 ---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -121,7 +237,9 @@ end
 ---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
@@ -132,19 +250,40 @@ end
 ---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
--- Ability
+-- Способности
 
 --- Выдать юниту указанные способности
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:AddAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
+        if isTable(ability) then
+            ability = ability:GetId()
+        end
         UnitAddAbility(self.unit, ability)
+    end
+end
+
+--- Удалить у юнита указанные способности
+---@param ability ability Список способностей (через запятую)
+---@return nil
+function Unit:RemoveAbilities(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
+    for _, ability in ipairs(abilities) do
+        UnitRemoveAbility(self.unit, ability)
     end
 end
 
@@ -153,14 +292,16 @@ end
 ---@return nil
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
-    if not spellbook then return end
+    if not spellbook then
+        return
+    end
     UnitAddAbility(self.unit, spellbook)
     UnitMakeAbilityPermanent(self.unit, true, spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
 end
 
 --- Применить способность
----@param ability string Id способности
+---@param ability string Строковое ID способности
 ---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
@@ -172,7 +313,9 @@ end
 ---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     IssueTargetOrder(self.unit, spell, u)
 end
 
@@ -182,7 +325,9 @@ end
 ---@return nil
 function Unit:SetAbilityManacost(ability, manacost)
     local factor = 100
-    if manacost <= 1 then factor = 1 end
+    if manacost <= 1 then
+        factor = 1
+    end
     local m = (self.basemana * (manacost / factor)) // 1
     BlzSetAbilityIntegerLevelField(
             BlzGetUnitAbility(self:GetId(), ability),
@@ -205,7 +350,55 @@ function Unit:SetAbilityCooldown(ability, cooldown)
     )
 end
 
--- Mana
+--- Скрыть способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:HideAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, true)
+end
+
+--- Показать способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:ShowAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, false)
+end
+
+--- Отключить способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:DisableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, true, false)
+end
+
+--- Активировать способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:EnableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, false, false)
+end
+
+--- Использовать способность-функцию
+---@param func function Способность-функция
+---@param location location Место применения
+---@param radius real Радиус применения (в метрах)
+---@return nil
+function Unit:UseSpellFunc(args)
+    local meters = METER * args.radius
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+    ForGroupBJ(group, args.func)
+    TriggerSleepAction(0.)
+    DestroyGroup(group)
+end
+
+--- Проверить есть ли баф на юните
+---@param buff ability Название бафа
+---@return boolean
+function Unit:HasBuff(buff)
+    return GetUnitAbilityLevel(self.unit, buff) > 0
+end
+
+-- Мана
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -214,7 +407,9 @@ end
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
-    if arg.check == nil then arg.check = true end
+    if arg.check == nil then
+        arg.check = true
+    end
     if m > self:GetCurrentMana() and arg.check then
         DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Недостаточно маны")
         return false
@@ -236,9 +431,13 @@ end
 ---@param percent real Количество маны в процентах
 ---@return real
 function Unit:GetPercentManaOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / factor)
 end
 
@@ -264,7 +463,9 @@ end
 function Unit:SetMaxMana(value, full)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
-    if f then self:SetMana(self:GetMaxLife()) end
+    if f then
+        self:SetMana(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество маны юнита
@@ -285,7 +486,7 @@ function Unit:GetBaseMana()
     return self.basemana
 end
 
--- Health
+-- Здоровье
 
 --- Потратить указанное количество хп
 ---@param life real Количество хп в абсолютных величинах
@@ -296,45 +497,30 @@ function Unit:LoseLife(arg)
     self:SetLife(self:GetCurrentLife() - l)
 end
 
---- Получить хп количественно или в процентах от максимума
+--- Дать хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@param show boolean Показывать ли исцеление
 ---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
-    TextTag(l, self:GetId()):Preset("heal")
-end
-
---- Реген HP по площади
----@param heal real Количество хп в абсолютных величинах
----@param overtime real Частота исцеления. По умолчанию 0
----@param location location Место исцеления
----@param radius real Радиус в метрах
----@return nil
-function Unit:HealNear(args)
-    local meters = METER * args.radius
-    local ot = args.overtime or 0.
-    local group = GetUnitsInRangeOfLocAll(meters, args.location)
-
-    local function act()
-        local u = GetEnumUnit()
-        if self:IsAlly(u) then
-            Unit(u):GainLife{ life = args.heal }
-        end
+    if arg.show then
+        TextTag(l, self:GetId()):Preset("heal")
     end
-    ForGroupBJ(group, act)
-    TriggerSleepAction(ot)
-    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
 ---@param percent real Количество хп в процентах
 ---@return real
 function Unit:GetPercentLifeOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / factor)
 end
 
@@ -352,7 +538,9 @@ end
 function Unit:SetMaxLife(value, full)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
-    if f then self:SetLife(self:GetMaxLife()) end
+    if f then
+        self:SetLife(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество хп юнита
@@ -367,7 +555,7 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
--- Movement
+-- Передвижение
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
@@ -394,8 +582,11 @@ end
 ---@return nil
 function Unit:MoveToUnit(unit)
     local loc
-    if type(unit) == "table" then loc = unit:GetLoc()
-    else loc = GetUnitLoc(unit) end
+    if isTable(unit) then
+        loc = unit:GetLoc()
+    else
+        loc = GetUnitLoc(unit)
+    end
     IssuePointOrderLoc(self.unit, "move", loc)
 end
 
@@ -426,7 +617,7 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
--- Animation
+-- Анимации
 
 --- Добавить тэг анимации
 ---@param tag string Название тэга
@@ -442,7 +633,7 @@ function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
 end
 
--- Meta
+-- Прочие методы
 
 --- Проверяет является ли юнит героем
 ---@return boolean
@@ -454,7 +645,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
@@ -464,7 +655,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
@@ -489,13 +680,6 @@ function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
 end
 
---- Установить количество брони
----@param armor real Количество брони в абсолютных величинах
----@return nil
-function Unit:SetArmor(armor)
-    BlzSetUnitArmor(self.unit, armor)
-end
-
 --- Установить время жизни юнита
 ---@param time real Время в абсолютных величинах
 ---@return nil
@@ -504,7 +688,7 @@ function Unit:ApplyTimedLife(time)
 end
 
 --- Воскрешает юнита
----@param location location Место воскрешения. Опционально
+---@param location location Место воскрешения. Опционально. По умолчанию воскрешает в той же точке, где умер
 ---@return nil
 function Unit:Revive(location)
     local loc = location or self:GetLoc()
@@ -526,9 +710,42 @@ function Unit:GetOwner()
 end
 
 --- Установить имя юниту
+---@param name string Имя юнита
 ---@return nil
 function Unit:SetName(name)
-    BlzSetUnitName(self.unit, name)
+    if self:IsHero() then
+        BlzSetHeroProperName(self.unit, name)
+    else
+        BlzSetUnitName(self.unit, name)
+    end
+end
+
+--- Получить имя юнита
+---@return string
+function Unit:GetName()
+    if self:IsHero() then
+        return GetHeroProperName(self.unit)
+    end
+    return GetUnitName(self.unit)
+end
+
+--- Активировать/деактивировать юнита
+---@param flag boolean true or false
+---@return nil
+function Unit:Pause(flag)
+    PauseUnit(self.unit, flag)
+end
+
+--- Отобразить юнита
+---@return nil
+function Unit:Show()
+    ShowUnitShow(self.unit)
+end
+
+--- Скрыть юнита
+---@return nil
+function Unit:Hide()
+    ShowUnitHide(self.unit)
 end
 
 --- Убить юнита

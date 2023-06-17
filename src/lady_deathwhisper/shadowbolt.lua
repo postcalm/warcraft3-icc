@@ -1,3 +1,4 @@
+---@author meiso
 
 function LadyDeathwhisper.ShadowBolt()
     TriggerSleepAction(10.)

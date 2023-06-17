@@ -1,15 +1,17 @@
+---@author meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
 function SaveSystem.GetUserKey()
     if SaveSystem.author > 0 then
-        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preloader("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
+        if public_key <= 0 or
+                public_key / SaveSystem.magic_number.ten > SaveSystem.magic_number.nine then
             return 0
         end
 
@@ -32,9 +34,9 @@ function SaveSystem.CreateUserKey(salt, val)
     if SaveSystem.author > 0 then
         SaveSystem.hash1 = salt
         PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(salt) .. ") \n //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(0) .. "," .. I2S(val + SaveSystem.generation1()) .. ") //")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         return val
     end
     return 0
@@ -71,9 +73,9 @@ function SaveSystem.LoadUserData()
             case = SaveSystem.data[i]
             if case == 1 then
                 local max_count_data = SaveSystem.data[i + 1]
-                local cjlocgn_00000004 = i + 1
+                local obj_i = i + 1
                 for j = 2, max_count_data do
-                    SaveSystem.user_data[j] = SaveSystem.data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = SaveSystem.data[obj_i + j]
                 end
                 SaveSystem.user_data[1] = max_count_data
             end
@@ -81,4 +83,3 @@ function SaveSystem.LoadUserData()
         end
     end
 end
-

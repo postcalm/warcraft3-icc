@@ -1,3 +1,5 @@
+// author meiso
+
 // Окно подтверждения выбора персонажа
 
 IncludeFile "UI\FrameDef\UI\EscMenuTemplates.fdf",
@@ -23,12 +25,16 @@ Frame "DIALOG" "ConfirmCharacter" {
     }
 
     Frame "TEXT" "ConfirmCharacterTitleText" INHERITS "StandardTitleTextTemplate" {
+        UseActiveContext,
+
         SetPoint CENTER, "ConfirmCharacter", CENTER, 0.0, 0.01,
         Text "Вы хотите выбрать этого персонажа?",
     }
 
     DialogOkButton "ConfirmCharacterOKButton",    
     Frame "GLUETEXTBUTTON" "ConfirmCharacterOKButton" INHERITS WITHCHILDREN "EscMenuButtonTemplate" {
+        UseActiveContext,
+
         Width 0.09,
         Height 0.032,
         SetPoint BOTTOMRIGHT, "ConfirmCharacter", BOTTOM, -0.007, 0.005625,
@@ -41,6 +47,8 @@ Frame "DIALOG" "ConfirmCharacter" {
 
     DialogCancelButton "ConfirmCharacterCancelButton",
     Frame "GLUETEXTBUTTON" "ConfirmCharacterCancelButton" INHERITS WITHCHILDREN "StandardButtonTemplate" {
+        UseActiveContext,
+
         Width 0.09,
         Height 0.032,
         SetPoint BOTTOMLEFT, "ConfirmCharacter", BOTTOM, 0.007, 0.005625,

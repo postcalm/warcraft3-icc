@@ -1,3 +1,4 @@
+---@author meiso
 
 function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
@@ -6,7 +7,7 @@ function LadyDeathwhisper.DeathAndDecay()
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
         LadyDeathwhisper.unit:DealMagicDamageLoc {
-            damage=450., location=loc, radius=15
+            damage = 450., location = loc, radius = 15
         }
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false

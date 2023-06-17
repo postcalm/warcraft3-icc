@@ -6,6 +6,7 @@ function EntryPoint()
 
     -- Механики
     BattleSystem.Init()
+    EquipSystem.RegisterItems()
 
     -- Боссы
     LordMarrowgar.Init()

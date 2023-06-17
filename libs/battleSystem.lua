@@ -1,3 +1,4 @@
+---@author meiso
 
 BattleSystem = {
     target = nil,
@@ -9,7 +10,6 @@ function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-
     settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(BattleSystem.ShowDamage)

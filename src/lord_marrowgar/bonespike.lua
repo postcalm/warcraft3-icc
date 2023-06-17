@@ -1,7 +1,12 @@
+---@author meiso
 
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
+    -- если в пати менее трёх игроков - шип не бросаем
+    if CountUnitsInGroup(gr) < 3 then
+        return
+    end
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
@@ -14,7 +19,7 @@ function LordMarrowgar.BoneSpike()
 
         PauseUnit(target_enemy, true)
         PauseUnit(bone_spike_obj, true)
-        
+
         -- сразу 9к
         SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - 9000.)
 
@@ -24,7 +29,7 @@ function LordMarrowgar.BoneSpike()
 
             -- TODO: поменять время разложения
             -- если шип уничтожен - выходим и сбрасываем игрока
-            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0  then
+            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0 then
                 SetUnitAnimation(bone_spike_obj, "Decay")
                 SetUnitFlyHeight(target_enemy, 0., 0.)
                 PauseUnit(target_enemy, false)

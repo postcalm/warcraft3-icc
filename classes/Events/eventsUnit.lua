@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс регистрации событий юнита
+---@class EventsUnit Класс регистрации событий юнита
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -18,25 +18,34 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then self.unit = unit:GetId() end
+    if isTable(unit) then
+        self.unit = unit:GetId()
+    end
 end
 
---- Регистриует событие получения урона юнитом
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистриует событие нанесения урона юнитом
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистриует событие, когда юнита атакуют или он атакует
+--- Регистриует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
+end
+
+--- Регистриует событие, когда юнит входит в область юнита
+---@param range integer Дистанция
+---@return nil
+function EventsUnit:RegisterWithinRange(range)
+    TriggerRegisterUnitInRange(self.trigger, self.unit, range * METER, nil)
 end
 
 -- далее идут бессмысленные обёртки над методами родителя

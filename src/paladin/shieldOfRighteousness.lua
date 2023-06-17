@@ -1,3 +1,4 @@
+---@author meiso
 
 function Paladin.ShieldOfRighteousness()
     -- 42% от силы + 520 ед. урона дополнительно
@@ -6,19 +7,11 @@ function Paladin.ShieldOfRighteousness()
 end
 
 function Paladin.IsShieldOfRighteousness()
-    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+    return shield_of_righteousness:SpellCasted()
 end
 
-
 function Paladin.InitShieldOfRighteousness()
-    Ability(
-            SHIELD_OF_RIGHTEOUSNESS,
-            "Щит праведности (W)",
-            "Мощный удар щитом, наносящий урон от светлой магии. " ..
-            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-    )
-    Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
-    Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
+    shield_of_righteousness:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

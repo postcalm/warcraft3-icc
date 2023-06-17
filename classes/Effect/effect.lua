@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания эффектов на юнитах
+---@class Effect Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект
@@ -20,9 +20,13 @@ setmetatable(Effect, {
 function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
-    if type(unit) == "table" then u = unit:GetId() end
+    if isTable(unit) then
+        u = unit:GetId()
+    end
     self.effect = AddSpecialEffectTarget(model, u, point)
-    if scale then BlzSetSpecialEffectScale(self.effect, scale) end
+    if scale then
+        BlzSetSpecialEffectScale(self.effect, scale)
+    end
 end
 
 --- Уничтожить эффект

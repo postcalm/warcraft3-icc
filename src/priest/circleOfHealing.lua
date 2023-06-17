@@ -1,26 +1,35 @@
--- Copyright (c) 2022 Kodpi
+---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
-    if not Priest.hero:LoseMana{percent=21} then return end
     local heal = GetRandomInt(958, 1058)
+    local model = "Abilities/Spells/Items/HealingSalve/HealingSalveTarget.mdl"
 
-    Priest.hero:HealNear {
-        heal = heal,
+    local function act()
+        local u = GetEnumUnit()
+        if Priest.hero:IsAlly(u) then
+            local effect = Effect(u, model, "origin")
+            Timer(1., function() effect:Destroy() end):Start()
+            heal = BuffSystem.ImproveSpell(u, heal)
+            Unit(u):GainLife { life = heal, show = true }
+        end
+    end
+
+    Priest.hero:UseSpellFunc {
         location = Priest.hero:GetLoc(),
-        radius = 15
+        radius = 15,
+        func = act
     }
 end
 
---- Заврешение способности
 function Priest.IsCircleOfHealing()
-    return GetSpellAbilityId() == CIRCLE_OF_HEALING
+    return circle_of_healing:SpellCasted()
 end
 
---- Иницилизация персонажа
 function Priest.InitCircleOfHealing()
+    circle_of_healing:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)
 end
-

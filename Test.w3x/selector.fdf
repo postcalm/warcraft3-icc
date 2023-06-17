@@ -1,3 +1,4 @@
+// author meiso
 
 Frame "GLUEBUTTON" "TemplateButtonSelector" {
 
@@ -40,7 +41,7 @@ Frame "BACKDROP" "HeroSelector" {
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroPaladin.tga",
+			BackdropBackground "ReplaceableTextures\icons\paladin.tga",
 		}
 	}
 	
@@ -51,7 +52,7 @@ Frame "BACKDROP" "HeroSelector" {
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroBloodElfPrince.tga",
+			BackdropBackground "ReplaceableTextures\icons\priest.tga",
 		}
 	}
 	
@@ -62,7 +63,7 @@ Frame "BACKDROP" "HeroSelector" {
 		
 		ControlBackdrop "HeroSelectorButtonIcon",
 		Frame "BACKDROP" "HeroSelectorButtonIcon" {
-			BackdropBackground "ReplaceableTextures\CommandButtons\BTNHeroDeathKnight.tga",
+			BackdropBackground "ReplaceableTextures\icons\deathknight.tga",
 		}
 	}
 	

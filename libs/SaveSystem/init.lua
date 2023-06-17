@@ -1,5 +1,5 @@
--- Copyright (c) Vlod www.xgm.ru
--- Copyright (c) meiso
+---@author Vlod www.xgm.ru
+---@author meiso
 
 --- Система сохранений
 SaveSystem = {
@@ -61,6 +61,7 @@ SaveSystem = {
         seven = 7141,
         eight = 421,
         nine  = 259199,
+        ten   = 8286,
     },
 }
 

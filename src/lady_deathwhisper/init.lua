@@ -1,28 +1,26 @@
 
 function LadyDeathwhisper.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(500)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
 
     -- both phase
-    --LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitDeathAndDecay()
     LadyDeathwhisper.InitSummoning()
     -- только в 25-ке
     --LadyDeathwhisper.InitDominateMind()
 
     -- first phase
     LadyDeathwhisper.InitManaShield()
-    --LadyDeathwhisper.InitShadowBolt()
+    LadyDeathwhisper.InitShadowBolt()
 
     -- second phase
-    --LadyDeathwhisper.InitFrostBolt()
-    --LadyDeathwhisper.InitFrostBoltVolley()
+    LadyDeathwhisper.InitFrostBolt()
+    LadyDeathwhisper.InitFrostBoltVolley()
 end

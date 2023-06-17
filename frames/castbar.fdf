@@ -1,3 +1,5 @@
+// author meiso
+
 // шаблон для каст-баров
 
 Frame "STATUSBAR" "Castbar" {

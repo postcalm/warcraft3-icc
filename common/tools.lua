@@ -1,4 +1,4 @@
--- Copyright (c) 2022 meiso
+---@author meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -9,7 +9,9 @@ function zip(...)
 
     --опеределяем самую маленькую последовательность
     for i = 1, args.n do
-        if #args[i] < len then len = #args[i] end
+        if #args[i] < len then
+            len = #args[i]
+        end
     end
 
     for i = 1, len do
@@ -49,4 +51,12 @@ end
 ---@return number
 function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
+end
+
+--- Проверяет, является ли объект типом "table".
+---По сути проверяет, является ли объект экземпляром класса
+---@param object type Проверяемый объект
+---@return boolean
+function isTable(object)
+    return type(object) == "table"
 end

@@ -1,4 +1,4 @@
--- Copyright (c) 2022 meiso
+---@author meiso
 
 --- Сохраняет юнита игрока
 ---@return nil

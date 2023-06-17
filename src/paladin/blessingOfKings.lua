@@ -1,55 +1,49 @@
+---@author meiso
 
-function Paladin.RemoveBlessingOfKings(unit, stat, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
-        SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
-        SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_KINGS)
+function Paladin.RemoveBlessingOfKings(unit, stat)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        unit:AddStr(-stat[1])
+        unit:AddAgi(-stat[2])
+        unit:AddInt(-stat[3])
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfKings()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_kings)
     end
 
     --массив с доп. статами
     local stat = {
-        R2I(GetHeroStr(unit, false) * 0.1),
-        R2I(GetHeroAgi(unit, false) * 0.1),
-        R2I(GetHeroInt(unit, false) * 0.1)
+        R2I(unit:GetStr() * 0.1),
+        R2I(unit:GetAgi() * 0.1),
+        R2I(unit:GetInt() * 0.1),
     }
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
-    SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
-    SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+    --бафаем цель
+    unit:AddStr(stat[1])
+    unit:AddAgi(stat[2])
+    unit:AddInt(stat[3])
 
-    --создаем лямбду для снятия бафа
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfKings(unit, stat, timer) end
-
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
-
-    --скидываем баф через 10 минут
-    TimerStart(timer, 600., false, remove_buff)
-
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfKings(unit, stat)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfKings()
-    return GetSpellAbilityId() == BLESSING_OF_KINGS
+    return blessing_of_kings:SpellCasted()
 end
 
 function Paladin.InitBlessingOfKings()
-    Ability(
-            BLESSING_OF_KINGS,
-            "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+    blessing_of_kings:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()

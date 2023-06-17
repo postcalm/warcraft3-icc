@@ -1,7 +1,7 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания дамми-юнита.
---- Юнит используется для применения способностей
+---@class UnitSpell Класс создания дамми-юнита.
+---Юнит используется для применения способностей
 ---@param owner unit
 ---@param location location
 UnitSpell = {}
@@ -29,8 +29,11 @@ end
 ---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
-    if type(target) == "table" then loc = target:GetLoc()
-    else loc = GetUnitLoc(target) end
+    if isTable(target) then
+        loc = target:GetLoc()
+    else
+        loc = GetUnitLoc(target)
+    end
     local target_point = Point(GetLocationX(loc), GetLocationY(loc))
     local unit_loc = self:GetLoc()
     local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))

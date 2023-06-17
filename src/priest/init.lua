@@ -1,24 +1,42 @@
+---@author meiso
+
+function Priest.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
-
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
+    Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000)
+    Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-
-    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
+    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
     Priest.InitCircleOfHealing()
+    Priest.InitPrayerOfMending()
+    Priest.InitPowerWordShield()
+    Priest.InitGuardianSpirit()
+    Priest.InitPowerWordFortitude()
+    Priest.InitInnerFire()
+    Priest.InitSpiritOfRedemption()
+
+    Priest.ResetToDefault()
 end

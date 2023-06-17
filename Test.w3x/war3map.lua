@@ -5,31 +5,58 @@ function InitGlobals()
 end
 
 --CUSTOM_CODE
+---@author meiso
 
 --Paladin
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
 JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
+---@author meiso
+
+-- Формат: transparency-red-green-blue
+function _dec2hex(red, green, blue)
+    red = string.format("%x", red)
+    green = string.format("%x", green)
+    blue = string.format("%x", blue)
+    return "00" .. red .. green .. blue
+end
 
 
-Items = {}
-Items["ARMOR_ITEM"]              = FourCC("I001")
-Items["ATTACK_ITEM"]             = FourCC("I000")
-Items["HP_ITEM"]                 = FourCC("I002")
-Items["MAGICARMOR_ITEM"]         = FourCC("I003")
-Items["DEC_DMG_ITEM"]            = FourCC("I004")
-Items["BLESSING_OF_WISDOM_ITEM"] = FourCC("I005")
-Items["MP_ITEM"]                 = FourCC("I006")
+Color = {
+    --- Конвертирует цвет из десятичной в шестнадцатеричную систему
+    dec2hex = _dec2hex,
+    ORANGE = _dec2hex(235, 185, 60),
+    RED = _dec2hex(255, 0, 0),
+}
 
-ItemsSpells = {}
-ItemsSpells["ARMOR_500"]          = { int = FourCC("A008"), str = "A008" }
-ItemsSpells["ATTACK_1500"]        = { int = FourCC("A007"), str = "A007" }
-ItemsSpells["HP_90K"]             = { int = FourCC("A00D"), str = "A00D" }
-ItemsSpells["MAGICARMOR_500"]     = { int = FourCC("A00I"), str = "A00I" }
-ItemsSpells["DECREASE_DMG"]       = { int = FourCC("A00K"), str = "A00K" }
-ItemsSpells["BLESSING_OF_WISDOM"] = { int = FourCC("A00F"), str = "A00F" }
-ItemsSpells["MP_50K"]             = { int = FourCC("A00W"), str = "A00W" }
+--- Задать цвет тексту
+---@param color Color Цвет
+function set_color(text, color)
+    return "|c" .. color .. text .. "|r"
+end
 
+---@author meiso
+
+Items = {
+    --- Даёт 500 брони
+    ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
+    --- Даёт 1.5к урона
+    ATTACK_ITEM                 = { item = FourCC("I000"), spell = FourCC("A007"), str = "A007" },
+    --- Даёт 90к хп
+    HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
+    --- Даёт 500 магической брони
+    MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
+    --- Баф "Благословение неприкосновенности" - 3 снижения урона
+    BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
+    --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
+    BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
+    --- Даёт 50к маны
+    MP_ITEM                     = { item = FourCC("I006"), spell = FourCC("A00W"), str = "A00W" },
+    --- Баф "Слово силы: Стойкость" - 165 хп
+    POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
+}
+
+---@author meiso
 
 --- Метр. Равен 20 игровым единицам
 METER = 20
@@ -52,6 +79,7 @@ DPS = 3.5
 -- Сила
 --STRENGTH = 1.
 
+---@author meiso
 
 --Lord Marrowgar
 BONE_SPIKE_OBJ = FourCC('h000')
@@ -61,6 +89,7 @@ DUMMY       = FourCC('h002')
 SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
 
+---@author meiso
 
 PLAYER_1   = Player(0)
 PLAYER_2   = Player(1)
@@ -68,7 +97,9 @@ LICH_KING  = Player(10)
 
 COMMON_TIMER = FourCC("BTLF")
 ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
+CHANNEL_EFFECT = "Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl"
 
+---@author meiso
 
 Paladin = {
     hero = nil,
@@ -77,6 +108,7 @@ Paladin = {
 
 Priest = {
     hero = nil,
+    spirit_of_redemption = false,
 }
 
 DeathKnight = {
@@ -119,6 +151,7 @@ CultFanatic = {
 --- Кэш для системы экипировки
 EQUIP_CACHE = nil
 
+---@author meiso
 
 --Lord Marrowgar
 COLDFLAME               = FourCC("A001")
@@ -145,8 +178,16 @@ SPELLBOOK_PALADIN       = FourCC("A00L")
 FLASH_HEAL              = FourCC("A00S")
 RENEW                   = FourCC("A00T")
 CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")
+POWER_WORD_SHIELD       = FourCC("A00V")
+GUARDIAN_SPIRIT         = FourCC("A00X")
+SPELLBOOK_PRIEST        = FourCC("A00Y")
+POWER_WORD_FORTITUDE    = FourCC("A011")
+INNER_FIRE              = FourCC("A00Z")
+SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
--- Copyright (c) 2022 meiso
+
+---@author meiso
 
 --- Аналог python функции zip().
 --- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
@@ -157,7 +198,9 @@ function zip(...)
 
     --опеределяем самую маленькую последовательность
     for i = 1, args.n do
-        if #args[i] < len then len = #args[i] end
+        if #args[i] < len then
+            len = #args[i]
+        end
     end
 
     for i = 1, len do
@@ -199,6 +242,15 @@ function round(number)
     return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
 end
 
+--- Проверяет, является ли объект типом "table".
+---По сути проверяет, является ли объект экземпляром класса
+---@param object type Проверяемый объект
+---@return boolean
+function isTable(object)
+    return type(object) == "table"
+end
+
+---@author meiso
 
 --Bosses
 LORD_MARROWGAR      = FourCC("U001")
@@ -223,83 +275,20 @@ MAGE                = nil
 DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
+PRIEST_SOR          = FourCC("h006")
 
---descriptions
+---@author meiso
 
-paladin_tooltip = "Паладин"
-paladin_text = "Паладины бьются с врагом лицом к лицу, "..
-        "полагаясь на тяжелые доспехи и навыки целительства. "..
-        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. "..
-        "Он сумеет не только защитить соратников от вражеских когтей и клинков, "..
-        "но и удержит группу на ногах при помощи исцеляющих заклинаний."
-
-priest_tooltip = "Жрец"
-priest_text = "Жрецы могут задействовать мощную целительную магию, "..
-        "чтобы спасти себя и своих спутников. Им подвластны и сильные "..
-        "атакующие заклинания, но физическая слабость и отсутствие прочных "..
-        "доспехов заставляют жрецов бояться сближения с противником. "..
-        "Опытные жрецы используют боевые и контролирующие способности, "..
-        "не допуская гибели членов отряда."
-
-deathknight_tooltip = "Рыцарь смерти"
-deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары "..
-        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой "..
-        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и "..
-        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, "..
-        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и "..
-        "соответствующим образом направлять свои атаки."
-
-druid_tooltip = "Друид"
-druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны "..
-        "играть почти любую роль в команде: быть целителями, танками или бойцами, но "..
-        "должны помнить об особенностях каждой роли. Друид вынужден внимательно "..
-        "подбирать облик к ситуации, так как каждый из них служит определенной цели."
-
-shaman_tooltip = "Шаман"
-shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, "..
-        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в "..
-        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается "..
-        "учитывать сильные и слабые стороны врага."
-
-warrior_tooltip = "Воин"
-warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, "..
-        "принимая все удары на свои доспехи. Они пользуются различными боевыми "..
-        "тактиками и применяют разнообразное оружие, чтобы защитить своих более "..
-        "хрупких союзников. Для максимальной эффективности воины должны "..
-        "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
-
-mage_tooltip = "Маг"
-mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, "..
-        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. "..
-        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе "..
-        "обездвиживают его."
-
-rogue_tooltip = "Разбойник"
-rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. "..
-        "В затяжном бою они изматывают врага тщательно продуманной серией атак, "..
-        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись "..
-        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, "..
-        "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
-
-warlock_tooltip = "Чернокнижник"
-warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и "..
-        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага "..
-        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, "..
-        "поэтому подставляют под вражеские удары своих слуг."
-
-hunter_tooltip = "Охотник"
-hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, "..
-        "приказывая питомцам атаковать, пока сами натягивают тетиву, "..
-        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, "..
-        "и издалека. Кроме того, охотники очень подвижны. "..
-        "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
-
--- Copyright (c) meiso
-
---- Класс конфигурирования способностей
+---@class Ability Класс конфигурирования способностей
 ---@param ability ability Способность
+---@param manacost integer Затраты маны с процентах. По умолчанию 0
+---@param cooldown float Время восстановления способности. По умолчанию 1.5
 ---@param tooltip string Название способности
 ---@param text string Описание способности
+---@param icon string Иконка. По умолчанию дефолтная, выбранная в редакторе
+---@param key string Кнопка использования
+---@param buff_tooltip string Название бафа. По умолчанию название способности
+---@param buff_desc string Описание бафа. По умолчанию описание способности
 Ability = {}
 Ability.__index = Ability
 
@@ -312,28 +301,59 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text)
-    self.ability = ability
-    self.tooltip = tooltip
-    self.text = text
+function Ability:_init(args)
+    self.ability = args.ability
+    self.manacost = args.manacost or 0
+    self.cooldown = args.cooldown or 1.5
+    self.tooltip = args.tooltip
+    self.text = args.text
+    self.icon = args.icon or ""
+    self.key = args.key
+    self.buff_tooltip = args.buff_tooltip or args.tooltip
+    self.buff_desc = args.buff_desc or args.text
+end
+
+--- Проинициализировать способность.
+---Задать тултип, описание и иконку
+function Ability:Init()
     self:SetTooltip()
     self:SetText()
+    self:SetIcon()
 end
 
 --- Установить название для способности
 ---@param tooltip string
 ---@return nil
 function Ability:SetTooltip(tooltip)
-    local t = tooltip or self.tooltip
-    BlzSetAbilityTooltip(self.ability, t, 0)
+    tooltip = tooltip or self.tooltip
+    if self.key ~= nil then
+        tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    end
+    BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 
 --- Установить описание для способности
 ---@param text string
 ---@return nil
 function Ability:SetText(text)
-    local t = text or self.text
-    BlzSetAbilityExtendedTooltip(self.ability, t, 0)
+    text = text or self.text
+    BlzSetAbilityExtendedTooltip(self.ability, text, 0)
+end
+
+--- Установить иконку способности
+---@param icon string Путь до текстуры
+---@return nil
+function Ability:SetIcon(icon)
+    icon = icon or self.icon
+    if icon ~= "" then
+        BlzSetAbilityIcon(self.ability, icon)
+    end
+end
+
+--- Проверить, что спелл скастован
+---@return boolean
+function Ability:SpellCasted()
+    return GetSpellAbilityId() == self.ability
 end
 
 --- Вернуть идентификатор способности
@@ -342,9 +362,9 @@ function Ability:GetId()
     return self.ability
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания эффектов на юнитах
+---@class Effect Класс создания эффектов на юнитах
 ---@param unit unitid Id юнита
 ---@param model string Название модели
 ---@param attach_point string Точка к которой крепится эффект
@@ -364,9 +384,13 @@ setmetatable(Effect, {
 function Effect:_init(unit, model, attach_point, scale)
     local u = unit
     local point = attach_point or "overhead"
-    if type(unit) == "table" then u = unit:GetId() end
+    if isTable(unit) then
+        u = unit:GetId()
+    end
     self.effect = AddSpecialEffectTarget(model, u, point)
-    if scale then BlzSetSpecialEffectScale(self.effect, scale) end
+    if scale then
+        BlzSetSpecialEffectScale(self.effect, scale)
+    end
 end
 
 --- Уничтожить эффект
@@ -375,9 +399,9 @@ function Effect:Destroy()
     DestroyEffect(self.effect)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Базовый класс событий
+---@class Events Базовый класс событий
 Events = {}
 Events.__index = Events
 
@@ -427,9 +451,9 @@ function Events:Destroy()
     DestroyTrigger(self.trigger)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс регистрации событий фрейма
+---@class EventsFrame Класс регистрации событий фрейма
 ---@param frame framehandle Хэндл фрейма
 EventsFrame = {}
 EventsFrame.__index = EventsFrame
@@ -526,9 +550,9 @@ function EventsFrame:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс регистрации событий игрока
+---@class EventsPlayer Класс регистрации событий игрока
 ---@param player playerid Id игрока. По умолчанию - локальный игрок
 EventsPlayer = {}
 EventsPlayer.__index = EventsPlayer
@@ -573,13 +597,25 @@ function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
---- Регистриует событие нанесения урона юнитом игрока
+--- Регистриует событие прекращения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellEndcast()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_ENDCAST, nil)
+end
+
+--- Регистриует событие завершения каста способности
+---@return nil
+function EventsPlayer:RegisterUnitSpellFinish()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_FINISH, nil)
+end
+
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
---- Регистриует событие получения урона юнитом игрока
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
@@ -632,9 +668,9 @@ function EventsPlayer:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс регистрации событий юнита
+---@class EventsUnit Класс регистрации событий юнита
 ---@param unit unit Id юнита или юнит от класса Unit
 EventsUnit = {}
 EventsUnit.__index = EventsUnit
@@ -652,25 +688,34 @@ setmetatable(EventsUnit, {
 function EventsUnit:_init(unit)
     Events._init(self)
     self.unit = unit
-    if type(unit) == "table" then self.unit = unit:GetId() end
+    if isTable(unit) then
+        self.unit = unit:GetId()
+    end
 end
 
---- Регистриует событие получения урона юнитом
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистриует событие нанесения урона юнитом
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистриует событие, когда юнита атакуют или он атакует
+--- Регистриует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
+end
+
+--- Регистриует событие, когда юнит входит в область юнита
+---@param range integer Дистанция
+---@return nil
+function EventsUnit:RegisterWithinRange(range)
+    TriggerRegisterUnitInRange(self.trigger, self.unit, range * METER, nil)
 end
 
 -- далее идут бессмысленные обёртки над методами родителя
@@ -708,9 +753,9 @@ function EventsUnit:Destroy()
     Events.Destroy(self)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания фреймов
+---@class Frame Класс создания фреймов
 ---@param name string Название фрейма из fdf-шаблона
 ---@param owner framehandle Хэндл родителя. По умолчанию главный фрейм
 ---@param simple boolean Создать простой фрейм. По умолчанию false
@@ -734,14 +779,12 @@ setmetatable(Frame, {
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
     if simple then
-        self.frame = BlzCreateSimpleFrame(name, own, 0, 0)
+        self.frame = BlzCreateSimpleFrame(name, own, 0, self:GetContext())
     else
-        self.frame = BlzCreateFrame(name, own, 0, 0)
+        self.frame = BlzCreateFrame(name, own, 0, self:GetContext())
     end
     self.drop = false
 end
-
--- Presets
 
 --- Создать каст-бар
 ---@param cd real Время каста
@@ -786,8 +829,6 @@ function Frame:CastBar(cd, spell, unit)
     end)
 end
 
--- Setters
-
 --- Установить уровень приоритетности
 ---@param level integer Уровень от 0
 ---@return nil
@@ -813,7 +854,9 @@ end
 ---@return nil
 function Frame:SetPoint(point, relative, relative_point, x, y)
     local r = relative
-    if type(relative) == "table" then r = relative:GetHandle() end
+    if isTable(relative) then
+        r = relative:GetHandle()
+    end
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 
@@ -860,6 +903,20 @@ function Frame:SetText(text)
     BlzFrameSetText(self.frame, text)
 end
 
+--- Задать ширину фрейма
+---@param value real Значение ширины
+---@return nil
+function Frame:SetWidth(value)
+    BlzFrameSetSize(self.frame, value, self:GetHeight())
+end
+
+--- Задать высоту фрейма
+---@param value real Значение высоты
+---@return nil
+function Frame:SetHeight(value)
+    BlzFrameSetSize(self.frame, self:GetWidth(), value)
+end
+
 --- Привязать тултип к фрейму
 ---@param title string Заголовок
 ---@param text string Содержимое
@@ -880,8 +937,6 @@ function Frame:SetTooltip(title, text)
     tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
 end
 
--- Getters
-
 --- Получить главный фрейм
 ---@return framehandle
 function Frame:GetOriginFrame()
@@ -892,7 +947,7 @@ end
 ---@param name string Название фрейма из fdf-шаблона
 ---@return framehandle
 function Frame:GetFrameByName(name)
-    return BlzGetFrameByName(name, 0)
+    return BlzGetFrameByName(name, self:GetContext())
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -919,7 +974,24 @@ function Frame:GetName()
     return BlzFrameGetName(self.frame)
 end
 
--- Removers
+--- Получить "контекст" фрейма.
+---По сути возвращает ID игрока
+---@return integer
+function Frame:GetContext()
+    return GetHandleId(GetLocalPlayer())
+end
+
+--- Получить высоту фрейма
+---@return integer
+function Frame:GetHeight()
+    return BlzFrameGetHeight(self.frame)
+end
+
+--- Получить ширину фрейма
+---@return integer
+function Frame:GetWidth()
+    return BlzFrameGetWidth(self.frame)
+end
 
 --- Сброс анимации фрейма
 ---@return nil
@@ -939,8 +1011,6 @@ function Frame:Destroy()
     BlzDestroyFrame(self.frame)
 end
 
--- Meta
-
 --- Отключить фрейм
 ---@return nil
 function Frame:Disable()
@@ -953,8 +1023,21 @@ function Frame:Enable()
     BlzFrameSetEnable(self.frame, true)
 end
 
+--- Скрыть фрейм
+---@return nil
+function Frame:Hide()
+    BlzFrameSetVisible(self.frame, false)
+end
+
+--- Показать фрейм
+---@return nil
+function Frame:Show()
+    BlzFrameSetVisible(self.frame, true)
+end
+
 --- Created by meiso.
 
+---@class Line Класс представляющий линию в пространстве
 Line = {}
 Line.__index = Line
 
@@ -984,14 +1067,22 @@ function Line:getPoints(quantity)
     local x, y
 
     for i = 1, quantity do
-        if slope == 0 then y = 0
-        else y = ydiff * (i / quantity) end
+        if slope == 0 then
+            y = 0
+        else
+            y = ydiff * (i / quantity)
+        end
 
-        if slope == 0 then x = xdiff * (i / quantity)
-        else x = y / slope end
+        if slope == 0 then
+            x = xdiff * (i / quantity)
+        else
+            x = y / slope
+        end
 
-        points = Point(round(x) + self.point1.X,
-                       round(y) + self.point1.Y)
+        points = Point(
+                round(x) + self.point1.X,
+                round(y) + self.point1.Y
+        )
         table.insert(new_points, i, points:get2DPoint())
     end
     table.insert(new_points, 1, self.point1:get2DPoint())
@@ -1006,9 +1097,9 @@ function Line:getLength()
 end
 
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания точек
+---@class Point Простой point-класс
 ---@param X real Координата X. По умолчанию 0
 ---@param Y real Координата Y. По умолчанию 0
 ---@param Z real Координата Z. По умолчанию 0
@@ -1043,8 +1134,11 @@ end
 ---@param inaccuracy boolean Учитывать ли погрешность
 ---@return boolean
 function Point:atPoint(point, inaccuracy)
-    if not inaccuracy then inaccuracy = 0
-    else inaccuracy = 30. end
+    if not inaccuracy then
+        inaccuracy = 0
+    else
+        inaccuracy = 30.
+    end
     if math.abs(self.X - point.X) <= inaccuracy and
             math.abs(self.Y - point.Y) <= inaccuracy then
         return true
@@ -1052,9 +1146,9 @@ function Point:atPoint(point, inaccuracy)
     return false
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс для создания "плавающего" текста
+---@class TextTag Класс для создания "плавающего" текста
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z
@@ -1082,8 +1176,12 @@ function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency
     self.text = text
     self.unit = unit
     -- неявное приведение к int
-    if type(text) == "number" then self.text = I2S(text // 1) end
-    if type(unit) == "table" then self.unit = unit:GetId() end
+    if type(text) == "number" then
+        self.text = I2S(text // 1)
+    end
+    if isTable(unit) then
+        self.unit = unit:GetId()
+    end
 
     if size then
         self:SetSize(size)
@@ -1171,7 +1269,11 @@ function TextTag:Destroy()
     DestroyTextTag(self.texttag)
 end
 
+---@author meiso
 
+---@class Timer Класс создания таймера
+---@param timeout real Время действия
+---@param func function Функция
 Timer = {}
 Timer.__index = Timer
 
@@ -1183,27 +1285,47 @@ setmetatable(Timer, {
     end,
 })
 
----@param timeout real
----@param func function
 function Timer:_init(timeout, func)
     self.timer = CreateTimer()
     self.timeout = timeout
-    self.func = function() func() end
+    self.func = func
 end
 
 --- Запустить таймер
+---@return nil
 function Timer:Start()
-    TimerStart(self.timer, self.timeout, false, self.func())
+    TimerStart(self.timer, self.timeout, false, self.func)
+end
+
+--- Задать время действия
+---@param timeout real Время действия
+---@return nil
+function Timer:SetTimeout(timeout)
+    self.timeout = timeout
+end
+
+--- Задать функцию
+---@param func function Функция
+---@return nil
+function Timer:SetFunc(func)
+    self.func = func
 end
 
 --- Уничтожить таймер
+---@return nil
 function Timer:Destroy()
     DestroyTimer(self.timer)
 end
 
--- Copyright (c) meiso
+--- Уничтожить первый истёкший таймер
+---@return nil
+function Timer:DestroyExpired()
+    DestroyTimer(GetExpiredTimer())
+end
 
---- Класс создания юнита
+---@author meiso
+
+---@class Unit Класс создания юнита
 ---@param player player Игрок-владелец
 ---@param unit_id unit Raw-code, создаваемого юнита
 ---@param location location Позиция, в которой требуется создать юнита
@@ -1232,7 +1354,7 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(player, unit_id, x, y, f)
 end
 
--- Damage
+-- Характеристики
 
 --- Выставить базовый урон
 ---@param value integer Урон
@@ -1243,8 +1365,116 @@ function Unit:SetBaseDamage(value, index)
     BlzSetUnitBaseDamage(self.unit, value, i)
 end
 
+--- Получить базовый урон
+---@param index integer Номер атаки. 0 (первая) или 1 (вторая)
+---@return integer
+function Unit:GetBaseDamage(index)
+    index = index or 0
+    return BlzGetUnitBaseDamage(self.unit, index)
+end
+
+--- Добавить брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:AddArmor(armor)
+    BlzSetUnitArmor(self.unit, self:GetArmor() + armor)
+end
+
+--- Установить значение брони
+---@param armor real Количество брони в абсолютных величинах
+---@return nil
+function Unit:SetArmor(armor)
+    BlzSetUnitArmor(self.unit, armor)
+end
+
+--- Получить текущее значение брони
+---@return integer
+function Unit:GetArmor()
+    return BlzGetUnitArmor(self.unit)
+end
+
+--- Добавить силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddStr(value, permanent)
+    permanent = permanent or false
+    self:SetStr(self:GetStr() + value, permanent)
+end
+
+--- Добавить ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddAgi(value, permanent)
+    permanent = permanent or false
+    self:SetAgi(self:GetAgi() + value, permanent)
+end
+
+--- Добавить интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:AddInt(value, permanent)
+    permanent = permanent or false
+    self:SetInt(self:GetInt() + value, permanent)
+end
+
+--- Задать значение силы
+---@param value integer Значение силы
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetStr(value, permanent)
+    permanent = permanent or false
+    SetHeroStr(self.unit, value, permanent)
+end
+
+--- Задать значение ловкости
+---@param value integer Значение ловкости
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetAgi(value, permanent)
+    permanent = permanent or false
+    SetHeroAgi(self.unit, value, permanent)
+end
+
+--- Задать значение интеллекта
+---@param value integer Значение интеллекта
+---@param permanent boolean Перманентно
+---@return nil
+function Unit:SetInt(value, permanent)
+    permanent = permanent or false
+    SetHeroInt(self.unit, value, permanent)
+end
+
+--- Получить текущее значение силы
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetStr(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroStr(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение ловкости
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetAgi(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroAgi(self.unit, include_bonuses)
+end
+
+--- Получить текущее значение интеллекта
+---@param include_bonuses boolean Учитывать ли бонусы
+---@return integer
+function Unit:GetInt(include_bonuses)
+    include_bonuses = include_bonuses or false
+    return GetHeroInt(self.unit, include_bonuses)
+end
+
+-- Всё, что связано с нанесением урона
+
 --- Нанести физический урон.
---- Урон снижает как от количества защиты, так и от её типа
+--- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель
 ---@param damage real Урон
 ---@param attack_type attacktype Тип атаки. По умолчанию ближняя
@@ -1252,7 +1482,9 @@ end
 function Unit:DealPhysicalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
@@ -1265,7 +1497,9 @@ end
 function Unit:DealUniversalDamage(target, damage, attack_type)
     local t = attack_type or ATTACK_TYPE_MELEE
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -1276,7 +1510,9 @@ end
 ---@return nil
 function Unit:DealMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
     TextTag(damage, self.unit):Preset("spell")
@@ -1313,7 +1549,9 @@ end
 ---@return nil
 function Unit:DealUniversalMagicDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL)
 end
 
@@ -1324,7 +1562,9 @@ end
 ---@return nil
 function Unit:DealMixedDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL)
 end
 
@@ -1335,19 +1575,40 @@ end
 ---@return nil
 function Unit:DealCleanDamage(target, damage)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL)
 end
 
--- Ability
+-- Способности
 
 --- Выдать юниту указанные способности
 ---@param ability ability Список способностей (через запятую)
 ---@return nil
 function Unit:AddAbilities(...)
-    local abilities = table.pack(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
     for _, ability in ipairs(abilities) do
+        if isTable(ability) then
+            ability = ability:GetId()
+        end
         UnitAddAbility(self.unit, ability)
+    end
+end
+
+--- Удалить у юнита указанные способности
+---@param ability ability Список способностей (через запятую)
+---@return nil
+function Unit:RemoveAbilities(...)
+    local abilities = ...
+    if type(...) ~= "table" then
+        abilities = table.pack(...)
+    end
+    for _, ability in ipairs(abilities) do
+        UnitRemoveAbility(self.unit, ability)
     end
 end
 
@@ -1356,14 +1617,16 @@ end
 ---@return nil
 function Unit:AddSpellbook(spellbook)
     local p = GetOwningPlayer(self.unit)
-    if not spellbook then return end
+    if not spellbook then
+        return
+    end
     UnitAddAbility(self.unit, spellbook)
     UnitMakeAbilityPermanent(self.unit, true, spellbook)
     SetPlayerAbilityAvailable(p, spellbook, true)
 end
 
 --- Применить способность
----@param ability string Id способности
+---@param ability string Строковое ID способности
 ---@return nil
 function Unit:UseAbility(ability)
     IssueImmediateOrder(self.unit, ability)
@@ -1375,7 +1638,9 @@ end
 ---@return nil
 function Unit:CastToTarget(spell, target)
     local u = target
-    if type(target) == "table" then u = target:GetId() end
+    if isTable(target) then
+        u = target:GetId()
+    end
     IssueTargetOrder(self.unit, spell, u)
 end
 
@@ -1385,7 +1650,9 @@ end
 ---@return nil
 function Unit:SetAbilityManacost(ability, manacost)
     local factor = 100
-    if manacost <= 1 then factor = 1 end
+    if manacost <= 1 then
+        factor = 1
+    end
     local m = (self.basemana * (manacost / factor)) // 1
     BlzSetAbilityIntegerLevelField(
             BlzGetUnitAbility(self:GetId(), ability),
@@ -1408,7 +1675,55 @@ function Unit:SetAbilityCooldown(ability, cooldown)
     )
 end
 
--- Mana
+--- Скрыть способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:HideAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, true)
+end
+
+--- Показать способность у юнита
+---@param ability ability ID способности
+---@return nil
+function Unit:ShowAbility(ability)
+    BlzUnitHideAbility(self.unit, ability, false)
+end
+
+--- Отключить способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:DisableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, true, false)
+end
+
+--- Активировать способность
+---@param ability ability Идентификатор способности
+---@return nil
+function Unit:EnableAbility(ability)
+    BlzUnitDisableAbility(self.unit, ability, false, false)
+end
+
+--- Использовать способность-функцию
+---@param func function Способность-функция
+---@param location location Место применения
+---@param radius real Радиус применения (в метрах)
+---@return nil
+function Unit:UseSpellFunc(args)
+    local meters = METER * args.radius
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+    ForGroupBJ(group, args.func)
+    TriggerSleepAction(0.)
+    DestroyGroup(group)
+end
+
+--- Проверить есть ли баф на юните
+---@param buff ability Название бафа
+---@return boolean
+function Unit:HasBuff(buff)
+    return GetUnitAbilityLevel(self.unit, buff) > 0
+end
+
+-- Мана
 
 --- Потратить указанное количество маны
 ---@param mana real Количество маны в абсолютных единицах
@@ -1417,7 +1732,9 @@ end
 ---@return boolean
 function Unit:LoseMana(arg)
     local m = self:GetPercentManaOfMax(arg.percent) or arg.mana
-    if arg.check == nil then arg.check = true end
+    if arg.check == nil then
+        arg.check = true
+    end
     if m > self:GetCurrentMana() and arg.check then
         DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Недостаточно маны")
         return false
@@ -1439,9 +1756,13 @@ end
 ---@param percent real Количество маны в процентах
 ---@return real
 function Unit:GetPercentManaOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_MANA) * (percent / factor)
 end
 
@@ -1467,7 +1788,9 @@ end
 function Unit:SetMaxMana(value, full)
     local f = full or false
     BlzSetUnitMaxMana(self.unit, value)
-    if f then self:SetMana(self:GetMaxLife()) end
+    if f then
+        self:SetMana(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество маны юнита
@@ -1488,7 +1811,7 @@ function Unit:GetBaseMana()
     return self.basemana
 end
 
--- Health
+-- Здоровье
 
 --- Потратить указанное количество хп
 ---@param life real Количество хп в абсолютных величинах
@@ -1499,45 +1822,30 @@ function Unit:LoseLife(arg)
     self:SetLife(self:GetCurrentLife() - l)
 end
 
---- Получить хп количественно или в процентах от максимума
+--- Дать хп количественно или в процентах от максимума
 ---@param life real Количество хп в абсолютных величинах
 ---@param percent real Количество хп в процентах
+---@param show boolean Показывать ли исцеление
 ---@return nil
 function Unit:GainLife(arg)
     local l = self:GetPercentLifeOfMax(arg.percent) or arg.life
     self:SetLife(self:GetCurrentLife() + l)
-    TextTag(l, self:GetId()):Preset("heal")
-end
-
---- Реген HP по площади
----@param heal real Количество хп в абсолютных величинах
----@param overtime real Частота исцеления. По умолчанию 0
----@param location location Место исцеления
----@param radius real Радиус в метрах
----@return nil
-function Unit:HealNear(args)
-    local meters = METER * args.radius
-    local ot = args.overtime or 0.
-    local group = GetUnitsInRangeOfLocAll(meters, args.location)
-
-    local function act()
-        local u = GetEnumUnit()
-        if self:IsAlly(u) then
-            Unit(u):GainLife{ life = args.heal }
-        end
+    if arg.show then
+        TextTag(l, self:GetId()):Preset("heal")
     end
-    ForGroupBJ(group, act)
-    TriggerSleepAction(ot)
-    DestroyGroup(group)
 end
 
 --- Получить процент хп от максимума
 ---@param percent real Количество хп в процентах
 ---@return real
 function Unit:GetPercentLifeOfMax(percent)
-    if percent == nil then return nil end
+    if percent == nil then
+        return nil
+    end
     local factor = 100
-    if percent <= 1 then factor = 1 end
+    if percent <= 1 then
+        factor = 1
+    end
     return GetUnitState(self.unit, UNIT_STATE_MAX_LIFE) * (percent / factor)
 end
 
@@ -1555,7 +1863,9 @@ end
 function Unit:SetMaxLife(value, full)
     local f = full or false
     BlzSetUnitMaxHP(self.unit, value)
-    if f then self:SetLife(self:GetMaxLife()) end
+    if f then
+        self:SetLife(self:GetMaxLife())
+    end
 end
 
 --- Получить максимальное количество хп юнита
@@ -1570,7 +1880,7 @@ function Unit:GetCurrentLife()
     return GetUnitState(self.unit, UNIT_STATE_LIFE)
 end
 
--- Movement
+-- Передвижение
 
 --- Установить скорость передвижения юнита
 ---@param movespeed real
@@ -1597,8 +1907,11 @@ end
 ---@return nil
 function Unit:MoveToUnit(unit)
     local loc
-    if type(unit) == "table" then loc = unit:GetLoc()
-    else loc = GetUnitLoc(unit) end
+    if isTable(unit) then
+        loc = unit:GetLoc()
+    else
+        loc = GetUnitLoc(unit)
+    end
     IssuePointOrderLoc(self.unit, "move", loc)
 end
 
@@ -1629,7 +1942,7 @@ function Unit:GetLoc()
     return GetUnitLoc(self.unit)
 end
 
--- Animation
+-- Анимации
 
 --- Добавить тэг анимации
 ---@param tag string Название тэга
@@ -1645,7 +1958,7 @@ function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
 end
 
--- Meta
+-- Прочие методы
 
 --- Проверяет является ли юнит героем
 ---@return boolean
@@ -1657,7 +1970,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsAlly(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerAlly(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerAlly(self:GetOwner(), GetOwningPlayer(unit))
@@ -1667,7 +1980,7 @@ end
 ---@param unit unit Юнит
 ---@return boolean
 function Unit:IsEnemy(unit)
-    if type(unit) == "table" then
+    if isTable(unit) then
         return IsPlayerEnemy(self:GetOwner(), unit:GetOwner())
     end
     return IsPlayerEnemy(self:GetOwner(), GetOwningPlayer(unit))
@@ -1692,13 +2005,6 @@ function Unit:SetLevel(level)
     SetHeroLevel(self.unit, level, false)
 end
 
---- Установить количество брони
----@param armor real Количество брони в абсолютных величинах
----@return nil
-function Unit:SetArmor(armor)
-    BlzSetUnitArmor(self.unit, armor)
-end
-
 --- Установить время жизни юнита
 ---@param time real Время в абсолютных величинах
 ---@return nil
@@ -1707,7 +2013,7 @@ function Unit:ApplyTimedLife(time)
 end
 
 --- Воскрешает юнита
----@param location location Место воскрешения. Опционально
+---@param location location Место воскрешения. Опционально. По умолчанию воскрешает в той же точке, где умер
 ---@return nil
 function Unit:Revive(location)
     local loc = location or self:GetLoc()
@@ -1729,9 +2035,42 @@ function Unit:GetOwner()
 end
 
 --- Установить имя юниту
+---@param name string Имя юнита
 ---@return nil
 function Unit:SetName(name)
-    BlzSetUnitName(self.unit, name)
+    if self:IsHero() then
+        BlzSetHeroProperName(self.unit, name)
+    else
+        BlzSetUnitName(self.unit, name)
+    end
+end
+
+--- Получить имя юнита
+---@return string
+function Unit:GetName()
+    if self:IsHero() then
+        return GetHeroProperName(self.unit)
+    end
+    return GetUnitName(self.unit)
+end
+
+--- Активировать/деактивировать юнита
+---@param flag boolean true or false
+---@return nil
+function Unit:Pause(flag)
+    PauseUnit(self.unit, flag)
+end
+
+--- Отобразить юнита
+---@return nil
+function Unit:Show()
+    ShowUnitShow(self.unit)
+end
+
+--- Скрыть юнита
+---@return nil
+function Unit:Hide()
+    ShowUnitHide(self.unit)
 end
 
 --- Убить юнита
@@ -1746,10 +2085,10 @@ function Unit:Remove()
     RemoveUnit(self.unit)
 end
 
--- Copyright (c) meiso
+---@author meiso
 
---- Класс создания дамми-юнита.
---- Юнит используется для применения способностей
+---@class UnitSpell Класс создания дамми-юнита.
+---Юнит используется для применения способностей
 ---@param owner unit
 ---@param location location
 UnitSpell = {}
@@ -1777,16 +2116,19 @@ end
 ---@return boolean
 function UnitSpell:NearTarget(target)
     local loc
-    if type(target) == "table" then loc = target:GetLoc()
-    else loc = GetUnitLoc(target) end
+    if isTable(target) then
+        loc = target:GetLoc()
+    else
+        loc = GetUnitLoc(target)
+    end
     local target_point = Point(GetLocationX(loc), GetLocationY(loc))
     local unit_loc = self:GetLoc()
     local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))
     return target_point:atPoint(unit_point, true)
 end
 
--- Copyright (c) Vlod www.xgm.ru
--- Copyright (c) meiso
+---@author Vlod www.xgm.ru
+---@author meiso
 
 --- Система сохранений
 SaveSystem = {
@@ -1848,6 +2190,7 @@ SaveSystem = {
         seven = 7141,
         eight = 421,
         nine  = 259199,
+        ten   = 8286,
     },
 }
 
@@ -1863,7 +2206,7 @@ HEROES = {
     priest  = PRIEST,
 }
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Проверяет создан ли герой для игрока
 ---@return boolean
@@ -1874,7 +2217,7 @@ function SaveSystem.IsHeroNotCreated()
     return false
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Возвращает итератор на следующую область для считывания данных
 ---@param index int Текущее значение итератора
@@ -1926,18 +2269,20 @@ function SaveSystem.generation2()
     return SaveSystem.hash2
 end
 
+---@author meiso
 
 --- Возвращает ключ игрока
 ---@return int Ключ игрока
 function SaveSystem.GetUserKey()
     if SaveSystem.author > 0 then
-        Preloader("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preloader("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         local public_key = GetPlayerTechMaxAllowed(Player(25), -1)
         local secret_key = GetPlayerTechMaxAllowed(Player(25), 0)
         if public_key == nil then
             return 0
         end
-        if public_key <= 0 or public_key/8286 > SaveSystem.magic_number.nine then
+        if public_key <= 0 or
+                public_key / SaveSystem.magic_number.ten > SaveSystem.magic_number.nine then
             return 0
         end
 
@@ -1960,9 +2305,9 @@ function SaveSystem.CreateUserKey(salt, val)
     if SaveSystem.author > 0 then
         SaveSystem.hash1 = salt
         PreloadGenClear()
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(salt)..") \n //")
-        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(0)..","..I2S(val + SaveSystem.generation1())..") //")
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."user.txt")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(salt) .. ") \n //")
+        Preload("\")\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(0) .. "," .. I2S(val + SaveSystem.generation1()) .. ") //")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "user.txt")
         return val
     end
     return 0
@@ -1999,9 +2344,9 @@ function SaveSystem.LoadUserData()
             case = SaveSystem.data[i]
             if case == 1 then
                 local max_count_data = SaveSystem.data[i + 1]
-                local cjlocgn_00000004 = i + 1
+                local obj_i = i + 1
                 for j = 2, max_count_data do
-                    SaveSystem.user_data[j] = SaveSystem.data[cjlocgn_00000004 + j]
+                    SaveSystem.user_data[j] = SaveSystem.data[obj_i + j]
                 end
                 SaveSystem.user_data[1] = max_count_data
             end
@@ -2010,8 +2355,7 @@ function SaveSystem.LoadUserData()
     end
 end
 
-
--- Copyright (c) meiso
+---@author meiso
 
 --- Сохранаяет информацию о характеристиках, способностях и предметах
 ---@param i integer Текущий итератор
@@ -2268,6 +2612,7 @@ function SaveSystem.LoadBaseState(pl)
     end
 end
 
+---@author meiso
 
 --- Создает юнита из полученных данных
 ---@return nil
@@ -2342,9 +2687,9 @@ function SaveSystem.CheckDataIntegrity(author, user)
             end
 
             local result = math.fmod(math.fmod(math.fmod(math.fmod(author, SaveSystem.magic_number.two) *
-                               math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
-                               math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
+                    math.fmod(check_max_count_data, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(saved_encrypted_key, SaveSystem.magic_number.two), SaveSystem.magic_number.two) *
+                    math.fmod(user, SaveSystem.magic_number.two), SaveSystem.magic_number.two)
             if GetPlayerTechMaxAllowed(player_s, -3) == result then
                 return true
             end
@@ -2380,7 +2725,7 @@ function SaveSystem.afa(gc, pl, file_name)
 
         -- загружаем данные из save-файла
         if is_player_author then
-            Preloader("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preloader("save\\" .. SaveSystem.directory .. "\\" .. file_name)
         end
 
         TriggerSleepAction(0.)
@@ -2414,7 +2759,7 @@ function SaveSystem.Load()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            save_file = SubString(full_command_from_chat, 6, 16)..".txt"
+            save_file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             save_file = "default.txt"
         end
@@ -2422,12 +2767,12 @@ function SaveSystem.Load()
         SaveSystem.afa(SaveSystem.gamecache, GetTriggerPlayer(), save_file)
 
         for i = 1, #SaveSystem.data do
-            Preload(I2S(SaveSystem.data[i]).." data["..I2S(i).."] < load")
+            Preload(I2S(SaveSystem.data[i]) .. " data[" .. I2S(i) .. "] < load")
         end
         for j = 1, #SaveSystem.user_data do
-            Preload(I2S(SaveSystem.user_data[j]).." user_data["..I2S(j).."] < load")
+            Preload(I2S(SaveSystem.user_data[j]) .. " user_data[" .. I2S(j) .. "] < load")
         end
-        PreloadGenEnd("save\\"..SaveSystem.directory.."\\".."log_load.txt")
+        PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "log_load.txt")
         PreloadGenClear()
     end
 end
@@ -2488,7 +2833,6 @@ function SaveSystem.ada(is_player, file_name, u)
             SaveSystem.data[1] = item_data
             SaveSystem.hash1 = key
             SaveSystem.hash2 = key
-
             for i = 1, item_data do
                 encrypted_data = SaveSystem.data[i]
                 raw_index = math.fmod(raw_index + encrypted_data, SaveSystem.magic_number.four)
@@ -2509,6 +2853,7 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 local k = R2I((I2R(SaveSystem.generation1()) / SaveSystem.magic_number.nine) * n)
+                if k == 0 then k = 1 end
                 encrypted_data = SaveSystem.data[i]
                 SaveSystem.data[i] = SaveSystem.data[k]
                 SaveSystem.data[k] = encrypted_data
@@ -2525,22 +2870,22 @@ function SaveSystem.ada(is_player, file_name, u)
             n = item_data + 1
             for i = 1, n do
                 if data_copy[i] == nil or SaveSystem.data[i] == nil then
-                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "repeat, pls")
+                    DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "Something is wrong. Pls, contact the developers.")
                     return
                 end
-                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(data_copy[i])..","..I2S(SaveSystem.data[i])..") \n //")
+                Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(data_copy[i]) .. "," .. I2S(SaveSystem.data[i]) .. ") \n //")
             end
 
             -- сохранение данных в файл
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-1)..","..I2S(item_data)..") \n //")
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-2)..","..I2S(key)..") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-1) .. "," .. I2S(item_data) .. ") \n //")
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-2) .. "," .. I2S(key) .. ") \n //")
             -- смысл этих вычислений скрыт от мира сего
             local a = math.fmod(user_key, SaveSystem.magic_number.two) * math.fmod(raw_index, SaveSystem.magic_number.two)
             local b = math.fmod(a, SaveSystem.magic_number.two) * math.fmod(key, SaveSystem.magic_number.two)
             local c = math.fmod(b, SaveSystem.magic_number.two) * math.fmod(id_author, SaveSystem.magic_number.two)
             encrypted_data = math.fmod(c, SaveSystem.magic_number.two)
-            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25),"..I2S(-3)..","..I2S(encrypted_data)..") \n //")
-            PreloadGenEnd("save\\"..SaveSystem.directory.."\\"..file_name)
+            Preload("\")\n\n call SetPlayerTechMaxAllowed(Player(25)," .. I2S(-3) .. "," .. I2S(encrypted_data) .. ") \n //")
+            PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. file_name)
             PreloadGenClear()
 
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0, "save complite")
@@ -2565,7 +2910,7 @@ function SaveSystem.Save()
 
         -- определяем имя save-файла
         if StringLength(full_command_from_chat) > 6 then
-            file = SubString(full_command_from_chat, 6, 16)..".txt"
+            file = SubString(full_command_from_chat, 6, 16) .. ".txt"
         else
             file = "default.txt"
         end
@@ -2575,7 +2920,7 @@ function SaveSystem.Save()
     end
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 --- Возрождает юнита
 ---@return nil
@@ -2635,7 +2980,7 @@ function SaveSystem.AddHeroAbilities(class)
     hero:SetLevel(80)
 end
 
--- Copyright (c) 2022 meiso
+---@author meiso
 
 --- Добавляет нового юнита игроку
 ---@return nil
@@ -2663,7 +3008,7 @@ function SaveSystem.InitNewHeroEvent()
     event:AddAction(SaveSystem.AddNewHero)
 end
 
--- Copyright (c) 2022 meiso
+---@author meiso
 
 --- Сохраняет юнита игрока
 ---@return nil
@@ -2681,7 +3026,7 @@ function SaveSystem.InitSaveEvent()
     event:AddAction(SaveSystem.SaveHero)
 end
 
--- Copyright (c) 2022 meiso
+---@author meiso
 
 --- Загружает юнита
 ---@return nil
@@ -2700,8 +3045,9 @@ function SaveSystem.InitLoadEvent()
     event:AddAction(SaveSystem.LoadHero)
 end
 
--- Copyright (c) 2022 meiso
+---@author meiso
 
+---@class EquipSystem Обёртка над системой экипировки
 EquipSystem = {}
 
 --- Регистрирует предмет со способностями.
@@ -2709,11 +3055,10 @@ EquipSystem = {}
 ---@param items string Список предметов
 ---@param items_spells string Список способностей предметов
 ---@return nil
-function EquipSystem.RegisterItems(items, items_spells)
+function EquipSystem.RegisterItems()
     local count = 1
-    local items_ = zip(items, items_spells)
-    for _, item in pairs({table.unpack(items_)}) do
-        reg_item_eq(Items[item[1]], ItemsSpells[item[2]].str, count)
+    for _, item in pairs(Items) do
+        reg_item_eq(item.item, item.str, count)
     end
 end
 
@@ -2725,9 +3070,11 @@ end
 function EquipSystem.AddItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then u = unit:GetId() end
+    if isTable(unit) then
+        u = unit:GetId()
+    end
     for _, item in pairs(items) do
-        equip_items_id(u, Items[item], c)
+        equip_items_id(u, item.item, c)
     end
 end
 
@@ -2739,9 +3086,11 @@ end
 function EquipSystem.RemoveItemsToUnit(unit, items, count)
     local c = count or 1
     local u = unit
-    if type(unit) == "table" then u = unit:GetId() end
+    if isTable(unit) then
+        u = unit:GetId()
+    end
     for _, item in pairs(items) do
-        unequip_item_id(u, Items[item], c)
+        unequip_item_id(u, item.item, c)
     end
 end
 
@@ -2768,6 +3117,8 @@ end
 >> Примечания :
 1. в 'ablist' записываются id способностей предмета, без тегов и через запятую (Например : "I000,I001")
 --]]
+
+--Код взят в исходном виде и переписан под Lua (C) meiso
 
 function dummy_eq()
     return FourCC('e000')
@@ -2960,18 +3311,37 @@ function unequip_item_id(hero, id, c)
     end
 end
 
--- Copyright (c) 2022 meiso
+---@author meiso
 
 BuffSystem = {
     --- Таблица содержащая всех героев с бафами
-    buffs = {}
+    ---Формат:
+    ---{ unit = { buff, debuff, func, frame } }
+    buffs = {},
+    debuffs = {},
+    main_frame_buff = nil,
+    main_frame_debuff = nil,
 }
 
---- Регистрирует героя в системе бафов
+function BuffSystem.LoadFrame()
+    BuffSystem.main_frame_buff = Frame("BSMainFrame")
+    BuffSystem.main_frame_debuff = Frame("BSMainFrame")
+    --если ставить фрейм в упор к границе, то фрейм ужимает в два раза,
+    --потому немного смещаем бафы на позицию 0.015
+    BuffSystem.main_frame_buff:SetAbsPoint(FRAMEPOINT_CENTER, 0.015, 0.18)
+    BuffSystem.main_frame_debuff:SetAbsPoint(FRAMEPOINT_CENTER, 0.61, 0.18)
+    BuffSystem.main_frame_buff:Hide()
+    BuffSystem.main_frame_debuff:Hide()
+end
+
+--- Регистрирует героя в системе
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
-    if BuffSystem.IsHeroInSystem(hero) then return end
+    if isTable(hero) then hero = hero:GetId() end
+    if BuffSystem.IsHeroInSystem(hero) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
     BuffSystem.buffs[u] = {}
 end
@@ -2980,18 +3350,34 @@ end
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
+---@param is_debuff boolean Является баф дебафом
 ---@return nil
-function BuffSystem.AddBuffToHero(hero, buff, func)
-    if BuffSystem.IsBuffOnHero(hero, buff) then return end
+function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
+    if isTable(hero) then hero = hero:GetId() end
+    if BuffSystem.IsBuffOnHero(hero, buff) then
+        return
+    end
     local u = I2S(GetHandleId(hero))
-    table.insert(BuffSystem.buffs[u], { buff_ = buff, func_ = func })
+    if is_debuff then
+        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func, frame_ = Frame("BSIconTemp") })
+    else
+        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func, frame_ = Frame("BSIconTemp") })
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
+    if is_debuff then
+        BuffSystem.main_frame_debuff:Show()
+        BuffSystem._ShowDebuffs(u)
+    else
+        BuffSystem.main_frame_buff:Show()
+        BuffSystem._ShowBuffs(u)
+    end
 end
 
 --- Проверяет есть ли герой в системе бафов
 ---@param hero unit Id героя
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
         if name == u then
@@ -3006,12 +3392,21 @@ end
 ---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
-    if #BuffSystem.buffs[u] == 0 then return false end
+    if not BuffSystem.IsHeroInSystem(hero) then
+        return false
+    end
+    if #BuffSystem.buffs[u] == 0 then
+        return false
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return false end
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i] == nil then
+            return false
+        end
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             return true
         end
     end
@@ -3022,54 +3417,72 @@ end
 ---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
-function BuffSystem.RemoveBuffToHero(hero, buff)
+function BuffSystem.RemoveBuffFromHero(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].buff_ == buff then
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.buffs[u][i] = nil
+        end
+    end
+    BuffSystem._ShowBuffs(u)
+    BuffSystem._ShowDebuffs(u)
+end
+
+--- Использует функцию для удаления бафа
+---@param hero unit Id героя
+---@param buff ability Название бафа
+---@return nil
+function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i] == nil then
+            return
+        end
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.main_frame_buff:Destroy()
+            BuffSystem.main_frame_debuff:Destroy()
+            BuffSystem.buffs[u][i].func_()
             BuffSystem.buffs[u][i] = nil
         end
     end
 end
 
---- Использует лямбда-функцию для удаления бафа
----@param hero unit Id героя
----@param buff ability Название бафа
----@return nil
-function BuffSystem.RemoveBuffToHeroByFunc(hero, buff)
-    local u = I2S(GetHandleId(hero))
-    for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then return end
-        if BuffSystem.buffs[u][i].buff_ == buff then
-            BuffSystem.buffs[u][i].func_()
-        end
-    end
-end
-
---- Проверят относится ли баф к группе однотипных бафов
----@param hero unit
+--- Проверяет относится ли баф к группе однотипных бафов
+---@param hero unit Юнит
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
-        paladin = {BLESSING_OF_KINGS, BLESSING_OF_WISDOM, BLESSING_OF_SANCTUARY, BLESSING_OF_MIGHT},
+        paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
         shaman = {},
         druid = {},
     }
 
     local debuffs_exceptions = {
-        paladin = {JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT},
+        paladin = { JUDGEMENT_OF_WISDOM, JUDGEMENT_OF_LIGHT },
     }
 
     local function getBuffsByClass()
         for class, buffs in pairs(buffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return buffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return buffs_exceptions[class]
+                end
             end
         end
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
-                if buffs[i] == buff then return debuffs_exceptions[class] end
+                if buffs[i] == buff then
+                    return debuffs_exceptions[class]
+                end
             end
         end
         return {}
@@ -3077,7 +3490,7 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 
     for _, buff_ in pairs(getBuffsByClass()) do
         if buff_ ~= buff then
-            BuffSystem.RemoveBuffToHeroByFunc(hero, buff_)
+            BuffSystem.RemoveBuffFromHeroByFunc(hero, buff_)
         end
     end
 end
@@ -3086,9 +3499,31 @@ end
 ---@param hero unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
     for i = 1, #BuffSystem.buffs[u] do
-        BuffSystem.RemoveBuffToHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
+    end
+end
+
+--- Удалить баф со всех юнитов
+---@param buff ability Название бафа
+---@return nil
+function BuffSystem.RemoveBuffFromUnits(buff)
+    for unit, _ in pairs(BuffSystem.buffs) do
+        for i = 1, #BuffSystem.buffs[unit] do
+            if BuffSystem.buffs[unit][i] == nil then
+                return
+            end
+            if BuffSystem.buffs[unit][i].buff_ == buff or
+                    BuffSystem.buffs[unit][i].debuff_ == buff then
+                BuffSystem.buffs[unit][i].frame_:Destroy()
+                BuffSystem.buffs[unit][i] = nil
+            end
+        end
+        BuffSystem._ShowBuffs(unit)
+        BuffSystem._ShowDebuffs(unit)
     end
 end
 
@@ -3096,10 +3531,96 @@ end
 ---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RemoveHero(hero)
+    if isTable(hero) then hero = hero:GetId() end
     local u = I2S(GetHandleId(hero))
+    --TODO: корректно удалять все бафы и фреймы!!
     BuffSystem.buffs[u] = nil
 end
 
+--- Усилить воздействие способности на цель взависимости от наличия определенного бафа
+---@param hero unit Юнит, на которого воздействуют спеллом
+---@param value integer Количество урона/исцеления воздействующее на цель
+---@return real
+function BuffSystem.ImproveSpell(hero, value)
+    if isTable(hero) then hero = hero:GetId() end
+    local improving_buffs = {
+        guardian_spirit,
+    }
+    if not BuffSystem.IsHeroInSystem(hero) then
+        return value
+    end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        for _, buff in pairs(improving_buffs) do
+            if BuffSystem.buffs[u][i] == nil then
+                return value
+            end
+            if buff == BuffSystem.buffs[u][i].buff_ then
+                return value * 1.4
+            end
+        end
+    end
+    return value
+end
+
+function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
+    --расположение иконки бафа по X
+    --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
+    local x = 0.005 + (count * icon_frame:GetWidth()) + (0.0025 * count)
+    --на сколько расширить фон
+    --(ширина иконки * 2 + расстояние между иконками) * количество всех бафов
+    local _add = (icon_frame:GetWidth() * 2 + 0.005) * count
+    --0.03 - базовая ширина фона
+    main_frame:SetWidth(0.03 + _add)
+    icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+end
+
+function BuffSystem._SetIcon(icon)
+    local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
+    buff_icon:SetTexture(icon)
+end
+
+function BuffSystem._ShowBuffs(u)
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].buff_ ~= "" then
+            count = count + 1
+            local buff_ = BuffSystem.buffs[u][i].buff_
+            BuffSystem._ResizeMainFrame(
+                    BuffSystem.main_frame_buff,
+                    BuffSystem.buffs[u][i].frame_,
+                    count - 1
+            )
+            BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(buff_.buff_tooltip, buff_.buff_desc)
+        end
+    end
+    if count == 0 then
+        BuffSystem.main_frame_buff:Hide()
+    end
+end
+
+function BuffSystem._ShowDebuffs(u)
+    local count = 0
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].debuff_ ~= "" then
+            count = count + 1
+            local debuff_ = BuffSystem.buffs[u][i].debuff_
+            BuffSystem._ResizeMainFrame(
+                    BuffSystem.main_frame_debuff,
+                    BuffSystem.buffs[u][i].frame_,
+                    count - 1
+            )
+            BuffSystem._SetIcon(debuff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(debuff_.buff_tooltip, debuff_.buff_desc)
+        end
+    end
+    if count == 0 then
+        BuffSystem.main_frame_debuff:Hide()
+    end
+end
+
+---@author meiso
 
 BattleSystem = {
     target = nil,
@@ -3111,7 +3632,6 @@ function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
-
     settarget:RegisterPlayerMouseDown()
 
     damaged:AddAction(BattleSystem.ShowDamage)
@@ -3148,6 +3668,7 @@ function BattleSystem.ShowDamage()
     end
 end
 
+---@author meiso
 
 -- Обертки над близовскими функциями для работы с областями и их переделка под себя
 
@@ -3198,20 +3719,93 @@ function GetVectorBetweenUnits(first_unit, second_unit, process)
     return Location(vector_x, vector_y)
 end
 
+---@author meiso
+
+-- Описания классов
+
+paladin_tooltip = "Паладин"
+paladin_text = "Паладины бьются с врагом лицом к лицу, " ..
+        "полагаясь на тяжелые доспехи и навыки целительства. " ..
+        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
+        "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
+        "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+
+priest_tooltip = "Жрец"
+priest_text = "Жрецы могут задействовать мощную целительную магию, " ..
+        "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
+        "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
+        "доспехов заставляют жрецов бояться сближения с противником. " ..
+        "Опытные жрецы используют боевые и контролирующие способности, " ..
+        "не допуская гибели членов отряда."
+
+deathknight_tooltip = "Рыцарь смерти"
+deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
+        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
+        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
+        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
+        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
+        "соответствующим образом направлять свои атаки."
+
+druid_tooltip = "Друид"
+druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
+        "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
+        "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
+        "подбирать облик к ситуации, так как каждый из них служит определенной цели."
+
+shaman_tooltip = "Шаман"
+shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
+        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
+        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
+        "учитывать сильные и слабые стороны врага."
+
+warrior_tooltip = "Воин"
+warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
+        "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
+        "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
+        "хрупких союзников. Для максимальной эффективности воины должны " ..
+        "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
+
+mage_tooltip = "Маг"
+mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
+        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
+        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
+        "обездвиживают его."
+
+rogue_tooltip = "Разбойник"
+rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
+        "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
+        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
+        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
+        "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
+
+warlock_tooltip = "Чернокнижник"
+warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
+        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
+        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
+        "поэтому подставляют под вражеские удары своих слуг."
+
+hunter_tooltip = "Охотник"
+hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, " ..
+        "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
+        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
+        "и издалека. Кроме того, охотники очень подвижны. " ..
+        "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
+
+---@author meiso
 
 HeroSelector = {
-    table          = nil,
-    paladin        = nil,
-    priest         = nil,
-    dk             = nil,
-    druid          = nil,
-    shaman         = nil,
-    warrior        = nil,
-    mage           = nil,
-    rogue          = nil,
-    warlock        = nil,
-    hunter         = nil,
-    hero           = nil,
+    table = nil,
+    paladin = nil,
+    priest = nil,
+    dk = nil,
+    druid = nil,
+    shaman = nil,
+    warrior = nil,
+    mage = nil,
+    rogue = nil,
+    warlock = nil,
+    hunter = nil,
+    hero = nil,
     selected_heroes = {},
 }
 
@@ -3246,48 +3840,56 @@ end
 function HeroSelector.InitDKSelector()
     HeroSelector.dk = Frame(Frame:GetFrameByName("DeathKnight_Button"))
     HeroSelector.dk:SetTooltip(deathknight_tooltip, deathknight_text)
+    HeroSelector.dk:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.dk)
 end
 
 function HeroSelector.InitDruidSelector()
     HeroSelector.druid = Frame(Frame:GetFrameByName("Druid_Button"))
     HeroSelector.druid:SetTooltip(druid_tooltip, druid_text)
+    HeroSelector.druid:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.druid)
 end
 
 function HeroSelector.InitShamanSelector()
     HeroSelector.shaman = Frame(Frame:GetFrameByName("Shaman_Button"))
     HeroSelector.shaman:SetTooltip(shaman_tooltip, shaman_text)
+    HeroSelector.shaman:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.shaman)
 end
 
 function HeroSelector.InitWarriorSelector()
     HeroSelector.warrior = Frame(Frame:GetFrameByName("Warrior_Button"))
     HeroSelector.warrior:SetTooltip(warrior_tooltip, warrior_text)
+    HeroSelector.warrior:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.warrior)
 end
 
 function HeroSelector.InitMageSelector()
     HeroSelector.mage = Frame(Frame:GetFrameByName("Mage_Button"))
     HeroSelector.mage:SetTooltip(mage_tooltip, mage_text)
+    HeroSelector.mage:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.mage)
 end
 
 function HeroSelector.InitRogueSelector()
     HeroSelector.rogue = Frame(Frame:GetFrameByName("Rogue_Button"))
     HeroSelector.rogue:SetTooltip(rogue_tooltip, rogue_text)
+    HeroSelector.rogue:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.rogue)
 end
 
 function HeroSelector.InitWarlockSelector()
     HeroSelector.warlock = Frame(Frame:GetFrameByName("Warlock_Button"))
     HeroSelector.warlock:SetTooltip(warlock_tooltip, warlock_text)
+    HeroSelector.warlock:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.warlock)
 end
 
 function HeroSelector.InitHunterSelector()
     HeroSelector.hunter = Frame(Frame:GetFrameByName("Hunter_Button"))
     HeroSelector.hunter:SetTooltip(hunter_tooltip, hunter_text)
+    HeroSelector.hunter:Hide()
     HeroSelector.ConfirmCharacter(HeroSelector.hunter)
 end
 
@@ -3322,11 +3924,15 @@ end
 function HeroSelector.AcceptHero(hero)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
-            if h == hero then return true end
+            if h == hero then
+                return true
+            end
         end
         return false
     end
-    if check() then return end
+    if check() then
+        return
+    end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.CreateHero()
 end
@@ -3335,12 +3941,283 @@ function HeroSelector.Close()
     HeroSelector.table:Destroy()
 end
 
+---@author meiso
+
+------------------------------Paladin------------------------------
+
+avengers_shield = Ability {
+    ability = AVENGERS_SHIELD,
+    tooltip = "Щит мстителя",
+    manacost = 26,
+    cooldown = 30.,
+    key = "C",
+    text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
+            "Щит затем перескакивает на других находящихся поблизости противников. " ..
+            "Способен воздействовать на 3 цели.",
+    icon = "ReplaceableTextures/CommandButtons/avengers_shield.tga"
+}
+
+blessing_of_kings = Ability {
+    ability = BLESSING_OF_KINGS,
+    manacost = 6,
+    tooltip = "Благословение королей",
+    key = "Q",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
+    buff_desc = "Все характеристики повышены на 10%."
+}
+
+blessing_of_might = Ability {
+    ability = BLESSING_OF_MIGHT,
+    manacost = 5,
+    tooltip = "Благословение могущества",
+    key = "W",
+    text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
+    buff_desc = "Сила атаки увеличена на 550."
+}
+
+blessing_of_wisdom = Ability {
+    ability = BLESSING_OF_WISDOM,
+    manacost = 5,
+    tooltip = "Благословение мудрости",
+    key = "E",
+    text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
+    buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
+}
+
+blessing_of_sanctuary = Ability {
+    ability = BLESSING_OF_SANCTUARY,
+    manacost = 7,
+    tooltip = "Благословение неприкосновенности",
+    key = "R",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
+    buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
+}
+
+consecration = Ability {
+    ability = CONSECRATION,
+    manacost = 22,
+    cooldown = 8.,
+    tooltip = "Освящение",
+    key = "R",
+    text = "Освящает участок земли, на котором стоит паладин, " ..
+            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
+    icon = "ReplaceableTextures/CommandButtons/consecration.tga"
+}
+
+judgement_of_light_tr = Ability {
+    ability = JUDGEMENT_OF_LIGHT_TR,
+    manacost = 5,
+    cooldown = 10.,
+    tooltip = "Правосудие света",
+    key = "D",
+    text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga",
+    buff_desc = "Атакуя цель, противник может восстановить здоровье."
+}
+
+judgement_of_wisdom_tr = Ability {
+    ability = JUDGEMENT_OF_WISDOM_TR,
+    manacost = 5,
+    cooldown = 10.,
+    tooltip = "Правосудие мудрости",
+    key = "F",
+    text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
+            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga",
+    buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
+}
+
+shield_of_righteousness = Ability {
+    ability = SHIELD_OF_RIGHTEOUSNESS,
+    manacost = 6,
+    cooldown = 6.,
+    tooltip = "Щит праведности",
+    key = "W",
+    text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
+            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
+    icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
+}
+
+divine_shield = Ability {
+    ability = DIVINE_SHIELD,
+    manacost = 3,
+    cooldown = 60. * 5,
+    tooltip = "Божественный щит",
+    key = "Z",
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
+}
+
+hammer_righteous = Ability {
+    ability = HAMMER_RIGHTEOUS,
+    manacost = 6,
+    cooldown = 6.,
+    tooltip = "Молот праведника",
+    key = "",
+    text = "Поражает светлой магией текущую цель и до 2 находящихся поблизости целей. " ..
+            "Величина наносимого урона равна урону в секунду от оружия в правой руке, умноженному на 4.",
+}
+
+ALL_MAIN_PALADIN_SPELLS = {
+    divine_shield,
+    hammer_righteous,
+    avengers_shield,
+    consecration,
+    judgement_of_light_tr,
+    judgement_of_wisdom_tr,
+    shield_of_righteousness,
+}
+
+ALL_OFF_PALADIN_SPELLS = {
+    blessing_of_kings,
+    blessing_of_might,
+    blessing_of_wisdom,
+    blessing_of_sanctuary,
+}
+
+------------------------------Priest------------------------------
+
+flash_heal = Ability {
+    ability = FLASH_HEAL,
+    manacost = 18,
+    tooltip = "Быстрое исцеление",
+    key = "Q",
+    text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
+    icon = "ReplaceableTextures/CommandButtons/flash_heal.tga"
+}
+
+renew = Ability {
+    ability = RENEW,
+    manacost = 17,
+    tooltip = "Обновление",
+    key = "E",
+    text = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
+    icon = "ReplaceableTextures/CommandButtons/renew.tga",
+    buff_desc = "Восстановление 280 ед. здоровья раз в 3 с."
+}
+
+power_word_shield = Ability {
+    ability = POWER_WORD_SHIELD,
+    manacost = 23,
+    cooldown = 4.,
+    tooltip = "Слово силы: Щит",
+    key = "S",
+    text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
+            "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
+            "получением урона. Повторно наложить щит можно только через 15 сек.",
+    icon = "ReplaceableTextures/CommandButtons/power_word_shield.tga",
+    buff_desc = "Поглощение урона."
+}
+
+weakened_soul = Ability {
+    ability = "",
+    tooltip = "Ослабленная душа",
+    key = "Q",
+    text = "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
+    icon = "ReplaceableTextures/CommandButtons/weakened_soul.tga"
+}
+
+guardian_spirit = Ability {
+    ability = GUARDIAN_SPIRIT,
+    manacost = 6,
+    cooldown = 60. * 3,
+    tooltip = "Оберегающий дух",
+    key = "R",
+    text = "Призывает оберегающего духа для охраны дружественной цели. " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
+            "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
+            "50% ее максимального запаса здоровья. Время действия – 10 сек.",
+    icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
+    buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
+}
+
+prayer_of_mending = Ability {
+    ability = PRAYER_OF_MENDING,
+    manacost = 15,
+    cooldown = 10.,
+    tooltip = "Молитва восстановления",
+    key = "D",
+    text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
+            "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
+            "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
+            "только на одну цель одновременно.",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    buff_desc = "Восстанавливает 1043 ед. здоровья при последующем получении урона."
+}
+
+circle_of_healing = Ability {
+    ability = CIRCLE_OF_HEALING,
+    manacost = 21,
+    cooldown = 6.,
+    tooltip = "Круг исцеления",
+    key = "W",
+    text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
+            "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
+    icon = "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
+}
+
+power_word_fortitude = Ability {
+    ability = POWER_WORD_FORTITUDE,
+    manacost = 27,
+    tooltip = "Молитва стойкости",
+    key = "Q",
+    text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    buff_desc = "Выносливость повышена на 165."
+}
+
+inner_fire = Ability {
+    ability = INNER_FIRE,
+    manacost = 14,
+    tooltip = "Внутренний огонь",
+    key = "W",
+    text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
+            "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
+            "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
+    icon = "ReplaceableTextures/CommandButtons/BTNInnerFire.blp",
+    buff_desc = "Броня усилена на 2440, а сила заклинаний увеличена на 120."
+}
+
+spirit_of_redemption = Ability {
+    ability = SPIRIT_OF_REDEMPTION,
+    tooltip = "Дух воздаяния",
+    text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
+            "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
+            "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
+    icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
+}
+
+ALL_MAIN_PRIEST_SPELLS = {
+    flash_heal,
+    renew,
+    circle_of_healing,
+    prayer_of_mending,
+    power_word_shield,
+    guardian_spirit,
+}
+
+ALL_OFF_PRIEST_SPELLS = {
+    power_word_fortitude,
+    inner_fire,
+    spirit_of_redemption,
+}
+
+------------------------------XXXXXXX------------------------------
+
 
 function DummyForDPS(location)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(500000, true)
-    d:SetBaseDamage(2000.)
+    d:SetBaseDamage(4000.)
 end
 
 
@@ -3351,12 +4228,15 @@ function DummyForHealing(location)
     d:SetLife(100)
 end
 
+---@author meiso
 
 function CultAdherent.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultAdherent.unit:DealMagicDamageLoc {
-        damage=1504, location=CultAdherent.unit:GetLoc(), radius=8
+        damage = 1504,
+        location = CultAdherent.unit:GetLoc(),
+        radius = 8,
     }
     CultAdherent.summoned = false
     CultAdherent.morphed = false
@@ -3377,6 +4257,7 @@ function CultAdherent.InitDarkMartyrdom()
     event:AddAction(CultAdherent.DarkMartyrdom)
 end
 
+---@author meiso
 
 function CultAdherent.Init(location, face)
     local current_hp
@@ -3410,12 +4291,15 @@ function CultAdherent.Init(location, face)
     CultAdherent.InitDarkMartyrdom()
 end
 
+---@author meiso
 
 function CultFanatic.DarkMartyrdom()
     -- взрывается нанося урон в радиусе 8 метров
     --TODO: добавить эффект и паузу
     CultFanatic.unit:DealMagicDamageLoc {
-        damage=1504, location=CultFanatic.unit:GetLoc(), radius=8
+        damage = 1504,
+        location = CultFanatic.unit:GetLoc(),
+        radius = 8,
     }
     CultFanatic.summoned = false
     CultFanatic.morphed = false
@@ -3436,12 +4320,15 @@ function CultFanatic.InitDarkMartyrdom()
     event:AddAction(CultFanatic.DarkMartyrdom)
 end
 
-
+---@author meiso
+---
 function CultFanatic.Init(location, face)
     local current_hp
     --определяем кого суммонить
     local fanatic = CULT_FANATIC
-    if CultFanatic.morphed then fanatic = CULT_FANATIC_MORPH end
+    if CultFanatic.morphed then
+        fanatic = CULT_FANATIC_MORPH
+    end
 
     --если уже призван - уберём и сохраним хп
     if CultFanatic.unit then
@@ -3460,16 +4347,21 @@ function CultFanatic.Init(location, face)
         CultFanatic.unit:SetLife(current_hp)
     end
 
-    --CultFanatic.unit:SetBaseDamage(1881, 1)
+    CultFanatic.unit:SetBaseDamage(1881, 1)
     CultFanatic.unit:SetArmor(220)
 
     CultFanatic.InitDarkMartyrdom()
 end
 
+---@author meiso
 
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
+    -- если в пати менее трёх игроков - шип не бросаем
+    if CountUnitsInGroup(gr) < 3 then
+        return
+    end
     local target_enemy = GetUnitInArea(gr)
     local target_enemy_health = GetUnitState(target_enemy, UNIT_STATE_MAX_LIFE)
 
@@ -3482,7 +4374,7 @@ function LordMarrowgar.BoneSpike()
 
         PauseUnit(target_enemy, true)
         PauseUnit(bone_spike_obj, true)
-        
+
         -- сразу 9к
         SetUnitState(target_enemy, UNIT_STATE_LIFE, GetUnitState(target_enemy, UNIT_STATE_LIFE) - 9000.)
 
@@ -3492,7 +4384,7 @@ function LordMarrowgar.BoneSpike()
 
             -- TODO: поменять время разложения
             -- если шип уничтожен - выходим и сбрасываем игрока
-            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0  then
+            if GetUnitState(bone_spike_obj, UNIT_STATE_LIFE) <= 0 then
                 SetUnitAnimation(bone_spike_obj, "Decay")
                 SetUnitFlyHeight(target_enemy, 0., 0.)
                 PauseUnit(target_enemy, false)
@@ -3526,6 +4418,7 @@ function LordMarrowgar.InitBoneSpike()
 end
 
 
+---@author meiso
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
@@ -3549,7 +4442,9 @@ function LordMarrowgar.Coldflame()
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
             LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
-            if coldflame_obj:GetCurrentLife() <= 0 then break end
+            if coldflame_obj:GetCurrentLife() <= 0 then
+                break
+            end
         end
         LordMarrowgar.coldflame_effect = false
     end
@@ -3572,45 +4467,46 @@ end
 
 
 function LordMarrowgar.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
     LordMarrowgar.unit:SetLevel(83)
 
     LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
-    --LordMarrowgar.unit:AddAbilities(WHIRLWIND)
+    LordMarrowgar.unit:AddAbilities(WHIRLWIND)
 
     LordMarrowgar.InitColdflame()
-    --LordMarrowgar.InitBoneSpike()
-    --LordMarrowgar.InitWhirlwind()
+    LordMarrowgar.InitBoneSpike()
+    LordMarrowgar.InitWhirlwind()
 end
 
-
-function LordMarrowgar.ResetAnimation()
-    if LordMarrowgar.whirlwind_effect then
-        LordMarrowgar.whirlwind_effect = false
-    end
-    DestroyTimer(GetExpiredTimer())
-end
+---@author meiso
 
 function LordMarrowgar.Whirlwind()
-    local whirlwind_timer = CreateTimer()
+    local whirlwind_timer = Timer(GetRandomReal(20., 30.))
+    local timer_reset = Timer(5.)
+
+    local function reset_anim()
+        if LordMarrowgar.whirlwind_effect then
+            LordMarrowgar.whirlwind_effect = false
+        end
+        timer_reset:Destroy()
+    end
 
     local function action()
-        local timer_reset = CreateTimer()
         IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
-        TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
-        DestroyTimer(whirlwind_timer)
+        timer_reset:SetFunc(reset_anim)
+        timer_reset:Start()
+        whirlwind_timer:Destroy()
     end
 
     if LordMarrowgar.whirlwind_effect then
-        TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
+        whirlwind_timer:SetFunc(action)
+        whirlwind_timer:Start()
     end
 end
 
@@ -3629,6 +4525,7 @@ function LordMarrowgar.InitWhirlwind()
     event:AddAction(LordMarrowgar.Whirlwind)
 end
 
+---@author meiso
 
 function LadyDeathwhisper.DeathAndDecay()
     local model = "Abilities\\Spells\\Items\\VampiricPotion\\VampPotionCaster.mdl"
@@ -3637,7 +4534,7 @@ function LadyDeathwhisper.DeathAndDecay()
         local loc = GetUnitLoc(GetAttacker())
         effect = AddSpecialEffectLoc(model, loc)
         LadyDeathwhisper.unit:DealMagicDamageLoc {
-            damage=450., location=loc, radius=15
+            damage = 450., location = loc, radius = 15
         }
         TriggerSleepAction(10.)
         LadyDeathwhisper.death_and_decay_effect = false
@@ -3660,6 +4557,7 @@ function LadyDeathwhisper.InitDeathAndDecay()
     event:AddAction(LadyDeathwhisper.DeathAndDecay)
 end
 
+---@author meiso
 
 function LadyDeathwhisper.DominateMind()
     --TODO: исправить на нормальную реализацию
@@ -3689,6 +4587,7 @@ function LadyDeathwhisper.InitDominateMind()
     event:AddAction(LadyDeathwhisper.DominateMind)
 end
 
+---@author meiso
 
 function LadyDeathwhisper.FrostBolt()
     --TriggerSleepAction(10.)
@@ -3704,7 +4603,6 @@ function LadyDeathwhisper.FrostBolt()
         fb:MoveToUnit(enemy)
         if fb:NearTarget(enemy) then
             local damage = GetRandomInt(100., 120.)
-            print("FrostBolt", damage)
             LadyDeathwhisper.unit:DealMagicDamage(enemy, damage)
             enemy:SetMoveSpeed(enemy_movespeed / 2)
             break
@@ -3729,6 +4627,7 @@ function LadyDeathwhisper.InitFrostBolt()
 end
 
 
+---@author meiso
 
 function LadyDeathwhisper.FrostBoltVolley()
     TriggerSleepAction(15.)
@@ -3780,33 +4679,32 @@ end
 
 
 function LadyDeathwhisper.Init()
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "MP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "MP_50K"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
 
     LadyDeathwhisper.unit:SetLevel(83)
     LadyDeathwhisper.unit:SetMana(500)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
-    --EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {"MP_ITEM"}, 4)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
 
     -- both phase
-    --LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitDeathAndDecay()
     LadyDeathwhisper.InitSummoning()
     -- только в 25-ке
     --LadyDeathwhisper.InitDominateMind()
 
     -- first phase
     LadyDeathwhisper.InitManaShield()
-    --LadyDeathwhisper.InitShadowBolt()
+    LadyDeathwhisper.InitShadowBolt()
 
     -- second phase
-    --LadyDeathwhisper.InitFrostBolt()
-    --LadyDeathwhisper.InitFrostBoltVolley()
+    LadyDeathwhisper.InitFrostBolt()
+    LadyDeathwhisper.InitFrostBoltVolley()
 end
 
+---@author meiso
 
 function LadyDeathwhisper.ManaShield()
     local event = EventsUnit(LadyDeathwhisper.unit)
@@ -3821,11 +4719,16 @@ function LadyDeathwhisper.ManaShield()
     local function ManaShield()
         local damage = GetEventDamage()
 
-        if damage == 0 then event:Destroy() return end
+        if damage == 0 then
+            event:Destroy()
+            return
+        end
 
         TriggerSleepAction(0.7)
-        LadyDeathwhisper.unit:GainLife{life=damage}
-        LadyDeathwhisper.unit:LoseMana{mana=damage, check=false}
+        --можно было бы реализовать через BlzSetEventDamage, но в оригинале
+        --хп у Леди явно регенилось от маны
+        LadyDeathwhisper.unit:GainLife { life = damage }
+        LadyDeathwhisper.unit:LoseMana { mana = damage, check = false }
         event:Destroy()
     end
 
@@ -3859,6 +4762,7 @@ function LadyDeathwhisper.InitManaShield()
 end
 
 
+---@author meiso
 
 function LadyDeathwhisper.ShadowBolt()
     TriggerSleepAction(10.)
@@ -3896,6 +4800,7 @@ function LadyDeathwhisper.InitShadowBolt()
 end
 
 
+---@author meiso
 
 function LadyDeathwhisper.Summoning()
     if not CultAdherent.summoned and not CultFanatic.summoned then
@@ -3932,6 +4837,7 @@ function LadyDeathwhisper.InitSummoning()
     event:AddAction(LadyDeathwhisper.Summoning)
 end
 
+---@author meiso
 
 function Paladin.AvengersShield()
     local target = Unit(GetSpellTargetUnit())
@@ -3951,7 +4857,9 @@ function Paladin.AvengersShield()
 
     local function TargetTookDamage(target_, exc)
         for i = 1, #exc do
-            if target_ == exc[i] then return true end
+            if target_ == exc[i] then
+                return true
+            end
         end
         return false
     end
@@ -3980,7 +4888,9 @@ function Paladin.AvengersShield()
         shield:MoveToUnit(target)
         if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
         if shield:NearTarget(target) then
@@ -3989,7 +4899,9 @@ function Paladin.AvengersShield()
             TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            if target == 0 then break end
+            if target == 0 then
+                break
+            end
             i = i + 1
         end
     end
@@ -3998,77 +4910,64 @@ function Paladin.AvengersShield()
 end
 
 function Paladin.IsAvengersShield()
-    return GetSpellAbilityId() == AVENGERS_SHIELD
+    return avengers_shield:SpellCasted()
 end
 
 function Paladin.InitAvengersShield()
-    Ability(
-            AVENGERS_SHIELD,
-            "Щит мстителя (C)",
-            "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
-            "Щит затем перескакивает на других находящихся поблизости противников. " ..
-            "Способен воздействовать на 3 цели."
-    )
-    Paladin.hero:SetAbilityManacost(AVENGERS_SHIELD, 26)
-    Paladin.hero:SetAbilityCooldown(AVENGERS_SHIELD, 30.)
+    avengers_shield:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
     event:AddAction(Paladin.AvengersShield)
 end
 
+---@author meiso
 
-function Paladin.RemoveBlessingOfKings(unit, stat, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat[1], false)
-        SetHeroAgi(unit, GetHeroAgi(unit, false) - stat[2], false)
-        SetHeroInt(unit, GetHeroInt(unit, false) - stat[3], false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_KINGS)
+function Paladin.RemoveBlessingOfKings(unit, stat)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        unit:AddStr(-stat[1])
+        unit:AddAgi(-stat[2])
+        unit:AddInt(-stat[3])
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfKings()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_KINGS) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_KINGS)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_kings)
     end
 
     --массив с доп. статами
     local stat = {
-        R2I(GetHeroStr(unit, false) * 0.1),
-        R2I(GetHeroAgi(unit, false) * 0.1),
-        R2I(GetHeroInt(unit, false) * 0.1)
+        R2I(unit:GetStr() * 0.1),
+        R2I(unit:GetAgi() * 0.1),
+        R2I(unit:GetInt() * 0.1),
     }
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat[1], false)
-    SetHeroAgi(unit, GetHeroAgi(unit, false) + stat[2], false)
-    SetHeroInt(unit, GetHeroInt(unit, false) + stat[3], false)
+    --бафаем цель
+    unit:AddStr(stat[1])
+    unit:AddAgi(stat[2])
+    unit:AddInt(stat[3])
 
-    --создаем лямбду для снятия бафа
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfKings(unit, stat, timer) end
-
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_KINGS, remove_buff)
-
-    --скидываем баф через 10 минут
-    TimerStart(timer, 600., false, remove_buff)
-
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfKings(unit, stat)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfKings()
-    return GetSpellAbilityId() == BLESSING_OF_KINGS
+    return blessing_of_kings:SpellCasted()
 end
 
 function Paladin.InitBlessingOfKings()
-    Ability(
-            BLESSING_OF_KINGS,
-            "Благословение королей (Z)",
-            "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_KINGS, 6)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_KINGS, 1.5)
+    blessing_of_kings:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4076,101 +4975,88 @@ function Paladin.InitBlessingOfKings()
     event:AddAction(Paladin.BlessingOfKings)
 end
 
+---@author meiso
 
-function Paladin.RemoveBlessingOfMight(unit, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - 225, false)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_MIGHT)
+function Paladin.RemoveBlessingOfMight(unit)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+        unit:SetBaseDamage(unit:GetBaseDamage() - 550 // DPS)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfMight()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_MIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_MIGHT)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
     end
 
-    -- fixme: увеличивать урон напрямую (3.5 AP = 1 ед. урона)
-    SetHeroStr(unit, GetHeroStr(unit, false) + 225, false)
+    unit:SetBaseDamage(unit:GetBaseDamage() + 550 // DPS)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfMight(unit, timer) end
-
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_MIGHT, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfMight(unit)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfMight()
-    return GetSpellAbilityId() == BLESSING_OF_MIGHT
+    return blessing_of_might:SpellCasted()
 end
 
 function Paladin.InitBlessingOfMight()
-    Ability(
-            BLESSING_OF_MIGHT,
-            "Благословение могущества (V)",
-            "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_MIGHT, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_MIGHT, 1.5)
+    blessing_of_might:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
     event:AddAction(Paladin.BlessingOfMight)
 end
-    
 
+---@author meiso
 
-function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
-        SetHeroStr(unit, GetHeroStr(unit, false) - stat, false)
+function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
+        unit:AddStr(-stat)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_SANCTUARY)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfSanctuary()
-    local unit = GetSpellTargetUnit()
-    local items_list = {"DEC_DMG_ITEM"}
-    local items_spells_list = {"DECREASE_DMG"}
+    local unit = Unit(GetSpellTargetUnit())
+    local timer = Timer(600.)
+    local items_list = { Items.BLESSING_OF_SANCTUARY_ITEM }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_SANCTUARY) then
-        BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_SANCTUARY)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
-    local stat = R2I(GetHeroStr(unit, false) * 0.1)
-    SetHeroStr(unit, GetHeroStr(unit, false) + stat, false)
+    local stat = R2I(unit:GetStr() * 0.1)
+    unit:AddStr(stat)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list, timer) end
-
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_SANCTUARY, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_sanctuary, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfSanctuary()
-    return GetSpellAbilityId() == BLESSING_OF_SANCTUARY
+    return blessing_of_sanctuary:SpellCasted()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    Ability(
-            BLESSING_OF_SANCTUARY,
-            "Благословение неприкосновенности (X)",
-            "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-            "повышая ее силу и выносливость на 10 Эффект длится 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_SANCTUARY, 7)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_SANCTUARY, 1.5)
+    blessing_of_sanctuary:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4178,56 +5064,51 @@ function Paladin.InitBlessingOfSanctuary()
     event:AddAction(Paladin.BlessingOfSanctuary)
 end
 
+---@author meiso
 
-function Paladin.RemoveBlessingOfWisdom(unit, items_list, timer)
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
+function Paladin.RemoveBlessingOfWisdom(unit, items_list)
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffToHero(unit, BLESSING_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(unit, blessing_of_wisdom)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.BlessingOfWisdom()
     local unit = GetSpellTargetUnit()
-    local items_list = {"BLESSING_OF_WISDOM_ITEM"}
-    local items_spells_list = {"BLESSING_OF_WISDOM"}
+    local timer = Timer(600.)
+    local items_list = { Items.BLESSING_OF_WISDOM_ITEM }
 
     BuffSystem.RegisterHero(unit)
-    EquipSystem.RegisterItems(items_list, items_spells_list)
 
-    if BuffSystem.IsBuffOnHero(unit, BLESSING_OF_WISDOM) then
-       BuffSystem.RemoveBuffToHeroByFunc(unit, BLESSING_OF_WISDOM) 
+    if BuffSystem.IsBuffOnHero(unit, blessing_of_wisdom) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_wisdom)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveBlessingOfWisdom(unit, items_list, timer) end
-    BuffSystem.AddBuffToHero(unit, BLESSING_OF_WISDOM, remove_buff)
-
-    TimerStart(timer, 600., false, remove_buff)
+    local remove_buff = function()
+        Paladin.RemoveBlessingOfWisdom(unit, items_list)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
 end
 
 function Paladin.IsBlessingOfWisdom()
-    return GetSpellAbilityId() == BLESSING_OF_WISDOM
+    return blessing_of_wisdom:SpellCasted()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    Ability(
-            BLESSING_OF_WISDOM,
-            "Благословение мудрости (C)",
-            "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин."
-    )
-    Paladin.hero:SetAbilityManacost(BLESSING_OF_WISDOM, 5)
-    Paladin.hero:SetAbilityCooldown(BLESSING_OF_WISDOM, 1.5)
+    blessing_of_wisdom:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
     event:AddAction(Paladin.BlessingOfWisdom)
 end
-    
 
+---@author meiso
 
 function Paladin.EnableConsecration()
     local location
@@ -4239,7 +5120,8 @@ function Paladin.EnableConsecration()
     while Paladin.consecration_effect do
         location = Location(
                 BlzGetLocalSpecialEffectX(Paladin.consecration_effect),
-                BlzGetLocalSpecialEffectY(Paladin.consecration_effect))
+                BlzGetLocalSpecialEffectY(Paladin.consecration_effect)
+        )
         Paladin.hero:DealMagicDamageLoc {
             damage = damage,
             overtime = 1.,
@@ -4249,34 +5131,27 @@ function Paladin.EnableConsecration()
     end
 end
 
-function Paladin.DisableConsecration()
-    DestroyTimer(GetExpiredTimer())
-    DestroyEffect(Paladin.consecration_effect)
-    Paladin.consecration_effect = nil
-end
-
 function Paladin.Consecration()
     local loc = Paladin.hero:GetLoc()
     local model = "Consecration_Impact_Base.mdx"
-    local timer = CreateTimer()
+    local timer = Timer(8.)
+    local function remove_effect()
+        DestroyEffect(Paladin.consecration_effect)
+        Paladin.consecration_effect = nil
+        timer:Destroy()
+    end
     Paladin.consecration_effect = AddSpecialEffectLoc(model, loc)
-    TimerStart(timer, 8., false, Paladin.DisableConsecration)
+    timer:SetFunc(remove_effect)
+    timer:Start()
     Paladin.EnableConsecration()
 end
 
 function Paladin.IsConsecration()
-    return GetSpellAbilityId() == CONSECRATION
+    return consecration:SpellCasted()
 end
 
 function Paladin.InitConsecration()
-    Ability(
-            CONSECRATION,
-            "Освящение (R)",
-            "Освящает участок земли, на котором стоит паладин, " ..
-            "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке"
-    )
-    Paladin.hero:SetAbilityManacost(CONSECRATION, 22)
-    Paladin.hero:SetAbilityCooldown(CONSECRATION, 8.)
+    consecration:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4284,34 +5159,32 @@ function Paladin.InitConsecration()
     event:AddAction(Paladin.Consecration)
 end
 
--- Copyright (c) meiso
+---@author meiso
+
+function Paladin.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
 
 function Paladin.Init(location)
     local loc = location or Location(4000., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM}
 
     Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
-    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)
 
-    Paladin.hero:AddAbilities(
-            DIVINE_SHIELD,
-            CONSECRATION,
-            HAMMER_RIGHTEOUS,
-            JUDGEMENT_OF_LIGHT_TR,
-            JUDGEMENT_OF_WISDOM_TR,
-            SHIELD_OF_RIGHTEOUSNESS,
-            AVENGERS_SHIELD,
-            SPELLBOOK_PALADIN
-    )
-
-    --даём паладину книжку с бафами и пассивками
+    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
     Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     Paladin.InitConsecration()
@@ -4323,129 +5196,133 @@ function Paladin.Init(location)
     Paladin.InitJudgementOfWisdom()
     Paladin.InitShieldOfRighteousness()
     Paladin.InitAvengersShield()
+
+    Paladin.ResetToDefault()
 end
 
+---@author meiso
 
-function Paladin.RemoveJudgementOfLight(target, timer)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+function Paladin.RemoveJudgementOfLight(target)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_light_tr)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfLight()
-    if GetRandomReal(0., 1.) <= 0.7  then
-        Paladin.hero:GainLife{percent=2}
+    if GetRandomReal(0., 1.) <= 0.7 then
+        Paladin.hero:GainLife { percent = 2, show = true }
         TextTag(Paladin.hero:GetPercentLifeOfMax(2), Paladin.hero):Preset("heal")
     end
 end
 
 function Paladin.IsJudgementOfLightDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_LIGHT_BUFF)
 end
 
 function Paladin.CastJudgementOfLight()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest.mdl"
+    local effect = Effect(target, model, "overhead")
+    local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_light_tr)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
     jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
     jol_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfLight(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfLight(target)
+        timer:Destroy()
+    end
 
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    BuffSystem.AddBuffToHero(target, judgement_of_light_tr, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jol_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfLight()
-    return GetSpellAbilityId() == JUDGEMENT_OF_LIGHT_TR
+    return judgement_of_light_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfLight()
-    Ability(
-            JUDGEMENT_OF_LIGHT_TR,
-            "Правосудие света (D)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего."
-    )
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+    judgement_of_light_tr:Init()
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
-    --событие того, что персонаж использовал способность
+    --персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
     event_ability:AddCondition(Paladin.IsJudgementOfLight)
     event_ability:AddAction(Paladin.CastJudgementOfLight)
 
-    --событие того, что персонаж бьёт юнита с дебафом
+    --персонаж бьёт юнита с дебафом
     event_jol:RegisterUnitDamaging()
     event_jol:AddCondition(Paladin.IsJudgementOfLightDebuff)
     event_jol:AddAction(Paladin.JudgementOfLight)
 end
 
+---@author meiso
 
-function Paladin.RemoveJudgementOfWisdom(target, timer)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
+function Paladin.RemoveJudgementOfWisdom(target)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_WISDOM)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfWisdom()
     if GetRandomReal(0., 1.) <= 0.7 then
-        Paladin.hero:GainMana{percent=2}
+        Paladin.hero:GainMana { percent = 2 }
         TextTag(Paladin.hero:GetPercentManaOfMax(2), Paladin.hero):Preset("mana")
     end
 end
 
 function Paladin.IsJudgementOfWisdomDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_WISDOM_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_WISDOM_BUFF)
 end
 
 function Paladin.CastJudgementOfWisdom()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest_blue.mdl"
+    local effect = Effect(target, model, "overhead")
+    local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_WISDOM) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_WISDOM)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_wisdom_tr)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
     jow_unit:AddAbilities(JUDGEMENT_OF_WISDOM)
     jow_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfWisdom(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfWisdom(target)
+        timer:Destroy()
+    end
 
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_WISDOM, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    BuffSystem.AddBuffToHero(target, judgement_of_wisdom_tr, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jow_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfWisdom()
-    return GetSpellAbilityId() == JUDGEMENT_OF_WISDOM_TR
+    return judgement_of_wisdom_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    Ability(
-            JUDGEMENT_OF_WISDOM_TR,
-            "Правосудие мудрости (F)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего."
-    )
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_WISDOM_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_WISDOM_TR, 10.)
+    judgement_of_wisdom_tr:Init()
 
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
@@ -4461,27 +5338,20 @@ function Paladin.InitJudgementOfWisdom()
     event_jow:AddAction(Paladin.JudgementOfWisdom)
 end
 
+---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42 от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
 
 function Paladin.IsShieldOfRighteousness()
-    return GetSpellAbilityId() == SHIELD_OF_RIGHTEOUSNESS
+    return shield_of_righteousness:SpellCasted()
 end
 
-
 function Paladin.InitShieldOfRighteousness()
-    Ability(
-            SHIELD_OF_RIGHTEOUSNESS,
-            "Щит праведности (W)",
-            "Мощный удар щитом, наносящий урон от светлой магии. " ..
-            "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно."
-    )
-    Paladin.hero:SetAbilityManacost(SHIELD_OF_RIGHTEOUSNESS, 6)
-    Paladin.hero:SetAbilityCooldown(SHIELD_OF_RIGHTEOUSNESS, 6.)
+    shield_of_righteousness:Init()
 
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
@@ -4489,44 +5359,52 @@ function Paladin.InitShieldOfRighteousness()
     event:AddAction(Paladin.ShieldOfRighteousness)
 end
 
--- Copyright (c) 2022 Kodpi
+---@author Kodpi, meiso
 
 function Priest.CastCircleOfHealing()
-    if not Priest.hero:LoseMana{percent=21} then return end
     local heal = GetRandomInt(958, 1058)
+    local model = "Abilities/Spells/Items/HealingSalve/HealingSalveTarget.mdl"
 
-    Priest.hero:HealNear {
-        heal = heal,
+    local function act()
+        local u = GetEnumUnit()
+        if Priest.hero:IsAlly(u) then
+            local effect = Effect(u, model, "origin")
+            Timer(1., function() effect:Destroy() end):Start()
+            heal = BuffSystem.ImproveSpell(u, heal)
+            Unit(u):GainLife { life = heal, show = true }
+        end
+    end
+
+    Priest.hero:UseSpellFunc {
         location = Priest.hero:GetLoc(),
-        radius = 15
+        radius = 15,
+        func = act
     }
 end
 
---- Заврешение способности
 function Priest.IsCircleOfHealing()
-    return GetSpellAbilityId() == CIRCLE_OF_HEALING
+    return circle_of_healing:SpellCasted()
 end
 
---- Иницилизация персонажа
 function Priest.InitCircleOfHealing()
+    circle_of_healing:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)
 end
 
-
--- Copyright (c) 2022 Kodpi, meiso
+---@author Kodpi, meiso
 
 function Priest.CastFlashHeal()
     local cast_time = 1.5
     local target = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/Items/AIhe/AIheTarget.mdl"
 
     --TODO: скалировать от стат
     local heal = GetRandomInt(1887, 2193)
-
-    -- проверяем есть ли мана
-    if not Priest.hero:LoseMana{percent=18} then return end
+    heal = BuffSystem.ImproveSpell(target, heal)
 
     -- отображаем кастбар
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
@@ -4535,80 +5413,504 @@ function Priest.CastFlashHeal()
     if Frame:IsDrop() then return end
 
     -- даем хп указанному юниту
-    target:GainLife{life=heal}
+    target:GainLife { life = heal, show = true}
+    local effect = Effect(target, model, "origin")
+    Timer(1., function() effect:Destroy() end):Start()
 end
 
 function Priest.IsFlashHeal()
-    return GetSpellAbilityId() == FLASH_HEAL
+    return flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal()
+    flash_heal:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
     event:AddAction(Priest.CastFlashHeal)
 end
 
+---@author meiso
+
+function Priest.CastGuardianSpirit()
+    local unit = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
+
+    BuffSystem.RegisterHero(unit)
+
+    local timer = Timer(10.)
+    local gs_effect = Effect(Priest.hero, model)
+    local event = EventsUnit(unit)
+    event:RegisterDamaged()
+
+    local remove_buff = function()
+        BuffSystem.RemoveBuffFromHero(unit, guardian_spirit)
+        timer:Destroy()
+        gs_effect:Destroy()
+        event:Destroy()
+    end
+
+    local function SaveHero()
+        BlzSetEventDamage(0.)
+        unit:SetLife(unit:GetPercentLifeOfMax(50.))
+        remove_buff()
+    end
+
+    local function GetLife()
+        local damage = GetEventDamage()
+        local current_hp = unit:GetCurrentLife()
+        return current_hp < damage
+    end
+    BuffSystem.AddBuffToHero(unit, guardian_spirit)
+    timer:SetFunc(remove_buff)
+    timer:Start()
+    event:AddCondition(GetLife)
+    event:AddAction(SaveHero)
+end
+
+function Priest.IsGuardianSpirit()
+    return guardian_spirit:SpellCasted()
+end
+
+function Priest.InitGuardianSpirit()
+    guardian_spirit:Init()
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsGuardianSpirit)
+    event:AddAction(Priest.CastGuardianSpirit)
+end
+
+---@author meiso
+
+function Priest.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
 
 function Priest.Init(location)
     local loc = location or Location(4200., 200.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
     Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
 
-    EquipSystem.RegisterItems(items_list, items_spells_list)
-    EquipSystem.AddItemsToUnit(Priest.hero, items_list)
-
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
+    Priest.hero:SetName("MeisoHolyPriest")
     Priest.hero:SetLevel(80)
 
-    Priest.hero:SetLife(5000)
+    Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
-
-    Priest.hero:AddAbilities(FLASH_HEAL, RENEW, CIRCLE_OF_HEALING)
+    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
     Priest.InitCircleOfHealing()
+    Priest.InitPrayerOfMending()
+    Priest.InitPowerWordShield()
+    Priest.InitGuardianSpirit()
+    Priest.InitPowerWordFortitude()
+    Priest.InitInnerFire()
+    Priest.InitSpiritOfRedemption()
+
+    Priest.ResetToDefault()
 end
 
--- Copyright (c) 2022 Kodpi
+---@author meiso
 
-function Priest.CastRenew()
-    --Прибавка каждые 3 секунды
-    local HP = 280
-    local unit = Unit(GetSpellTargetUnit())
+function Priest.InnerFire()
+    local event = EventsUnit(Priest.hero)
+    local stack = 20
+    local timer = Timer(60. * 30)  --баф висит полчаса
+    local spd = 120 * SPD
+    local armor = 2440
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
 
-    if not Priest.hero:LoseMana{percent=17} then return end
-    for _ = 1, 5 do
-        unit:GainLife{life=HP}
-        TriggerSleepAction(3.)
+    BuffSystem.RegisterHero(Priest.hero)
+
+    if BuffSystem.IsBuffOnHero(Priest.hero, inner_fire) then
+        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, inner_fire)
+    end
+
+    local effect = Effect(Priest.hero, model)
+    Timer(2., function() effect:Destroy() end):Start()
+
+    event:RegisterDamaged()
+
+    Priest.hero:AddInt(spd)
+    Priest.hero:AddArmor(armor)
+    local remove_buff =  function()
+        Priest.hero:AddInt(-spd)
+        Priest.hero:AddArmor(-armor)
+        event:Destroy()
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(Priest.hero, inner_fire, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
+
+    local function InnerFire()
+        TriggerSleepAction(0.)
+        local damage = GetEventDamage()
+        if damage > 0. then
+            stack = stack - 1
+        end
+    end
+
+    event:AddAction(InnerFire)
+    event:AddAction(function()
+        if stack == 0 then remove_buff() end
+    end)
+end
+
+function Priest.IsInnerFire()
+    return inner_fire:SpellCasted()
+end
+
+function Priest.InitInnerFire()
+    inner_fire:Init()
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsInnerFire)
+    event:AddAction(Priest.InnerFire)
+end
+
+---@author meiso
+
+function Priest.RemovePowerWordFortitude(unit, items_list)
+    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
+        EquipSystem.RemoveItemsToUnit(unit, items_list)
+        BuffSystem.RemoveBuffFromHero(unit, power_word_fortitude)
     end
 end
 
+function Priest.PowerWordFortitude()
+    --TODO: пока что даём как есть. потом отскалируем
+    local unit = GetSpellTargetUnit()
+    local timer = Timer(600.)
+    local items = { Items.POWER_WORD_FORTITUDE_ITEM }
+    local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
+    local effect = Effect(unit, model, "overhead")
+
+    Timer(2., function() effect:Destroy() end):Start()
+    BuffSystem.RegisterHero(unit)
+
+    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_fortitude)
+    end
+    EquipSystem.AddItemsToUnit(unit, items)
+
+    local remove_buff = function()
+        Paladin.RemovePowerWordFortitude(unit, items)
+        timer:Destroy()
+    end
+    BuffSystem.AddBuffToHero(unit, power_word_fortitude, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
+end
+
+function Priest.IsPowerWordFortitude()
+    return power_word_fortitude:SpellCasted()
+end
+
+function Priest.InitPowerWordFortitude()
+    power_word_fortitude:Init()
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPowerWordFortitude)
+    event:AddAction(Priest.PowerWordFortitude)
+end
+
+---@author meiso
+
+function Priest.RemovePowerWordShield(unit)
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHero(unit, power_word_shield)
+    end
+end
+
+function Priest.CastPowerWordShield()
+    local unit = Unit(GetSpellTargetUnit())
+    local event = EventsUnit(unit)
+    local buff_timer = Timer(30.)
+    local debuff_timer = Timer(15.)
+    local absorb = 2230
+    local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
+
+    BuffSystem.RegisterHero(unit)
+
+    --ничего не делаем, если есть дебаф на повтор
+    if BuffSystem.IsBuffOnHero(unit, weakened_soul) then
+        return
+    end
+    --проверяем есть ли щит, если да - сбрасываем и обновляем
+    if BuffSystem.IsBuffOnHero(unit, power_word_shield) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_shield)
+    end
+
+    local pws_effect = Effect(unit, model, "origin")
+    event:RegisterDamaged()
+
+    local remove_buff = function()
+        Priest.RemovePowerWordShield(unit)
+        buff_timer:Destroy()
+        event:Destroy()
+        pws_effect:Destroy()
+    end
+
+    local remove_debuff = function()
+        BuffSystem.RemoveBuffFromHero(unit, weakened_soul)
+        debuff_timer:Destroy()
+    end
+
+    local function Shield()
+        local damage = GetEventDamage()
+        if damage == 0 then return end
+        absorb = absorb - damage
+        if 0. <= absorb and absorb < damage then
+            BlzSetEventDamage(absorb)
+            remove_buff()
+        else
+            BlzSetEventDamage(0.)
+        end
+    end
+
+    local function UsingShield()
+        return absorb > 0.
+    end
+
+    BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
+    --фиксируем дебаф на юните
+    BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
+    buff_timer:SetFunc(remove_buff)
+    debuff_timer:SetFunc(remove_debuff)
+    buff_timer:Start()
+    debuff_timer:Start()
+
+    event:AddCondition(UsingShield)
+    event:AddAction(Shield)
+end
+
+function Priest.IsPowerWordShield()
+    return power_word_shield:SpellCasted()
+end
+
+function Priest.InitPowerWordShield()
+    power_word_shield:Init()
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPowerWordShield)
+    event:AddAction(Priest.CastPowerWordShield)
+end
+
+---@author meiso
+
+function Priest.RemovePrayerOfMending(unit)
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromHero(unit, prayer_of_mending)
+    end
+end
+
+function Priest.CastPrayerOfMending()
+    local unit = GetSpellTargetUnit()
+    local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
+    local effect
+    local last_unit
+    local event
+    local cured = false
+    local POM_JUMP_COUNT = 5
+
+    --при повторном наложении сбрасываем со всех
+    if BuffSystem.IsBuffOnHero(unit, prayer_of_mending) then
+        BuffSystem.RemoveBuffFromUnits(prayer_of_mending)
+        POM_JUMP_COUNT = 5
+    end
+
+    while POM_JUMP_COUNT > -1 do
+        TriggerSleepAction(0.)
+        if unit ~= last_unit then
+            POM_JUMP_COUNT = POM_JUMP_COUNT - 1
+            last_unit = unit
+
+            effect = Effect(last_unit, model)
+            Timer(2., function() effect:Destroy() end):Start()
+
+            if event then event:Destroy() end
+            BuffSystem.RegisterHero(unit)
+            event = EventsUnit(unit)
+            event:RegisterDamaged()
+
+            local timer = Timer(30.)
+            local remove_buff = function()
+                Priest.RemovePrayerOfMending(unit)
+                timer:Destroy()
+            end
+            BuffSystem.AddBuffToHero(unit, prayer_of_mending, remove_buff)
+            timer:SetFunc(remove_buff)
+            timer:Start()
+
+            event:AddCondition(function()
+                return BuffSystem.IsBuffOnHero(unit, prayer_of_mending)
+            end)
+            event:AddAction(function()
+                local heal = 1043
+                heal = BuffSystem.ImproveSpell(unit, heal)
+                Unit(unit):GainLife { life = heal, show = true }
+                cured = true
+                remove_buff()
+            end)
+        end
+        if cured and last_unit == unit then
+            cured = false
+            if event then event:Destroy() end
+            local group = GroupUnitsInRangeOfLocUnit(400, Unit(last_unit):GetLoc())
+            for _ = 1, CountUnitsInGroup(group) do
+                TriggerSleepAction(0.)
+                local temp = GroupPickRandomUnit(group)
+                if IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) and
+                        temp ~= last_unit then
+                    unit = temp
+                end
+                GroupRemoveUnit(group, temp)
+            end
+            BuffSystem.RemoveBuffFromHero(last_unit, prayer_of_mending)
+            DestroyGroup(group)
+        end
+    end
+    unit = nil
+    last_unit = nil
+end
+
+function Priest.IsPrayerOfMending()
+    return prayer_of_mending:SpellCasted()
+end
+
+function Priest.InitPrayerOfMending()
+    prayer_of_mending:Init()
+
+    local event = EventsPlayer()
+    event:RegisterUnitSpellCast()
+    event:AddCondition(Priest.IsPrayerOfMending)
+    event:AddAction(Priest.CastPrayerOfMending)
+end
+
+---@author Kodpi, meiso
+
+function Priest.CastRenew()
+    --Прибавка каждые 3 секунды в течение 15 сек
+    local heal = 280
+    local unit = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
+    local effect = Effect(unit, model, "origin")
+
+    for _ = 1, 5 do
+        heal = BuffSystem.ImproveSpell(unit, heal)
+        unit:GainLife { life = heal, show = true }
+        TriggerSleepAction(3.)
+    end
+    effect:Destroy()
+end
+
 function Priest.IsRenew()
-    return GetSpellAbilityId() == RENEW
+    return renew:SpellCasted()
 end
 
 function Priest.InitRenew()
+    renew:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
     event:AddAction(Priest.CastRenew)
 end
 
--- Copyright (c) meiso
+---@author meiso
+
+function Priest.SORHideMainUnit()
+    Priest.hero:Pause(true)
+    Priest.hero:Hide()
+    Priest.hero:SetPathing(true)
+end
+
+function Priest.SORShowOffUnit(u_sor)
+    u_sor:SetName(Priest.hero:GetName())
+    u_sor:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    for _, spell in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(spell:GetId(), 0)
+    end
+end
+
+function Priest.SpiritOfRedemption()
+    local timer = Timer(15.)
+    local u_sor = Unit(
+            Priest.hero:GetOwner(),
+            PRIEST_SOR,
+            Priest.hero:GetLoc(),
+            Priest.hero:GetFacing()
+    )
+
+    Priest.SORHideMainUnit()
+    TriggerSleepAction(0.)
+    Priest.SORShowOffUnit(u_sor)
+
+    timer:SetFunc(function()
+        Priest.hero:Pause(false)
+        Priest.hero:Show()
+        Priest.hero:Kill()
+        Priest.spirit_of_redemption = false
+        u_sor:Hide()
+        u_sor:Remove()
+        timer:Destroy()
+        Priest.ResetToDefault()
+    end)
+    timer:Start()
+end
+
+function Priest.IsSpiritOfRedemption()
+    -- берём проверку на смерть в свои руки,
+    -- чтобы лишний раз не триггерить воскрешение (да и вообще не париться с ним)
+    local dmg = GetEventDamage()
+    local dmg_target = BlzGetEventDamageTarget()
+    if Priest.hero:GetCurrentLife() - dmg <= 1. and
+            dmg_target == Priest.hero:GetId() and
+            not Priest.spirit_of_redemption then
+        Priest.spirit_of_redemption = true
+        BlzSetEventDamage(0.)
+        return true
+    end
+    return false
+end
+
+function Priest.InitSpiritOfRedemption()
+    spirit_of_redemption:Init()
+    Priest.hero:DisableAbility(spirit_of_redemption:GetId())
+
+    local event = EventsPlayer()
+    event:RegisterUnitDamaged()
+    event:AddCondition(Priest.IsSpiritOfRedemption)
+    event:AddAction(Priest.SpiritOfRedemption)
+end
+
+---@author meiso
 
 function DeathKnight.Init(location)
     local loc = location or Location(4000., 150.)
-    local items_list = {"ARMOR_ITEM", "ATTACK_ITEM", "HP_ITEM"}
-    local items_spells_list = {"ARMOR_500", "ATTACK_1500", "HP_90K"}
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
 
     DeathKnight.hero = Unit(GetLocalPlayer(), DEATH_KNIGHT, loc)
 
-    --EquipSystem.RegisterItems(items_list, items_spells_list)
     --EquipSystem.AddItemsToUnit(DeathKnight.hero, items_list)
 
     DeathKnight.hero:SetLevel(80)
@@ -4616,7 +5918,7 @@ function DeathKnight.Init(location)
     DeathKnight.Runes()
 end
 
--- Copyright (c) meiso
+---@author meiso
 
 function DeathKnight.Runes()
     local runes = Frame("Runes")
@@ -4631,6 +5933,7 @@ function EntryPoint()
 
     -- Механики
     BattleSystem.Init()
+    EquipSystem.RegisterItems()
 
     -- Боссы
     LordMarrowgar.Init()
@@ -4644,15 +5947,18 @@ function EntryPoint()
     --DummyForHealing()
 end
 
+---@author meiso
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     HeroSelector.Init()
+    BuffSystem.LoadFrame()
 
     -- Механики
-    --BattleSystem.Init()
+    BattleSystem.Init()
+    EquipSystem.RegisterItems()
 
     --SaveSystem.InitNewHeroEvent()
     SaveSystem.gamecache = InitGameCache("savesystem")
@@ -4661,13 +5967,13 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.))
-    --Paladin.Init(Location(-400., -490.))
+    Priest.Init(Location(300., -490.))
+    Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
-    --DummyForDPS(Location(-400., 200.))
+    DummyForDPS(Location(-400., 200.))
 
 end
 

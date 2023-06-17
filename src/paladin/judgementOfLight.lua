@@ -1,67 +1,68 @@
+---@author meiso
 
-function Paladin.RemoveJudgementOfLight(target, timer)
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
+function Paladin.RemoveJudgementOfLight(target)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
-        BuffSystem.RemoveBuffToHero(target, JUDGEMENT_OF_LIGHT)
+        BuffSystem.RemoveBuffFromHero(target, judgement_of_light_tr)
     end
-    DestroyTimer(timer)
 end
 
 function Paladin.JudgementOfLight()
-    if GetRandomReal(0., 1.) <= 0.7  then
-        Paladin.hero:GainLife{percent=2}
+    if GetRandomReal(0., 1.) <= 0.7 then
+        Paladin.hero:GainLife { percent = 2, show = true }
         TextTag(Paladin.hero:GetPercentLifeOfMax(2), Paladin.hero):Preset("heal")
     end
 end
 
 function Paladin.IsJudgementOfLightDebuff()
-    return GetUnitAbilityLevel(GetEventDamageSource(), JUDGEMENT_OF_LIGHT_BUFF) > 0
+    return Unit(GetEventDamageSource()):HasBuff(JUDGEMENT_OF_LIGHT_BUFF)
 end
 
 function Paladin.CastJudgementOfLight()
     local target = GetSpellTargetUnit()
+    local model = "judgement_impact_chest.mdl"
+    local effect = Effect(target, model, "overhead")
+    local timer = Timer(20.)
+
     BuffSystem.RegisterHero(target)
     --создаем юнита и выдаем ему основную способность
     --и бьем по таргету паладина
-    if BuffSystem.IsBuffOnHero(target, JUDGEMENT_OF_LIGHT) then
-        BuffSystem.RemoveBuffToHeroByFunc(target, JUDGEMENT_OF_LIGHT)
+    if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_light_tr)
     end
 
     local jol_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
     jol_unit:AddAbilities(JUDGEMENT_OF_LIGHT)
     jol_unit:CastToTarget("shadowstrike", target)
 
-    local timer = CreateTimer()
-    local remove_buff = function() Paladin.RemoveJudgementOfLight(target, timer) end
+    local remove_buff = function()
+        Paladin.RemoveJudgementOfLight(target)
+        timer:Destroy()
+    end
 
-    BuffSystem.AddBuffToHero(target, JUDGEMENT_OF_LIGHT, remove_buff)
-    TimerStart(timer, 20., false, remove_buff)
+    BuffSystem.AddBuffToHero(target, judgement_of_light_tr, remove_buff)
+    timer:SetFunc(remove_buff)
+    timer:Start()
     jol_unit:ApplyTimedLife(2.)
+    effect:Destroy()
 end
 
 function Paladin.IsJudgementOfLight()
-    return GetSpellAbilityId() == JUDGEMENT_OF_LIGHT_TR
+    return judgement_of_light_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfLight()
-    Ability(
-            JUDGEMENT_OF_LIGHT_TR,
-            "Правосудие света (D)",
-            "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего."
-    )
-    Paladin.hero:SetAbilityManacost(JUDGEMENT_OF_LIGHT_TR, 5)
-    Paladin.hero:SetAbilityCooldown(JUDGEMENT_OF_LIGHT_TR, 10.)
+    judgement_of_light_tr:Init()
 
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
-    --событие того, что персонаж использовал способность
+    --персонаж использовал способность
     event_ability:RegisterUnitSpellCast()
     event_ability:AddCondition(Paladin.IsJudgementOfLight)
     event_ability:AddAction(Paladin.CastJudgementOfLight)
 
-    --событие того, что персонаж бьёт юнита с дебафом
+    --персонаж бьёт юнита с дебафом
     event_jol:RegisterUnitDamaging()
     event_jol:AddCondition(Paladin.IsJudgementOfLightDebuff)
     event_jol:AddAction(Paladin.JudgementOfLight)

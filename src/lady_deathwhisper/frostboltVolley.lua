@@ -1,3 +1,4 @@
+---@author meiso
 
 function LadyDeathwhisper.FrostBoltVolley()
     TriggerSleepAction(15.)

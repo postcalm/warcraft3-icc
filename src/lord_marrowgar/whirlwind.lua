@@ -1,23 +1,26 @@
-
-function LordMarrowgar.ResetAnimation()
-    if LordMarrowgar.whirlwind_effect then
-        LordMarrowgar.whirlwind_effect = false
-    end
-    DestroyTimer(GetExpiredTimer())
-end
+---@author meiso
 
 function LordMarrowgar.Whirlwind()
-    local whirlwind_timer = CreateTimer()
+    local whirlwind_timer = Timer(GetRandomReal(20., 30.))
+    local timer_reset = Timer(5.)
+
+    local function reset_anim()
+        if LordMarrowgar.whirlwind_effect then
+            LordMarrowgar.whirlwind_effect = false
+        end
+        timer_reset:Destroy()
+    end
 
     local function action()
-        local timer_reset = CreateTimer()
         IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
-        TimerStart(timer_reset, 5., false, LordMarrowgar.ResetAnimation)
-        DestroyTimer(whirlwind_timer)
+        timer_reset:SetFunc(reset_anim)
+        timer_reset:Start()
+        whirlwind_timer:Destroy()
     end
 
     if LordMarrowgar.whirlwind_effect then
-        TimerStart(whirlwind_timer, GetRandomReal(20., 30.), false, action)
+        whirlwind_timer:SetFunc(action)
+        whirlwind_timer:Start()
     end
 end
 

@@ -1,22 +1,27 @@
--- Copyright (c) 2022 Kodpi
+---@author Kodpi, meiso
 
 function Priest.CastRenew()
-    --Прибавка каждые 3 секунды
-    local HP = 280
+    --Прибавка каждые 3 секунды в течение 15 сек
+    local heal = 280
     local unit = Unit(GetSpellTargetUnit())
+    local model = "Abilities/Spells/ItemsAIhe/AIheTarget.mdl"
+    local effect = Effect(unit, model, "origin")
 
-    if not Priest.hero:LoseMana{percent=17} then return end
     for _ = 1, 5 do
-        unit:GainLife{life=HP}
+        heal = BuffSystem.ImproveSpell(unit, heal)
+        unit:GainLife { life = heal, show = true }
         TriggerSleepAction(3.)
     end
+    effect:Destroy()
 end
 
 function Priest.IsRenew()
-    return GetSpellAbilityId() == RENEW
+    return renew:SpellCasted()
 end
 
 function Priest.InitRenew()
+    renew:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)

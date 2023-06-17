@@ -1,44 +1,6 @@
-﻿STRING 1
+STRING 1
 {
 Игрок 1
-}
-
-STRING 3
-{
-ICC
-}
-
-STRING 4
-{
-Не важно
-}
-
-STRING 5
-{
-Описание отсутствует
-}
-
-STRING 6
-{
-meiso, IRMessiah
-}
-
-STRING 7
-{
-#ненавижусоздаватьгребанныекарты
-#приключениена15минут
-}
-
-STRING 13
-// Разрушаемые объекты: B001 (stairs), Name (Название)
-{
-stairs
-}
-
-STRING 14
-// Декорации: D000 (pillar), Name (Название)
-{
-pillar
 }
 
 STRING 22
@@ -143,11 +105,6 @@ STRING 57
 Hammer of the Righteous
 }
 
-STRING 65
-{
-Игрок 2
-}
-
 STRING 66
 // Способности: A006 (ShadowBolt), Name (Название)
 {
@@ -173,7 +130,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -221,7 +178,7 @@ decrease_dmg
 }
 
 STRING 117
-// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
 {
 X
 }
@@ -326,12 +283,6 @@ STRING 135
 // Способности: A00M (Blessing of Might), Ubertip (Подсказка: используется, подробная)
 {
 Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.
-}
-
-STRING 136
-// Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
-{
-V
 }
 
 STRING 137
@@ -454,25 +405,10 @@ STRING 162
 Щит мстителя (|cffffcc00C|r)
 }
 
-STRING 165
-{
-Игрок 3
-}
-
 STRING 166
 {
 Введите -save _название_ для сохранения персонажа
 Введите -load _название_ для загрузки персонажа
-}
-
-STRING 167
-{
-Король-лич
-}
-
-STRING 170
-{
-Силы света
 }
 
 STRING 171
@@ -487,20 +423,14 @@ STRING 172
 Renew
 }
 
-STRING 177
-// Способности: A00U (CircleOfHealing), Name (Название)
-{
-CircleOfHealing
-}
-
 STRING 183
-// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
 {
 E
 }
 
 STRING 185
-// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
+// Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
 {
 W
 }
@@ -595,7 +525,7 @@ Enter -new "class name", e.c. -new paladin
 }
 
 STRING 207
-// Войска: Hpal (Паладин), Propernames (Имена собственные)
+// Войска: Hpal (Paladin), Propernames (Имена собственные)
 {
 Сеймур Правдивый,Малак Справедливый,Морлун Могучий,Агамонд Заступник,Занн Бесстрашный,Ариус Храбрый,Рогволд Бесстрашный
 }
@@ -625,13 +555,13 @@ STRING 212
 }
 
 STRING 213
-// Способности: A00U (CircleOfHealing), Ubertip (Подсказка: используется, подробная)
+// Способности: A00U (Circle Of Healing), Ubertip (Подсказка: используется, подробная)
 {
 Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда, находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.
 }
 
 STRING 214
-// Способности: A00U (CircleOfHealing), Tip (Подсказка: используется, нормальная)
+// Способности: A00U (Circle Of Healing), Tip (Подсказка: используется, нормальная)
 {
 Круг исцеления (|cffffcc00W|r)
 }
@@ -649,7 +579,7 @@ Concecration
 }
 
 STRING 218
-// Способности: A00L (Spellbook_Paladin), Hotkey (Горячая клавиша: используется)
+// Способности: A00L (Spellbook_Paladin), Unhotkey (Горячая клавиша: не используется)
 {
 X
 }
@@ -666,21 +596,181 @@ STRING 220
 Z
 }
 
-STRING 221
-// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
-{
-Z
-}
-
 STRING 222
-// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+// Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
 {
 Q
 }
 
 STRING 223
-// Способности: A00U (CircleOfHealing), Hotkey (Горячая клавиша: используется)
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
 {
 W
+}
+
+STRING 224
+// Способности: A00U (Circle Of Healing), Name (Название)
+{
+Circle Of Healing
+}
+
+STRING 225
+// Способности: A009 (Prayer of Mending), Name (Название)
+{
+Prayer of Mending
+}
+
+STRING 226
+// Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
+{
+D
+}
+
+STRING 228
+// Способности: A00Y (Spellbook_Priest), Hotkey (Горячая клавиша: используется)
+{
+X
+}
+
+STRING 230
+// Способности: A00V (Power Word: Shield), Name (Название)
+{
+Power Word: Shield
+}
+
+STRING 231
+// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
+{
+S
+}
+
+STRING 233
+// Способности: A00X (Guardian Spirit), Name (Название)
+{
+Guardian Spirit
+}
+
+STRING 234
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+{
+R
+}
+
+STRING 235
+// Способности: A00Y (Spellbook_Priest), Name (Название)
+{
+Spellbook_Priest
+}
+
+STRING 236
+// Способности: A00Y (Spellbook_Priest), Tip (Подсказка: используется, нормальная)
+{
+Книга заклинаний (X)
+}
+
+STRING 237
+// Способности: A00Y (Spellbook_Priest), Unhotkey (Горячая клавиша: не используется)
+{
+X
+}
+
+STRING 240
+// Предметы: I007 (prayer_of_fortitude), Name (Название)
+{
+prayer_of_fortitude
+}
+
+STRING 241
+// Способности: A010 (hp_165_pof), Name (Название)
+{
+hp_165_pof
+}
+
+STRING 244
+// Способности: A011 (Power Word: Fortitude), Name (Название)
+{
+Power Word: Fortitude
+}
+
+STRING 245
+// Способности: A00S (Flash Heal), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 246
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 247
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+
+STRING 248
+// Способности: A00X (Guardian Spirit), Hotkey (Горячая клавиша: используется)
+{
+R
+}
+
+STRING 250
+// Способности: A011 (Power Word: Fortitude), Hotkey (Горячая клавиша: используется)
+{
+Q
+}
+
+STRING 251
+// Способности: A00Z (Inner Fire), Name (Название)
+{
+Inner Fire
+}
+
+STRING 252
+// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
+{
+W
+}
+
+STRING 253
+// Войска: h006 (Spirit of Redemption), Name (Название)
+{
+Spirit of Redemption
+}
+
+STRING 254
+// Способности: A012 (Spirit of Redemption), Name (Название)
+{
+Spirit of Redemption
+}
+
+STRING 255
+// Войска: Hpal (Paladin), Name (Название)
+{
+Paladin
+}
+
+STRING 256
+// Войска: Hblm (Priest), Name (Название)
+{
+Priest
+}
+
+STRING 257
+// Войска: Hblm (Priest), Propernames (Имена собственные)
+{
+Элринг Полуденный,Тано Ястреб,Гилтанас Ворон,Гэл Стремительный,Эрвин Крылатый,Сильвар Ветрогон,Келен Яростный
+}
+
+STRING 258
+{
+ICC
+}
+
+STRING 259
+{
+1.0.0
 }
 

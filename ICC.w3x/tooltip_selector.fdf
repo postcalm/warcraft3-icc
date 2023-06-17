@@ -1,3 +1,4 @@
+// author meiso
 
 Frame "BACKDROP" "BoxedTextBackgroundTemplate" {
 	DecorateFileNames,
@@ -16,7 +17,6 @@ Frame "BACKDROP" "Tooltip" INHERITS "BoxedTextBackgroundTemplate" {
 	
 	Width 0.15,
 	Height 0.05,
- 
 }
 
 Frame "TEXT" "TooltipTitle" {

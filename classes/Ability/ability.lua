@@ -1,9 +1,15 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс конфигурирования способностей
+---@class Ability Класс конфигурирования способностей
 ---@param ability ability Способность
+---@param manacost integer Затраты маны с процентах. По умолчанию 0
+---@param cooldown float Время восстановления способности. По умолчанию 1.5
 ---@param tooltip string Название способности
 ---@param text string Описание способности
+---@param icon string Иконка. По умолчанию дефолтная, выбранная в редакторе
+---@param key string Кнопка использования
+---@param buff_tooltip string Название бафа. По умолчанию название способности
+---@param buff_desc string Описание бафа. По умолчанию описание способности
 Ability = {}
 Ability.__index = Ability
 
@@ -16,28 +22,59 @@ setmetatable(Ability, {
 })
 
 --- Конструктор класса
-function Ability:_init(ability, tooltip, text)
-    self.ability = ability
-    self.tooltip = tooltip
-    self.text = text
+function Ability:_init(args)
+    self.ability = args.ability
+    self.manacost = args.manacost or 0
+    self.cooldown = args.cooldown or 1.5
+    self.tooltip = args.tooltip
+    self.text = args.text
+    self.icon = args.icon or ""
+    self.key = args.key
+    self.buff_tooltip = args.buff_tooltip or args.tooltip
+    self.buff_desc = args.buff_desc or args.text
+end
+
+--- Проинициализировать способность.
+---Задать тултип, описание и иконку
+function Ability:Init()
     self:SetTooltip()
     self:SetText()
+    self:SetIcon()
 end
 
 --- Установить название для способности
 ---@param tooltip string
 ---@return nil
 function Ability:SetTooltip(tooltip)
-    local t = tooltip or self.tooltip
-    BlzSetAbilityTooltip(self.ability, t, 0)
+    tooltip = tooltip or self.tooltip
+    if self.key ~= nil then
+        tooltip = tooltip .. " (" .. set_color(self.key, Color.ORANGE) .. ")"
+    end
+    BlzSetAbilityTooltip(self.ability, tooltip, 0)
 end
 
 --- Установить описание для способности
 ---@param text string
 ---@return nil
 function Ability:SetText(text)
-    local t = text or self.text
-    BlzSetAbilityExtendedTooltip(self.ability, t, 0)
+    text = text or self.text
+    BlzSetAbilityExtendedTooltip(self.ability, text, 0)
+end
+
+--- Установить иконку способности
+---@param icon string Путь до текстуры
+---@return nil
+function Ability:SetIcon(icon)
+    icon = icon or self.icon
+    if icon ~= "" then
+        BlzSetAbilityIcon(self.ability, icon)
+    end
+end
+
+--- Проверить, что спелл скастован
+---@return boolean
+function Ability:SpellCasted()
+    return GetSpellAbilityId() == self.ability
 end
 
 --- Вернуть идентификатор способности

@@ -1,6 +1,6 @@
--- Copyright (c) meiso
+---@author meiso
 
---- Класс для создания "плавающего" текста
+---@class TextTag Класс для создания "плавающего" текста
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
 ---@param zoffset real Расположение относительно оси Z
@@ -28,8 +28,12 @@ function TextTag:_init(text, unit, zoffset, size, red, green, blue, transparency
     self.text = text
     self.unit = unit
     -- неявное приведение к int
-    if type(text) == "number" then self.text = I2S(text // 1) end
-    if type(unit) == "table" then self.unit = unit:GetId() end
+    if type(text) == "number" then
+        self.text = I2S(text // 1)
+    end
+    if isTable(unit) then
+        self.unit = unit:GetId()
+    end
 
     if size then
         self:SetSize(size)
