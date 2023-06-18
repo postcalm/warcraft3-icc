@@ -11,14 +11,15 @@ function Paladin.ResetToDefault()
     end
 end
 
-function Paladin.Init(location)
-    local loc = location or Location(4000., 200.)
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM}
+function Paladin.Init(location, name)
+    location = location or Location(4000., 200.)
+    name = name or "Paladin"
+    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
-    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
+    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, location, 90.)
 
     EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
-
+    Paladin.hero:SetName(name)
     Paladin.hero:SetLevel(80)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)

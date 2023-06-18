@@ -1,3 +1,4 @@
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Создает юнита из полученных данных

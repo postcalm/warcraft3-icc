@@ -1,3 +1,4 @@
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Возвращает ключ игрока

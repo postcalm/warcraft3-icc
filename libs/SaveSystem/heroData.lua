@@ -1,3 +1,4 @@
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Сохранаяет информацию о характеристиках, способностях и предметах
@@ -28,15 +29,17 @@ function SaveSystem.SaveUnitData(i, u)
 
         -- сохраняем способности
         for k = 1, #SaveSystem.abilities do
-            local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
+            local ability = SaveSystem.abilities[k]:GetId()
+            local ability_level = GetUnitAbilityLevel(u, ability)
             if ability_level > 0 then
                 ability_count = ability_count + 1
-                SaveSystem.data[i] = SaveSystem.abilities[k]
+                SaveSystem.data[i] = ability
                 i = i + 1
                 SaveSystem.data[i] = ability_level
                 i = i + 1
             end
         end
+
         SaveSystem.data[ability_index] = ability_count
         SaveSystem.data[i] = SaveSystem.scope.items
         i = i + 1
@@ -242,7 +245,7 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = GetLocationY(loc)
         end
 
-        --SaveSystem.AddHeroAbilities(SaveSystem.classid)
+        --SaveSystem.InitHero(SaveSystem.classid)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
         SaveSystem.unit = unit_obj
 

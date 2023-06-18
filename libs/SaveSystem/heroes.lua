@@ -1,3 +1,4 @@
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Возрождает юнита
@@ -10,50 +11,19 @@ function SaveSystem.UnitsRespawn()
     end
 end
 
---- Определяет способности выбранного класса
+--- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.DefineAbilities()
-    if SaveSystem.classid == CLASSES["paladin"] then
-        SaveSystem.DefineAbilitiesPaladin()
-    elseif SaveSystem.classid == CLASSES["priest"] then
-        SaveSystem.DefineAbilitiesPriest()
-    end
-end
-
---- Определяет способности паладина
----@return nil
-function SaveSystem.DefineAbilitiesPaladin()
-    SaveSystem.abilities = {
-        DIVINE_SHIELD,
-        CONSECRATION,
-        HAMMER_RIGHTEOUS,
-        JUDGEMENT_OF_LIGHT_TR,
-        JUDGEMENT_OF_WISDOM_TR,
-        SHIELD_OF_RIGHTEOUSNESS,
-        AVENGERS_SHIELD,
-        SPELLBOOK_PALADIN,
-    }
-    SaveSystem.spellbook = SPELLBOOK_PALADIN
-end
-
---- Определяет способности приста
----@return nil
-function SaveSystem.DefineAbilitiesPriest()
-    SaveSystem.abilities = {
-        FLASH_HEAL,
-        RENEW,
-        CIRCLE_OF_HEALING,
-    }
-    SaveSystem.spellbook = nil
-end
-
---- Выдает герою способности
----@return nil
-function SaveSystem.AddHeroAbilities(class)
+function SaveSystem.InitHero(class)
     SaveSystem.classid = CLASSES[class]
-    local hero = Unit(SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())])
-    SaveSystem.DefineAbilities()
-    hero:AddAbilities(table.unpack(SaveSystem.abilities))
-    hero:AddSpellbook(SaveSystem.spellbook)
-    hero:SetLevel(80)
+    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
+    local loc = Location(-60., -750.)
+    if SaveSystem.classid == CLASSES["paladin"] then
+        Paladin.Init(loc)
+        SaveSystem.hero[playerid] = Paladin.hero:GetId()
+        SaveSystem.abilities = {}
+    elseif SaveSystem.classid == CLASSES["priest"] then
+        Priest.Init(loc)
+        SaveSystem.hero[playerid] = Priest.hero:GetId()
+        SaveSystem.abilities = {}
+    end
 end

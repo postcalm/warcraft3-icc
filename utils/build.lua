@@ -10,8 +10,10 @@ local param = {
     customCode = [[\custom-code.lua]], -- файл, в который собирается весь код
     patcher = [[\utils\custom-code-replacer.exe]], -- патчер для .wct
     files = { -- порядок сборки файлов
-        -- различные алиасы и тулсеты
+        -- различные алиасы, тулсеты, инициализация библиотек и прочего
         [[\common]],
+        [[\src\paladin\init.lua]],
+        [[\src\priest\init.lua]],
         -- кастомные классы для работы с юнитами, эффектами и т.д.
         [[\classes]],
         -- система сохранений
@@ -30,7 +32,7 @@ local param = {
         [[\libs\BuffSystem]],
         -- система отображения урона автоатак
         [[\libs\battleSystem.lua]],
-        --
+        -- обёртки
         [[\libs\wrappers.lua]],
         -- система выбора героев
         [[\libs\HeroSelector\frames_desc.lua]],
@@ -41,9 +43,9 @@ local param = {
         [[\src\enemies]],
         [[\src\lord_marrowgar]],
         [[\src\lady_deathwhisper]],
-        [[\src\paladin]],
-        [[\src\priest]],
-        [[\src\death_knight]],
+        [[\src\paladin\spells]],
+        [[\src\priest\spells]]
+        --[[\src\death_knight]],
         -- точка входа
         [[\src\entry_point]],
         -- тесты

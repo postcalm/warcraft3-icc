@@ -49,3 +49,33 @@ CultFanatic = {
 
 --- Кэш для системы экипировки
 EQUIP_CACHE = nil
+
+--- Система выбора героев
+HeroSelector = {
+    --- Основной фрейм
+    table = nil,
+    --- Фрейм паладина
+    paladin = nil,
+    --- Фрейм жреца
+    priest = nil,
+    --- Фрейм рыцаря смерти
+    dk = nil,
+    --- Фрейм друида
+    druid = nil,
+    --- Фрейм шамана
+    shaman = nil,
+    --- Фрейм воина
+    warrior = nil,
+    --- Фрейм мага
+    mage = nil,
+    --- Фрейм разбойника
+    rogue = nil,
+    --- Фрейм чернокнижника
+    warlock = nil,
+    --- Фрейм охотника
+    hunter = nil,
+    --- Выбранный герой
+    hero = nil,
+    --- Список выбранных героев
+    selected_heroes = {},
+}

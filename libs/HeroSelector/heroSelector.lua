@@ -1,21 +1,5 @@
 ---@author meiso
 
-HeroSelector = {
-    table = nil,
-    paladin = nil,
-    priest = nil,
-    dk = nil,
-    druid = nil,
-    shaman = nil,
-    warrior = nil,
-    mage = nil,
-    rogue = nil,
-    warlock = nil,
-    hunter = nil,
-    hero = nil,
-    selected_heroes = {},
-}
-
 function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -125,7 +109,7 @@ function HeroSelector.CreateHero()
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
     SaveSystem.hero[playerid] = unit:GetId()
-    SaveSystem.AddHeroAbilities(HeroSelector.hero)
+    SaveSystem.InitHero(HeroSelector.hero)
 end
 
 function HeroSelector.AcceptHero(hero)
@@ -141,7 +125,8 @@ function HeroSelector.AcceptHero(hero)
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
-    HeroSelector.CreateHero()
+    --HeroSelector.CreateHero()
+    SaveSystem.InitHero(HeroSelector.hero)
 end
 
 function HeroSelector.Close()

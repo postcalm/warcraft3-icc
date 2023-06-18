@@ -9,11 +9,11 @@ function SaveSystem.AddNewHero()
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.AddHeroAbilities("paladin")
+        SaveSystem.InitHero("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.AddHeroAbilities("priest")
+        SaveSystem.InitHero("priest")
     end
 end
 

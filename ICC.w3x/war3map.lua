@@ -187,6 +187,36 @@ CultFanatic = {
 --- Кэш для системы экипировки
 EQUIP_CACHE = nil
 
+--- Система выбора героев
+HeroSelector = {
+    --- Основной фрейм
+    table = nil,
+    --- Фрейм паладина
+    paladin = nil,
+    --- Фрейм жреца
+    priest = nil,
+    --- Фрейм рыцаря смерти
+    dk = nil,
+    --- Фрейм друида
+    druid = nil,
+    --- Фрейм шамана
+    shaman = nil,
+    --- Фрейм воина
+    warrior = nil,
+    --- Фрейм мага
+    mage = nil,
+    --- Фрейм разбойника
+    rogue = nil,
+    --- Фрейм чернокнижника
+    warlock = nil,
+    --- Фрейм охотника
+    hunter = nil,
+    --- Выбранный герой
+    hero = nil,
+    --- Список выбранных героев
+    selected_heroes = {},
+}
+
 ---@author meiso
 
 --Lord Marrowgar
@@ -312,6 +342,95 @@ DRUID               = nil
 SHAMAN              = nil
 PRIEST              = FourCC("Hblm")
 PRIEST_SOR          = FourCC("h006")
+
+---@author meiso
+
+function Paladin.ResetToDefault()
+    for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
+        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
+
+function Paladin.Init(location, name)
+    location = location or Location(4000., 200.)
+    name = name or "Paladin"
+    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
+
+    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, location, 90.)
+
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    Paladin.hero:SetName(name)
+    Paladin.hero:SetLevel(80)
+    Paladin.hero:SetBaseMana(4394)
+    Paladin.hero:SetMaxMana(4394, true)
+
+    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
+    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
+
+    Paladin.InitConsecration()
+    Paladin.InitBlessingOfKings()
+    Paladin.InitBlessingOfMight()
+    Paladin.InitBlessingOfSanctuary()
+    Paladin.InitBlessingOfWisdom()
+    Paladin.InitJudgementOfLight()
+    Paladin.InitJudgementOfWisdom()
+    Paladin.InitShieldOfRighteousness()
+    Paladin.InitAvengersShield()
+
+    Paladin.ResetToDefault()
+end
+
+---@author meiso
+
+function Priest.ResetToDefault()
+    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
+
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
+
+    Priest.hero:SetLevel(80)
+
+    Priest.hero:SetLife(100)
+    Priest.hero:SetBaseMana(3863)
+    Priest.hero:SetMaxMana(5000, true)
+
+    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
+    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
+
+    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
+        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
+    end
+end
+
+function Priest.Init(location, unit, name)
+    location = location or Location(4200., 200.)
+    name = name or "Priest"
+    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.)
+
+    Priest.hero = Unit(unit)
+    Priest.hero:SetName(name)
+
+    Priest.InitFlashHeal()
+    Priest.InitRenew()
+    Priest.InitCircleOfHealing()
+    Priest.InitPrayerOfMending()
+    Priest.InitPowerWordShield()
+    Priest.InitGuardianSpirit()
+    Priest.InitPowerWordFortitude()
+    Priest.InitInnerFire()
+    Priest.InitSpiritOfRedemption()
+
+    Priest.ResetToDefault()
+end
 
 ---@author meiso
 
@@ -2253,6 +2372,7 @@ function SaveSystem.IsHeroNotCreated()
     return false
 end
 
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Возвращает итератор на следующую область для считывания данных
@@ -2305,6 +2425,7 @@ function SaveSystem.generation2()
     return SaveSystem.hash2
 end
 
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Возвращает ключ игрока
@@ -2391,6 +2512,7 @@ function SaveSystem.LoadUserData()
     end
 end
 
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Сохранаяет информацию о характеристиках, способностях и предметах
@@ -2421,15 +2543,17 @@ function SaveSystem.SaveUnitData(i, u)
 
         -- сохраняем способности
         for k = 1, #SaveSystem.abilities do
-            local ability_level = GetUnitAbilityLevel(u, SaveSystem.abilities[k])
+            local ability = SaveSystem.abilities[k]:GetId()
+            local ability_level = GetUnitAbilityLevel(u, ability)
             if ability_level > 0 then
                 ability_count = ability_count + 1
-                SaveSystem.data[i] = SaveSystem.abilities[k]
+                SaveSystem.data[i] = ability
                 i = i + 1
                 SaveSystem.data[i] = ability_level
                 i = i + 1
             end
         end
+
         SaveSystem.data[ability_index] = ability_count
         SaveSystem.data[i] = SaveSystem.scope.items
         i = i + 1
@@ -2635,7 +2759,7 @@ function SaveSystem.LoadBaseState(pl)
             unit_y = GetLocationY(loc)
         end
 
-        --SaveSystem.AddHeroAbilities(SaveSystem.classid)
+        --SaveSystem.InitHero(SaveSystem.classid)
         local unit_obj = CreateUnit(pl, unit_id, unit_x, unit_y, unit_face)
         SaveSystem.unit = unit_obj
 
@@ -2648,6 +2772,7 @@ function SaveSystem.LoadBaseState(pl)
     end
 end
 
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Создает юнита из полученных данных
@@ -2956,6 +3081,7 @@ function SaveSystem.Save()
     end
 end
 
+---@author Vlod www.xgm.ru
 ---@author meiso
 
 --- Возрождает юнита
@@ -2968,52 +3094,21 @@ function SaveSystem.UnitsRespawn()
     end
 end
 
---- Определяет способности выбранного класса
+--- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.DefineAbilities()
-    if SaveSystem.classid == CLASSES["paladin"] then
-        SaveSystem.DefineAbilitiesPaladin()
-    elseif SaveSystem.classid == CLASSES["priest"] then
-        SaveSystem.DefineAbilitiesPriest()
-    end
-end
-
---- Определяет способности паладина
----@return nil
-function SaveSystem.DefineAbilitiesPaladin()
-    SaveSystem.abilities = {
-        DIVINE_SHIELD,
-        CONSECRATION,
-        HAMMER_RIGHTEOUS,
-        JUDGEMENT_OF_LIGHT_TR,
-        JUDGEMENT_OF_WISDOM_TR,
-        SHIELD_OF_RIGHTEOUSNESS,
-        AVENGERS_SHIELD,
-        SPELLBOOK_PALADIN,
-    }
-    SaveSystem.spellbook = SPELLBOOK_PALADIN
-end
-
---- Определяет способности приста
----@return nil
-function SaveSystem.DefineAbilitiesPriest()
-    SaveSystem.abilities = {
-        FLASH_HEAL,
-        RENEW,
-        CIRCLE_OF_HEALING,
-    }
-    SaveSystem.spellbook = nil
-end
-
---- Выдает герою способности
----@return nil
-function SaveSystem.AddHeroAbilities(class)
+function SaveSystem.InitHero(class)
     SaveSystem.classid = CLASSES[class]
-    local hero = Unit(SaveSystem.hero[GetConvertedPlayerId(GetTriggerPlayer())])
-    SaveSystem.DefineAbilities()
-    hero:AddAbilities(table.unpack(SaveSystem.abilities))
-    hero:AddSpellbook(SaveSystem.spellbook)
-    hero:SetLevel(80)
+    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
+    local loc = Location(-60., -750.)
+    if SaveSystem.classid == CLASSES["paladin"] then
+        Paladin.Init(loc)
+        SaveSystem.hero[playerid] = Paladin.hero:GetId()
+        SaveSystem.abilities = {}
+    elseif SaveSystem.classid == CLASSES["priest"] then
+        Priest.Init(loc)
+        SaveSystem.hero[playerid] = Priest.hero:GetId()
+        SaveSystem.abilities = {}
+    end
 end
 
 ---@author meiso
@@ -3027,11 +3122,11 @@ function SaveSystem.AddNewHero()
     if text:find("paladin") then
         unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.AddHeroAbilities("paladin")
+        SaveSystem.InitHero("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.AddHeroAbilities("priest")
+        SaveSystem.InitHero("priest")
     end
 end
 
@@ -3068,8 +3163,15 @@ end
 ---@return nil
 function SaveSystem.LoadHero()
     local i = GetConvertedPlayerId(GetTriggerPlayer())
+    HeroSelector.Close()
     SaveSystem.Load()
     SaveSystem.hero[i] = SaveSystem.unit
+    local class = GetUnitName(SaveSystem.unit):lower()
+    if class == "priest" then
+        Priest.Init(nil, SaveSystem.unit)
+    elseif class == "paladin" then
+        Paladin.Init(nil, SaveSystem.unit)
+    end
 end
 
 --- Инициализация события по загрузке юнита
@@ -3829,22 +3931,6 @@ hunter_text = "Охотники бьют врага на расстоянии и
 
 ---@author meiso
 
-HeroSelector = {
-    table = nil,
-    paladin = nil,
-    priest = nil,
-    dk = nil,
-    druid = nil,
-    shaman = nil,
-    warrior = nil,
-    mage = nil,
-    rogue = nil,
-    warlock = nil,
-    hunter = nil,
-    hero = nil,
-    selected_heroes = {},
-}
-
 function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -3954,7 +4040,7 @@ function HeroSelector.CreateHero()
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local unit = Unit(GetTriggerPlayer(), HEROES[HeroSelector.hero], Location(-60., -750.))
     SaveSystem.hero[playerid] = unit:GetId()
-    SaveSystem.AddHeroAbilities(HeroSelector.hero)
+    SaveSystem.InitHero(HeroSelector.hero)
 end
 
 function HeroSelector.AcceptHero(hero)
@@ -3970,7 +4056,8 @@ function HeroSelector.AcceptHero(hero)
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
-    HeroSelector.CreateHero()
+    --HeroSelector.CreateHero()
+    SaveSystem.InitHero(HeroSelector.hero)
 end
 
 function HeroSelector.Close()
@@ -5197,47 +5284,6 @@ end
 
 ---@author meiso
 
-function Paladin.ResetToDefault()
-    for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
-        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
-        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
-    end
-    for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
-        Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
-        Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
-    end
-end
-
-function Paladin.Init(location)
-    local loc = location or Location(4000., 200.)
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM}
-
-    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, loc, 90.)
-
-    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
-
-    Paladin.hero:SetLevel(80)
-    Paladin.hero:SetBaseMana(4394)
-    Paladin.hero:SetMaxMana(4394, true)
-
-    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
-    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
-
-    Paladin.InitConsecration()
-    Paladin.InitBlessingOfKings()
-    Paladin.InitBlessingOfMight()
-    Paladin.InitBlessingOfSanctuary()
-    Paladin.InitBlessingOfWisdom()
-    Paladin.InitJudgementOfLight()
-    Paladin.InitJudgementOfWisdom()
-    Paladin.InitShieldOfRighteousness()
-    Paladin.InitAvengersShield()
-
-    Paladin.ResetToDefault()
-end
-
----@author meiso
-
 function Paladin.RemoveJudgementOfLight(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
@@ -5516,49 +5562,6 @@ function Priest.InitGuardianSpirit()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsGuardianSpirit)
     event:AddAction(Priest.CastGuardianSpirit)
-end
-
----@author meiso
-
-function Priest.ResetToDefault()
-    for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
-        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
-    end
-    for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
-        Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
-        Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
-    end
-end
-
-function Priest.Init(location)
-    local loc = location or Location(4200., 200.)
-    local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
-
-    Priest.hero = Unit(GetLocalPlayer(), PRIEST, loc, 90.)
-
-    EquipSystem.AddItemsToUnit(Priest.hero, items)
-    Priest.hero:SetName("MeisoHolyPriest")
-    Priest.hero:SetLevel(80)
-
-    Priest.hero:SetLife(100)
-    Priest.hero:SetBaseMana(3863)
-    Priest.hero:SetMaxMana(5000, true)
-
-    Priest.hero:AddAbilities(ALL_MAIN_PRIEST_SPELLS)
-    Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
-
-    Priest.InitFlashHeal()
-    Priest.InitRenew()
-    Priest.InitCircleOfHealing()
-    Priest.InitPrayerOfMending()
-    Priest.InitPowerWordShield()
-    Priest.InitGuardianSpirit()
-    Priest.InitPowerWordFortitude()
-    Priest.InitInnerFire()
-    Priest.InitSpiritOfRedemption()
-
-    Priest.ResetToDefault()
 end
 
 ---@author meiso
@@ -5939,28 +5942,6 @@ function Priest.InitSpiritOfRedemption()
     event:AddAction(Priest.SpiritOfRedemption)
 end
 
----@author meiso
-
-function DeathKnight.Init(location)
-    local loc = location or Location(4000., 150.)
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
-
-    DeathKnight.hero = Unit(GetLocalPlayer(), DEATH_KNIGHT, loc)
-
-    --EquipSystem.AddItemsToUnit(DeathKnight.hero, items_list)
-
-    DeathKnight.hero:SetLevel(80)
-
-    DeathKnight.Runes()
-end
-
----@author meiso
-
-function DeathKnight.Runes()
-    local runes = Frame("Runes")
-    runes:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.155)
-end
-
 
 -- Точка входа для инициализации всего
 function EntryPoint()
@@ -6003,8 +5984,8 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    --Priest.Init(Location(300., -490.))
+    --Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
     -- Манекены
