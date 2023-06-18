@@ -203,6 +203,10 @@ function SaveSystem.ada(is_player, file_name, u)
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
         end
 
+        if is_player then
+            SaveSystem.SaveHeroName()
+        end
+
         if SaveSystem.user_data[1] > 0 then
             if is_player then
                 if SaveSystem.user_data[1] + item_data < 1200 then

@@ -13,6 +13,7 @@ function SaveSystem.LoadHero()
     elseif class == "paladin" then
         Paladin.Init(nil, SaveSystem.unit)
     end
+    SaveSystem.LoadHeroName()
 end
 
 --- Инициализация события по загрузке юнита

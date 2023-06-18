@@ -95,10 +95,19 @@ function HeroSelector.ConfirmCharacter(hero)
         trig:AddAction(function()
             if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
                 dialog:Destroy()
-                local tmp = split(hero:GetName(), "_")[1]
-                HeroSelector.hero = tmp:lower()
-                HeroSelector.AcceptHero(HeroSelector.hero)
-                HeroSelector.Close()
+                local naming = Frame("NameSetter")
+                local name = Frame(Frame:GetFrameByName("EditBoxText"))
+                naming:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
+                naming:SetSize(0.2, 0.03)
+                local n_trig = EventsFrame(naming:GetHandle())
+                n_trig:RegisterEditBoxEnter()
+                n_trig:AddAction(function()
+                    local tmp = split(hero:GetName(), "_")[1]
+                    HeroSelector.hero = tmp:lower()
+                    HeroSelector.AcceptHero(HeroSelector.hero, name:GetTriggerText())
+                    naming:Destroy()
+                    HeroSelector.Close()
+                end)
             end
             confirm:Destroy()
         end)
@@ -112,7 +121,7 @@ function HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero)
 end
 
-function HeroSelector.AcceptHero(hero)
+function HeroSelector.AcceptHero(hero, name)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
             if h == hero then
@@ -126,7 +135,7 @@ function HeroSelector.AcceptHero(hero)
     end
     table.insert(HeroSelector.selected_heroes, hero)
     --HeroSelector.CreateHero()
-    SaveSystem.InitHero(HeroSelector.hero)
+    SaveSystem.InitHero(HeroSelector.hero, name)
 end
 
 function HeroSelector.Close()

@@ -50,6 +50,12 @@ function EventsFrame:RegisterMouseLeave()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_MOUSE_LEAVE)
 end
 
+--- Регистрирует событие нажатия Enter в поле edit box
+---@return nil
+function EventsFrame:RegisterEditBoxEnter()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_EDITBOX_ENTER)
+end
+
 --- Получить фрейм
 ---@return framehandle
 function EventsFrame:GetFrame()

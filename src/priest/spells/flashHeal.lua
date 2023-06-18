@@ -13,7 +13,7 @@ function Priest.CastFlashHeal()
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
     TriggerSleepAction(cast_time)
     -- дропаем каст заклинания, если кастбар был сброшен
-    if Frame:IsDrop() then return end
+    if Frame:Dropped() then return end
 
     -- даем хп указанному юниту
     target:GainLife { life = heal, show = true}

@@ -310,6 +310,17 @@ PRIEST_SOR          = FourCC("h006")
 ---@author meiso
 
 function Paladin.ResetToDefault()
+    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
+
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+
+    Paladin.hero:SetLevel(80)
+    Paladin.hero:SetBaseMana(4394)
+    Paladin.hero:SetMaxMana(4394, true)
+
+    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
+    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
+
     for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
@@ -320,21 +331,13 @@ function Paladin.ResetToDefault()
     end
 end
 
-function Paladin.Init(location, name)
+function Paladin.Init(location, unit, name)
     location = location or Location(4000., 200.)
     name = name or "Paladin"
-    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
+    unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
 
-    Paladin.hero = Unit(GetLocalPlayer(), PALADIN, location, 90.)
-
-    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    Paladin.hero = Unit(unit)
     Paladin.hero:SetName(name)
-    Paladin.hero:SetLevel(80)
-    Paladin.hero:SetBaseMana(4394)
-    Paladin.hero:SetMaxMana(4394, true)
-
-    Paladin.hero:AddAbilities(ALL_MAIN_PALADIN_SPELLS)
-    Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -378,7 +381,7 @@ end
 function Priest.Init(location, unit, name)
     location = location or Location(4200., 200.)
     name = name or "Priest"
-    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.)
+    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.):GetId()
 
     Priest.hero = Unit(unit)
     Priest.hero:SetName(name)
@@ -620,6 +623,12 @@ end
 ---@return nil
 function EventsFrame:RegisterMouseLeave()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_MOUSE_LEAVE)
+end
+
+--- Регистрирует событие нажатия Enter в поле edit box
+---@return nil
+function EventsFrame:RegisterEditBoxEnter()
+    BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_EDITBOX_ENTER)
 end
 
 --- Получить фрейм
@@ -1078,7 +1087,13 @@ end
 --- Получить текст фрейма. Возможна десинхронизация!
 ---@return string
 function Frame:GetText()
-    return BlzFrameGetText(self.text)
+    return BlzFrameGetText(self.frame)
+end
+
+--- Получить текст фрейма от события
+---@return string
+function Frame:GetTriggerText()
+    return BlzGetTriggerFrameText()
 end
 
 --- Получить хэндл фрейма
@@ -1120,7 +1135,7 @@ end
 
 --- Проверить сброшена ли анимация фрейма
 ---@return boolean
-function Frame:IsDrop()
+function Frame:Dropped()
     return self.drop
 end
 
@@ -2594,6 +2609,15 @@ function SaveSystem.SaveBaseState(i, u, world)
     return i
 end
 
+--- Сохраняет имя героя
+---@return nil
+function SaveSystem.SaveHeroName()
+    local name = GetHeroProperName(SaveSystem.unit)
+    PreloadGenClear()
+    Preload("\")\n call SetPlayerName(Player(25), \"" .. name .. "\") \n //")
+    PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "name.txt")
+end
+
 --- Загружает информацию о характеристиках, способностях и предметах
 ---@return nil
 function SaveSystem.LoadUnitData()
@@ -2734,6 +2758,14 @@ function SaveSystem.LoadBaseState(pl)
             SetPlayerState(pl, PLAYER_STATE_RESOURCE_LUMBER, count_lumber)
         end
     end
+end
+
+--- Загружает имя героя
+---@return nil
+function SaveSystem.LoadHeroName()
+    TriggerSleepAction(0.)
+    Preloader("save\\" .. SaveSystem.directory .. "\\" .. "name.txt")
+    BlzSetHeroProperName(SaveSystem.unit, GetPlayerName(Player(25)))
 end
 
 ---@author Vlod www.xgm.ru
@@ -2941,6 +2973,10 @@ function SaveSystem.ada(is_player, file_name, u)
             item_data = SaveSystem.SaveBaseState(item_data, u, handle_world)
         end
 
+        if is_player then
+            SaveSystem.SaveHeroName()
+        end
+
         if SaveSystem.user_data[1] > 0 then
             if is_player then
                 if SaveSystem.user_data[1] + item_data < 1200 then
@@ -3060,16 +3096,16 @@ end
 
 --- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.InitHero(class)
+function SaveSystem.InitHero(class, name)
     SaveSystem.classid = CLASSES[class]
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(loc)
+        Paladin.Init(loc, nil, name)
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(loc)
+        Priest.Init(loc, nil, name)
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end
@@ -3136,6 +3172,7 @@ function SaveSystem.LoadHero()
     elseif class == "paladin" then
         Paladin.Init(nil, SaveSystem.unit)
     end
+    SaveSystem.LoadHeroName()
 end
 
 --- Инициализация события по загрузке юнита
@@ -3990,10 +4027,19 @@ function HeroSelector.ConfirmCharacter(hero)
         trig:AddAction(function()
             if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
                 dialog:Destroy()
-                local tmp = split(hero:GetName(), "_")[1]
-                HeroSelector.hero = tmp:lower()
-                HeroSelector.AcceptHero(HeroSelector.hero)
-                HeroSelector.Close()
+                local naming = Frame("NameSetter")
+                local name = Frame(Frame:GetFrameByName("EditBoxText"))
+                naming:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
+                naming:SetSize(0.2, 0.03)
+                local n_trig = EventsFrame(naming:GetHandle())
+                n_trig:RegisterEditBoxEnter()
+                n_trig:AddAction(function()
+                    local tmp = split(hero:GetName(), "_")[1]
+                    HeroSelector.hero = tmp:lower()
+                    HeroSelector.AcceptHero(HeroSelector.hero, name:GetTriggerText())
+                    naming:Destroy()
+                    HeroSelector.Close()
+                end)
             end
             confirm:Destroy()
         end)
@@ -4007,7 +4053,7 @@ function HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero)
 end
 
-function HeroSelector.AcceptHero(hero)
+function HeroSelector.AcceptHero(hero, name)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
             if h == hero then
@@ -4021,7 +4067,7 @@ function HeroSelector.AcceptHero(hero)
     end
     table.insert(HeroSelector.selected_heroes, hero)
     --HeroSelector.CreateHero()
-    SaveSystem.InitHero(HeroSelector.hero)
+    SaveSystem.InitHero(HeroSelector.hero, name)
 end
 
 function HeroSelector.Close()
@@ -5456,7 +5502,7 @@ function Priest.CastFlashHeal()
     Frame:CastBar(cast_time, "Быстрое исцеление", Priest.hero)
     TriggerSleepAction(cast_time)
     -- дропаем каст заклинания, если кастбар был сброшен
-    if Frame:IsDrop() then return end
+    if Frame:Dropped() then return end
 
     -- даем хп указанному юниту
     target:GainLife { life = heal, show = true}

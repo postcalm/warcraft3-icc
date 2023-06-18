@@ -116,6 +116,15 @@ function SaveSystem.SaveBaseState(i, u, world)
     return i
 end
 
+--- Сохраняет имя героя
+---@return nil
+function SaveSystem.SaveHeroName()
+    local name = GetHeroProperName(SaveSystem.unit)
+    PreloadGenClear()
+    Preload("\")\n call SetPlayerName(Player(25), \"" .. name .. "\") \n //")
+    PreloadGenEnd("save\\" .. SaveSystem.directory .. "\\" .. "name.txt")
+end
+
 --- Загружает информацию о характеристиках, способностях и предметах
 ---@return nil
 function SaveSystem.LoadUnitData()
@@ -256,4 +265,12 @@ function SaveSystem.LoadBaseState(pl)
             SetPlayerState(pl, PLAYER_STATE_RESOURCE_LUMBER, count_lumber)
         end
     end
+end
+
+--- Загружает имя героя
+---@return nil
+function SaveSystem.LoadHeroName()
+    TriggerSleepAction(0.)
+    Preloader("save\\" .. SaveSystem.directory .. "\\" .. "name.txt")
+    BlzSetHeroProperName(SaveSystem.unit, GetPlayerName(Player(25)))
 end

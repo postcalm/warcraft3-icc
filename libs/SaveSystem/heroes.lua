@@ -13,16 +13,16 @@ end
 
 --- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.InitHero(class)
+function SaveSystem.InitHero(class, name)
     SaveSystem.classid = CLASSES[class]
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(loc)
+        Paladin.Init(loc, nil, name)
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(loc)
+        Priest.Init(loc, nil, name)
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end

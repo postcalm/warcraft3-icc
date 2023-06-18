@@ -27,7 +27,7 @@ end
 function Priest.Init(location, unit, name)
     location = location or Location(4200., 200.)
     name = name or "Priest"
-    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.)
+    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.):GetId()
 
     Priest.hero = Unit(unit)
     Priest.hero:SetName(name)

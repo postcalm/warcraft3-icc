@@ -204,7 +204,13 @@ end
 --- Получить текст фрейма. Возможна десинхронизация!
 ---@return string
 function Frame:GetText()
-    return BlzFrameGetText(self.text)
+    return BlzFrameGetText(self.frame)
+end
+
+--- Получить текст фрейма от события
+---@return string
+function Frame:GetTriggerText()
+    return BlzGetTriggerFrameText()
 end
 
 --- Получить хэндл фрейма
@@ -246,7 +252,7 @@ end
 
 --- Проверить сброшена ли анимация фрейма
 ---@return boolean
-function Frame:IsDrop()
+function Frame:Dropped()
     return self.drop
 end
 
