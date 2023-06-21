@@ -1,4 +1,5 @@
 .idea
-custom-code.lua
+**/__pycache__
+*custom-code.lua
 .token
 models/origin
