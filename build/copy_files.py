@@ -1,7 +1,7 @@
 import shutil
 import os
 from pathlib import Path
-from builder.settings import PROJECT_DIR
+from build.settings import PROJECT_DIR
 
 test_map = PROJECT_DIR / "Test.w3x"
 release_map = PROJECT_DIR / "ICC.w3x"
