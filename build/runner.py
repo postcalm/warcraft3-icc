@@ -1,4 +1,4 @@
-import subprocess
+import os
 from pathlib import Path
 from dataclasses import dataclass
 from build.settings import GAME_DIRS, PROJECT_DIR
@@ -18,14 +18,16 @@ class BaseRunner:
         cmd = f'start "" ' \
               f'"{self.game_dir / self.runner}" -loadfile ' \
               f'"{PROJECT_DIR / self.map}"'
-        subprocess.run(cmd)
+        os.system(cmd)
 
 
+@dataclass
 class WorldEditor(BaseRunner):
     """Редактор"""
-    runner = "World Editor.exe"
+    runner: str = "World Editor.exe"
 
 
+@dataclass
 class Warcraft(BaseRunner):
     """Игра"""
-    runner = "Warcraft III.exe"
+    runner: str = "Warcraft III.exe"

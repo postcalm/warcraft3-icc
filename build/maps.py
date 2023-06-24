@@ -12,3 +12,9 @@ lower_tier_settings = Settings(
     entry_point="src/entry_point/main.lua",
     custom_code=Path("custom-code.lua"),
 )
+
+
+MAPS = {
+    "test": test_map_settings,
+    "lower": lower_tier_settings,
+}
