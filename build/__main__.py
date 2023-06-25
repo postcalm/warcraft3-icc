@@ -15,12 +15,12 @@ def parse_arguments():
 
 def main(args: Namespace):
     m = MAPS.get(args.map)
-    copy()
+    copy(m.map)
     Builder(m).build()
     if args.edit:
-        WorldEditor(map=m.map).run()
+        WorldEditor(m.map).run()
     if args.run:
-        Warcraft(map=m.map).run()
+        Warcraft(m.map).run()
 
 
 if __name__ == '__main__':

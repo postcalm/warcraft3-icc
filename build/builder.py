@@ -7,6 +7,8 @@ from build.settings import Settings, PROJECT_DIR, PATCHER
 
 @dataclass
 class Builder:
+    """Сборщик исходного кода"""
+
     settings: Settings
 
     def build(self):
@@ -30,9 +32,10 @@ class Builder:
         with open(path.absolute(), "w+", encoding="utf8") as war3map:
             # повторно заменяем кастомный код
             content = re.sub(
-                f"{self.settings.tag}.*{self.settings.tag}",
+                rf"{self.settings.tag}(.*?){self.settings.tag}",
                 self.settings.custom_code.read_text(encoding="utf8"),
-                content
+                content,
+                flags=re.DOTALL,
             )
             war3map.write(content)
 
@@ -56,6 +59,10 @@ class Builder:
         for sf in src_files:
             sf = PROJECT_DIR / sf
             if sf.is_file():
-                file.write(sf.read_text(encoding="utf8"))
+                # при чтении из кастомного кода, python автоматически преобразует все служебные символы
+                # потому, косую черту запишем через двойную.
+                # % управляющий символ в lua - преобразуем сами
+                text = f'{sf.read_text(encoding="utf8")}\n'.replace("\\", "\\\\").replace("%%", "%")
+                file.write(text)
             else:
                 self._w2f(file, sf.glob("**/*.lua"))  # noqa

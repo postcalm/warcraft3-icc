@@ -43,18 +43,19 @@ def copy_spell_icons(src: Path, dst: Path):
     copy_files(src, cmddisbtn, "DISBTN")
 
 
-def copy():
+def copy(target_map: str):
+    p = PROJECT_DIR / target_map
     for si in spell_icons:
-        print(f"Copying {si} to a test map ...")
-        copy_spell_icons(Path(si), test_map)
+        print(f"Copying {si} to a {target_map} map ...")
+        copy_spell_icons(Path(si), p)
     print("Success\n")
 
     for oi in other_icons:
-        print(f"Copying {oi} to a test map ...")
-        copy_files(Path(oi), test_map / "ReplaceableTextures" / "icons")
+        print(f"Copying {oi} to a {target_map} map ...")
+        copy_files(Path(oi), p / "ReplaceableTextures" / "icons")
     print("Success\n")
 
     for mf in model_files:
-        print(f"Copying {mf} to a test map ...")
-        copy_files(Path(mf), test_map)
+        print(f"Copying {mf} to a {target_map} map ...")
+        copy_files(Path(mf), p)
     print("Success\n")
