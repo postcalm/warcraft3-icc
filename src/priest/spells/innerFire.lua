@@ -50,8 +50,6 @@ function Priest.IsInnerFire()
 end
 
 function Priest.InitInnerFire()
-    inner_fire:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsInnerFire)

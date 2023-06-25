@@ -11,8 +11,6 @@ function Paladin.IsShieldOfRighteousness()
 end
 
 function Paladin.InitShieldOfRighteousness()
-    shield_of_righteousness:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)

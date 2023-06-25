@@ -52,8 +52,6 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    judgement_of_light_tr:Init()
-
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 

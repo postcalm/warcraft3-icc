@@ -73,8 +73,6 @@ function Priest.IsPowerWordShield()
 end
 
 function Priest.InitPowerWordShield()
-    power_word_shield:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)

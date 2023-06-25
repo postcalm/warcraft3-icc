@@ -26,8 +26,6 @@ function Priest.IsCircleOfHealing()
 end
 
 function Priest.InitCircleOfHealing()
-    circle_of_healing:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)

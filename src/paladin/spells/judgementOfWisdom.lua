@@ -50,8 +50,6 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    judgement_of_wisdom_tr:Init()
-
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
 

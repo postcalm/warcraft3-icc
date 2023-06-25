@@ -81,8 +81,6 @@ function Priest.IsPrayerOfMending()
 end
 
 function Priest.InitPrayerOfMending()
-    prayer_of_mending:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPrayerOfMending)

@@ -41,8 +41,6 @@ function Paladin.IsConsecration()
 end
 
 function Paladin.InitConsecration()
-    consecration:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)

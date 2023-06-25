@@ -32,8 +32,6 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    blessing_of_might:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)

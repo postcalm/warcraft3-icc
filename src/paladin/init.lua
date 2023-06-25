@@ -13,10 +13,12 @@ function Paladin.ResetToDefault()
     Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
+        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
+        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end

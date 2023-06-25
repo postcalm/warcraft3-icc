@@ -20,8 +20,6 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
-    renew:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)

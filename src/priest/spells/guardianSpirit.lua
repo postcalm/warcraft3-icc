@@ -41,8 +41,6 @@ function Priest.IsGuardianSpirit()
 end
 
 function Priest.InitGuardianSpirit()
-    guardian_spirit:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsGuardianSpirit)

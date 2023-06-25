@@ -56,7 +56,6 @@ function Priest.IsSpiritOfRedemption()
 end
 
 function Priest.InitSpiritOfRedemption()
-    spirit_of_redemption:Init()
     Priest.hero:DisableAbility(spirit_of_redemption:GetId())
 
     local event = EventsPlayer()

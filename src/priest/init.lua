@@ -15,10 +15,12 @@ function Priest.ResetToDefault()
     Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
