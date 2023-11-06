@@ -1,4 +1,4 @@
-STRING 1
+﻿STRING 1
 {
 Игрок 1
 }
@@ -772,5 +772,15 @@ ICC
 STRING 259
 {
 1.0.0
+
+
+
+
+}
+
+STRING 260
+// Декорации: D001 (lower), Name (Название)
+{
+lower
 }
 

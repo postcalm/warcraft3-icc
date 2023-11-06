@@ -27,6 +27,7 @@ model_files = (
 
 
 def copy_files(src: Path, dst: Path, prefix_filename: str = ""):
+    os.makedirs(dst, exist_ok=True)
     for f in os.listdir(src):
         if f in skip_files:
             continue

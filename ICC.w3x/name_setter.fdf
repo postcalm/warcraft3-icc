@@ -1,0 +1,31 @@
+// author meiso
+
+Frame "EDITBOX" "NameSetter" {
+    Width 0.362,
+    Height 0.037,
+    EditBorderSize 0.009,
+    EditCursorColor 1.0 0.0 0.0,
+
+    ControlBackdrop "EditBoxBackdrop",
+    Frame "BACKDROP" "EditBoxBackdrop" {
+        DecorateFileNames,
+        UseActiveContext,
+        BackdropTileBackground,
+        BackdropBackground "EscMenuEditBoxBackground",
+        BackdropCornerFlags "UL|UR|BL|BR|T|L|B|R",
+        BackdropCornerSize  0.0125,
+        BackdropBackgroundSize  0.256,
+        BackdropBackgroundInsets 0.005 0.005 0.005 0.005,
+        BackdropEdgeFile  "EscMenuEditBoxBorder",
+        BackdropBlendAll,
+    }
+
+    EditTextFrame "EditBoxText",
+    Frame "TEXT" "EditBoxText" {
+        DecorateFileNames,
+        UseActiveContext,
+        FrameFont "MasterFont", 0.015, "",
+        FontColor 1.0 1.0 1.0,
+        FontFlags "FIXEDSIZE",
+   }
+}

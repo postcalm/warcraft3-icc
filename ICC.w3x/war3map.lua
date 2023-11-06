@@ -82,7 +82,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3 снижения урона
+    --- Баф "Благословение неприкосновенности" - 3% снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -132,8 +132,8 @@ PLAYER_2   = Player(1)
 LICH_KING  = Player(10)
 
 COMMON_TIMER = FourCC("BTLF")
-ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
-CHANNEL_EFFECT = "Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl"
+ARROW_MODEL = "Abilities/Spells/Other/Aneu/AneuCaster.mdl"
+CHANNEL_EFFECT = "Abilities/Spells/Undead/DeathPact/DeathPactTarget.mdl"
 
 ---@author meiso
 
@@ -358,10 +358,12 @@ function Paladin.ResetToDefault()
     Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
+        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
+        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
@@ -405,10 +407,12 @@ function Priest.ResetToDefault()
     Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
+        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
+        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
@@ -4123,7 +4127,7 @@ avengers_shield = Ability {
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
             "Способен воздействовать на 3 цели.",
-    icon = "ReplaceableTextures/CommandButtons/avengers_shield.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNavengers_shield.tga"
 }
 
 blessing_of_kings = Ability {
@@ -4132,7 +4136,7 @@ blessing_of_kings = Ability {
     tooltip = "Благословение королей",
     key = "Q",
     text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
     buff_desc = "Все характеристики повышены на 10%."
 }
 
@@ -4142,7 +4146,7 @@ blessing_of_might = Ability {
     tooltip = "Благословение могущества",
     key = "W",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_might.tga",
     buff_desc = "Сила атаки увеличена на 550."
 }
 
@@ -4152,7 +4156,7 @@ blessing_of_wisdom = Ability {
     tooltip = "Благословение мудрости",
     key = "E",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_wisdom.tga",
     buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
 }
 
@@ -4163,7 +4167,7 @@ blessing_of_sanctuary = Ability {
     key = "R",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
             "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
     buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
             "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
 }
@@ -4176,7 +4180,7 @@ consecration = Ability {
     key = "R",
     text = "Освящает участок земли, на котором стоит паладин, " ..
             "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
-    icon = "ReplaceableTextures/CommandButtons/consecration.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNconsecration.tga"
 }
 
 judgement_of_light_tr = Ability {
@@ -4187,7 +4191,7 @@ judgement_of_light_tr = Ability {
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
     buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
 
@@ -4199,7 +4203,7 @@ judgement_of_wisdom_tr = Ability {
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
     buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
 
@@ -4211,7 +4215,7 @@ shield_of_righteousness = Ability {
     key = "W",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
             "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
-    icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNshield_of_righteousness.tga"
 }
 
 divine_shield = Ability {
@@ -4224,19 +4228,20 @@ divine_shield = Ability {
     buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
 }
 
-hammer_righteous = Ability {
+hammer_of_righteous = Ability {
     ability = HAMMER_RIGHTEOUS,
     manacost = 6,
     cooldown = 6.,
     tooltip = "Молот праведника",
-    key = "",
+    key = "Q",
     text = "Поражает светлой магией текущую цель и до 2 находящихся поблизости целей. " ..
             "Величина наносимого урона равна урону в секунду от оружия в правой руке, умноженному на 4.",
+    icon = "ReplaceableTextures/CommandButtons/BTNhammer_of_righteous.tga"
 }
 
 ALL_MAIN_PALADIN_SPELLS = {
     divine_shield,
-    hammer_righteous,
+    hammer_of_righteous,
     avengers_shield,
     consecration,
     judgement_of_light_tr,
@@ -4259,7 +4264,7 @@ flash_heal = Ability {
     tooltip = "Быстрое исцеление",
     key = "Q",
     text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
-    icon = "ReplaceableTextures/CommandButtons/flash_heal.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNflash_heal.tga"
 }
 
 renew = Ability {
@@ -4268,7 +4273,7 @@ renew = Ability {
     tooltip = "Обновление",
     key = "E",
     text = "Восстанавливает цели 1400 ед. здоровья в течение 15 сек.",
-    icon = "ReplaceableTextures/CommandButtons/renew.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNrenew.tga",
     buff_desc = "Восстановление 280 ед. здоровья раз в 3 с."
 }
 
@@ -4281,7 +4286,7 @@ power_word_shield = Ability {
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
             "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
             "получением урона. Повторно наложить щит можно только через 15 сек.",
-    icon = "ReplaceableTextures/CommandButtons/power_word_shield.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNpower_word_shield.tga",
     buff_desc = "Поглощение урона."
 }
 
@@ -4290,7 +4295,7 @@ weakened_soul = Ability {
     tooltip = "Ослабленная душа",
     key = "Q",
     text = "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
-    icon = "ReplaceableTextures/CommandButtons/weakened_soul.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNweakened_soul.tga"
 }
 
 guardian_spirit = Ability {
@@ -4303,7 +4308,7 @@ guardian_spirit = Ability {
             "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
             "50% ее максимального запаса здоровья. Время действия – 10 сек.",
-    icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
     buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
 }
 
@@ -4317,7 +4322,7 @@ prayer_of_mending = Ability {
             "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
             "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
             "только на одну цель одновременно.",
-    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNprayer_of_mending.tga",
     buff_desc = "Восстанавливает 1043 ед. здоровья при последующем получении урона."
 }
 
@@ -4329,7 +4334,7 @@ circle_of_healing = Ability {
     key = "W",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
             "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
-    icon = "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
+    icon = "ReplaceableTextures/CommandButtons/BTNcircle_of_healing.tga"
 }
 
 power_word_fortitude = Ability {
@@ -4338,7 +4343,7 @@ power_word_fortitude = Ability {
     tooltip = "Молитва стойкости",
     key = "Q",
     text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
-    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNprayer_of_mending.tga",
     buff_desc = "Выносливость повышена на 165."
 }
 
@@ -4361,7 +4366,7 @@ spirit_of_redemption = Ability {
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
-    icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
+    icon = "ReplaceableTextures/CommandButtons/BTNspirit_of_redemption.tga",
 }
 
 ALL_MAIN_PRIEST_SPELLS = {
@@ -4396,7 +4401,6 @@ function DummyForHealing(location)
     d:SetMaxLife(500000)
     d:SetLife(100)
 end
-
 ---@author meiso
 
 function CultAdherent.DarkMartyrdom()
@@ -5083,8 +5087,6 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
-    avengers_shield:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
@@ -5136,8 +5138,6 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
-    blessing_of_kings:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
@@ -5178,8 +5178,6 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
-    blessing_of_might:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
@@ -5225,8 +5223,6 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
-    blessing_of_sanctuary:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
@@ -5269,8 +5265,6 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
-    blessing_of_wisdom:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
@@ -5320,8 +5314,6 @@ function Paladin.IsConsecration()
 end
 
 function Paladin.InitConsecration()
-    consecration:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)
@@ -5382,8 +5374,6 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
-    judgement_of_light_tr:Init()
-
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
@@ -5450,8 +5440,6 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
-    judgement_of_wisdom_tr:Init()
-
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
 
@@ -5469,7 +5457,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42 от силы + 520 ед. урона дополнительно
+    -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -5479,8 +5467,6 @@ function Paladin.IsShieldOfRighteousness()
 end
 
 function Paladin.InitShieldOfRighteousness()
-    shield_of_righteousness:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
@@ -5515,8 +5501,6 @@ function Priest.IsCircleOfHealing()
 end
 
 function Priest.InitCircleOfHealing()
-    circle_of_healing:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
@@ -5551,8 +5535,6 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
-    flash_heal:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
@@ -5602,8 +5584,6 @@ function Priest.IsGuardianSpirit()
 end
 
 function Priest.InitGuardianSpirit()
-    guardian_spirit:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsGuardianSpirit)
@@ -5662,8 +5642,6 @@ function Priest.IsInnerFire()
 end
 
 function Priest.InitInnerFire()
-    inner_fire:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsInnerFire)
@@ -5709,8 +5687,6 @@ function Priest.IsPowerWordFortitude()
 end
 
 function Priest.InitPowerWordFortitude()
-    power_word_fortitude:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordFortitude)
@@ -5792,8 +5768,6 @@ function Priest.IsPowerWordShield()
 end
 
 function Priest.InitPowerWordShield()
-    power_word_shield:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)
@@ -5883,8 +5857,6 @@ function Priest.IsPrayerOfMending()
 end
 
 function Priest.InitPrayerOfMending()
-    prayer_of_mending:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPrayerOfMending)
@@ -5913,8 +5885,6 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
-    renew:Init()
-
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
@@ -5979,7 +5949,6 @@ function Priest.IsSpiritOfRedemption()
 end
 
 function Priest.InitSpiritOfRedemption()
-    spirit_of_redemption:Init()
     Priest.hero:DisableAbility(spirit_of_redemption:GetId())
 
     local event = EventsPlayer()
@@ -6008,36 +5977,6 @@ function EntryPoint()
 
     -- Манекены
     --DummyForHealing()
-end
-
----@author meiso
-
--- Точка входа для инициализации всего
-function TestEntryPoint()
-    -- Загрузка шаблонов фреймов
-    loadTOCFile("templates.toc")
-    HeroSelector.Init()
-    BuffSystem.LoadFrame()
-
-    -- Механики
-    BattleSystem.Init()
-    EquipSystem.RegisterItems()
-
-    --SaveSystem.InitNewHeroEvent()
-    SaveSystem.gamecache = InitGameCache("savesystem")
-    SaveSystem.map_number = 1
-    SaveSystem.InitSaveEvent()
-    SaveSystem.InitLoadEvent()
-
-    -- Персонажи
-    --Priest.Init(Location(300., -490.))
-    --Paladin.Init(Location(-400., -490.))
-    --DeathKnight.Init(Location(-400., -520.))
-
-    -- Манекены
-    --DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200.))
-
 end
 
 --CUSTOM_CODE
