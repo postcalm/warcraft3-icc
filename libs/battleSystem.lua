@@ -1,8 +1,11 @@
 ---@author meiso
 
 BattleSystem = {
+    ---@param target unit Текущая цель игрока для которой отображается урон
     target = nil,
+    ---@param target_event event Текущее событие на отображение урона
     target_event = nil,
+    ---@param disable boolean Отключить отображение урона
     disable = false,
 }
 
@@ -41,6 +44,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
+    -- если урона 0, то игра может крашнуть
     if damage ~= 0. and not BattleSystem.disable then
         TextTag(damage, unit):Preset("damage")
     end

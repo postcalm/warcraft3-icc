@@ -1,3 +1,5 @@
+# Copyright meiso
+#
 from pathlib import Path
 from build.settings import Settings
 

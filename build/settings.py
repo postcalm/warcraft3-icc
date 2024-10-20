@@ -1,3 +1,5 @@
+# Copyright meiso
+#
 from pathlib import Path
 from dataclasses import dataclass
 import copy

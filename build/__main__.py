@@ -1,3 +1,5 @@
+# Copyright meiso
+# 
 from argparse import ArgumentParser, Namespace
 from build.builder import Builder
 from build.runner import Warcraft, WorldEditor

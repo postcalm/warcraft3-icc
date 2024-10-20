@@ -250,6 +250,7 @@ function BuffSystem.ImproveSpell(hero, value)
     return value
 end
 
+--- Расширяет основной фрейм с бафа/дебафами
 function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     --расположение иконки бафа по X
     --расстояние между иконками + суммарный размер всех иконок + граница справа от фона

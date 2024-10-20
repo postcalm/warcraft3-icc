@@ -1,3 +1,5 @@
+# Copyright meiso
+#
 import shutil
 import os
 from pathlib import Path

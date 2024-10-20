@@ -1,3 +1,5 @@
+# Copyright meiso
+#
 import re
 import os
 from io import IOBase

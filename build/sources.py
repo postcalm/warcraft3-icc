@@ -1,3 +1,5 @@
+# Copyright meiso
+# 
 COMMON_FILES = (
     "common",
 )
