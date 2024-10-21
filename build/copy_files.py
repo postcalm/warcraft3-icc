@@ -1,8 +1,9 @@
 # Copyright meiso
 #
-import shutil
 import os
+import shutil
 from pathlib import Path
+
 from build.settings import PROJECT_DIR
 
 test_map = PROJECT_DIR / "Test.w3x"

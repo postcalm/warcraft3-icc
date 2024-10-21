@@ -134,10 +134,13 @@ function HeroSelector.AcceptHero(hero, name)
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
+    --TODO
     --HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero, name)
 end
 
 function HeroSelector.Close()
-    HeroSelector.table:Destroy()
+    if HeroSelector.table ~= nil then
+        HeroSelector.table:Destroy()
+    end
 end

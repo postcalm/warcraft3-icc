@@ -1,8 +1,9 @@
 # Copyright meiso
 #
+import copy
 from pathlib import Path
 from dataclasses import dataclass
-import copy
+
 from build.sources import ALL_SOURCE_FILES
 
 PROJECT_DIR: Path = Path.cwd()

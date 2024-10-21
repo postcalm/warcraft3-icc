@@ -4,6 +4,7 @@ import re
 import os
 from io import IOBase
 from dataclasses import dataclass
+
 from build.settings import Settings, PROJECT_DIR, PATCHER
 
 
@@ -64,6 +65,7 @@ class Builder:
                 # при чтении из кастомного кода, python автоматически преобразует все служебные символы
                 # потому, косую черту запишем через двойную.
                 # % управляющий символ в lua - преобразуем сами
+                # в custom-code при этом всегда будут ошибки!
                 text = f'{sf.read_text(encoding="utf8")}\n'.replace("\\", "\\\\").replace("%%", "%")
                 file.write(text)
             else:
