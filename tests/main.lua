@@ -2,6 +2,7 @@
 
 -- Точка входа для инициализации всего
 function TestEntryPoint()
+    ENABLE_LOGGER_STDOUT = true
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     --HeroSelector.Init()

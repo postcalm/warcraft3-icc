@@ -698,7 +698,7 @@ function Unit:Revive(location)
 end
 
 --- Получить идентификатор созданного юнита
----@return unitid
+---@return unit
 function Unit:GetId()
     return self.unit
 end
