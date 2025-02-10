@@ -73,6 +73,305 @@ end
 
 ---@author meiso
 
+---@class Counter Простой счётчик
+Counter = {}
+Counter.__index = Counter
+
+
+setmetatable(Counter, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function Counter:_init(start, step)
+    self.start = start or 0
+    self.step = step or 1
+end
+
+--- Возвращает следующее число
+---@return number
+function Counter:next()
+    self.start = self.start + self.step
+    return self.start
+end
+
+---@author meiso
+
+-- Based on TriggerHappy implementation (hiveworkshop.com)
+-- Lua implementation by Luashine (hiveworkshop.com)
+
+--[[
+Features:
+ * file overwrite is implemented;
+ * only line-by-line recording
+
+!!Attempt!!
+Heavily loads the system due to overwriting. Do not use in a real game, or very carefully.
+]]--
+
+-- FileIO v1.1.0-lua1.0.1
+FileIO = {
+    BACKWARDS_COMPATIBILITY = false,
+    AbilityList = {
+        "Amls", "Aroc", "Amic", "Amil", "Aclf", "Acmg", "Adef", "Adis", "Afbt", "Afbk",
+        "ACmo", "ACwe", "ACbn", "ACua", "ACah", "ACnr", "ACat", "ACds", "ACtb", "ACbz",
+    },
+    AbilityCount = nil, -- set below
+    PreloadLimit = 200,
+
+    -- readonly
+    -- some vJass stuff to ensure read/writes are from within one scope (code section)
+    -- unused ReadEnabled = true,
+    -- readonly
+    -- unused Counter =
+    -- readonly
+    List = {},
+    cc2Int = function(str)
+        local n = 0
+        local len = #str
+        for i = len, 1, -1 do
+            n = n + (str:byte(i, i) << 8 * (len - i))
+        end
+        return n
+    end,
+    int2cc = function(int)
+        return string.char((int & 0xff000000) >> 24, (int & 0x00ff0000) >> 16, (int & 0x0000ff00) >> 8, int & 0x000000ff):match("[^\0]+")
+    end,
+}
+FileIO.AbilityCount = #FileIO.AbilityList
+
+function FileIO.hasInvalidChars(str)
+    -- Original Jass FileIO did not permit double-quotes and backslash
+    -- return str:find("[\0\"\\]") and true or false
+    -- Instead we'll escape them properly before writing to file
+    return str:find("[\0]") and true or false
+end
+
+do
+    local subst = {
+        -- only relevant if we saved it as  pure Lua
+        -- the Jass2Lua transpiler works correctly on multiline Jass strings
+        --["\n"] = "\\n",
+        ["\\"] = "\\\\",
+        ['"'] = '\"'
+    }
+    function FileIO.escapeChars(str)
+        -- \n removed, no functional difference to 1.0.0
+        return (str:gsub('["\\]', subst))
+    end
+end
+
+function FileIO:open(fileName)
+    if self.file then
+        error("FileIO: Cannot use :open() on an existing file")
+    end
+    local file = {}
+    setmetatable(file, { __index = self })
+    file.fileName = fileName
+    file.buffer = {}
+
+    return file
+end
+
+function FileIO:write(contents)
+    -- this is used to signify an empty string vs a null one
+    local prefix = "-"
+    --if self.hasInvalidChars(contents) then
+    --    error("FileIO: Invalid character in input: " .. tostring(contents))
+    --end
+    --contents = FileIO.escapeChars(contents)
+
+    self.buffer = {}
+
+    -- Begin file generation
+    PreloadGenClear()
+    PreloadGenStart()
+    -- loop start
+    local abilCount = 0
+    local bufOffset = 1
+
+    if isTable(contents) then
+        for _, chunk in ipairs(contents) do
+            local level = 0
+            if abilCount >= self.AbilityCount then
+                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
+            end
+
+            Preload(string.format(
+                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
+                    self.cc2Int(self.AbilityList[abilCount + 1]),
+                    prefix .. chunk,
+                    level
+            ))
+            bufOffset = bufOffset + self.PreloadLimit
+            abilCount = abilCount + 1
+        end
+    else
+        local len = #contents
+        while bufOffset < len do
+            --print(string.format("bufOffset=\037d, len=\037d", bufOffset, len))
+            local level = 0
+            if abilCount >= self.AbilityCount then
+                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
+            end
+
+            Preload(string.format(
+                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
+                    self.cc2Int(self.AbilityList[abilCount + 1]),
+                    prefix .. contents,
+                    level
+            ))
+            bufOffset = bufOffset + self.PreloadLimit
+            abilCount = abilCount + 1
+        end
+    end -- loop end
+    Preload('" )\nendfunction\nfunction a takes nothing returns nothing\n //')
+    PreloadGenEnd(self.fileName)
+    return self
+end
+
+function FileIO:clear()
+    return self:write("")
+end
+
+function FileIO:readPreload()
+    local originalDesc = {}
+    for n = 1, self.AbilityCount do
+        originalDesc[n] = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[n]), 0)
+        --print("Saving orig ab desc: ".. n ..": "..  originalDesc[n])
+    end
+
+    -- Execute the preload file
+    Preloader(self.fileName)
+
+    local level = 0
+    local chunk = ""
+    local output = ""
+    local output_buffer = {}
+    local i = 0
+
+    while true do
+        if i == self.AbilityCount then
+            break
+        end
+        level = 0
+
+        -- Make sure the tooltip has changed
+        chunk = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), level)
+        --print("Loaded chunk=".. tostring(chunk))
+        if chunk == originalDesc[i + 1] then
+            if i == 0 and output == "" then
+                -- empty file
+                return output_buffer
+            end
+            return output_buffer
+        end
+
+        if not self.BACKWARDS_COMPATIBILITY then
+            if i == 0 then
+                if chunk:sub(1, 1) ~= "-" then
+                    -- empty file
+                    return output_buffer
+                end
+                -- exclude first "-" symbol
+                chunk = chunk:sub(2)
+            end
+        end
+
+        -- remove prefix
+        if i > 0 then
+            chunk = chunk:sub(2)
+        end
+        -- restore original
+        --print("Restoring original tooltip i=".. i)
+        BlzSetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), originalDesc[i + 1], level)
+        output = output .. chunk
+        output_buffer[i + 1] = chunk
+
+        i = i + 1
+    end
+
+    return output_buffer
+end
+
+function FileIO:create(fileName)
+    return self:open(fileName):write("")
+end
+
+function FileIO:close()
+    local output = ""
+    for _, msg in  ipairs(self:readPreload()) do
+        output = output .. msg
+    end
+    if #self.buffer > 0 then
+        self:write(output .. table.concat(self.buffer))
+    end
+end
+
+function FileIO:readEx(toClose)
+    local output = ""
+    for _, msg in  ipairs(self:readPreload()) do
+        output = output .. msg
+    end
+    local buf = table.concat(self.buffer)
+
+    if toClose then
+        self:close()
+    end
+    if output == nil then
+        return buf
+    end
+
+    if buf ~= nil then
+        output = output .. buf
+    end
+
+    return output
+end
+
+function FileIO:read()
+    return self:readEx(false)
+end
+
+function FileIO:readAndClose()
+    return self:readEx(true)
+end
+
+function FileIO:appendBuffer(str)
+    table.insert(self.buffer, str)
+    return self
+end
+
+function FileIO:readBuffer()
+    return table.concat(self.buffer)
+end
+
+function FileIO:writeBuffer(str)
+    if type(str) == "table" then
+        self.buffer = str
+    elseif type(str) == "string" then
+        self.buffer = { str }
+    else
+        error("Expected new buffer of type table/string, received: " .. type(str))
+    end
+    return nil
+end
+
+function FileIO:Write(fileName, text)
+    self:open(fileName):write(text):close()
+    return nil
+end
+
+function FileIO:Read(fileName)
+    return self:open(fileName):readEx(true)
+end
+
+---@author meiso
+
 Items = {
     --- Даёт 500 брони
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
@@ -91,6 +390,119 @@ Items = {
     --- Баф "Слово силы: Стойкость" - 165 хп
     POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
 }
+
+---@author meiso
+
+---@class LogLevel
+LogLevel = {
+    DEBUG = { name = "DEBUG", level = 1 },
+    INFO = { name = "INFO", level = 2 },
+    WARNING = { name = "WARNING", level = 3 },
+    ERROR = { name = "ERROR", level = 4 },
+}
+
+--- Включить логгер
+ENABLE_LOGGER = true
+--- Включить запись в чат игры
+ENABLE_LOGGER_STDOUT = false
+
+---@class Logger
+---@param log_name string Имя лог файла
+Logger = {
+    buffer = {},
+    counter = Counter(),
+}
+Logger.__index = Logger
+
+setmetatable(Logger, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function Logger:_init(log_name)
+    if not ENABLE_LOGGER then return end
+    local session_datetime = os.date("%d.%m.%Y_%H.%M.%S")
+    self.current = self.counter:next()
+    self.buffer[self.current] = {}
+    self.log_dir = "logs"
+    self.log_file = session_datetime .. "_" .. (log_name or "log") .. ".txt"
+    --self.log_file = (log_name or "log") .. ".txt"
+    self.full_log_path = "save\\" .. self.log_dir .. "\\" .. self.log_file
+    self.file_handle = FileIO:open(self.full_log_path)
+end
+
+function Logger.GetLogger()
+
+end
+
+--- Записать в лог файл
+---@param level LogLevel Уровень логирования
+---@param ... string Список аргументов
+---@return nil
+function Logger:Log(level, ...)
+    local args = table.pack(...)
+    local message = ""
+    if not ENABLE_LOGGER_STDOUT then
+        local log_datetime = "[" .. os.date("%d.%m.%Y %H:%M:%S") .. "]"
+        message = log_datetime .. " "
+    end
+    message = message .. level.name .. ":"
+    for _, arg in ipairs(args) do
+        message = message .. " " .. arg
+    end
+    if ENABLE_LOGGER_STDOUT then
+        print(message)
+    else
+        self:_write(message)
+    end
+end
+
+--- Записать отладочное сообщение
+---@param ... string Список аргументов
+---@return nil
+function Logger:Debug(...)
+    self:Log(LogLevel.DEBUG, ...)
+end
+
+--- Записать информационное сообщение
+---@param ... string Список аргументов
+---@return nil
+function Logger:Info(...)
+    self:Log(LogLevel.INFO, ...)
+end
+
+--- Записать сообщение о предупреждении
+---@param ... string Список аргументов
+---@return nil
+function Logger:Warning(...)
+    self:Log(LogLevel.WARNING, ...)
+end
+
+--- Записать сообщение об ошибке
+---@param ... string Список аргументов
+---@return nil
+function Logger:Error(...)
+    self:Log(LogLevel.ERROR, ...)
+end
+
+--- Записать сообщение в файл
+---@private
+---@param message string Сообщение
+---@return nil
+function Logger:_write(message)
+    local buf = self:_read()
+    table.insert(buf, message)
+    self.file_handle:write(buf)
+end
+
+---@private
+function Logger:_read()
+    return self.file_handle:readPreload()
+end
 
 ---@author meiso
 
@@ -2197,7 +2609,7 @@ function Unit:Revive(location)
 end
 
 --- Получить идентификатор созданного юнита
----@return unitid
+---@return unit
 function Unit:GetId()
     return self.unit
 end
@@ -3492,17 +3904,58 @@ end
 
 ---@author meiso
 
+---@class Buff Структура, представляющая положительный или отрицательный эффект
+---@field buff Ability Налагаемый эффект
+---@field func function Функция для снятия эффекта
+---@field frame Frame Фрейм иконки
+---@field is_debuff boolean Является ли эффект отрицательным
+Buff = {}
+Buff.__index = Buff
+
+setmetatable(Buff, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function Buff:_init(buff, func, frame, is_debuff)
+    self.buff = buff
+    self.func = func
+    self.frame = frame
+    self.is_debuff = is_debuff or false
+end
+
+--- Проверяет является ли эффект бафом
+---@return boolean
+function Buff:IsBuff(buff)
+    return self.buff == buff
+end
+
+--- Проверяет является ли эффект дебафом
+---@return boolean
+function Buff:IsDebuff(buff)
+    return self.buff == buff and self.is_debuff
+end
+
+---@author meiso
+
+---@class BuffSystem
 BuffSystem = {
-    --- Таблица содержащая всех героев с бафами
-    ---Формат:
-    ---{ unit = { buff, debuff, func, frame } }
+    ---@type table<Unit, table[Buff]>
     buffs = {},
-    debuffs = {},
+    ---@type Frame
     main_frame_buff = nil,
+    ---@type Frame
     main_frame_debuff = nil,
+    logger = Logger("buffsys"),
 }
 
 function BuffSystem.LoadFrame()
+    BuffSystem.logger:Info("Initialize BuffSystem")
+
     BuffSystem.main_frame_buff = Frame("BSMainFrame")
     BuffSystem.main_frame_debuff = Frame("BSMainFrame")
     --если ставить фрейм в упор к границе, то фрейм ужимает в два раза,
@@ -3514,52 +3967,52 @@ function BuffSystem.LoadFrame()
 end
 
 --- Регистрирует героя в системе
----@param hero unit Id героя
+---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RegisterHero(hero)
-    if isTable(hero) then hero = hero:GetId() end
+    BuffSystem.logger:Info("Register hero", hero:GetName())
     if BuffSystem.IsHeroInSystem(hero) then
+        BuffSystem.logger:Info(hero:GetName(), "already registered")
         return
     end
-    local u = I2S(GetHandleId(hero))
-    BuffSystem.buffs[u] = {}
+    BuffSystem.buffs[hero] = {}
+    BuffSystem.logger:Info(hero:GetName(), "successfully added")
 end
 
 --- Добавляет герою баф
----@param hero unit Id героя
----@param buff ability Название бафа
+---@param hero Unit Экземпляр класса Unit
+---@param buff Ability Название бафа
 ---@param func function Функция, снимающая баф
 ---@param is_debuff boolean Является баф дебафом
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
-    if isTable(hero) then hero = hero:GetId() end
+    BuffSystem.logger:Info("Add a", buff.tooltip, "to", hero:GetName())
+
     if BuffSystem.IsBuffOnHero(hero, buff) then
+        BuffSystem.logger:Info(buff.tooltip, "is already on", hero:GetName())
         return
     end
-    local u = I2S(GetHandleId(hero))
-    if is_debuff then
-        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func, frame_ = Frame("BSIconTemp") })
-    else
-        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func, frame_ = Frame("BSIconTemp") })
-    end
+
+    table.insert(BuffSystem.buffs[hero], Buff(buff, func, Frame("BSIconTemp"), is_debuff))
+
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
+        BuffSystem.logger:Info("Show debuff frame")
         BuffSystem.main_frame_debuff:Show()
-        BuffSystem._ShowDebuffs(u)
+        BuffSystem._ShowDebuffs(hero)
     else
+        BuffSystem.logger:Info("Show buff frame")
         BuffSystem.main_frame_buff:Show()
-        BuffSystem._ShowBuffs(u)
+        BuffSystem._ShowBuffs(hero)
     end
 end
 
 --- Проверяет есть ли герой в системе бафов
----@param hero unit Id героя
+---@param hero Unit Экземпляр класса Unit
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
-        if name == u then
+        if name == hero then
             return true
         end
     end
@@ -3567,25 +4020,25 @@ function BuffSystem.IsHeroInSystem(hero)
 end
 
 --- Проверяет есть ли на герое баф
----@param hero unit Id героя
----@param buff ability Название бафа
+---@param hero Unit Экземпляр класса Unit
+---@param buff Ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
+    BuffSystem.logger:Info("Test the", buff.tooltip, "on", hero:GetName())
     if not BuffSystem.IsHeroInSystem(hero) then
+        BuffSystem.logger:Info(hero:GetName(), "is not registered")
         return false
     end
-    if #BuffSystem.buffs[u] == 0 then
+    if #BuffSystem.buffs[hero] == 0 then
         return false
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then
+    for i = 1, #BuffSystem.buffs[hero] do
+        if BuffSystem._getBuff(hero, i) == nil then
             return false
         end
-        if BuffSystem.buffs[u][i].buff_ == buff or
-                BuffSystem.buffs[u][i].debuff_ == buff then
+        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
+                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
             return true
         end
     end
@@ -3593,51 +4046,47 @@ function BuffSystem.IsBuffOnHero(hero, buff)
 end
 
 --- Удаляет у героя баф
----@param hero unit Id героя
+---@param hero Unit Экземпляр класса Unit
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHero(hero, buff)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
-    for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].buff_ == buff or
-                BuffSystem.buffs[u][i].debuff_ == buff then
-            BuffSystem.buffs[u][i].frame_:Destroy()
-            BuffSystem.buffs[u][i] = nil
+    for i = 1, #BuffSystem.buffs[hero] do
+        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
+                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
+            BuffSystem._getBuff(hero, i).frame:Destroy()
+            BuffSystem.buffs[hero][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(u)
-    BuffSystem._ShowDebuffs(u)
+    BuffSystem._ShowBuffs(hero)
+    BuffSystem._ShowDebuffs(hero)
 end
 
 --- Использует функцию для удаления бафа
----@param hero unit Id героя
+---@param hero Unit Экземпляр класса Unit
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
-    for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i] == nil then
+    for i = 1, #BuffSystem.buffs[hero] do
+        if BuffSystem.buffs[hero][i] == nil then
             return
         end
-        if BuffSystem.buffs[u][i].buff_ == buff or
-                BuffSystem.buffs[u][i].debuff_ == buff then
-            BuffSystem.buffs[u][i].frame_:Destroy()
+
+        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
+                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
+            BuffSystem._getBuff(hero, i).frame:Destroy()
             BuffSystem.main_frame_buff:Destroy()
             BuffSystem.main_frame_debuff:Destroy()
-            BuffSystem.buffs[u][i].func_()
-            BuffSystem.buffs[u][i] = nil
+            BuffSystem._getBuff(hero, i).func()
+            BuffSystem.buffs[hero][i] = nil
         end
     end
 end
 
 --- Проверяет относится ли баф к группе однотипных бафов
----@param hero unit Юнит
----@param buff ability Название бафа
+---@param hero Unit Экземпляр класса Unit
+---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
-    if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
         paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
@@ -3675,66 +4124,59 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
 
 --- Удалить все бафы с юнита
----@param hero unit
+---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
-    for i = 1, #BuffSystem.buffs[u] do
-        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
-        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
+    for i = 1, #BuffSystem.buffs[hero] do
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem._getBuff(hero, i).buff)
     end
 end
 
 --- Удалить баф со всех юнитов
----@param buff ability Название бафа
+---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromUnits(buff)
-    for unit, _ in pairs(BuffSystem.buffs) do
-        for i = 1, #BuffSystem.buffs[unit] do
-            if BuffSystem.buffs[unit][i] == nil then
+    for u, _ in pairs(BuffSystem.buffs) do
+        for i = 1, #BuffSystem.buffs[u] do
+            if BuffSystem._getBuff(u, i) == nil then
                 return
             end
-            if BuffSystem.buffs[unit][i].buff_ == buff or
-                    BuffSystem.buffs[unit][i].debuff_ == buff then
-                BuffSystem.buffs[unit][i].frame_:Destroy()
-                BuffSystem.buffs[unit][i] = nil
+            if BuffSystem._getBuff(u, i):IsBuff(buff) or
+                    BuffSystem._getBuff(u, i):IsDebuff(buff) then
+                BuffSystem._getBuff(u, i).frame:Destroy()
+                BuffSystem.buffs[u][i] = nil
             end
         end
-        BuffSystem._ShowBuffs(unit)
-        BuffSystem._ShowDebuffs(unit)
+        BuffSystem._ShowBuffs(u)
+        BuffSystem._ShowDebuffs(u)
     end
 end
 
 --- Удаляет героя из системы бафов
----@param hero unit Id героя
+---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RemoveHero(hero)
-    if isTable(hero) then hero = hero:GetId() end
-    local u = I2S(GetHandleId(hero))
     --TODO: корректно удалять все бафы и фреймы!!
-    BuffSystem.buffs[u] = nil
+    BuffSystem.buffs[hero] = nil
 end
 
---- Усилить воздействие способности на цель взависимости от наличия определенного бафа
----@param hero unit Юнит, на которого воздействуют спеллом
+--- Усилить воздействие способности на цель в зависимости от наличия определенного бафа
+---@param hero Unit Юнит, на которого воздействуют спеллом
 ---@param value integer Количество урона/исцеления воздействующее на цель
 ---@return real
 function BuffSystem.ImproveSpell(hero, value)
-    if isTable(hero) then hero = hero:GetId() end
     local improving_buffs = {
         guardian_spirit,
     }
     if not BuffSystem.IsHeroInSystem(hero) then
         return value
     end
-    local u = I2S(GetHandleId(hero))
-    for i = 1, #BuffSystem.buffs[u] do
+    for i = 1, #BuffSystem.buffs[hero] do
         for _, buff in pairs(improving_buffs) do
-            if BuffSystem.buffs[u][i] == nil then
+            if BuffSystem._getBuff(hero, i) == nil then
                 return value
             end
-            if buff == BuffSystem.buffs[u][i].buff_ then
+            if BuffSystem._getBuff(hero, i):IsBuff(buff) then
                 return value * 1.4
             end
         end
@@ -3742,6 +4184,8 @@ function BuffSystem.ImproveSpell(hero, value)
     return value
 end
 
+--- Расширяет основной фрейм с бафа/дебафами
+---@private
 function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     --расположение иконки бафа по X
     --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
@@ -3754,56 +4198,84 @@ function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
 end
 
+--- Задать иконку бафу
+---@private
 function BuffSystem._SetIcon(icon)
     local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
     buff_icon:SetTexture(icon)
 end
 
+---@private
+---@param u Unit Id юнита
 function BuffSystem._ShowBuffs(u)
+    BuffSystem.logger:Debug("_ShowBuffs start")
     local count = 0
+    BuffSystem.logger:Info("buff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].buff_ ~= "" then
+        local buff = BuffSystem._getBuff(u, i)
+        if buff then
             count = count + 1
-            local buff_ = BuffSystem.buffs[u][i].buff_
+            BuffSystem.logger:Info("buff", buff.buff.tooltip)
+            BuffSystem.logger:Info("icon", buff.buff.icon)
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_buff,
-                    BuffSystem.buffs[u][i].frame_,
+                    buff.frame,
                     count - 1
             )
-            BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
-            BuffSystem.buffs[u][i].frame_:SetTooltip(buff_.buff_tooltip, buff_.buff_desc)
+            BuffSystem._SetIcon(buff.buff.icon)
+            buff.frame:SetTooltip(buff.buff.buff_tooltip, buff.buff.buff_desc)
         end
     end
     if count == 0 then
         BuffSystem.main_frame_buff:Hide()
     end
+    BuffSystem.logger:Debug("_ShowBuffs end")
 end
 
+---@private
+---@param u Unit Id юнита
 function BuffSystem._ShowDebuffs(u)
+    BuffSystem.logger:Debug("_ShowDebuffs start")
     local count = 0
+    BuffSystem.logger:Info("debuff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
-        if BuffSystem.buffs[u][i].debuff_ ~= "" then
+        local debuff = BuffSystem._getBuff(u, i)
+        if debuff and debuff.is_debuff then
             count = count + 1
-            local debuff_ = BuffSystem.buffs[u][i].debuff_
+            BuffSystem.logger:Info("debuff", debuff.buff.tooltip)
+            BuffSystem.logger:Info("icon", debuff.buff.icon)
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_debuff,
-                    BuffSystem.buffs[u][i].frame_,
+                    debuff.frame,
                     count - 1
             )
-            BuffSystem._SetIcon(debuff_.icon)
-            BuffSystem.buffs[u][i].frame_:SetTooltip(debuff_.buff_tooltip, debuff_.buff_desc)
+            BuffSystem._SetIcon(debuff.buff.icon)
+            debuff.frame:SetTooltip(debuff.buff.buff_tooltip, debuff.buff.buff_desc)
         end
     end
     if count == 0 then
         BuffSystem.main_frame_debuff:Hide()
     end
+    BuffSystem.logger:Debug("_ShowDebuffs end")
+end
+
+--- Возвращает баф юнита
+---@private
+---@param u Unit Юнит
+---@param i number Индекс бафа
+---@return Buff
+function BuffSystem._getBuff(u, i)
+    return BuffSystem.buffs[u][i]
 end
 
 ---@author meiso
 
 BattleSystem = {
+    ---@param target unit Текущая цель игрока для которой отображается урон
     target = nil,
+    ---@param target_event event Текущее событие на отображение урона
     target_event = nil,
+    ---@param disable boolean Отключить отображение урона
     disable = false,
 }
 
@@ -3842,6 +4314,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
+    -- если урона 0, то игра может крашнуть
     if damage ~= 0. and not BattleSystem.disable then
         TextTag(damage, unit):Preset("damage")
     end
@@ -4106,12 +4579,15 @@ function HeroSelector.AcceptHero(hero, name)
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
+    --TODO
     --HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero, name)
 end
 
 function HeroSelector.Close()
-    HeroSelector.table:Destroy()
+    if HeroSelector.table ~= nil then
+        HeroSelector.table:Destroy()
+    end
 end
 
 ---@author meiso

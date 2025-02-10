@@ -1,5 +1,10 @@
 .idea
 **/__pycache__
 *custom-code.lua
-.token
 models/origin
+
+*.w3x/**/*.blp
+*.w3x/**/*.mdl
+*.w3x/**/*.mdx
+
+!*.w3x/war3mapMap.blp

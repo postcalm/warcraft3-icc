@@ -7,7 +7,7 @@ function zip(...)
     local array = {}
     local len = #args[1]
 
-    --опеределяем самую маленькую последовательность
+    --определяем самую маленькую последовательность
     for i = 1, args.n do
         if #args[i] < len then
             len = #args[i]
