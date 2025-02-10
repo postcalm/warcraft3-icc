@@ -1,6 +1,6 @@
 ---@author meiso
 
----@class Timer Класс создания таймера
+---@class Timer Таймер
 ---@param timeout real Время действия
 ---@param func function Функция
 Timer = {}
@@ -14,16 +14,18 @@ setmetatable(Timer, {
     end,
 })
 
-function Timer:_init(timeout, func)
+---@private
+function Timer:_init(timeout, func, periodic)
     self.timer = CreateTimer()
     self.timeout = timeout
     self.func = func
+    self.periodic = periodic or false
 end
 
 --- Запустить таймер
 ---@return nil
 function Timer:Start()
-    TimerStart(self.timer, self.timeout, false, self.func)
+    TimerStart(self.timer, self.timeout, self.periodic, self.func)
 end
 
 --- Задать время действия
@@ -40,10 +42,23 @@ function Timer:SetFunc(func)
     self.func = func
 end
 
+--- Включить периодичность выполнения
+---@return nil
+function Timer:EnablePeriodic()
+    self.periodic = true
+end
+
+--- Отключить периодичность выполнения
+---@return nil
+function Timer:DisablePeriodic()
+    self.periodic = false
+end
+
 --- Уничтожить таймер
 ---@return nil
 function Timer:Destroy()
     DestroyTimer(self.timer)
+    self.timer = nil
 end
 
 --- Уничтожить первый истёкший таймер

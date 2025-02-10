@@ -20,7 +20,7 @@ setmetatable(Unit, {
     end,
 })
 
---- Конструктор класса
+---@private
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
