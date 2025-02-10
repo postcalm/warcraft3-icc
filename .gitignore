@@ -6,5 +6,8 @@ models/origin
 *.w3x/**/*.blp
 *.w3x/**/*.mdl
 *.w3x/**/*.mdx
+*.w3x/**/*.tga
+*.w3x/**/*.fdf
+*.w3x/**/*.toc
 
 !*.w3x/war3mapMap.blp
