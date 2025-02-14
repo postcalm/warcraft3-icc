@@ -2,7 +2,7 @@
 #
 from argparse import ArgumentParser, Namespace
 
-from py.mdl_parser.model import Mdl
+from py.mdl_parser.mdl import Mdl
 
 
 def parse_args() -> Namespace:
@@ -13,8 +13,6 @@ def parse_args() -> Namespace:
 
 def main(args: Namespace) -> None:
     mdl = Mdl(args.model)
-    print(mdl.version)
-    print(mdl.textures)
 
 
 if __name__ == "__main__":
