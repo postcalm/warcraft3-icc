@@ -9,7 +9,8 @@ class _MdlParser:
     def __init__(self, model: str):
         self.model = model
         self.sections = {}
-        self._parse()
+        if model:
+            self._parse()
 
     def get(self, section: str, default: Any = None) -> dict | list:
         return self.sections.get(section, default)
