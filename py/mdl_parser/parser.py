@@ -49,6 +49,11 @@ class _MdlParser:
                     section.append(line.strip())
                     opening = 1
                     continue
+                if line.startswith("PivotPoints"):
+                    current_set = "PivotPoints"
+                    section.append(line.strip())
+                    opening = 1
+                    continue
                 if "{" in line:
                     opening += 1
                 if "}" in line:
@@ -71,6 +76,7 @@ class _MdlParser:
             "Textures": self._parse_textures,
             "Materials": self._parse_materials,
             "Geoset": self._parse_geosets,
+            "PivotPoints": self._parse_pivot,
         }.get(name, lambda *_: {})
         return func(name, section)  # noqa
 
@@ -213,6 +219,13 @@ class _MdlParser:
                     faces_start = 0
             except StopIteration:
                 break
+        return data
+
+    def _parse_pivot(self, name: str, section: list) -> dict:
+        data: dict[str, dict] = {name: {}}
+        for elem in section[1:-1]:
+            var = self._parse_str(elem)
+            data[name].update(self._todict(["points", var]))
         return data
 
     def _parse_str(self, string: str, replace: list[str] = None) -> list:

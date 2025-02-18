@@ -464237,3 +464237,6 @@ Geoset {
 	MaterialID 54,
 	SelectionGroup 0,
 }
+PivotPoints 1 {
+	{0, -6005.196289, 0},
+}

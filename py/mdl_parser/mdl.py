@@ -5,17 +5,20 @@ from pathlib import Path
 from py.mdl_parser.controllers.geosets import Geosets
 from py.mdl_parser.controllers.materials import Materials
 from py.mdl_parser.controllers.model import Model
+from py.mdl_parser.controllers.pivot import PivotPoints
 from py.mdl_parser.controllers.textures import Textures
 from py.mdl_parser.controllers.version import Version
 from py.mdl_parser.models.geosets import GeosetsModel
 from py.mdl_parser.models.materials import MaterialsModel
 from py.mdl_parser.models.model import MDLModel
+from py.mdl_parser.models.pivot import PivotPointsModel
 from py.mdl_parser.models.textures import TexturesModel
 from py.mdl_parser.models.version import VersionModel
 from py.mdl_parser.parser import _MdlParser
 from py.mdl_parser.views.geosets import GeosetsView
 from py.mdl_parser.views.materials import MaterialsView
 from py.mdl_parser.views.model import MDLView
+from py.mdl_parser.views.pivot import PivotPointsView
 from py.mdl_parser.views.textures import TexturesView
 from py.mdl_parser.views.version import VersionView
 
@@ -31,6 +34,7 @@ class Mdl:
         self._textures = None
         self._materials = None
         self._geosets = None
+        self._pivot_points = None
 
     @property
     def version(self) -> Version:
@@ -87,6 +91,17 @@ class Mdl:
     def geosets(self, geosets: Geosets) -> None:
         self._geosets = geosets
 
+    @property
+    def pivot_points(self) -> PivotPoints:
+        model = PivotPointsModel(**self.parser.get("PivotPoints", {}))
+        if not self._pivot_points:
+            self._pivot_points = PivotPoints(model, PivotPointsView(model))
+        return self._pivot_points
+
+    @pivot_points.setter
+    def pivot_points(self, points: PivotPoints) -> None:
+        self._pivot_points = points
+
     def merge(self, model: "Mdl") -> "Mdl":
         new = Mdl()
         new.version = self.version
@@ -107,6 +122,7 @@ class Mdl:
             model.geosets.model().geosets,
             new.materials.model()
         )
+        new.pivot_points = self.pivot_points
         return new
 
     def save(self, filename: str = None, folder: str = "models"):
@@ -117,3 +133,4 @@ class Mdl:
             handle.write(f"{self.textures.view()}\n")
             handle.write(f"{self.materials.view()}\n")
             handle.write(f"{self.geosets.view()}\n")
+            handle.write(f"{self.pivot_points.view()}\n")
