@@ -207,7 +207,7 @@ end
 function unequip_item_id(hero, id, c)
     local ablist = get_item_list_eq(id)
     local abc = get_item_abc_eq(id)
-    for i = 1, c do
+    for _ = 1, c do
         for j = 0, abc - 1 do
             local str = get_string_str(ablist, ",", j)
             UnitRemoveAbility(hero, FourCC(str))

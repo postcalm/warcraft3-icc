@@ -1,50 +1,54 @@
 # Copyright meiso
 # 
 COMMON_FILES = (
-    "common",
+    "src/common",
 )
 INIT_FILES = (
-    "src/paladin/init.lua",
-    "src/priest/init.lua",
+    "src/characters/paladin/init.lua",
+    "src/characters/priest/init.lua",
 )
 CLASSES_FILES = (
-    "classes",
+    "src/classes",
 )
 SAVE_SYSTEM_FILES = (
-    "libs/SaveSystem/init.lua",
-    "libs/SaveSystem/modules",
-    "libs/SaveSystem/userData.lua",
-    "libs/SaveSystem/heroData.lua",
-    "libs/SaveSystem/saveSystem.lua",
-    "libs/SaveSystem/heroes.lua",
-    "libs/SaveSystem/newHero.lua",
-    "libs/SaveSystem/saveHero.lua",
-    "libs/SaveSystem/loadHero.lua",
+    "src/libs/SaveSystem/init.lua",
+    "src/libs/SaveSystem/modules",
+    "src/libs/SaveSystem/userData.lua",
+    "src/libs/SaveSystem/heroData.lua",
+    "src/libs/SaveSystem/saveSystem.lua",
+    "src/libs/SaveSystem/heroes.lua",
+    "src/libs/SaveSystem/newHero.lua",
+    "src/libs/SaveSystem/saveHero.lua",
+    "src/libs/SaveSystem/loadHero.lua",
 )
 EQUIPMENT_SYSTEM_FILES = (
-    "libs/EquipmentSystem",
+    "src/libs/EquipmentSystem",
 )
 BUFF_SYSTEM_FILES = (
-    "libs/BuffSystem",
+    "src/libs/BuffSystem",
 )
 BATTLE_SYSTEM_FILES = (
-    "libs/battleSystem.lua",
+    "src/libs/battleSystem.lua",
 )
 WRAPPER_FILES = (
-    "libs/wrappers.lua",
+    "src/libs/wrappers.lua",
 )
 HERO_SELECTOR_FILES = (
-    "libs/HeroSelector/frames_desc.lua",
-    "libs/HeroSelector/heroSelector.lua",
+    "src/libs/HeroSelector/frames_desc.lua",
+    "src/libs/HeroSelector/heroSelector.lua",
 )
-SOURCE_FILES = (
+SOURCES_FILES = (
     "src/abilities.lua",
-    "src/dummy",
-    "src/enemies",
-    "src/lord_marrowgar",
-    "src/lady_deathwhisper",
-    "src/paladin/spells",
-    "src/priest/spells",
+)
+UNITS_FILES = (
+    "src/units/dummy",
+    "src/units/enemies",
+    "src/units/lord_marrowgar",
+    "src/units/lady_deathwhisper",
+)
+CHARACTER_SPELLS_FILES = (
+    "src/characters/paladin/spells",
+    "src/characters/priest/spells",
 )
 
 ALL_SOURCE_FILES = (
@@ -57,5 +61,7 @@ ALL_SOURCE_FILES = (
     *BATTLE_SYSTEM_FILES,
     *WRAPPER_FILES,
     *HERO_SELECTOR_FILES,
-    *SOURCE_FILES,
+    *SOURCES_FILES,
+    *UNITS_FILES,
+    *CHARACTER_SPELLS_FILES,
 )
