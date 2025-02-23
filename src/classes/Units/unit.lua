@@ -12,7 +12,12 @@ setmetatable(Unit, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
         if #table.pack(...) == 1 then
-            self.unit = ...
+            local unit = ...
+            if UNITS_PULL.contain(unit) then
+                self = UNITS_PULL.get(UNITS_PULL.find(unit))
+            else
+                self.unit = unit
+            end
         else
             self:_init(...)
         end
@@ -26,8 +31,28 @@ function Unit:_init(player, unit_id, location, face)
     local y = GetLocationY(location)
     local f = face or GetRandomDirectionDeg()
     self.basemana = 0
+    self.agro = 0
+    self.controlled = (player == GetLocalPlayer()) or false
     self.unit = CreateUnit(player, unit_id, x, y, f)
+    UNITS_PULL.add(self)
 end
+
+--- Добавить уровень агрессии
+---@param value integer Уровень агрессии
+---@return nil
+function Unit:AddAgro(value)
+    if self.agro > 100 then
+        return
+    end
+    self.agro = self.agro + value
+end
+
+--- Получить текущий уровень агрессии
+---@return integer
+function Unit:GetAgro()
+    return self.agro
+end
+
 
 -- Характеристики
 
@@ -695,6 +720,12 @@ function Unit:Revive(location)
     local x = GetLocationX(loc)
     local y = GetLocationY(loc)
     ReviveHero(self.unit, x, y, false)
+end
+
+--- Является ли юнит подконтрольным игроку
+---@return boolean
+function Unit:IsControlled()
+    return self.controlled
 end
 
 --- Получить идентификатор созданного юнита

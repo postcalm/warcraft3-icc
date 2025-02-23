@@ -4,11 +4,15 @@ COMMON_FILES = (
     "src/common",
 )
 INIT_FILES = (
+    "src/preinitialize.lua",
     "src/characters/paladin/init.lua",
     "src/characters/priest/init.lua",
 )
 CLASSES_FILES = (
     "src/classes",
+)
+AGRO_SYSTEM_FILES = (
+    "src/libs/AgroSystem",
 )
 SAVE_SYSTEM_FILES = (
     "src/libs/SaveSystem/init.lua",
@@ -55,6 +59,7 @@ ALL_SOURCE_FILES = (
     *COMMON_FILES,
     *INIT_FILES,
     *CLASSES_FILES,
+    *AGRO_SYSTEM_FILES,
     *SAVE_SYSTEM_FILES,
     *EQUIPMENT_SYSTEM_FILES,
     *BUFF_SYSTEM_FILES,

@@ -32,6 +32,8 @@ function Paladin.Init(location, unit, name)
     Paladin.hero = Unit(unit)
     Paladin.hero:SetName(name)
 
+    AgroSystem.Init(Paladin.hero)
+
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
     Paladin.InitBlessingOfMight()

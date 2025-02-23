@@ -23,25 +23,25 @@ function EventsUnit:_init(unit)
     end
 end
 
---- Регистриует событие получения урона юнитом (после вычета брони)
+--- Регистрирует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистриует событие получения урона юнитом (до вычета брони)
+--- Регистрирует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистриует событие, когда юнит в бою
+--- Регистрирует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
---- Регистриует событие, когда юнит входит в область юнита
+--- Регистрирует событие, когда юнит входит в область юнита
 ---@param range integer Дистанция
 ---@return nil
 function EventsUnit:RegisterWithinRange(range)

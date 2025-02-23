@@ -20,13 +20,13 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
---- Регистриует событие нажатия кнопки мыши
+--- Регистрирует событие нажатия кнопки мыши
 ---@return nil
 function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
 
---- Регистриует событие, написания в чат
+--- Регистрирует событие, написания в чат
 ---@param text string Сообщение, которое необходимо отследить
 ---@param exact boolean Проверять как точное вхождение
 ---@return nil
@@ -35,47 +35,49 @@ function EventsPlayer:RegisterChatEvent(text, exact)
     TriggerRegisterPlayerChatEvent(self.trigger, self.player, text, e)
 end
 
+--- Регистрирует событие атаки по юниту игрока
+---@return nil
 function EventsPlayer:RegisterUnitAttacked()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_ATTACKED, nil)
 end
 
---- Регистриует событие каста способности юнитом игрока
+--- Регистрирует событие каста способности юнитом игрока
 ---@return nil
 function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
---- Регистриует событие прекращения каста способности
+--- Регистрирует событие прекращения каста способности
 ---@return nil
 function EventsPlayer:RegisterUnitSpellEndcast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_ENDCAST, nil)
 end
 
---- Регистриует событие завершения каста способности
+--- Регистрирует событие завершения каста способности
 ---@return nil
 function EventsPlayer:RegisterUnitSpellFinish()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_FINISH, nil)
 end
 
---- Регистриует событие получения урона юнитом (до вычета брони)
+--- Регистрирует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
---- Регистриует событие получения урона юнитом (после вычета брони)
+--- Регистрирует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
 end
 
---- Регистриует событие смерти юнита игрока
+--- Регистрирует событие смерти юнита игрока
 ---@return nil
 function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
---- Регистриует собыие призыва юнита игрока
+--- Регистрирует событие призыва юнита игрока
 ---@return nil
 function EventsPlayer:RegisterUnitSummon()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SUMMON, nil)

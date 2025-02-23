@@ -44,7 +44,7 @@ end
 function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    -- если урона 0, то игра может крашнуть
+    -- если урона 0, то игра может крашнуть из-за частого срабатывания
     if damage ~= 0. and not BattleSystem.disable then
         TextTag(damage, unit):Preset("damage")
     end
