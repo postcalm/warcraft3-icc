@@ -35,7 +35,11 @@ function Unit:_init(player, unit_id, location, face)
     self.controlled = (player == GetLocalPlayer()) or false
     self.unit = CreateUnit(player, unit_id, x, y, f)
     UNITS_PULL.add(self)
+    local agro = AgroSystem(self)
+    agro:Register()
 end
+
+-- Уровень угрозы
 
 --- Добавить уровень агрессии
 ---@param value integer Уровень агрессии
@@ -172,6 +176,14 @@ function Unit:GetInt(include_bonuses)
 end
 
 -- Всё, что связано с нанесением урона
+
+
+function Unit:Attack(target)
+    if isTable(target) then
+        target = target:GetId()
+    end
+    IssueTargetOrder(self.unit, "attack", target)
+end
 
 --- Нанести физический урон.
 --- Урон снижается как от количества защиты, так и от её типа

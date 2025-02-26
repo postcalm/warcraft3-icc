@@ -2,7 +2,11 @@
 
 UNITS_PULL = {
     ---@private
+    ---@type table[Unit]
     _pull = {},
+    all = function()
+        return UNITS_PULL._pull
+    end,
     ---@return Unit
     get = function(index)
         return UNITS_PULL._pull[index]
