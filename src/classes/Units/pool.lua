@@ -1,33 +1,33 @@
 ---@author meiso
 
-UNITS_PULL = {
+UNITS_POOL = {
     ---@private
     ---@type table[Unit]
-    _pull = {},
+    _pool = {},
     all = function()
-        return UNITS_PULL._pull
+        return UNITS_POOL._pool
     end,
     ---@return Unit
     get = function(index)
-        return UNITS_PULL._pull[index]
+        return UNITS_POOL._pool[index]
     end,
     ---@param unit Unit
     add = function(unit)
-        if not UNITS_PULL.contain(unit) then
-            table.insert(UNITS_PULL._pull, unit)
+        if not UNITS_POOL.contain(unit) then
+            table.insert(UNITS_POOL._pool, unit)
         end
     end,
     ---@param unit Unit
     remove = function(unit)
-        if UNITS_PULL.contain(unit) then
-            table.remove(UNITS_PULL._pull, UNITS_PULL.find(unit))
+        if UNITS_POOL.contain(unit) then
+            table.remove(UNITS_POOL._pool, UNITS_POOL.find(unit))
         end
     end,
     ---@param unit Unit
     contain = function(unit)
-        unit = UNITS_PULL._unitId(unit)
-        for _, u in pairs(UNITS_PULL._pull) do
-            if UNITS_PULL._unitId(u) == unit then
+        unit = UNITS_POOL._unitId(unit)
+        for _, u in pairs(UNITS_POOL._pool) do
+            if UNITS_POOL._unitId(u) == unit then
                 return true
             end
         end
@@ -35,9 +35,9 @@ UNITS_PULL = {
     end,
     ---@param unit Unit
     find = function(unit)
-        unit = UNITS_PULL._unitId(unit)
-        for i, u in pairs(UNITS_PULL._pull) do
-            if UNITS_PULL._unitId(u) == unit then
+        unit = UNITS_POOL._unitId(unit)
+        for i, u in pairs(UNITS_POOL._pool) do
+            if UNITS_POOL._unitId(u) == unit then
                 return i
             end
         end

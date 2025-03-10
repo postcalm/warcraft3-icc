@@ -1,10 +1,10 @@
 ---@author meiso
 
----@class AgroSystem
-AgroSystem = {}
-AgroSystem.__index = AgroSystem
+---@class CombatSystem
+CombatSystem = {}
+CombatSystem.__index = CombatSystem
 
-setmetatable(AgroSystem, {
+setmetatable(CombatSystem, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
         self:_init(...)
@@ -13,51 +13,53 @@ setmetatable(AgroSystem, {
 })
 
 ---@private
-function AgroSystem:_init(unit)
+function CombatSystem:_init(unit)
     ---@type Unit
     self.unit = unit
-    self._pull_attacked = {}
+    self.combat = false
+    self.pool_attacked = Pool()
 end
 
-function AgroSystem:Register()
+function CombatSystem:Register()
     self:_detectedCombat()
 end
 
-function AgroSystem:Reset()
-    self._pull_attacked = {}
+function CombatSystem:Reset()
+    self.unit:ResetAgro()
 end
 
 ---@private
-function AgroSystem:_detectedCombat()
+function CombatSystem:_detectedCombat()
     local tr_attacked = EventsUnit(self.unit)
     local tr_damaged = EventsUnit(self.unit)
+    local tr_killed = Events()
     tr_attacked:RegisterAttacked()
     tr_damaged:RegisterDamaged()
+    tr_killed:RegisterAnyUnitDying()
     tr_attacked:AddAction(function() self:_detectedAttackedUnit() end)
     tr_damaged:AddAction(function() self:_detectedDamagedUnit() end)
+    tr_killed:AddAction(function() self:_remove() end)
 end
 
 ---@private
-function AgroSystem:_detectedAttackedUnit()
+function CombatSystem:_detectedAttackedUnit()
     local attacker = Unit(GetAttacker())
-    --local attacked = Unit(GetAttackedUnitBJ())
     if attacker:IsControlled() then
         attacker:AddAgro(self:_getAgro(attacker))
     end
 end
 
 ---@private
-function AgroSystem:_detectedDamagedUnit()
-    local unit = Unit(GetEventDamageSource())
+function CombatSystem:_detectedDamagedUnit()
+    local attacked = Unit(GetEventDamageSource())
+    self.pool_attacked:Add(attacked)
     if not self.unit:IsControlled() then
-        self:_add(unit)
-        local t = self:_findHighAgroUnit()
-        self.unit:Attack(t)
+        self.unit:Attack(self:_findHighAgroUnit())
     end
 end
 
 ---@private
-function AgroSystem:_getAgro(unit)
+function CombatSystem:_getAgro(unit)
     local high_agro = {
         Paladin.hero,
         DEATH_KNIGHT,
@@ -86,28 +88,21 @@ function AgroSystem:_getAgro(unit)
 end
 
 ---@private
-function AgroSystem:_add(unit)
-    if not self:_contain(unit) then
-        table.insert(self._pull_attacked, unit)
-    end
-end
+function CombatSystem:_remove()
+    local killed = Unit(GetTriggerUnit())
+    self.pool_attacked:Remove(killed)
 
----@private
-function AgroSystem:_contain(unit)
-    for _, u in pairs(self._pull_attacked) do
-        if u == unit then
-            return true
-        end
+    if #self.pool_attacked:All() == 0 then
+        self:Reset()
     end
-    return false
 end
 
 ---@private
 ---@return Unit
-function AgroSystem:_findHighAgroUnit()
+function CombatSystem:_findHighAgroUnit()
     local target
     local agro = 0
-    for _, unit in pairs(self._pull_attacked) do
+    for _, unit in pairs(self.pool_attacked:All()) do
         if unit:GetAgro() > agro then
             target = unit
             agro = unit:GetAgro()

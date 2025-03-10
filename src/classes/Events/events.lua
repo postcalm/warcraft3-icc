@@ -18,6 +18,12 @@ function Events:_init()
     self.trigger = CreateTrigger()
 end
 
+--- Регистрирует смерть любого юнита
+---@return nil
+function Events:RegisterAnyUnitDying()
+    TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
+end
+
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 ---@return nil

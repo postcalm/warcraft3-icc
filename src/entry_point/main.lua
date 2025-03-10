@@ -5,7 +5,7 @@ function EntryPoint()
     loadTOCFile("templates.toc")
 
     -- Механики
-    BattleSystem.Init()
+    BattleTextViewSystem.Init()
     EquipSystem.RegisterItems()
 
     -- Боссы

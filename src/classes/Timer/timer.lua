@@ -3,6 +3,7 @@
 ---@class Timer Таймер
 ---@param timeout real Время действия
 ---@param func function Функция
+---@param periodic boolean Повторное выполнение
 Timer = {}
 Timer.__index = Timer
 

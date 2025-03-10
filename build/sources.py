@@ -8,11 +8,14 @@ INIT_FILES = (
     "src/characters/paladin/init.lua",
     "src/characters/priest/init.lua",
 )
+CORE_FILES = (
+    "src/core/pool.lua",
+)
 CLASSES_FILES = (
     "src/classes",
 )
 AGRO_SYSTEM_FILES = (
-    "src/libs/AgroSystem",
+    "src/libs/CombatSystem",
 )
 SAVE_SYSTEM_FILES = (
     "src/libs/SaveSystem/init.lua",
@@ -31,8 +34,8 @@ EQUIPMENT_SYSTEM_FILES = (
 BUFF_SYSTEM_FILES = (
     "src/libs/BuffSystem",
 )
-BATTLE_SYSTEM_FILES = (
-    "src/libs/battleSystem.lua",
+BATTLE_TEXT_VIEW_SYSTEM_FILES = (
+    "src/libs/battleTextViewSystem.lua",
 )
 WRAPPER_FILES = (
     "src/libs/wrappers.lua",
@@ -58,12 +61,13 @@ CHARACTER_SPELLS_FILES = (
 ALL_SOURCE_FILES = (
     *COMMON_FILES,
     *INIT_FILES,
+    *CORE_FILES,
     *AGRO_SYSTEM_FILES,
     *CLASSES_FILES,
     *SAVE_SYSTEM_FILES,
     *EQUIPMENT_SYSTEM_FILES,
     *BUFF_SYSTEM_FILES,
-    *BATTLE_SYSTEM_FILES,
+    *BATTLE_TEXT_VIEW_SYSTEM_FILES,
     *WRAPPER_FILES,
     *HERO_SELECTOR_FILES,
     *SOURCES_FILES,

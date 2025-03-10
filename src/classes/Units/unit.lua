@@ -13,8 +13,8 @@ setmetatable(Unit, {
         local self = setmetatable({}, cls)
         if #table.pack(...) == 1 then
             local unit = ...
-            if UNITS_PULL.contain(unit) then
-                self = UNITS_PULL.get(UNITS_PULL.find(unit))
+            if UNITS_POOL.contain(unit) then
+                self = UNITS_POOL.get(UNITS_POOL.find(unit))
             else
                 self.unit = unit
             end
@@ -34,15 +34,15 @@ function Unit:_init(player, unit_id, location, face)
     self.agro = 0
     self.controlled = (player == GetLocalPlayer()) or false
     self.unit = CreateUnit(player, unit_id, x, y, f)
-    UNITS_PULL.add(self)
-    local agro = AgroSystem(self)
+    UNITS_POOL.add(self)
+    local agro = CombatSystem(self)
     agro:Register()
 end
 
 -- Уровень угрозы
 
 --- Добавить уровень агрессии
----@param value integer Уровень агрессии
+---@param value number Уровень угрозы
 ---@return nil
 function Unit:AddAgro(value)
     if self.agro > 100 then
@@ -51,12 +51,17 @@ function Unit:AddAgro(value)
     self.agro = self.agro + value
 end
 
---- Получить текущий уровень агрессии
----@return integer
+--- Получить текущий уровень угрозы
+---@return number
 function Unit:GetAgro()
     return self.agro
 end
 
+--- Сбросить уровень угрозы
+---@return nil
+function Unit:ResetAgro()
+    self.agro = 0
+end
 
 -- Характеристики
 
@@ -225,10 +230,10 @@ function Unit:DealMagicDamage(target, damage)
     if isTable(target) then
         u = target:GetId()
     end
-    BattleSystem.disable = true
+    BattleTextViewSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
     TextTag(damage, self.unit):Preset("spell")
-    BattleSystem.disable = false
+    BattleTextViewSystem.disable = false
 end
 
 --- Нанести магической урон по площади.
