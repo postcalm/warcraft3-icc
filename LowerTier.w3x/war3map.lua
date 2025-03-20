@@ -1,33 +1,7 @@
-gg_rct________________000 = nil
-gg_trg_EntryPoint = nil
-gg_trg_test = nil
-gg_trg_Alert = nil
-gg_trg_RespawnHero = nil
+gg_trg_init = nil
+gg_trg___________________________u = nil
+gg_unit_hpea_0001 = nil
 function InitGlobals()
-end
-
-function SetCameraTargetUnit(unit)
-    SetCameraTargetControllerNoZForPlayer(GetLocalPlayer(), unit, 0, 0, false)
-end
-
-function SetCameraRotation(rotation, duration)
-    local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ROTATION, rotation, d)
-end
-
-function SetCameraAngle(angle, duration)
-    local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
-end
-
-function SetCameraZOffset(zoffset, duration)
-    local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ZOFFSET, zoffset, d)
-end
-
-function SetCameraDistance(dist, duration)
-    local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_TARGET_DISTANCE, dist, d)
 end
 
 function CreateUnitsForPlayer0()
@@ -36,7 +10,8 @@ function CreateUnitsForPlayer0()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("hpea"), 234.3, -806.5, 91.969)
+    u = CreateUnit(p, FourCC("hpea"), 1364.9, 16793.0, 348.673)
+    u = CreateUnit(p, FourCC("hpea"), 934.4, -11016.2, 281.215)
 end
 
 function CreatePlayerBuildings()
@@ -49,11 +24,6 @@ end
 function CreateAllUnits()
     CreatePlayerBuildings()
     CreatePlayerUnits()
-end
-
-function CreateRegions()
-    local we
-    gg_rct________________000 = Rect(-1344.0, -1760.0, -384.0, -736.0)
 end
 
 --CUSTOM_CODE
@@ -1619,9 +1589,6 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
---- Регистрирует нажатие клавиши
----@param key oskeytype Регистрируемая клавиша
----@return nil
 function EventsPlayer:RegisterKeyPressed(key)
     BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, true)
     BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, false)
@@ -1646,6 +1613,12 @@ end
 ---@return nil
 function EventsPlayer:RegisterUnitAttacked()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_ATTACKED, nil)
+end
+
+--- Регистрирует событие направления способности юнитом игрока
+---@return nil
+function EventsPlayer:RegisterUnitSpellChannel()
+    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CHANNEL, nil)
 end
 
 --- Регистрирует событие каста способности юнитом игрока
@@ -7072,79 +7045,64 @@ function Priest.InitSpiritOfRedemption()
     event:AddAction(Priest.SpiritOfRedemption)
 end
 
----@author meiso
 
 -- Точка входа для инициализации всего
-function TestEntryPoint()
-    ENABLE_LOGGER_STDOUT = true
-    --LOGGER_LEVEL = LogLevel.DEBUG
+function EntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
-    BuffSystem.LoadFrame()
 
     -- Механики
     BattleTextViewSystem.Init()
     EquipSystem.RegisterItems()
 
-    --SaveSystem.InitNewHeroEvent()
-    SaveSystem.gamecache = InitGameCache("savesystem")
-    SaveSystem.map_number = 1
-    SaveSystem.InitSaveEvent()
-    SaveSystem.InitLoadEvent()
+    -- Боссы
+    --LordMarrowgar.Init()
+    --LadyDeathwhisper.Init()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
-    --DeathKnight.Init(Location(-400., -520.))
-
-    Movement.Init()
+    --Priest.Init()
+    --Paladin.Init()
 
     -- Манекены
-    --DummyForHealing(Location(300., 200.))
-    --DummyForDPS(Location(-400., 200.))
-    --SpawnTrashDummies(5)
+    --DummyForHealing()
 end
 
 --CUSTOM_CODE
-function Trig_EntryPoint_Actions()
-        TestEntryPoint()
+function Trig_init_Actions()
+    FogEnableOff()
+    FogMaskEnableOff()
+        EntryPoint()
 end
 
-function InitTrig_EntryPoint()
-    gg_trg_EntryPoint = CreateTrigger()
-    TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
+function InitTrig_init()
+    gg_trg_init = CreateTrigger()
+    TriggerAddAction(gg_trg_init, Trig_init_Actions)
 end
 
-function Trig_test_Actions()
-    SetUnitAnimation(nil, "stand")
+function Trig___________________________u_Actions()
+    MeleeStartingVisibility()
+    MeleeStartingHeroLimit()
+    MeleeGrantHeroItems()
+    MeleeStartingResources()
+    MeleeClearExcessUnits()
+    MeleeStartingUnits()
+    MeleeStartingAI()
+    MeleeInitVictoryDefeat()
 end
 
-function InitTrig_test()
-    gg_trg_test = CreateTrigger()
-    TriggerAddAction(gg_trg_test, Trig_test_Actions)
-end
-
-function Trig_RespawnHero_Actions()
-        SaveSystem.UnitsRespawn()
-        BuffSystem.RemoveAllBuffs(GetTriggerUnit())
-end
-
-function InitTrig_RespawnHero()
-    gg_trg_RespawnHero = CreateTrigger()
-    TriggerRegisterAnyUnitEventBJ(gg_trg_RespawnHero, EVENT_PLAYER_UNIT_DEATH)
-    TriggerAddAction(gg_trg_RespawnHero, Trig_RespawnHero_Actions)
+function InitTrig___________________________u()
+    gg_trg___________________________u = CreateTrigger()
+    TriggerAddAction(gg_trg___________________________u, Trig___________________________u_Actions)
 end
 
 function InitCustomTriggers()
-    InitTrig_EntryPoint()
-    InitTrig_test()
-    InitTrig_RespawnHero()
+    InitTrig_init()
+    InitTrig___________________________u()
 end
 
 function RunInitializationTriggers()
-    ConditionalTriggerExecute(gg_trg_EntryPoint)
-    ConditionalTriggerExecute(gg_trg_test)
+    ConditionalTriggerExecute(gg_trg_init)
+    ConditionalTriggerExecute(gg_trg___________________________u)
 end
 
 function InitCustomPlayerSlots()
@@ -7153,33 +7111,19 @@ function InitCustomPlayerSlots()
     SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
     SetPlayerRaceSelectable(Player(0), true)
     SetPlayerController(Player(0), MAP_CONTROL_USER)
-    SetPlayerStartLocation(Player(1), 1)
-    SetPlayerColor(Player(1), ConvertPlayerColor(1))
-    SetPlayerRacePreference(Player(1), RACE_PREF_ORC)
-    SetPlayerRaceSelectable(Player(1), true)
-    SetPlayerController(Player(1), MAP_CONTROL_USER)
 end
 
 function InitCustomTeams()
     SetPlayerTeam(Player(0), 0)
-    SetPlayerTeam(Player(1), 0)
-end
-
-function InitAllyPriorities()
-    SetStartLocPrioCount(0, 1)
-    SetStartLocPrio(0, 0, 1, MAP_LOC_PRIO_HIGH)
-    SetStartLocPrioCount(1, 1)
-    SetStartLocPrio(1, 0, 0, MAP_LOC_PRIO_HIGH)
 end
 
 function main()
-    SetCameraBounds(-1280.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -1536.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 1280.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 1024.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -1280.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 1024.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 1280.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -1536.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+    SetCameraBounds(-5376.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -19456.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 9472.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 24064.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -5376.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 24064.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 9472.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -19456.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
     SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
     NewSoundEnvironment("Default")
     SetAmbientDaySound("LordaeronSummerDay")
     SetAmbientNightSound("LordaeronSummerNight")
     SetMapMusic("Music", true, 0)
-    CreateRegions()
     CreateAllUnits()
     InitBlizzard()
     InitGlobals()
@@ -7188,17 +7132,14 @@ function main()
 end
 
 function config()
-    SetMapName("TRIGSTR_215")
-    SetMapDescription("TRIGSTR_217")
-    SetPlayers(2)
-    SetTeams(2)
-    SetGamePlacement(MAP_PLACEMENT_TEAMS_TOGETHER)
-    DefineStartLocation(0, 0.0, -1152.0)
-    DefineStartLocation(1, 0.0, -1152.0)
+    SetMapName("TRIGSTR_003")
+    SetMapDescription("TRIGSTR_005")
+    SetPlayers(1)
+    SetTeams(1)
+    SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
+    DefineStartLocation(0, 4672.0, -3072.0)
     InitCustomPlayerSlots()
     SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
-    SetPlayerSlotAvailable(Player(1), MAP_CONTROL_USER)
     InitGenericPlayerSlots()
-    InitAllyPriorities()
 end
 
