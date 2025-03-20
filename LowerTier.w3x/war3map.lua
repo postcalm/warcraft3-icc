@@ -1,7 +1,31 @@
-gg_trg_init = nil
-gg_trg___________________________u = nil
-gg_unit_hpea_0001 = nil
+gg_trg_EntryPoint = nil
+gg_trg_Alert = nil
+gg_trg_RespawnHero = nil
 function InitGlobals()
+end
+
+function SetCameraTargetUnit(unit)
+    SetCameraTargetControllerNoZForPlayer(GetLocalPlayer(), unit, 0, 0, false)
+end
+
+function SetCameraRotation(rotation, duration)
+    local d = duration or 0.25
+    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ROTATION, rotation, d)
+end
+
+function SetCameraAngle(angle, duration)
+    local d = duration or 0.25
+    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
+end
+
+function SetCameraZOffset(zoffset, duration)
+    local d = duration or 0.25
+    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ZOFFSET, zoffset, d)
+end
+
+function SetCameraDistance(dist, duration)
+    local d = duration or 0.25
+    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_TARGET_DISTANCE, dist, d)
 end
 
 function CreateUnitsForPlayer0()
@@ -1092,6 +1116,7 @@ Movement = {
     logger = Logger("movement"),
 }
 
+--- Инициализация системы передвижения
 function Movement.Init()
     Movement.logger:Info("Initialize movement system")
     Camera.Register()
@@ -1105,14 +1130,15 @@ function Movement.Init()
     Movement.logger:Info("Movement system start!")
 end
 
+---@private
 function Movement._update()
-    SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
     Movement._process()
     Movement._rotate_camera()
     Movement._move()
     Movement._play_anim()
 end
 
+---@private
 function Movement._process()
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == OSKEY_W then
@@ -1130,27 +1156,34 @@ function Movement._process()
     end
 end
 
+---@private
 function Movement._rotate_camera()
     if Movement.to_left then
         Camera.TurnLeft()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to left")
     elseif Movement.to_right then
         Camera.TurnRight()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to right")
     end
 end
 
+---@private
 function Movement._move()
     local unit = Movement.unit
     if Movement.to_up then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to up")
     elseif Movement.to_down then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to down")
     end
 end
 
+---@private
 function Movement._play_anim()
     if Movement.to_up and not Movement.animate then
         SetUnitAnimationByIndex(Movement.unit:GetId(), 5)
@@ -1164,6 +1197,7 @@ function Movement._play_anim()
     end
 end
 
+---@private
 function Movement._set_default_anim()
     SetUnitAnimation(Movement.unit:GetId(), "Portrait")
     Movement.animate = false
@@ -1589,6 +1623,9 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
+--- Регистрирует нажатие клавиши
+---@param key oskeytype Регистрируемая клавиша
+---@return nil
 function EventsPlayer:RegisterKeyPressed(key)
     BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, true)
     BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, false)
@@ -1613,12 +1650,6 @@ end
 ---@return nil
 function EventsPlayer:RegisterUnitAttacked()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_ATTACKED, nil)
-end
-
---- Регистрирует событие направления способности юнитом игрока
----@return nil
-function EventsPlayer:RegisterUnitSpellChannel()
-    TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CHANNEL, nil)
 end
 
 --- Регистрирует событие каста способности юнитом игрока
@@ -3146,7 +3177,6 @@ end
 ---@param facing number
 ---@return nil
 function Unit:SetFacing(facing)
-    --SetUnitFacing(self.unit, facing)
     SetUnitFacingTimed(self.unit, facing, 0)
 end
 
@@ -4546,6 +4576,7 @@ BuffSystem = {
     main_frame_buff = nil,
     ---@type Frame
     main_frame_debuff = nil,
+    ---@type Logger
     logger = Logger("buffsys"),
 }
 
@@ -4593,13 +4624,15 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
 
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
-        BuffSystem.logger:Info("Show debuff frame")
+        BuffSystem.logger:Info("Show debuff frame...")
         BuffSystem.main_frame_debuff:Show()
         BuffSystem._ShowDebuffs(hero)
+        BuffSystem.logger:Info("...ok")
     else
-        BuffSystem.logger:Info("Show buff frame")
+        BuffSystem.logger:Info("Show buff frame...")
         BuffSystem.main_frame_buff:Show()
         BuffSystem._ShowBuffs(hero)
+        BuffSystem.logger:Info("...ok")
     end
 end
 
@@ -4607,11 +4640,14 @@ end
 ---@param hero Unit Экземпляр класса Unit
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
+    BuffSystem.logger:Info("Checking for a hero in the system...")
     for name, _ in pairs(BuffSystem.buffs) do
         if name == hero then
+            BuffSystem.logger:Info("...founded")
             return true
         end
     end
+    BuffSystem.logger:Info("...not found")
     return false
 end
 
@@ -4620,32 +4656,39 @@ end
 ---@param buff Ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
-    BuffSystem.logger:Info("Test the", buff.tooltip, "on", hero:GetName())
+    BuffSystem.logger:Info("Check the", buff.tooltip, "on", hero:GetName())
     if not BuffSystem.IsHeroInSystem(hero) then
         BuffSystem.logger:Info(hero:GetName(), "is not registered")
         return false
     end
     if #BuffSystem.buffs[hero] == 0 then
+        BuffSystem.logger:Info("No buffs")
         return false
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem._getBuff(hero, i) == nil then
+        local b = BuffSystem._getBuff(hero, i)
+        if b == nil then
+            BuffSystem.logger:Info("Not found buff")
             return false
         end
+        BuffSystem.logger:Info("checking", b.buff.tooltip, "...")
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
+            BuffSystem.logger:Info("buff on hero")
             return true
         end
     end
+    BuffSystem.logger:Info("There's nothing")
     return false
 end
 
 --- Удаляет у героя баф
 ---@param hero Unit Экземпляр класса Unit
----@param buff ability Название бафа
+---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHero(hero, buff)
+    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName())
     for i = 1, #BuffSystem.buffs[hero] do
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
@@ -4655,6 +4698,7 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
     end
     BuffSystem._ShowBuffs(hero)
     BuffSystem._ShowDebuffs(hero)
+    BuffSystem.logger:Info("Remove successfully")
 end
 
 --- Использует функцию для удаления бафа
@@ -4662,6 +4706,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
+    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName(), "by func")
     for i = 1, #BuffSystem.buffs[hero] do
         if BuffSystem.buffs[hero][i] == nil then
             return
@@ -4670,12 +4715,13 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
             BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.main_frame_buff:Destroy()
-            BuffSystem.main_frame_debuff:Destroy()
+            BuffSystem.main_frame_buff:Hide()
+            BuffSystem.main_frame_debuff:Hide()
             BuffSystem._getBuff(hero, i).func()
             BuffSystem.buffs[hero][i] = nil
         end
     end
+    BuffSystem.logger:Info("Remove successfully")
 end
 
 --- Проверяет относится ли баф к группе однотипных бафов
@@ -4683,6 +4729,7 @@ end
 ---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    BuffSystem.logger:Info("Check buffs exceptions")
     local buffs_exceptions = {
         paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
@@ -4752,6 +4799,7 @@ end
 ---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RemoveHero(hero)
+    BuffSystem.logger:Info("Remove", hero:GetName(), "from system")
     --TODO: корректно удалять все бафы и фреймы!!
     BuffSystem.buffs[hero] = nil
 end
@@ -4783,6 +4831,7 @@ end
 --- Расширяет основной фрейм с бафа/дебафами
 ---@private
 function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
+    BuffSystem.logger:Info("Resize main frame...")
     --расположение иконки бафа по X
     --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
     local x = 0.005 + (count * icon_frame:GetWidth()) + (0.0025 * count)
@@ -4792,11 +4841,13 @@ function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     --0.03 - базовая ширина фона
     main_frame:SetWidth(0.03 + _add)
     icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+    BuffSystem.logger:Info("...resized")
 end
 
 --- Задать иконку бафу
 ---@private
 function BuffSystem._SetIcon(icon)
+    BuffSystem.logger:Info("Set icon")
     local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
     buff_icon:SetTexture(icon)
 end
@@ -4819,6 +4870,7 @@ function BuffSystem._ShowBuffs(u)
                     count - 1
             )
             BuffSystem._SetIcon(buff.buff.icon)
+            BuffSystem.logger:Info("Set tooltip")
             buff.frame:SetTooltip(buff.buff.buff_tooltip, buff.buff.buff_desc)
         end
     end
@@ -4846,6 +4898,7 @@ function BuffSystem._ShowDebuffs(u)
                     count - 1
             )
             BuffSystem._SetIcon(debuff.buff.icon)
+            BuffSystem.logger:Info("Set tooltip")
             debuff.frame:SetTooltip(debuff.buff.buff_tooltip, debuff.buff.buff_desc)
         end
     end
@@ -6193,6 +6246,7 @@ function Paladin.RemoveBlessingOfKings(unit, stat)
 end
 
 function Paladin.BlessingOfKings()
+    BuffSystem.logger:Info("Blessing of kings...")
     local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
@@ -6219,6 +6273,7 @@ function Paladin.BlessingOfKings()
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfKings()
@@ -6327,7 +6382,8 @@ function Paladin.RemoveBlessingOfWisdom(unit, items_list)
 end
 
 function Paladin.BlessingOfWisdom()
-    local unit = GetSpellTargetUnit()
+    BuffSystem.logger:Info("Blessing of wisdom...")
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     local items_list = { Items.BLESSING_OF_WISDOM_ITEM }
 
@@ -6346,6 +6402,7 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfWisdom()
@@ -6747,7 +6804,7 @@ end
 
 function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     local items = { Items.POWER_WORD_FORTITUDE_ITEM }
     local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
@@ -6871,7 +6928,7 @@ function Priest.RemovePrayerOfMending(unit)
 end
 
 function Priest.CastPrayerOfMending()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
     local effect
     local last_unit
@@ -7048,12 +7105,19 @@ end
 
 -- Точка входа для инициализации всего
 function EntryPoint()
+    ENABLE_LOGGER_STDOUT = true
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
 
     -- Механики
+    BuffSystem.LoadFrame()
     BattleTextViewSystem.Init()
     EquipSystem.RegisterItems()
+
+    SaveSystem.gamecache = InitGameCache("savesystem")
+    SaveSystem.map_number = 1
+    SaveSystem.InitSaveEvent()
+    SaveSystem.InitLoadEvent()
 
     -- Боссы
     --LordMarrowgar.Init()
@@ -7061,48 +7125,42 @@ function EntryPoint()
 
     -- Персонажи
     --Priest.Init()
-    --Paladin.Init()
+    Paladin.Init(Location(930., -11000.))
 
-    -- Манекены
-    --DummyForHealing()
+    Movement.Init()
+    FogEnableOff()
+    FogMaskEnableOff()
 end
 
 --CUSTOM_CODE
-function Trig_init_Actions()
-    FogEnableOff()
-    FogMaskEnableOff()
+function Trig_EntryPoint_Actions()
         EntryPoint()
 end
 
-function InitTrig_init()
-    gg_trg_init = CreateTrigger()
-    TriggerAddAction(gg_trg_init, Trig_init_Actions)
+function InitTrig_EntryPoint()
+    gg_trg_EntryPoint = CreateTrigger()
+    TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
-function Trig___________________________u_Actions()
-    MeleeStartingVisibility()
-    MeleeStartingHeroLimit()
-    MeleeGrantHeroItems()
-    MeleeStartingResources()
-    MeleeClearExcessUnits()
-    MeleeStartingUnits()
-    MeleeStartingAI()
-    MeleeInitVictoryDefeat()
+function Trig_RespawnHero_Actions()
+        SaveSystem.UnitsRespawn()
+        BuffSystem.RemoveAllBuffs(GetTriggerUnit())
 end
 
-function InitTrig___________________________u()
-    gg_trg___________________________u = CreateTrigger()
-    TriggerAddAction(gg_trg___________________________u, Trig___________________________u_Actions)
+function InitTrig_RespawnHero()
+    gg_trg_RespawnHero = CreateTrigger()
+    DisableTrigger(gg_trg_RespawnHero)
+    TriggerRegisterAnyUnitEventBJ(gg_trg_RespawnHero, EVENT_PLAYER_UNIT_DEATH)
+    TriggerAddAction(gg_trg_RespawnHero, Trig_RespawnHero_Actions)
 end
 
 function InitCustomTriggers()
-    InitTrig_init()
-    InitTrig___________________________u()
+    InitTrig_EntryPoint()
+    InitTrig_RespawnHero()
 end
 
 function RunInitializationTriggers()
-    ConditionalTriggerExecute(gg_trg_init)
-    ConditionalTriggerExecute(gg_trg___________________________u)
+    ConditionalTriggerExecute(gg_trg_EntryPoint)
 end
 
 function InitCustomPlayerSlots()
@@ -7137,7 +7195,7 @@ function config()
     SetPlayers(1)
     SetTeams(1)
     SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
-    DefineStartLocation(0, 4672.0, -3072.0)
+    DefineStartLocation(0, 6912.0, -8064.0)
     InitCustomPlayerSlots()
     SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
     InitGenericPlayerSlots()

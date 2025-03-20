@@ -1069,7 +1069,7 @@ end
 ---@private
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    local dist = 850.
+    local dist = 650.
     local zoffset = GetLocationZ(Camera.unit:GetLoc())
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
@@ -1077,9 +1077,9 @@ function Camera._update()
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
         Camera._set_angle(-50.)
     else
-        Camera._set_angle(-25.)
+        Camera._set_angle(-15.)
     end
-    Camera._set_offset(zoffset)
+    Camera._set_offset(100.)
     Camera._set_facing(facing)
 end
 
@@ -7139,7 +7139,7 @@ function TestEntryPoint()
     -- Манекены
     --DummyForHealing(Location(300., 200.))
     --DummyForDPS(Location(-400., 200.))
-    --SpawnTrashDummies(5)
+    SpawnTrashDummies(5)
 end
 
 --CUSTOM_CODE

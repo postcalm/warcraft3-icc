@@ -29,5 +29,5 @@ function TestEntryPoint()
     -- Манекены
     --DummyForHealing(Location(300., 200.))
     --DummyForDPS(Location(-400., 200.))
-    --SpawnTrashDummies(5)
+    SpawnTrashDummies(5)
 end
