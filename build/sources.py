@@ -10,6 +10,9 @@ INIT_FILES = (
 )
 CORE_FILES = (
     "src/core/pool.lua",
+    "src/core/keyboard.lua",
+    "src/core/camera.lua",
+    "src/core/movement.lua",
 )
 CLASSES_FILES = (
     "src/classes",

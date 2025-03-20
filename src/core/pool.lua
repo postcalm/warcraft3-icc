@@ -1,7 +1,7 @@
 ---@author meiso
 
 
----@class Pool Структура, представляющая пул (список) элементов одного типа.
+---@class Pool Неупорядоченная коллекция, представляющая пул (список) элементов одного типа.
 Pool = {}
 Pool.__index = Pool
 
@@ -36,6 +36,17 @@ end
 ---@return nil
 function Pool:Add(value)
     if not self:Contain(value) then
+        table.insert(self._pool, value)
+    end
+end
+
+--- Обновить существующий элемент
+---@param value any
+---@return nil
+function Pool:Update(value)
+    local index = self:Find(value)
+    if self:Contain(value) then
+        table.remove(self._pool, index)
         table.insert(self._pool, value)
     end
 end

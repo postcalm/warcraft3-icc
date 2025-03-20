@@ -182,7 +182,9 @@ end
 
 -- Всё, что связано с нанесением урона
 
-
+--- Атаковать указанную цель
+---@param target Unit
+---@return nil
 function Unit:Attack(target)
     if isTable(target) then
         target = target:GetId()
@@ -709,6 +711,13 @@ function Unit:GetFacing()
     return GetUnitFacing(self.unit)
 end
 
+--- Задать градус поворота юнита
+---@param facing number
+---@return nil
+function Unit:SetFacing(facing)
+    SetUnitFacingTimed(self.unit, facing, 0)
+end
+
 --- Проверяет мертв ли юнит
 ---@return boolean
 function Unit:IsDied()
@@ -775,6 +784,24 @@ function Unit:GetName()
         return GetHeroProperName(self.unit)
     end
     return GetUnitName(self.unit)
+end
+
+--- Получить расположение юнита по оси X
+---@return number
+function Unit:GetX()
+    return GetUnitX(self.unit)
+end
+
+--- Получить расположение юнита по оси Y
+---@return number
+function Unit:GetY()
+    return GetUnitY(self.unit)
+end
+
+--- Получить расположение юнита по оси Z
+---@return number
+function Unit:GetZ()
+    return BlzGetUnitZ(self.unit)
 end
 
 --- Активировать/деактивировать юнита

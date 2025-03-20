@@ -13,7 +13,7 @@ function TrashDummyForDPS(location, name)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
     d:SetName(name)
-    d:SetMaxLife(10000, true)
+    d:SetMaxLife(50000, true)
     d:SetBaseDamage(200.)
 end
 

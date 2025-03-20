@@ -20,6 +20,14 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
+--- Регистрирует нажатие клавиши
+---@param key oskeytype Регистрируемая клавиша
+---@return nil
+function EventsPlayer:RegisterKeyPressed(key)
+    BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, true)
+    BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, false)
+end
+
 --- Регистрирует событие нажатия кнопки мыши
 ---@return nil
 function EventsPlayer:RegisterPlayerMouseDown()

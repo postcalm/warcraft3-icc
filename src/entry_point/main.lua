@@ -9,12 +9,12 @@ function EntryPoint()
     EquipSystem.RegisterItems()
 
     -- Боссы
-    LordMarrowgar.Init()
-    LadyDeathwhisper.Init()
+    --LordMarrowgar.Init()
+    --LadyDeathwhisper.Init()
 
     -- Персонажи
-    Priest.Init()
-    Paladin.Init()
+    --Priest.Init()
+    --Paladin.Init()
 
     -- Манекены
     --DummyForHealing()

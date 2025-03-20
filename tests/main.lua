@@ -3,6 +3,7 @@
 -- Точка входа для инициализации всего
 function TestEntryPoint()
     ENABLE_LOGGER_STDOUT = true
+    --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     --HeroSelector.Init()
@@ -23,8 +24,10 @@ function TestEntryPoint()
     Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
+    Movement.Init()
+
     -- Манекены
     --DummyForHealing(Location(300., 200.))
     --DummyForDPS(Location(-400., 200.))
-    SpawnTrashDummies(5)
+    --SpawnTrashDummies(5)
 end

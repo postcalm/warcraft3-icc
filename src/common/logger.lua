@@ -12,6 +12,8 @@ LogLevel = {
 ENABLE_LOGGER = true
 --- Включить запись в чат игры
 ENABLE_LOGGER_STDOUT = false
+--- Уровень логирования
+LOGGER_LEVEL = LogLevel.INFO
 
 ---@class Logger
 ---@param log_name string Имя лог файла
@@ -42,15 +44,13 @@ function Logger:_init(log_name)
     self.file_handle = FileIO:open(self.full_log_path)
 end
 
-function Logger.GetLogger()
-
-end
-
 --- Записать в лог файл
 ---@param level LogLevel Уровень логирования
 ---@param ... string Список аргументов
 ---@return nil
 function Logger:Log(level, ...)
+    if not ENABLE_LOGGER then return end
+    if level.level < LOGGER_LEVEL.level then return end
     local args = table.pack(...)
     local message = ""
     if not ENABLE_LOGGER_STDOUT then
