@@ -7,6 +7,10 @@ from build.runner import Warcraft, WorldEditor
 from build.copy_files import copy
 from build.maps import MAPS
 
+# Чтобы кастомный код заработал, надо в самой карте через редактор
+# вставить тег --CUSTOM_CODE дважды.
+# По этим меткам будет производиться замена кода
+
 
 def parse_arguments():
     parser = ArgumentParser()

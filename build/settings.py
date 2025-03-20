@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from build.sources import ALL_SOURCE_FILES
 
 PROJECT_DIR: Path = Path.cwd()
-PATCHER: Path = PROJECT_DIR / "build" / "custom-code-replacer.exe"
 GAME_DIRS: tuple[Path, ...] = (
     Path("E:/Warcraft III/x86_64"),
     Path("E:/Games/Warcraft III/x86_64"),

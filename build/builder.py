@@ -1,11 +1,10 @@
 # Copyright meiso
 #
 import re
-import os
 from io import IOBase
 from dataclasses import dataclass
 
-from build.settings import Settings, PROJECT_DIR, PATCHER
+from build.settings import Settings, PROJECT_DIR
 
 
 @dataclass
@@ -22,17 +21,21 @@ class Builder:
 
     def create_custom_code(self):
         """Создать кастомный код из исходников"""
+        print("Creating custom code...")
         with open(PROJECT_DIR / self.settings.custom_code, "w+", encoding="utf8") as custom_code:
             custom_code.write(self.settings.tag + "\n")
             self._w2f(custom_code, self.settings.files)  # noqa
             self._w2f(custom_code, (self.settings.entry_point,))  # noqa
             custom_code.write(self.settings.tag)
+        print("Success")
 
     def replace_in_map(self):
         """Заменить исходный код в карте"""
         path = PROJECT_DIR / self.settings.map / "war3map.lua"
+        print(f"Replacing custom code into {path}...")
         content = path.read_text(encoding="utf8")
         with open(path.absolute(), "w+", encoding="utf8") as war3map:
+            print(f"Use custom code {self.settings.custom_code.absolute()}")
             # повторно заменяем кастомный код
             content = re.sub(
                 rf"{self.settings.tag}(.*?){self.settings.tag}",
@@ -41,14 +44,7 @@ class Builder:
                 flags=re.DOTALL,
             )
             war3map.write(content)
-
-    def path_wct(self):
-        """Пропатчить wct карты"""
-        wct = PROJECT_DIR / self.settings.map / "war3map.wct"
-        os.system(f'start "" '
-                  f'"{PATCHER}" '
-                  f'"{wct}" '
-                  f'"{self.settings.custom_code.absolute()}"')
+        print("Success")
 
     def set_version(self):
         """Задать версию карты"""
