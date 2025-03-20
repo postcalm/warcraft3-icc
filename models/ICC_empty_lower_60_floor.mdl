@@ -7,8 +7,8 @@ Model "ICC_j" {
 	NumBones 1,
 	BlendTime 150,
 	MinimumExtent { -5615.268, -20074.3, -1132.228 },
-	MaximumExtent { 5612.856, 5675.42, 5349.643 },
-	BoundsRadius 14414.69,
+	MaximumExtent { 5612.856, 47000.42, 5349.643 },
+	BoundsRadius 30000.69,
 }
 Textures 23 {
 	Bitmap {
