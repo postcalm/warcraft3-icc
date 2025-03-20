@@ -29,7 +29,6 @@ end
 
 ---@private
 function Movement._update()
-    SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
     Movement._process()
     Movement._rotate_camera()
     Movement._move()
@@ -58,9 +57,11 @@ end
 function Movement._rotate_camera()
     if Movement.to_left then
         Camera.TurnLeft()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to left")
     elseif Movement.to_right then
         Camera.TurnRight()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to right")
     end
 end
@@ -70,9 +71,11 @@ function Movement._move()
     local unit = Movement.unit
     if Movement.to_up then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to up")
     elseif Movement.to_down then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to down")
     end
 end

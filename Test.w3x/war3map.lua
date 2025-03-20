@@ -1122,6 +1122,7 @@ Movement = {
     logger = Logger("movement"),
 }
 
+--- Инициализация системы передвижения
 function Movement.Init()
     Movement.logger:Info("Initialize movement system")
     Camera.Register()
@@ -1135,14 +1136,15 @@ function Movement.Init()
     Movement.logger:Info("Movement system start!")
 end
 
+---@private
 function Movement._update()
-    SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
     Movement._process()
     Movement._rotate_camera()
     Movement._move()
     Movement._play_anim()
 end
 
+---@private
 function Movement._process()
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == OSKEY_W then
@@ -1160,27 +1162,34 @@ function Movement._process()
     end
 end
 
+---@private
 function Movement._rotate_camera()
     if Movement.to_left then
         Camera.TurnLeft()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to left")
     elseif Movement.to_right then
         Camera.TurnRight()
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to right")
     end
 end
 
+---@private
 function Movement._move()
     local unit = Movement.unit
     if Movement.to_up then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to up")
     elseif Movement.to_down then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
+        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
         Movement.logger:Debug("to down")
     end
 end
 
+---@private
 function Movement._play_anim()
     if Movement.to_up and not Movement.animate then
         SetUnitAnimationByIndex(Movement.unit:GetId(), 5)
@@ -1194,6 +1203,7 @@ function Movement._play_anim()
     end
 end
 
+---@private
 function Movement._set_default_anim()
     SetUnitAnimation(Movement.unit:GetId(), "Portrait")
     Movement.animate = false
@@ -3173,7 +3183,6 @@ end
 ---@param facing number
 ---@return nil
 function Unit:SetFacing(facing)
-    --SetUnitFacing(self.unit, facing)
     SetUnitFacingTimed(self.unit, facing, 0)
 end
 
