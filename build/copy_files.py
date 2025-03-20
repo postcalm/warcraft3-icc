@@ -22,10 +22,12 @@ other_icons = (
     "icons/classes",
 )
 model_files = (
-    "frames",
     "models/creatures/Paladin",
     "models/creatures/Priest",
     "models/spells/Paladin",
+)
+ui_files = (
+    "frames",
 )
 
 
@@ -34,10 +36,10 @@ def copy_files(src: Path, dst: Path, prefix_filename: str = ""):
     for f in os.listdir(src):
         if f in skip_files:
             continue
-        if Path(src / f).is_dir():  # noqa
-            copy_files(src / f, dst, prefix_filename)  # noqa
+        if Path(src / f).is_dir():
+            copy_files(src / f, dst, prefix_filename)
         else:
-            shutil.copy(src / f, dst / f"{prefix_filename}{f}")  # noqa
+            shutil.copy(src / f, dst / f"{prefix_filename}{f}")
 
 
 def copy_spell_icons(src: Path, dst: Path):
@@ -62,4 +64,8 @@ def copy(target_map: str):
     for mf in model_files:
         print(f"Copying {mf} to a {target_map} map ...")
         copy_files(Path(mf), p)
+
+    for ui in ui_files:
+        print(f"Copying {ui} to a {target_map} map ...")
+        shutil.copytree(Path(ui), p, dirs_exist_ok=True)
     print("Success\n")

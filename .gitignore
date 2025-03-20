@@ -9,5 +9,6 @@ models/origin
 *.w3x/**/*.tga
 *.w3x/**/*.fdf
 *.w3x/**/*.toc
+*.w3x/units/*
 
 !*.w3x/war3mapMap.blp
