@@ -7,7 +7,7 @@ function Priest.RemovePrayerOfMending(unit)
 end
 
 function Priest.CastPrayerOfMending()
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
     local effect
     local last_unit

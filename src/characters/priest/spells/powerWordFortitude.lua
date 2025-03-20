@@ -9,7 +9,7 @@ end
 
 function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
-    local unit = GetSpellTargetUnit()
+    local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     local items = { Items.POWER_WORD_FORTITUDE_ITEM }
     local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"

@@ -10,6 +10,7 @@ function Paladin.RemoveBlessingOfKings(unit, stat)
 end
 
 function Paladin.BlessingOfKings()
+    BuffSystem.logger:Info("Blessing of kings...")
     local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
@@ -36,6 +37,7 @@ function Paladin.BlessingOfKings()
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfKings()

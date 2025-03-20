@@ -8,6 +8,7 @@ BuffSystem = {
     main_frame_buff = nil,
     ---@type Frame
     main_frame_debuff = nil,
+    ---@type Logger
     logger = Logger("buffsys"),
 }
 
@@ -55,13 +56,15 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
 
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
-        BuffSystem.logger:Info("Show debuff frame")
+        BuffSystem.logger:Info("Show debuff frame...")
         BuffSystem.main_frame_debuff:Show()
         BuffSystem._ShowDebuffs(hero)
+        BuffSystem.logger:Info("...ok")
     else
-        BuffSystem.logger:Info("Show buff frame")
+        BuffSystem.logger:Info("Show buff frame...")
         BuffSystem.main_frame_buff:Show()
         BuffSystem._ShowBuffs(hero)
+        BuffSystem.logger:Info("...ok")
     end
 end
 
@@ -69,11 +72,14 @@ end
 ---@param hero Unit Экземпляр класса Unit
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
+    BuffSystem.logger:Info("Checking for a hero in the system...")
     for name, _ in pairs(BuffSystem.buffs) do
         if name == hero then
+            BuffSystem.logger:Info("...founded")
             return true
         end
     end
+    BuffSystem.logger:Info("...not found")
     return false
 end
 
@@ -82,32 +88,39 @@ end
 ---@param buff Ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
-    BuffSystem.logger:Info("Test the", buff.tooltip, "on", hero:GetName())
+    BuffSystem.logger:Info("Check the", buff.tooltip, "on", hero:GetName())
     if not BuffSystem.IsHeroInSystem(hero) then
         BuffSystem.logger:Info(hero:GetName(), "is not registered")
         return false
     end
     if #BuffSystem.buffs[hero] == 0 then
+        BuffSystem.logger:Info("No buffs")
         return false
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem._getBuff(hero, i) == nil then
+        local b = BuffSystem._getBuff(hero, i)
+        if b == nil then
+            BuffSystem.logger:Info("Not found buff")
             return false
         end
+        BuffSystem.logger:Info("checking", b.buff.tooltip, "...")
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
+            BuffSystem.logger:Info("buff on hero")
             return true
         end
     end
+    BuffSystem.logger:Info("There's nothing")
     return false
 end
 
 --- Удаляет у героя баф
 ---@param hero Unit Экземпляр класса Unit
----@param buff ability Название бафа
+---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHero(hero, buff)
+    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName())
     for i = 1, #BuffSystem.buffs[hero] do
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
@@ -117,6 +130,7 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
     end
     BuffSystem._ShowBuffs(hero)
     BuffSystem._ShowDebuffs(hero)
+    BuffSystem.logger:Info("Remove successfully")
 end
 
 --- Использует функцию для удаления бафа
@@ -124,6 +138,7 @@ end
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
+    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName(), "by func")
     for i = 1, #BuffSystem.buffs[hero] do
         if BuffSystem.buffs[hero][i] == nil then
             return
@@ -132,12 +147,13 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
             BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.main_frame_buff:Destroy()
-            BuffSystem.main_frame_debuff:Destroy()
+            BuffSystem.main_frame_buff:Hide()
+            BuffSystem.main_frame_debuff:Hide()
             BuffSystem._getBuff(hero, i).func()
             BuffSystem.buffs[hero][i] = nil
         end
     end
+    BuffSystem.logger:Info("Remove successfully")
 end
 
 --- Проверяет относится ли баф к группе однотипных бафов
@@ -145,6 +161,7 @@ end
 ---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
+    BuffSystem.logger:Info("Check buffs exceptions")
     local buffs_exceptions = {
         paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
@@ -214,6 +231,7 @@ end
 ---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RemoveHero(hero)
+    BuffSystem.logger:Info("Remove", hero:GetName(), "from system")
     --TODO: корректно удалять все бафы и фреймы!!
     BuffSystem.buffs[hero] = nil
 end
@@ -245,6 +263,7 @@ end
 --- Расширяет основной фрейм с бафа/дебафами
 ---@private
 function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
+    BuffSystem.logger:Info("Resize main frame...")
     --расположение иконки бафа по X
     --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
     local x = 0.005 + (count * icon_frame:GetWidth()) + (0.0025 * count)
@@ -254,11 +273,13 @@ function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     --0.03 - базовая ширина фона
     main_frame:SetWidth(0.03 + _add)
     icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
+    BuffSystem.logger:Info("...resized")
 end
 
 --- Задать иконку бафу
 ---@private
 function BuffSystem._SetIcon(icon)
+    BuffSystem.logger:Info("Set icon")
     local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
     buff_icon:SetTexture(icon)
 end
@@ -281,6 +302,7 @@ function BuffSystem._ShowBuffs(u)
                     count - 1
             )
             BuffSystem._SetIcon(buff.buff.icon)
+            BuffSystem.logger:Info("Set tooltip")
             buff.frame:SetTooltip(buff.buff.buff_tooltip, buff.buff.buff_desc)
         end
     end
@@ -308,6 +330,7 @@ function BuffSystem._ShowDebuffs(u)
                     count - 1
             )
             BuffSystem._SetIcon(debuff.buff.icon)
+            BuffSystem.logger:Info("Set tooltip")
             debuff.frame:SetTooltip(debuff.buff.buff_tooltip, debuff.buff.buff_desc)
         end
     end
