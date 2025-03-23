@@ -130,7 +130,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -339,12 +339,6 @@ STRING 148
 (trigger)
 }
 
-STRING 149
-// Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
-{
-D
-}
-
 STRING 151
 // Способности: A00Q (Judgement of Wisdom), EditorSuffix (Суффикс редактора)
 {
@@ -352,7 +346,7 @@ STRING 151
 }
 
 STRING 152
-// Способности: A00Q (Judgement of Wisdom), Hotkey (Горячая клавиша: используется)
+// Способности: A004 (Avenger's Shield), Hotkey (Горячая клавиша: используется)
 {
 F
 }
@@ -424,15 +418,9 @@ Renew
 }
 
 STRING 183
-// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
-{
-E
-}
-
-STRING 185
 // Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
 {
-W
+E
 }
 
 STRING 186
@@ -599,12 +587,6 @@ STRING 222
 Q
 }
 
-STRING 223
-// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
-{
-W
-}
-
 STRING 224
 // Способности: A00U (Circle Of Healing), Name (Название)
 {
@@ -641,12 +623,6 @@ STRING 230
 Power Word: Shield
 }
 
-STRING 231
-// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
-{
-S
-}
-
 STRING 233
 // Способности: A00X (Guardian Spirit), Name (Название)
 {
@@ -654,7 +630,7 @@ Guardian Spirit
 }
 
 STRING 234
-// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -702,15 +678,9 @@ Q
 }
 
 STRING 246
-// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
 {
 E
-}
-
-STRING 247
-// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
-{
-W
 }
 
 STRING 248
@@ -777,5 +747,41 @@ STRING 259
 // Способности: A013 (A), Hotkey (Горячая клавиша: используется)
 {
 A
+}
+
+STRING 260
+// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+{
+T
+}
+
+STRING 261
+// Способности: A00Q (Judgement of Wisdom), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 262
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 263
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 264
+// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
+{
+F
+}
+
+STRING 265
+// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
+{
+E
 }
 

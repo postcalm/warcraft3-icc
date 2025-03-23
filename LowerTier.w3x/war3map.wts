@@ -130,7 +130,7 @@ Spell_Template
 }
 
 STRING 93
-// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+// Способности: A00A (Consecration), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -154,13 +154,13 @@ Crusader Aura
 }
 
 STRING 102
-// Способности: A00A (Concecration), Tip (Подсказка: используется, нормальная)
+// Способности: A00A (Consecration), Tip (Подсказка: используется, нормальная)
 {
 Освящение
 }
 
 STRING 103
-// Способности: A00A (Concecration), Ubertip (Подсказка: используется, подробная)
+// Способности: A00A (Consecration), Ubertip (Подсказка: используется, подробная)
 {
 Освящение
 }
@@ -339,12 +339,6 @@ STRING 148
 (trigger)
 }
 
-STRING 149
-// Способности: A009 (Prayer of Mending), Hotkey (Горячая клавиша: используется)
-{
-D
-}
-
 STRING 151
 // Способности: A00Q (Judgement of Wisdom), EditorSuffix (Суффикс редактора)
 {
@@ -352,7 +346,7 @@ STRING 151
 }
 
 STRING 152
-// Способности: A00Q (Judgement of Wisdom), Hotkey (Горячая клавиша: используется)
+// Способности: A004 (Avenger's Shield), Hotkey (Горячая клавиша: используется)
 {
 F
 }
@@ -424,15 +418,9 @@ Renew
 }
 
 STRING 183
-// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
-{
-E
-}
-
-STRING 185
 // Способности: A00M (Blessing of Might), Hotkey (Горячая клавиша: используется)
 {
-W
+E
 }
 
 STRING 186
@@ -566,18 +554,6 @@ STRING 214
 Круг исцеления (|cffffcc00W|r)
 }
 
-STRING 216
-// Способности: A00R (Shield of Righteousness), Tip (Подсказка: используется, нормальная)
-{
-Щит праведности (|cffffcc00V|r)
-}
-
-STRING 217
-// Способности: A00A (Concecration), Name (Название)
-{
-Concecration
-}
-
 STRING 218
 // Способности: A00L (Spellbook_Paladin), Unhotkey (Горячая клавиша: не используется)
 {
@@ -600,12 +576,6 @@ STRING 222
 // Способности: A00C (Blessing of Kings), Hotkey (Горячая клавиша: используется)
 {
 Q
-}
-
-STRING 223
-// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
-{
-W
 }
 
 STRING 224
@@ -632,12 +602,6 @@ STRING 230
 Power Word: Shield
 }
 
-STRING 231
-// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
-{
-S
-}
-
 STRING 233
 // Способности: A00X (Guardian Spirit), Name (Название)
 {
@@ -645,7 +609,7 @@ Guardian Spirit
 }
 
 STRING 234
-// Способности: A00A (Concecration), Hotkey (Горячая клавиша: используется)
+// Способности: A00G (Blessing of Wisdom), Hotkey (Горячая клавиша: используется)
 {
 R
 }
@@ -660,12 +624,6 @@ STRING 236
 // Способности: A00Y (Spellbook_Priest), Tip (Подсказка: используется, нормальная)
 {
 Книга заклинаний (X)
-}
-
-STRING 237
-// Способности: A00Y (Spellbook_Priest), Unhotkey (Горячая клавиша: не используется)
-{
-X
 }
 
 STRING 240
@@ -693,15 +651,9 @@ Q
 }
 
 STRING 246
-// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+// Способности: A00R (Shield of Righteousness), Hotkey (Горячая клавиша: используется)
 {
 E
-}
-
-STRING 247
-// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
-{
-W
 }
 
 STRING 248
@@ -762,5 +714,67 @@ STRING 259
 // Способности: A013 (A), Hotkey (Горячая клавиша: используется)
 {
 A
+}
+
+STRING 260
+{
+Игрок 2
+}
+
+STRING 261
+{
+Игрок 11
+}
+
+STRING 262
+{
+Heroes
+}
+
+STRING 263
+{
+LichKing
+}
+
+STRING 268
+// Способности: A00H (Blessing of Sanctuary), Hotkey (Горячая клавиша: используется)
+{
+T
+}
+
+STRING 269
+// Способности: A00A (Consecration), Name (Название)
+{
+Consecration
+}
+
+STRING 270
+// Способности: A00T (Renew), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 271
+// Способности: A00Q (Judgement of Wisdom), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 272
+// Способности: A00Z (Inner Fire), Hotkey (Горячая клавиша: используется)
+{
+E
+}
+
+STRING 273
+// Способности: A00U (Circle Of Healing), Hotkey (Горячая клавиша: используется)
+{
+V
+}
+
+STRING 274
+// Способности: A00V (Power Word: Shield), Hotkey (Горячая клавиша: используется)
+{
+F
 }
 

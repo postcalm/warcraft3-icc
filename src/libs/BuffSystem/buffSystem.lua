@@ -147,12 +147,12 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
             BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.main_frame_buff:Hide()
-            BuffSystem.main_frame_debuff:Hide()
             BuffSystem._getBuff(hero, i).func()
             BuffSystem.buffs[hero][i] = nil
         end
     end
+    BuffSystem._ShowBuffs(hero)
+    BuffSystem._ShowDebuffs(hero)
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -292,7 +292,7 @@ function BuffSystem._ShowBuffs(u)
     BuffSystem.logger:Info("buff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
         local buff = BuffSystem._getBuff(u, i)
-        if buff then
+        if buff and not buff.is_debuff then
             count = count + 1
             BuffSystem.logger:Info("buff", buff.buff.tooltip)
             BuffSystem.logger:Info("icon", buff.buff.icon)

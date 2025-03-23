@@ -2,7 +2,7 @@
 
 function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
-        UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target:GetId())
         BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
     end
 end
@@ -19,7 +19,8 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    local target = GetSpellTargetUnit()
+    BuffSystem.logger:Info("Judgement Of Wisdom...")
+    local target = Unit(GetSpellTargetUnit())
     local model = "judgement_impact_chest_blue.mdl"
     local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
@@ -43,6 +44,7 @@ function Paladin.CastJudgementOfWisdom()
     timer:Start()
     jow_unit:ApplyTimedLife(2.)
     effect:Destroy()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsJudgementOfWisdom()

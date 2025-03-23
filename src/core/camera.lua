@@ -40,14 +40,14 @@ end
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
     local dist = 650.
-    local zoffset = 100.
+    local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
     Camera._set_dist(dist)
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
-        Camera._set_angle(-50.)
+        Camera._set_angle(-24.)
     else
-        Camera._set_angle(-15.)
+        Camera._set_angle(-12.)
     end
     Camera._set_offset(zoffset)
     Camera._set_facing(facing)

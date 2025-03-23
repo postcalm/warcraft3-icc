@@ -7,7 +7,7 @@ avengers_shield = Ability {
     tooltip = "Щит мстителя",
     manacost = 26,
     cooldown = 30.,
-    key = "C",
+    key = "F",
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
             "Способен воздействовать на 3 цели.",
@@ -28,7 +28,7 @@ blessing_of_might = Ability {
     ability = BLESSING_OF_MIGHT,
     manacost = 5,
     tooltip = "Благословение могущества",
-    key = "W",
+    key = "E",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_might.tga",
     buff_desc = "Сила атаки увеличена на 550."
@@ -38,7 +38,7 @@ blessing_of_wisdom = Ability {
     ability = BLESSING_OF_WISDOM,
     manacost = 5,
     tooltip = "Благословение мудрости",
-    key = "E",
+    key = "R",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_wisdom.tga",
     buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
@@ -48,7 +48,7 @@ blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
     manacost = 7,
     tooltip = "Благословение неприкосновенности",
-    key = "R",
+    key = "T",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3%% и " ..
             "повышая ее силу и выносливость на 10%%. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
@@ -72,7 +72,7 @@ judgement_of_light_tr = Ability {
     manacost = 5,
     cooldown = 10.,
     tooltip = "Правосудие света",
-    key = "D",
+    key = "C",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2%% от максимального запаса здоровья атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
@@ -84,7 +84,7 @@ judgement_of_wisdom_tr = Ability {
     manacost = 5,
     cooldown = 10.,
     tooltip = "Правосудие мудрости",
-    key = "F",
+    key = "V",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2%% базового запаса маны атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
@@ -96,7 +96,7 @@ shield_of_righteousness = Ability {
     manacost = 6,
     cooldown = 6.,
     tooltip = "Щит праведности",
-    key = "W",
+    key = "E",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
             "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
     icon = "ReplaceableTextures/CommandButtons/BTNshield_of_righteousness.tga"
@@ -166,7 +166,7 @@ power_word_shield = Ability {
     manacost = 23,
     cooldown = 4.,
     tooltip = "Слово силы: Щит",
-    key = "S",
+    key = "F",
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
             "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
             "получением урона. Повторно наложить щит можно только через 15 сек.",
@@ -201,7 +201,7 @@ prayer_of_mending = Ability {
     manacost = 15,
     cooldown = 10.,
     tooltip = "Молитва восстановления",
-    key = "D",
+    key = "C",
     text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
             "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
             "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
@@ -215,7 +215,7 @@ circle_of_healing = Ability {
     manacost = 21,
     cooldown = 6.,
     tooltip = "Круг исцеления",
-    key = "W",
+    key = "V",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
             "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
     icon = "ReplaceableTextures/CommandButtons/BTNcircle_of_healing.tga"
@@ -235,7 +235,7 @@ inner_fire = Ability {
     ability = INNER_FIRE,
     manacost = 14,
     tooltip = "Внутренний огонь",
-    key = "W",
+    key = "E",
     text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
             "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
             "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",

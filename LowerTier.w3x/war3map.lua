@@ -38,11 +38,31 @@ function CreateUnitsForPlayer0()
     u = CreateUnit(p, FourCC("hpea"), 934.4, -11016.2, 281.215)
 end
 
+function CreateUnitsForPlayer1()
+    local p = Player(1)
+    local u
+    local unitID
+    local t
+    local life
+    u = CreateUnit(p, FourCC("hpea"), 1302.1, -11076.8, 38.124)
+end
+
+function CreateUnitsForPlayer10()
+    local p = Player(10)
+    local u
+    local unitID
+    local t
+    local life
+    u = CreateUnit(p, FourCC("uaco"), 823.3, 19525.2, 346.992)
+end
+
 function CreatePlayerBuildings()
 end
 
 function CreatePlayerUnits()
     CreateUnitsForPlayer0()
+    CreateUnitsForPlayer1()
+    CreateUnitsForPlayer10()
 end
 
 function CreateAllUnits()
@@ -83,305 +103,6 @@ end
 
 ---@author meiso
 
----@class Counter Простой счётчик
-Counter = {}
-Counter.__index = Counter
-
-
-setmetatable(Counter, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Counter:_init(start, step)
-    self.start = start or 0
-    self.step = step or 1
-end
-
---- Возвращает следующее число
----@return number
-function Counter:next()
-    self.start = self.start + self.step
-    return self.start
-end
-
----@author meiso
-
--- Based on TriggerHappy implementation (hiveworkshop.com)
--- Lua implementation by Luashine (hiveworkshop.com)
-
---[[
-Features:
- * file overwrite is implemented;
- * only line-by-line recording
-
-!!Attempt!!
-Heavily loads the system due to overwriting. Do not use in a real game, or very carefully.
-]]--
-
--- FileIO v1.1.0-lua1.0.1
-FileIO = {
-    BACKWARDS_COMPATIBILITY = false,
-    AbilityList = {
-        "Amls", "Aroc", "Amic", "Amil", "Aclf", "Acmg", "Adef", "Adis", "Afbt", "Afbk",
-        "ACmo", "ACwe", "ACbn", "ACua", "ACah", "ACnr", "ACat", "ACds", "ACtb", "ACbz",
-    },
-    AbilityCount = nil, -- set below
-    PreloadLimit = 200,
-
-    -- readonly
-    -- some vJass stuff to ensure read/writes are from within one scope (code section)
-    -- unused ReadEnabled = true,
-    -- readonly
-    -- unused Counter =
-    -- readonly
-    List = {},
-    cc2Int = function(str)
-        local n = 0
-        local len = #str
-        for i = len, 1, -1 do
-            n = n + (str:byte(i, i) << 8 * (len - i))
-        end
-        return n
-    end,
-    int2cc = function(int)
-        return string.char((int & 0xff000000) >> 24, (int & 0x00ff0000) >> 16, (int & 0x0000ff00) >> 8, int & 0x000000ff):match("[^\0]+")
-    end,
-}
-FileIO.AbilityCount = #FileIO.AbilityList
-
-function FileIO.hasInvalidChars(str)
-    -- Original Jass FileIO did not permit double-quotes and backslash
-    -- return str:find("[\0\"\\]") and true or false
-    -- Instead we'll escape them properly before writing to file
-    return str:find("[\0]") and true or false
-end
-
-do
-    local subst = {
-        -- only relevant if we saved it as  pure Lua
-        -- the Jass2Lua transpiler works correctly on multiline Jass strings
-        --["\n"] = "\\n",
-        ["\\"] = "\\\\",
-        ['"'] = '\"'
-    }
-    function FileIO.escapeChars(str)
-        -- \n removed, no functional difference to 1.0.0
-        return (str:gsub('["\\]', subst))
-    end
-end
-
-function FileIO:open(fileName)
-    if self.file then
-        error("FileIO: Cannot use :open() on an existing file")
-    end
-    local file = {}
-    setmetatable(file, { __index = self })
-    file.fileName = fileName
-    file.buffer = {}
-
-    return file
-end
-
-function FileIO:write(contents)
-    -- this is used to signify an empty string vs a null one
-    local prefix = "-"
-    --if self.hasInvalidChars(contents) then
-    --    error("FileIO: Invalid character in input: " .. tostring(contents))
-    --end
-    --contents = FileIO.escapeChars(contents)
-
-    self.buffer = {}
-
-    -- Begin file generation
-    PreloadGenClear()
-    PreloadGenStart()
-    -- loop start
-    local abilCount = 0
-    local bufOffset = 1
-
-    if isTable(contents) then
-        for _, chunk in ipairs(contents) do
-            local level = 0
-            if abilCount >= self.AbilityCount then
-                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
-            end
-
-            Preload(string.format(
-                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
-                    self.cc2Int(self.AbilityList[abilCount + 1]),
-                    prefix .. chunk,
-                    level
-            ))
-            bufOffset = bufOffset + self.PreloadLimit
-            abilCount = abilCount + 1
-        end
-    else
-        local len = #contents
-        while bufOffset < len do
-            --print(string.format("bufOffset=\037d, len=\037d", bufOffset, len))
-            local level = 0
-            if abilCount >= self.AbilityCount then
-                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
-            end
-
-            Preload(string.format(
-                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
-                    self.cc2Int(self.AbilityList[abilCount + 1]),
-                    prefix .. contents,
-                    level
-            ))
-            bufOffset = bufOffset + self.PreloadLimit
-            abilCount = abilCount + 1
-        end
-    end -- loop end
-    Preload('" )\nendfunction\nfunction a takes nothing returns nothing\n //')
-    PreloadGenEnd(self.fileName)
-    return self
-end
-
-function FileIO:clear()
-    return self:write("")
-end
-
-function FileIO:readPreload()
-    local originalDesc = {}
-    for n = 1, self.AbilityCount do
-        originalDesc[n] = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[n]), 0)
-        --print("Saving orig ab desc: ".. n ..": "..  originalDesc[n])
-    end
-
-    -- Execute the preload file
-    Preloader(self.fileName)
-
-    local level = 0
-    local chunk = ""
-    local output = ""
-    local output_buffer = {}
-    local i = 0
-
-    while true do
-        if i == self.AbilityCount then
-            break
-        end
-        level = 0
-
-        -- Make sure the tooltip has changed
-        chunk = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), level)
-        --print("Loaded chunk=".. tostring(chunk))
-        if chunk == originalDesc[i + 1] then
-            if i == 0 and output == "" then
-                -- empty file
-                return output_buffer
-            end
-            return output_buffer
-        end
-
-        if not self.BACKWARDS_COMPATIBILITY then
-            if i == 0 then
-                if chunk:sub(1, 1) ~= "-" then
-                    -- empty file
-                    return output_buffer
-                end
-                -- exclude first "-" symbol
-                chunk = chunk:sub(2)
-            end
-        end
-
-        -- remove prefix
-        if i > 0 then
-            chunk = chunk:sub(2)
-        end
-        -- restore original
-        --print("Restoring original tooltip i=".. i)
-        BlzSetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), originalDesc[i + 1], level)
-        output = output .. chunk
-        output_buffer[i + 1] = chunk
-
-        i = i + 1
-    end
-
-    return output_buffer
-end
-
-function FileIO:create(fileName)
-    return self:open(fileName):write("")
-end
-
-function FileIO:close()
-    local output = ""
-    for _, msg in  ipairs(self:readPreload()) do
-        output = output .. msg
-    end
-    if #self.buffer > 0 then
-        self:write(output .. table.concat(self.buffer))
-    end
-end
-
-function FileIO:readEx(toClose)
-    local output = ""
-    for _, msg in  ipairs(self:readPreload()) do
-        output = output .. msg
-    end
-    local buf = table.concat(self.buffer)
-
-    if toClose then
-        self:close()
-    end
-    if output == nil then
-        return buf
-    end
-
-    if buf ~= nil then
-        output = output .. buf
-    end
-
-    return output
-end
-
-function FileIO:read()
-    return self:readEx(false)
-end
-
-function FileIO:readAndClose()
-    return self:readEx(true)
-end
-
-function FileIO:appendBuffer(str)
-    table.insert(self.buffer, str)
-    return self
-end
-
-function FileIO:readBuffer()
-    return table.concat(self.buffer)
-end
-
-function FileIO:writeBuffer(str)
-    if type(str) == "table" then
-        self.buffer = str
-    elseif type(str) == "string" then
-        self.buffer = { str }
-    else
-        error("Expected new buffer of type table/string, received: " .. type(str))
-    end
-    return nil
-end
-
-function FileIO:Write(fileName, text)
-    self:open(fileName):write(text):close()
-    return nil
-end
-
-function FileIO:Read(fileName)
-    return self:open(fileName):readEx(true)
-end
-
----@author meiso
-
 Items = {
     --- Даёт 500 брони
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
@@ -391,7 +112,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3% снижения урона
+    --- Баф "Благословение неприкосновенности" - 3снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -400,119 +121,6 @@ Items = {
     --- Баф "Слово силы: Стойкость" - 165 хп
     POWER_WORD_FORTITUDE_ITEM   = { item = FourCC("I007"), spell = FourCC("A010"), str = "A010" },
 }
-
----@author meiso
-
----@class LogLevel
-LogLevel = {
-    DEBUG = { name = "DEBUG", level = 1 },
-    INFO = { name = "INFO", level = 2 },
-    WARNING = { name = "WARNING", level = 3 },
-    ERROR = { name = "ERROR", level = 4 },
-}
-
---- Включить логгер
-ENABLE_LOGGER = true
---- Включить запись в чат игры
-ENABLE_LOGGER_STDOUT = false
---- Уровень логирования
-LOGGER_LEVEL = LogLevel.INFO
-
----@class Logger
----@param log_name string Имя лог файла
-Logger = {
-    buffer = {},
-    counter = Counter(),
-}
-Logger.__index = Logger
-
-setmetatable(Logger, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Logger:_init(log_name)
-    if not ENABLE_LOGGER then return end
-    local session_datetime = os.date("%d.%m.%Y_%H.%M.%S")
-    self.current = self.counter:next()
-    self.buffer[self.current] = {}
-    self.log_dir = "logs"
-    self.log_file = session_datetime .. "_" .. (log_name or "log") .. ".txt"
-    --self.log_file = (log_name or "log") .. ".txt"
-    self.full_log_path = "save\\" .. self.log_dir .. "\\" .. self.log_file
-    self.file_handle = FileIO:open(self.full_log_path)
-end
-
---- Записать в лог файл
----@param level LogLevel Уровень логирования
----@param ... string Список аргументов
----@return nil
-function Logger:Log(level, ...)
-    if not ENABLE_LOGGER then return end
-    if level.level < LOGGER_LEVEL.level then return end
-    local args = table.pack(...)
-    local message = ""
-    if not ENABLE_LOGGER_STDOUT then
-        local log_datetime = "[" .. os.date("%d.%m.%Y %H:%M:%S") .. "]"
-        message = log_datetime .. " "
-    end
-    message = message .. level.name .. ":"
-    for _, arg in ipairs(args) do
-        message = message .. " " .. arg
-    end
-    if ENABLE_LOGGER_STDOUT then
-        print(message)
-    else
-        self:_write(message)
-    end
-end
-
---- Записать отладочное сообщение
----@param ... string Список аргументов
----@return nil
-function Logger:Debug(...)
-    self:Log(LogLevel.DEBUG, ...)
-end
-
---- Записать информационное сообщение
----@param ... string Список аргументов
----@return nil
-function Logger:Info(...)
-    self:Log(LogLevel.INFO, ...)
-end
-
---- Записать сообщение о предупреждении
----@param ... string Список аргументов
----@return nil
-function Logger:Warning(...)
-    self:Log(LogLevel.WARNING, ...)
-end
-
---- Записать сообщение об ошибке
----@param ... string Список аргументов
----@return nil
-function Logger:Error(...)
-    self:Log(LogLevel.ERROR, ...)
-end
-
---- Записать сообщение в файл
----@private
----@param message string Сообщение
----@return nil
-function Logger:_write(message)
-    local buf = self:_read()
-    table.insert(buf, message)
-    self.file_handle:write(buf)
-end
-
----@private
-function Logger:_read()
-    return self.file_handle:readPreload()
-end
 
 ---@author meiso
 
@@ -554,134 +162,8 @@ PLAYER_2   = Player(1)
 LICH_KING  = Player(10)
 
 COMMON_TIMER = FourCC("BTLF")
-ARROW_MODEL = "Abilities/Spells/Other/Aneu/AneuCaster.mdl"
-CHANNEL_EFFECT = "Abilities/Spells/Undead/DeathPact/DeathPactTarget.mdl"
-
----@author meiso
-
---Lord Marrowgar
-COLDFLAME               = FourCC("A001")
-WHIRLWIND               = FourCC("A005")
-
---Paladin
-DIVINE_SHIELD           = FourCC("AHds")
-CONSECRATION            = FourCC("A00A")
-HAMMER_RIGHTEOUS        = FourCC("A00B")
-BLESSING_OF_KINGS       = FourCC("A00C")
-BLESSING_OF_SANCTUARY   = FourCC("A00H")
-BLESSING_OF_WISDOM      = FourCC("A00G")
-BLESSING_OF_MIGHT       = FourCC("A00M")
-CRUSADER_AURA           = FourCC("A00J")
-JUDGEMENT_OF_LIGHT      = FourCC("A00N")
-JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
-JUDGEMENT_OF_WISDOM     = FourCC("A00O")
-JUDGEMENT_OF_WISDOM_TR  = FourCC("A00Q")
-SHIELD_OF_RIGHTEOUSNESS = FourCC("A00R")
-AVENGERS_SHIELD         = FourCC("A004")
-SPELLBOOK_PALADIN       = FourCC("A00L")
-
---Priest
-FLASH_HEAL              = FourCC("A00S")
-RENEW                   = FourCC("A00T")
-CIRCLE_OF_HEALING       = FourCC("A00U")
-PRAYER_OF_MENDING       = FourCC("A009")
-POWER_WORD_SHIELD       = FourCC("A00V")
-GUARDIAN_SPIRIT         = FourCC("A00X")
-SPELLBOOK_PRIEST        = FourCC("A00Y")
-POWER_WORD_FORTITUDE    = FourCC("A011")
-INNER_FIRE              = FourCC("A00Z")
-SPIRIT_OF_REDEMPTION    = FourCC("A012")
-
-
----@author meiso
-
---- Аналог python функции zip().
---- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
-function zip(...)
-    local args = table.pack(...)
-    local array = {}
-    local len = #args[1]
-
-    --определяем самую маленькую последовательность
-    for i = 1, args.n do
-        if #args[i] < len then
-            len = #args[i]
-        end
-    end
-
-    for i = 1, len do
-        local array_mini = {}
-        for j = 1, args.n do
-            table.insert(array_mini, args[j][i])
-        end
-        table.insert(array, array_mini)
-    end
-    return array
-end
-
---- Разбивает строку по разделителю
----@param inputstr string Строка
----@param sep string Разделитель. По умолчанию пробел
----@return table
-function split(inputstr, sep)
-    local s = sep or " "
-    local t = {}
-    for str in string.gmatch(inputstr, "([^" .. s .. "]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
---- Загружает toc-файл
----@param file string Путь до toc-файла
----@return nil
-function loadTOCFile(file)
-    if not BlzLoadTOCFile(file) then
-        print("Failed to load: ", file)
-    end
-end
-
---- Округляет число
----@param number number
----@return number
-function round(number)
-    return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
-end
-
---- Проверяет, является ли объект типом "table".
----По сути проверяет, является ли объект экземпляром класса
----@param object type Проверяемый объект
----@return boolean
-function isTable(object)
-    return type(object) == "table"
-end
-
----@author meiso
-
---Bosses
-LORD_MARROWGAR      = FourCC("U001")
-LADY_DEATHWHISPER   = FourCC("U000")
---mobs
---adds
-CULT_ADHERENT       = FourCC("u002")
-CULT_ADHERENT_MORPH = FourCC("u003")
-CULT_FANATIC        = FourCC("h003")
-CULT_FANATIC_MORPH  = FourCC("h004")
-
---tanks
-PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = FourCC("Udea")
-WARRIOR             = nil
---damage dealers
-WARLOCK             = nil
-HUNTER              = nil
-ROGUE               = nil
-MAGE                = nil
---healers
-DRUID               = nil
-SHAMAN              = nil
-PRIEST              = FourCC("Hblm")
-PRIEST_SOR          = FourCC("h006")
+ARROW_MODEL = "Abilities\\Spells\\Other\\Aneu\\AneuCaster.mdl"
+CHANNEL_EFFECT = "Abilities\\Spells\\Undead\\DeathPact\\DeathPactTarget.mdl"
 
 ---@author meiso
 
@@ -767,6 +249,132 @@ HeroSelector = {
 
 ---@author meiso
 
+--Lord Marrowgar
+COLDFLAME               = FourCC("A001")
+WHIRLWIND               = FourCC("A005")
+
+--Paladin
+DIVINE_SHIELD           = FourCC("AHds")
+CONSECRATION            = FourCC("A00A")
+HAMMER_RIGHTEOUS        = FourCC("A00B")
+BLESSING_OF_KINGS       = FourCC("A00C")
+BLESSING_OF_SANCTUARY   = FourCC("A00H")
+BLESSING_OF_WISDOM      = FourCC("A00G")
+BLESSING_OF_MIGHT       = FourCC("A00M")
+CRUSADER_AURA           = FourCC("A00J")
+JUDGEMENT_OF_LIGHT      = FourCC("A00N")
+JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
+JUDGEMENT_OF_WISDOM     = FourCC("A00O")
+JUDGEMENT_OF_WISDOM_TR  = FourCC("A00Q")
+SHIELD_OF_RIGHTEOUSNESS = FourCC("A00R")
+AVENGERS_SHIELD         = FourCC("A004")
+SPELLBOOK_PALADIN       = FourCC("A00L")
+
+--Priest
+FLASH_HEAL              = FourCC("A00S")
+RENEW                   = FourCC("A00T")
+CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")
+POWER_WORD_SHIELD       = FourCC("A00V")
+GUARDIAN_SPIRIT         = FourCC("A00X")
+SPELLBOOK_PRIEST        = FourCC("A00Y")
+POWER_WORD_FORTITUDE    = FourCC("A011")
+INNER_FIRE              = FourCC("A00Z")
+SPIRIT_OF_REDEMPTION    = FourCC("A012")
+
+
+---@author meiso
+
+--- Аналог python функции zip().
+--- Объединяет в таблицы элементы из последовательностей переданных в качестве аргументов
+function zip(...)
+    local args = table.pack(...)
+    local array = {}
+    local len = #args[1]
+
+    --опеределяем самую маленькую последовательность
+    for i = 1, args.n do
+        if #args[i] < len then
+            len = #args[i]
+        end
+    end
+
+    for i = 1, len do
+        local array_mini = {}
+        for j = 1, args.n do
+            table.insert(array_mini, args[j][i])
+        end
+        table.insert(array, array_mini)
+    end
+    return array
+end
+
+--- Разбивает строку по разделителю
+---@param inputstr string Строка
+---@param sep string Разделитель. По умолчанию пробел
+---@return table
+function split(inputstr, sep)
+    local s = sep or " "
+    local t = {}
+    for str in string.gmatch(inputstr, "([^" .. s .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+--- Загружает toc-файл
+---@param file string Путь до toc-файла
+---@return nil
+function loadTOCFile(file)
+    if not BlzLoadTOCFile(file) then
+        print("Failed to load: ", file)
+    end
+end
+
+--- Округляет число
+---@param number number
+---@return number
+function round(number)
+    return number >= 0 and math.floor(number + 0.5) or math.ceil(number - 0.5)
+end
+
+--- Проверяет, является ли объект типом "table".
+---По сути проверяет, является ли объект экземпляром класса
+---@param object type Проверяемый объект
+---@return boolean
+function isTable(object)
+    return type(object) == "table"
+end
+
+---@author meiso
+
+--Bosses
+LORD_MARROWGAR      = FourCC("U001")
+LADY_DEATHWHISPER   = FourCC("U000")
+--mobs
+--adds
+CULT_ADHERENT       = FourCC("u002")
+CULT_ADHERENT_MORPH = FourCC("u003")
+CULT_FANATIC        = FourCC("h003")
+CULT_FANATIC_MORPH  = FourCC("h004")
+
+--tanks
+PALADIN             = FourCC("Hpal")
+DEATH_KNIGHT        = FourCC("Udea")
+WARRIOR             = nil
+--damage dealers
+WARLOCK             = nil
+HUNTER              = nil
+ROGUE               = nil
+MAGE                = nil
+--healers
+DRUID               = nil
+SHAMAN              = nil
+PRIEST              = FourCC("Hblm")
+PRIEST_SOR          = FourCC("h006")
+
+---@author meiso
+
 function Paladin.ResetToDefault()
     local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
@@ -780,12 +388,10 @@ function Paladin.ResetToDefault()
     Paladin.hero:AddSpellbook(SPELLBOOK_PALADIN)
 
     for _, ability in pairs(ALL_MAIN_PALADIN_SPELLS) do
-        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PALADIN_SPELLS) do
-        ability:Init()
         Paladin.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Paladin.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
@@ -829,12 +435,10 @@ function Priest.ResetToDefault()
     Priest.hero:AddSpellbook(SPELLBOOK_PRIEST)
 
     for _, ability in pairs(ALL_MAIN_PRIEST_SPELLS) do
-        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
     for _, ability in pairs(ALL_OFF_PRIEST_SPELLS) do
-        ability:Init()
         Priest.hero:SetAbilityManacost(ability:GetId(), ability.manacost)
         Priest.hero:SetAbilityCooldown(ability:GetId(), ability.cooldown)
     end
@@ -859,461 +463,6 @@ function Priest.Init(location, unit, name)
     Priest.InitSpiritOfRedemption()
 
     Priest.ResetToDefault()
-end
-
----@author meiso
-
-
----@class Pool Неупорядоченная коллекция, представляющая пул (список) элементов одного типа.
-Pool = {}
-Pool.__index = Pool
-
-setmetatable(Pool, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Pool:_init()
-    ---@private
-    self._pool = {}
-end
-
---- Возвращает все элементы
----@return table
-function Pool:All()
-    return self._pool
-end
-
---- Проверят не пуст ли пул
----@return boolean
-function Pool:IsEmpty()
-    return next(self._pool) == nil
-end
-
---- Добавить элемент
----@param value any
----@return nil
-function Pool:Add(value)
-    if not self:Contain(value) then
-        table.insert(self._pool, value)
-    end
-end
-
---- Обновить существующий элемент
----@param value any
----@return nil
-function Pool:Update(value)
-    local index = self:Find(value)
-    if self:Contain(value) then
-        table.remove(self._pool, index)
-        table.insert(self._pool, value)
-    end
-end
-
---- Получить элемент по индексу
----@param index number
----@return any
-function Pool:Get(index)
-    return self._pool[index]
-end
-
---- Удалить элемент
----@param value any
----@return nil
-function Pool:Remove(value)
-    if self:Contain(value) then
-        table.remove(self._pool, self:Find(value))
-    end
-end
-
---- Входит ли элемент в пул
----@param value any
----@return boolean
-function Pool:Contain(value)
-    for _, v in pairs(self._pool) do
-        if v == value then
-            return true
-        end
-    end
-    return false
-end
-
---- Найти элемент. Возвращает индекс
----@param value any
----@return number
-function Pool:Find(value)
-    for i, v in pairs(self._pool) do
-        if v == value then
-            return i
-        end
-    end
-    return nil
-end
-
---- Очистить пул
----@return nil
-function Pool:Clear()
-    self._pool = {}
-end
-
----@author meiso
-
----@class Key Структура, представляющая клавишу
----@param key oskeytype Клавиша
-Key = {}
-Key.__index = Key
-
-setmetatable(Key, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Key:_init(key)
-    ---@type oskeytype
-    self.key = key
-    ---@type boolean
-    self.pressed = false
-end
-
----@class KeyboardController
-KeyboardController = {
-    ---@type Pool
-    keys = Pool(),
-    ---@private
-    _event = nil,
-}
-
---- Регистрирует события нажатия клавиш
----@param keys oskeytype Список клавиш
----@return nil
-function KeyboardController.Register(...)
-    local keys = ...
-    if type(...) ~= "table" then
-        keys = table.pack(...)
-    end
-    if KeyboardController._event == nil then
-        KeyboardController._event = EventsPlayer()
-        KeyboardController._event:AddAction(KeyboardController._process)
-    end
-    for _, key in ipairs(keys) do
-        KeyboardController.keys:Add(Key(key))
-        KeyboardController._event:RegisterKeyPressed(key)
-    end
-end
-
----@private
-function KeyboardController._process()
-    local key = BlzGetTriggerPlayerKey()
-    local pressed = BlzGetTriggerPlayerIsKeyDown()
-    for _, k in pairs(KeyboardController.keys:All()) do
-        if k.key == key then
-            local new = k
-            new.pressed = pressed
-            KeyboardController.keys:Update(new)
-        end
-    end
-end
-
----@author meiso
-
----@class Camera
-Camera = {
-    ---@type Unit
-    unit = nil,
-    ---@type Logger
-    logger = Logger("camera"),
-}
-
---- Регистрирует камеру для игрока
-function Camera.Register()
-    Camera.logger:Info("Initialize Camera")
-    --TODO: брать персонажа выбранного игроком
-    Camera.unit = Paladin.hero
-    SetCameraTargetUnit(Camera.unit:GetId())
-
-    local camera = Timer(0.04)
-    camera:SetFunc(Camera._update)
-    camera:EnablePeriodic()
-    camera:Start()
-    Camera.logger:Info("Start camera!")
-end
-
---- Повернуть камеру влево
----@return nil
-function Camera.TurnLeft()
-    local facing = Camera.unit:GetFacing() + 10
-    Camera.unit:SetFacing(facing)
-end
-
---- Повернуть камеру вправо
----@return nil
-function Camera.TurnRight()
-    local facing = Camera.unit:GetFacing() - 10
-    Camera.unit:SetFacing(facing)
-end
-
----@private
-function Camera._update()
-    Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    local dist = 850.
-    local zoffset = GetLocationZ(Camera.unit:GetLoc())
-    local facing = Camera.unit:GetFacing()
-    local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
-    Camera._set_dist(dist)
-    if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
-        Camera._set_angle(-50.)
-    else
-        Camera._set_angle(-25.)
-    end
-    Camera._set_offset(zoffset)
-    Camera._set_facing(facing)
-end
-
----@private
-function Camera._set_dist(dist)
-    SetCameraDistance(dist)
-    Camera.logger:Debug("set camera fields: dist -", dist)
-end
-
----@private
-function Camera._set_angle(angle)
-    SetCameraAngle(angle)
-    Camera.logger:Debug("set camera fields: angle -", angle)
-end
-
----@private
-function Camera._set_offset(offset)
-    SetCameraZOffset(offset)
-    Camera.logger:Debug("set camera fields: zoffset -", offset)
-end
-
----@private
-function Camera._set_facing(facing)
-    SetCameraRotation(facing)
-    Camera.logger:Debug("set camera fields: facing -", facing)
-end
-
----@author meiso
-
----@class Movement
-Movement = {
-    ---@type Unit
-    unit = nil,
-    to_up = false,
-    to_down = false,
-    to_left = false,
-    to_right = false,
-    animate = false,
-    ---@type Logger
-    logger = Logger("movement"),
-}
-
---- Инициализация системы передвижения
-function Movement.Init()
-    Movement.logger:Info("Initialize movement system")
-    Camera.Register()
-    KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
-    Movement.unit = Camera.unit
-    Movement._set_default_anim()
-    local movement = Timer(0.03)
-    movement:SetFunc(Movement._update)
-    movement:EnablePeriodic()
-    movement:Start()
-    Movement.logger:Info("Movement system start!")
-end
-
----@private
-function Movement._update()
-    Movement._process()
-    Movement._rotate_camera()
-    Movement._move()
-    Movement._play_anim()
-end
-
----@private
-function Movement._process()
-    for _, k in pairs(KeyboardController.keys:All()) do
-        if k.key == OSKEY_W then
-            Movement.to_up = k.pressed
-        end
-        if k.key == OSKEY_S then
-            Movement.to_down = k.pressed
-        end
-        if k.key == OSKEY_A then
-            Movement.to_left = k.pressed
-        end
-        if k.key == OSKEY_D then
-            Movement.to_right = k.pressed
-        end
-    end
-end
-
----@private
-function Movement._rotate_camera()
-    if Movement.to_left then
-        Camera.TurnLeft()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
-        Movement.logger:Debug("to left")
-    elseif Movement.to_right then
-        Camera.TurnRight()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
-        Movement.logger:Debug("to right")
-    end
-end
-
----@private
-function Movement._move()
-    local unit = Movement.unit
-    if Movement.to_up then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
-        Movement.logger:Debug("to up")
-    elseif Movement.to_down then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
-        Movement.logger:Debug("to down")
-    end
-end
-
----@private
-function Movement._play_anim()
-    if Movement.to_up and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 5)
-        Movement.animate = true
-    elseif Movement.to_down and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 13)
-        Movement.animate = true
-    end
-    if not Movement.to_up and not Movement.to_down and Movement.animate then
-        Movement._set_default_anim()
-    end
-end
-
----@private
-function Movement._set_default_anim()
-    SetUnitAnimation(Movement.unit:GetId(), "Portrait")
-    Movement.animate = false
-end
-
----@author meiso
-
----@class CombatSystem
-CombatSystem = {}
-CombatSystem.__index = CombatSystem
-
-setmetatable(CombatSystem, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function CombatSystem:_init(unit)
-    ---@type Unit
-    self.unit = unit
-    self.combat = false
-    self.pool_attacked = Pool()
-end
-
-function CombatSystem:Register()
-    self:_detectedCombat()
-end
-
-function CombatSystem:Reset()
-    self.unit:ResetAgro()
-end
-
----@private
-function CombatSystem:_detectedCombat()
-    local tr_attacked = EventsUnit(self.unit)
-    local tr_damaged = EventsUnit(self.unit)
-    local tr_killed = Events()
-    tr_attacked:RegisterAttacked()
-    tr_damaged:RegisterDamaged()
-    tr_killed:RegisterAnyUnitDying()
-    tr_attacked:AddAction(function() self:_detectedAttackedUnit() end)
-    tr_damaged:AddAction(function() self:_detectedDamagedUnit() end)
-    tr_killed:AddAction(function() self:_remove() end)
-end
-
----@private
-function CombatSystem:_detectedAttackedUnit()
-    local attacker = Unit(GetAttacker())
-    if attacker:IsControlled() then
-        attacker:AddAgro(self:_getAgro(attacker))
-    end
-end
-
----@private
-function CombatSystem:_detectedDamagedUnit()
-    local attacked = Unit(GetEventDamageSource())
-    self.pool_attacked:Add(attacked)
-    if not self.unit:IsControlled() then
-        self.unit:Attack(self:_findHighAgroUnit())
-    end
-end
-
----@private
-function CombatSystem:_getAgro(unit)
-    local high_agro = {
-        Paladin.hero,
-        DEATH_KNIGHT,
-        WARRIOR,
-    }
-    local medium_agro = {
-        WARLOCK,
-        HUNTER,
-        ROGUE,
-        MAGE,
-        DRUID,
-        SHAMAN,
-        Priest.hero,
-    }
-    for _, u in pairs(high_agro) do
-        if u == unit then
-            return GetRandomReal(1, 3)
-        end
-    end
-    for _, u in pairs(medium_agro) do
-        if u == unit then
-            return GetRandomReal(0, 2)
-        end
-    end
-    return 0.
-end
-
----@private
-function CombatSystem:_remove()
-    local killed = Unit(GetTriggerUnit())
-    self.pool_attacked:Remove(killed)
-
-    if #self.pool_attacked:All() == 0 then
-        self:Reset()
-    end
-end
-
----@private
----@return Unit
-function CombatSystem:_findHighAgroUnit()
-    local target
-    local agro = 0
-    for _, unit in pairs(self.pool_attacked:All()) do
-        if unit:GetAgro() > agro then
-            target = unit
-            agro = unit:GetAgro()
-        end
-    end
-    return target
 end
 
 ---@author meiso
@@ -1456,12 +605,6 @@ setmetatable(Events, {
 --- Конструктор класса
 function Events:_init()
     self.trigger = CreateTrigger()
-end
-
---- Регистрирует смерть любого юнита
----@return nil
-function Events:RegisterAnyUnitDying()
-    TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
 end
 
 --- Добавляет условие для выполнения события
@@ -1623,21 +766,13 @@ function EventsPlayer:_init(player)
     self.player = player or GetLocalPlayer()
 end
 
---- Регистрирует нажатие клавиши
----@param key oskeytype Регистрируемая клавиша
----@return nil
-function EventsPlayer:RegisterKeyPressed(key)
-    BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, true)
-    BlzTriggerRegisterPlayerKeyEvent(self.trigger, self.player, key, 0, false)
-end
-
---- Регистрирует событие нажатия кнопки мыши
+--- Регистриует событие нажатия кнопки мыши
 ---@return nil
 function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
 
---- Регистрирует событие, написания в чат
+--- Регистриует событие, написания в чат
 ---@param text string Сообщение, которое необходимо отследить
 ---@param exact boolean Проверять как точное вхождение
 ---@return nil
@@ -1646,49 +781,47 @@ function EventsPlayer:RegisterChatEvent(text, exact)
     TriggerRegisterPlayerChatEvent(self.trigger, self.player, text, e)
 end
 
---- Регистрирует событие атаки по юниту игрока
----@return nil
 function EventsPlayer:RegisterUnitAttacked()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_ATTACKED, nil)
 end
 
---- Регистрирует событие каста способности юнитом игрока
+--- Регистриует событие каста способности юнитом игрока
 ---@return nil
 function EventsPlayer:RegisterUnitSpellCast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_CAST, nil)
 end
 
---- Регистрирует событие прекращения каста способности
+--- Регистриует событие прекращения каста способности
 ---@return nil
 function EventsPlayer:RegisterUnitSpellEndcast()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_ENDCAST, nil)
 end
 
---- Регистрирует событие завершения каста способности
+--- Регистриует событие завершения каста способности
 ---@return nil
 function EventsPlayer:RegisterUnitSpellFinish()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SPELL_FINISH, nil)
 end
 
---- Регистрирует событие получения урона юнитом (до вычета брони)
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaging()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGING, nil)
 end
 
---- Регистрирует событие получения урона юнитом (после вычета брони)
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsPlayer:RegisterUnitDamaged()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DAMAGED, nil)
 end
 
---- Регистрирует событие смерти юнита игрока
+--- Регистриует событие смерти юнита игрока
 ---@return nil
 function EventsPlayer:RegisterUnitDeath()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_DEATH, nil)
 end
 
---- Регистрирует событие призыва юнита игрока
+--- Регистриует собыие призыва юнита игрока
 ---@return nil
 function EventsPlayer:RegisterUnitSummon()
     TriggerRegisterPlayerUnitEvent(self.trigger, self.player, EVENT_PLAYER_UNIT_SUMMON, nil)
@@ -1754,25 +887,25 @@ function EventsUnit:_init(unit)
     end
 end
 
---- Регистрирует событие получения урона юнитом (после вычета брони)
+--- Регистриует событие получения урона юнитом (после вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaged()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGED)
 end
 
---- Регистрирует событие получения урона юнитом (до вычета брони)
+--- Регистриует событие получения урона юнитом (до вычета брони)
 ---@return nil
 function EventsUnit:RegisterDamaging()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_DAMAGING)
 end
 
---- Регистрирует событие, когда юнит в бою
+--- Регистриует событие, когда юнит в бою
 ---@return nil
 function EventsUnit:RegisterAttacked()
     TriggerRegisterUnitEvent(self.trigger, self.unit, EVENT_UNIT_ATTACKED)
 end
 
---- Регистрирует событие, когда юнит входит в область юнита
+--- Регистриует событие, когда юнит входит в область юнита
 ---@param range integer Дистанция
 ---@return nil
 function EventsUnit:RegisterWithinRange(range)
@@ -2338,10 +1471,9 @@ end
 
 ---@author meiso
 
----@class Timer Таймер
+---@class Timer Класс создания таймера
 ---@param timeout real Время действия
 ---@param func function Функция
----@param periodic boolean Повторное выполнение
 Timer = {}
 Timer.__index = Timer
 
@@ -2353,18 +1485,16 @@ setmetatable(Timer, {
     end,
 })
 
----@private
-function Timer:_init(timeout, func, periodic)
+function Timer:_init(timeout, func)
     self.timer = CreateTimer()
     self.timeout = timeout
     self.func = func
-    self.periodic = periodic or false
 end
 
 --- Запустить таймер
 ---@return nil
 function Timer:Start()
-    TimerStart(self.timer, self.timeout, self.periodic, self.func)
+    TimerStart(self.timer, self.timeout, false, self.func)
 end
 
 --- Задать время действия
@@ -2381,23 +1511,10 @@ function Timer:SetFunc(func)
     self.func = func
 end
 
---- Включить периодичность выполнения
----@return nil
-function Timer:EnablePeriodic()
-    self.periodic = true
-end
-
---- Отключить периодичность выполнения
----@return nil
-function Timer:DisablePeriodic()
-    self.periodic = false
-end
-
 --- Уничтожить таймер
 ---@return nil
 function Timer:Destroy()
     DestroyTimer(self.timer)
-    self.timer = nil
 end
 
 --- Уничтожить первый истёкший таймер
@@ -2405,60 +1522,6 @@ end
 function Timer:DestroyExpired()
     DestroyTimer(GetExpiredTimer())
 end
-
----@author meiso
-
-UNITS_POOL = {
-    ---@private
-    ---@type table[Unit]
-    _pool = {},
-    all = function()
-        return UNITS_POOL._pool
-    end,
-    ---@return Unit
-    get = function(index)
-        return UNITS_POOL._pool[index]
-    end,
-    ---@param unit Unit
-    add = function(unit)
-        if not UNITS_POOL.contain(unit) then
-            table.insert(UNITS_POOL._pool, unit)
-        end
-    end,
-    ---@param unit Unit
-    remove = function(unit)
-        if UNITS_POOL.contain(unit) then
-            table.remove(UNITS_POOL._pool, UNITS_POOL.find(unit))
-        end
-    end,
-    ---@param unit Unit
-    contain = function(unit)
-        unit = UNITS_POOL._unitId(unit)
-        for _, u in pairs(UNITS_POOL._pool) do
-            if UNITS_POOL._unitId(u) == unit then
-                return true
-            end
-        end
-        return false
-    end,
-    ---@param unit Unit
-    find = function(unit)
-        unit = UNITS_POOL._unitId(unit)
-        for i, u in pairs(UNITS_POOL._pool) do
-            if UNITS_POOL._unitId(u) == unit then
-                return i
-            end
-        end
-        return nil
-    end,
-    ---@private
-    _unitId = function(unit)
-        if isTable(unit) then
-            return unit:GetId()
-        end
-        return unit
-    end
-}
 
 ---@author meiso
 
@@ -2474,12 +1537,7 @@ setmetatable(Unit, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
         if #table.pack(...) == 1 then
-            local unit = ...
-            if UNITS_POOL.contain(unit) then
-                self = UNITS_POOL.get(UNITS_POOL.find(unit))
-            else
-                self.unit = unit
-            end
+            self.unit = ...
         else
             self:_init(...)
         end
@@ -2487,42 +1545,13 @@ setmetatable(Unit, {
     end,
 })
 
----@private
+--- Конструктор класса
 function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
     local f = face or GetRandomDirectionDeg()
     self.basemana = 0
-    self.agro = 0
-    self.controlled = (player == GetLocalPlayer()) or false
     self.unit = CreateUnit(player, unit_id, x, y, f)
-    UNITS_POOL.add(self)
-    local agro = CombatSystem(self)
-    agro:Register()
-end
-
--- Уровень угрозы
-
---- Добавить уровень агрессии
----@param value number Уровень угрозы
----@return nil
-function Unit:AddAgro(value)
-    if self.agro > 100 then
-        return
-    end
-    self.agro = self.agro + value
-end
-
---- Получить текущий уровень угрозы
----@return number
-function Unit:GetAgro()
-    return self.agro
-end
-
---- Сбросить уровень угрозы
----@return nil
-function Unit:ResetAgro()
-    self.agro = 0
 end
 
 -- Характеристики
@@ -2644,16 +1673,6 @@ end
 
 -- Всё, что связано с нанесением урона
 
---- Атаковать указанную цель
----@param target Unit
----@return nil
-function Unit:Attack(target)
-    if isTable(target) then
-        target = target:GetId()
-    end
-    IssueTargetOrder(self.unit, "attack", target)
-end
-
 --- Нанести физический урон.
 --- Урон снижается как от количества защиты, так и от её типа
 ---@param target unit Цель
@@ -2694,10 +1713,10 @@ function Unit:DealMagicDamage(target, damage)
     if isTable(target) then
         u = target:GetId()
     end
-    BattleTextViewSystem.disable = true
+    BattleSystem.disable = true
     UnitDamageTargetBJ(self.unit, u, damage, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_MAGIC)
     TextTag(damage, self.unit):Preset("spell")
-    BattleTextViewSystem.disable = false
+    BattleSystem.disable = false
 end
 
 --- Нанести магической урон по площади.
@@ -3173,13 +2192,6 @@ function Unit:GetFacing()
     return GetUnitFacing(self.unit)
 end
 
---- Задать градус поворота юнита
----@param facing number
----@return nil
-function Unit:SetFacing(facing)
-    SetUnitFacingTimed(self.unit, facing, 0)
-end
-
 --- Проверяет мертв ли юнит
 ---@return boolean
 function Unit:IsDied()
@@ -3210,14 +2222,8 @@ function Unit:Revive(location)
     ReviveHero(self.unit, x, y, false)
 end
 
---- Является ли юнит подконтрольным игроку
----@return boolean
-function Unit:IsControlled()
-    return self.controlled
-end
-
 --- Получить идентификатор созданного юнита
----@return unit
+---@return unitid
 function Unit:GetId()
     return self.unit
 end
@@ -3246,24 +2252,6 @@ function Unit:GetName()
         return GetHeroProperName(self.unit)
     end
     return GetUnitName(self.unit)
-end
-
---- Получить расположение юнита по оси X
----@return number
-function Unit:GetX()
-    return GetUnitX(self.unit)
-end
-
---- Получить расположение юнита по оси Y
----@return number
-function Unit:GetY()
-    return GetUnitY(self.unit)
-end
-
---- Получить расположение юнита по оси Z
----@return number
-function Unit:GetZ()
-    return BlzGetUnitZ(self.unit)
 end
 
 --- Активировать/деактивировать юнита
@@ -4520,7 +3508,7 @@ end
 function unequip_item_id(hero, id, c)
     local ablist = get_item_list_eq(id)
     local abc = get_item_abc_eq(id)
-    for _ = 1, c do
+    for i = 1, c do
         for j = 0, abc - 1 do
             local str = get_string_str(ablist, ",", j)
             UnitRemoveAbility(hero, FourCC(str))
@@ -4530,59 +3518,17 @@ end
 
 ---@author meiso
 
----@class Buff Структура, представляющая положительный или отрицательный эффект
----@field buff Ability Налагаемый эффект
----@field func function Функция для снятия эффекта
----@field frame Frame Фрейм иконки
----@field is_debuff boolean Является ли эффект отрицательным
-Buff = {}
-Buff.__index = Buff
-
-setmetatable(Buff, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Buff:_init(buff, func, frame, is_debuff)
-    self.buff = buff
-    self.func = func
-    self.frame = frame
-    self.is_debuff = is_debuff or false
-end
-
---- Проверяет является ли эффект бафом
----@return boolean
-function Buff:IsBuff(buff)
-    return self.buff == buff
-end
-
---- Проверяет является ли эффект дебафом
----@return boolean
-function Buff:IsDebuff(buff)
-    return self.buff == buff and self.is_debuff
-end
-
----@author meiso
-
----@class BuffSystem
 BuffSystem = {
-    ---@type table<Unit, table[Buff]>
+    --- Таблица содержащая всех героев с бафами
+    ---Формат:
+    ---{ unit = { buff, debuff, func, frame } }
     buffs = {},
-    ---@type Frame
+    debuffs = {},
     main_frame_buff = nil,
-    ---@type Frame
     main_frame_debuff = nil,
-    ---@type Logger
-    logger = Logger("buffsys"),
 }
 
 function BuffSystem.LoadFrame()
-    BuffSystem.logger:Info("Initialize BuffSystem")
-
     BuffSystem.main_frame_buff = Frame("BSMainFrame")
     BuffSystem.main_frame_debuff = Frame("BSMainFrame")
     --если ставить фрейм в упор к границе, то фрейм ужимает в два раза,
@@ -4594,142 +3540,130 @@ function BuffSystem.LoadFrame()
 end
 
 --- Регистрирует героя в системе
----@param hero Unit Экземпляр класса Unit
+---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RegisterHero(hero)
-    BuffSystem.logger:Info("Register hero", hero:GetName())
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsHeroInSystem(hero) then
-        BuffSystem.logger:Info(hero:GetName(), "already registered")
         return
     end
-    BuffSystem.buffs[hero] = {}
-    BuffSystem.logger:Info(hero:GetName(), "successfully added")
+    local u = I2S(GetHandleId(hero))
+    BuffSystem.buffs[u] = {}
 end
 
 --- Добавляет герою баф
----@param hero Unit Экземпляр класса Unit
----@param buff Ability Название бафа
+---@param hero unit Id героя
+---@param buff ability Название бафа
 ---@param func function Функция, снимающая баф
 ---@param is_debuff boolean Является баф дебафом
 ---@return nil
 function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
-    BuffSystem.logger:Info("Add a", buff.tooltip, "to", hero:GetName())
-
+    if isTable(hero) then hero = hero:GetId() end
     if BuffSystem.IsBuffOnHero(hero, buff) then
-        BuffSystem.logger:Info(buff.tooltip, "is already on", hero:GetName())
         return
     end
-
-    table.insert(BuffSystem.buffs[hero], Buff(buff, func, Frame("BSIconTemp"), is_debuff))
-
+    local u = I2S(GetHandleId(hero))
+    if is_debuff then
+        table.insert(BuffSystem.buffs[u], { buff_ = "", debuff_ = buff, func_ = func, frame_ = Frame("BSIconTemp") })
+    else
+        table.insert(BuffSystem.buffs[u], { buff_ = buff, debuff_ = "", func_ = func, frame_ = Frame("BSIconTemp") })
+    end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
-        BuffSystem.logger:Info("Show debuff frame...")
         BuffSystem.main_frame_debuff:Show()
-        BuffSystem._ShowDebuffs(hero)
-        BuffSystem.logger:Info("...ok")
+        BuffSystem._ShowDebuffs(u)
     else
-        BuffSystem.logger:Info("Show buff frame...")
         BuffSystem.main_frame_buff:Show()
-        BuffSystem._ShowBuffs(hero)
-        BuffSystem.logger:Info("...ok")
+        BuffSystem._ShowBuffs(u)
     end
 end
 
 --- Проверяет есть ли герой в системе бафов
----@param hero Unit Экземпляр класса Unit
+---@param hero unit Id героя
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
-    BuffSystem.logger:Info("Checking for a hero in the system...")
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
     for name, _ in pairs(BuffSystem.buffs) do
-        if name == hero then
-            BuffSystem.logger:Info("...founded")
+        if name == u then
             return true
         end
     end
-    BuffSystem.logger:Info("...not found")
     return false
 end
 
 --- Проверяет есть ли на герое баф
----@param hero Unit Экземпляр класса Unit
----@param buff Ability Название бафа
+---@param hero unit Id героя
+---@param buff ability Название бафа
 ---@return boolean
 function BuffSystem.IsBuffOnHero(hero, buff)
-    BuffSystem.logger:Info("Check the", buff.tooltip, "on", hero:GetName())
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
     if not BuffSystem.IsHeroInSystem(hero) then
-        BuffSystem.logger:Info(hero:GetName(), "is not registered")
         return false
     end
-    if #BuffSystem.buffs[hero] == 0 then
-        BuffSystem.logger:Info("No buffs")
+    if #BuffSystem.buffs[u] == 0 then
         return false
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    for i = 1, #BuffSystem.buffs[hero] do
-        local b = BuffSystem._getBuff(hero, i)
-        if b == nil then
-            BuffSystem.logger:Info("Not found buff")
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i] == nil then
             return false
         end
-        BuffSystem.logger:Info("checking", b.buff.tooltip, "...")
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
-            BuffSystem.logger:Info("buff on hero")
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
             return true
         end
     end
-    BuffSystem.logger:Info("There's nothing")
     return false
 end
 
 --- Удаляет у героя баф
----@param hero Unit Экземпляр класса Unit
----@param buff Ability Название бафа
+---@param hero unit Id героя
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHero(hero, buff)
-    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName())
-    for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
-            BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.buffs[hero][i] = nil
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.buffs[u][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(hero)
-    BuffSystem._ShowDebuffs(hero)
-    BuffSystem.logger:Info("Remove successfully")
+    BuffSystem._ShowBuffs(u)
+    BuffSystem._ShowDebuffs(u)
 end
 
 --- Использует функцию для удаления бафа
----@param hero Unit Экземпляр класса Unit
+---@param hero unit Id героя
 ---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
-    BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName(), "by func")
-    for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem.buffs[hero][i] == nil then
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        if BuffSystem.buffs[u][i] == nil then
             return
         end
-
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
-            BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.main_frame_buff:Hide()
-            BuffSystem.main_frame_debuff:Hide()
-            BuffSystem._getBuff(hero, i).func()
-            BuffSystem.buffs[hero][i] = nil
+        if BuffSystem.buffs[u][i].buff_ == buff or
+                BuffSystem.buffs[u][i].debuff_ == buff then
+            BuffSystem.buffs[u][i].frame_:Destroy()
+            BuffSystem.main_frame_buff:Destroy()
+            BuffSystem.main_frame_debuff:Destroy()
+            BuffSystem.buffs[u][i].func_()
+            BuffSystem.buffs[u][i] = nil
         end
     end
-    BuffSystem.logger:Info("Remove successfully")
 end
 
 --- Проверяет относится ли баф к группе однотипных бафов
----@param hero Unit Экземпляр класса Unit
----@param buff Ability Название бафа
+---@param hero unit Юнит
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
-    BuffSystem.logger:Info("Check buffs exceptions")
+    if isTable(hero) then hero = hero:GetId() end
     local buffs_exceptions = {
         paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
         priest = {},
@@ -4767,60 +3701,66 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
 end
 
 --- Удалить все бафы с юнита
----@param hero Unit Экземпляр класса Unit
+---@param hero unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
-    for i = 1, #BuffSystem.buffs[hero] do
-        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem._getBuff(hero, i).buff)
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].buff_)
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem.buffs[u][i].debuff_)
     end
 end
 
 --- Удалить баф со всех юнитов
----@param buff Ability Название бафа
+---@param buff ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromUnits(buff)
-    for u, _ in pairs(BuffSystem.buffs) do
-        for i = 1, #BuffSystem.buffs[u] do
-            if BuffSystem._getBuff(u, i) == nil then
+    for unit, _ in pairs(BuffSystem.buffs) do
+        for i = 1, #BuffSystem.buffs[unit] do
+            if BuffSystem.buffs[unit][i] == nil then
                 return
             end
-            if BuffSystem._getBuff(u, i):IsBuff(buff) or
-                    BuffSystem._getBuff(u, i):IsDebuff(buff) then
-                BuffSystem._getBuff(u, i).frame:Destroy()
-                BuffSystem.buffs[u][i] = nil
+            if BuffSystem.buffs[unit][i].buff_ == buff or
+                    BuffSystem.buffs[unit][i].debuff_ == buff then
+                BuffSystem.buffs[unit][i].frame_:Destroy()
+                BuffSystem.buffs[unit][i] = nil
             end
         end
-        BuffSystem._ShowBuffs(u)
-        BuffSystem._ShowDebuffs(u)
+        BuffSystem._ShowBuffs(unit)
+        BuffSystem._ShowDebuffs(unit)
     end
 end
 
 --- Удаляет героя из системы бафов
----@param hero Unit Экземпляр класса Unit
+---@param hero unit Id героя
 ---@return nil
 function BuffSystem.RemoveHero(hero)
-    BuffSystem.logger:Info("Remove", hero:GetName(), "from system")
+    if isTable(hero) then hero = hero:GetId() end
+    local u = I2S(GetHandleId(hero))
     --TODO: корректно удалять все бафы и фреймы!!
-    BuffSystem.buffs[hero] = nil
+    BuffSystem.buffs[u] = nil
 end
 
---- Усилить воздействие способности на цель в зависимости от наличия определенного бафа
----@param hero Unit Юнит, на которого воздействуют спеллом
+--- Усилить воздействие способности на цель взависимости от наличия определенного бафа
+---@param hero unit Юнит, на которого воздействуют спеллом
 ---@param value integer Количество урона/исцеления воздействующее на цель
 ---@return real
 function BuffSystem.ImproveSpell(hero, value)
+    if isTable(hero) then hero = hero:GetId() end
     local improving_buffs = {
         guardian_spirit,
     }
     if not BuffSystem.IsHeroInSystem(hero) then
         return value
     end
-    for i = 1, #BuffSystem.buffs[hero] do
+    local u = I2S(GetHandleId(hero))
+    for i = 1, #BuffSystem.buffs[u] do
         for _, buff in pairs(improving_buffs) do
-            if BuffSystem._getBuff(hero, i) == nil then
+            if BuffSystem.buffs[u][i] == nil then
                 return value
             end
-            if BuffSystem._getBuff(hero, i):IsBuff(buff) then
+            if buff == BuffSystem.buffs[u][i].buff_ then
                 return value * 1.4
             end
         end
@@ -4828,10 +3768,7 @@ function BuffSystem.ImproveSpell(hero, value)
     return value
 end
 
---- Расширяет основной фрейм с бафа/дебафами
----@private
 function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
-    BuffSystem.logger:Info("Resize main frame...")
     --расположение иконки бафа по X
     --расстояние между иконками + суммарный размер всех иконок + граница справа от фона
     local x = 0.005 + (count * icon_frame:GetWidth()) + (0.0025 * count)
@@ -4841,127 +3778,97 @@ function BuffSystem._ResizeMainFrame(main_frame, icon_frame, count)
     --0.03 - базовая ширина фона
     main_frame:SetWidth(0.03 + _add)
     icon_frame:SetPoint(FRAMEPOINT_LEFT, main_frame, FRAMEPOINT_LEFT, x, 0.0)
-    BuffSystem.logger:Info("...resized")
 end
 
---- Задать иконку бафу
----@private
 function BuffSystem._SetIcon(icon)
-    BuffSystem.logger:Info("Set icon")
     local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
     buff_icon:SetTexture(icon)
 end
 
----@private
----@param u Unit Id юнита
 function BuffSystem._ShowBuffs(u)
-    BuffSystem.logger:Debug("_ShowBuffs start")
     local count = 0
-    BuffSystem.logger:Info("buff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
-        local buff = BuffSystem._getBuff(u, i)
-        if buff then
+        if BuffSystem.buffs[u][i].buff_ ~= "" then
             count = count + 1
-            BuffSystem.logger:Info("buff", buff.buff.tooltip)
-            BuffSystem.logger:Info("icon", buff.buff.icon)
+            local buff_ = BuffSystem.buffs[u][i].buff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_buff,
-                    buff.frame,
+                    BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
-            BuffSystem._SetIcon(buff.buff.icon)
-            BuffSystem.logger:Info("Set tooltip")
-            buff.frame:SetTooltip(buff.buff.buff_tooltip, buff.buff.buff_desc)
+            BuffSystem._SetIcon(BuffSystem.buffs[u][i].buff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(buff_.buff_tooltip, buff_.buff_desc)
         end
     end
     if count == 0 then
         BuffSystem.main_frame_buff:Hide()
     end
-    BuffSystem.logger:Debug("_ShowBuffs end")
 end
 
----@private
----@param u Unit Id юнита
 function BuffSystem._ShowDebuffs(u)
-    BuffSystem.logger:Debug("_ShowDebuffs start")
     local count = 0
-    BuffSystem.logger:Info("debuff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
-        local debuff = BuffSystem._getBuff(u, i)
-        if debuff and debuff.is_debuff then
+        if BuffSystem.buffs[u][i].debuff_ ~= "" then
             count = count + 1
-            BuffSystem.logger:Info("debuff", debuff.buff.tooltip)
-            BuffSystem.logger:Info("icon", debuff.buff.icon)
+            local debuff_ = BuffSystem.buffs[u][i].debuff_
             BuffSystem._ResizeMainFrame(
                     BuffSystem.main_frame_debuff,
-                    debuff.frame,
+                    BuffSystem.buffs[u][i].frame_,
                     count - 1
             )
-            BuffSystem._SetIcon(debuff.buff.icon)
-            BuffSystem.logger:Info("Set tooltip")
-            debuff.frame:SetTooltip(debuff.buff.buff_tooltip, debuff.buff.buff_desc)
+            BuffSystem._SetIcon(debuff_.icon)
+            BuffSystem.buffs[u][i].frame_:SetTooltip(debuff_.buff_tooltip, debuff_.buff_desc)
         end
     end
     if count == 0 then
         BuffSystem.main_frame_debuff:Hide()
     end
-    BuffSystem.logger:Debug("_ShowDebuffs end")
-end
-
---- Возвращает баф юнита
----@private
----@param u Unit Юнит
----@param i number Индекс бафа
----@return Buff
-function BuffSystem._getBuff(u, i)
-    return BuffSystem.buffs[u][i]
 end
 
 ---@author meiso
 
-BattleTextViewSystem = {
-    ---@param target Unit Текущая цель игрока для которой отображается урон
+BattleSystem = {
     target = nil,
-    ---@param target_event Event Текущее событие на отображение урона
     target_event = nil,
-    ---@param disable boolean Отключить отображение урона
     disable = false,
 }
 
-function BattleTextViewSystem.Init()
+function BattleSystem.Init()
     local damaged = EventsPlayer()
     local settarget = EventsPlayer()
     damaged:RegisterUnitDamaged()
     settarget:RegisterPlayerMouseDown()
 
-    damaged:AddAction(BattleTextViewSystem.ShowDamage)
-    settarget:AddCondition(BattleTextViewSystem.IsRightButton)
-    settarget:AddAction(BattleTextViewSystem.SetTarget)
+    damaged:AddAction(BattleSystem.ShowDamage)
+    settarget:AddCondition(BattleSystem.IsRightButton)
+    settarget:AddAction(BattleSystem.SetTarget)
 end
 
-function BattleTextViewSystem.IsRightButton()
+function BattleSystem.IsRightButton()
     return BlzGetTriggerPlayerMouseButton() == MOUSE_BUTTON_TYPE_RIGHT
 end
 
-function BattleTextViewSystem.SetTarget()
+function BattleSystem.SetTarget()
+    -- получаем таргет (на кого тыкнул игрок)
     if BlzGetMouseFocusUnit() then
-        BattleTextViewSystem.target = Unit(BlzGetMouseFocusUnit())
+        BattleSystem.target = Unit(BlzGetMouseFocusUnit())
     end
-    if BattleTextViewSystem.target_event then
-        BattleTextViewSystem.target_event:Destroy()
+    -- если игрок решит сменить цель - то удалим ранее созданный ивент
+    if BattleSystem.target_event then
+        BattleSystem.target_event:Destroy()
     end
-    if IsPlayerEnemy(GetLocalPlayer(), BattleTextViewSystem.target:GetOwner()) then
-        BattleTextViewSystem.target_event = EventsUnit(BattleTextViewSystem.target)
-        BattleTextViewSystem.target_event:RegisterDamaged()
-        BattleTextViewSystem.target_event:AddAction(BattleTextViewSystem.ShowDamage)
+    -- регистрируем ивент для таргета
+    if IsPlayerEnemy(GetLocalPlayer(), BattleSystem.target:GetOwner()) then
+        BattleSystem.target_event = EventsUnit(BattleSystem.target)
+        BattleSystem.target_event:RegisterDamaged()
+        BattleSystem.target_event:AddAction(BattleSystem.ShowDamage)
     end
 end
 
-function BattleTextViewSystem.ShowDamage()
+function BattleSystem.ShowDamage()
     local unit = GetTriggerUnit()
     local damage = GetEventDamage()
-    -- если урона 0, то игра может крашнуть из-за частого срабатывания
-    if damage ~= 0. and not BattleTextViewSystem.disable then
+    if damage ~= 0. and not BattleSystem.disable then
         TextTag(damage, unit):Preset("damage")
     end
 end
@@ -5225,15 +4132,12 @@ function HeroSelector.AcceptHero(hero, name)
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
-    --TODO
     --HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero, name)
 end
 
 function HeroSelector.Close()
-    if HeroSelector.table ~= nil then
-        HeroSelector.table:Destroy()
-    end
+    HeroSelector.table:Destroy()
 end
 
 ---@author meiso
@@ -5249,7 +4153,7 @@ avengers_shield = Ability {
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
             "Способен воздействовать на 3 цели.",
-    icon = "ReplaceableTextures/CommandButtons/BTNavengers_shield.tga"
+    icon = "ReplaceableTextures/CommandButtons/avengers_shield.tga"
 }
 
 blessing_of_kings = Ability {
@@ -5258,7 +4162,7 @@ blessing_of_kings = Ability {
     tooltip = "Благословение королей",
     key = "Q",
     text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_kings.tga",
     buff_desc = "Все характеристики повышены на 10%."
 }
 
@@ -5268,7 +4172,7 @@ blessing_of_might = Ability {
     tooltip = "Благословение могущества",
     key = "W",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_might.tga",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_might.tga",
     buff_desc = "Сила атаки увеличена на 550."
 }
 
@@ -5278,7 +4182,7 @@ blessing_of_wisdom = Ability {
     tooltip = "Благословение мудрости",
     key = "E",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_wisdom.tga",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_wisdom.tga",
     buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
 }
 
@@ -5289,7 +4193,7 @@ blessing_of_sanctuary = Ability {
     key = "R",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
             "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
-    icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
+    icon = "ReplaceableTextures/CommandButtons/blessing_of_sanctuary.tga",
     buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
             "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
 }
@@ -5302,7 +4206,7 @@ consecration = Ability {
     key = "R",
     text = "Освящает участок земли, на котором стоит паладин, " ..
             "нанося урон от светлой магии в течение 8 сек., противникам, которые находятся на этом участке",
-    icon = "ReplaceableTextures/CommandButtons/BTNconsecration.tga"
+    icon = "ReplaceableTextures/CommandButtons/consecration.tga"
 }
 
 judgement_of_light_tr = Ability {
@@ -5313,7 +4217,7 @@ judgement_of_light_tr = Ability {
     key = "D",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_light.tga",
     buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
 
@@ -5325,7 +4229,7 @@ judgement_of_wisdom_tr = Ability {
     key = "F",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
-    icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
+    icon = "ReplaceableTextures/CommandButtons/judgement_of_wisdom.tga",
     buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
 
@@ -5337,7 +4241,7 @@ shield_of_righteousness = Ability {
     key = "W",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
             "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
-    icon = "ReplaceableTextures/CommandButtons/BTNshield_of_righteousness.tga"
+    icon = "ReplaceableTextures/CommandButtons/shield_of_righteousness.tga"
 }
 
 divine_shield = Ability {
@@ -5350,20 +4254,19 @@ divine_shield = Ability {
     buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
 }
 
-hammer_of_righteous = Ability {
+hammer_righteous = Ability {
     ability = HAMMER_RIGHTEOUS,
     manacost = 6,
     cooldown = 6.,
     tooltip = "Молот праведника",
-    key = "Q",
+    key = "",
     text = "Поражает светлой магией текущую цель и до 2 находящихся поблизости целей. " ..
             "Величина наносимого урона равна урону в секунду от оружия в правой руке, умноженному на 4.",
-    icon = "ReplaceableTextures/CommandButtons/BTNhammer_of_righteous.tga"
 }
 
 ALL_MAIN_PALADIN_SPELLS = {
     divine_shield,
-    hammer_of_righteous,
+    hammer_righteous,
     avengers_shield,
     consecration,
     judgement_of_light_tr,
@@ -5386,7 +4289,7 @@ flash_heal = Ability {
     tooltip = "Быстрое исцеление",
     key = "Q",
     text = "Восстанавливает 1887 - 2193 ед. здоровья союзнику.",
-    icon = "ReplaceableTextures/CommandButtons/BTNflash_heal.tga"
+    icon = "ReplaceableTextures/CommandButtons/flash_heal.tga"
 }
 
 renew = Ability {
@@ -5408,7 +4311,7 @@ power_word_shield = Ability {
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
             "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
             "получением урона. Повторно наложить щит можно только через 15 сек.",
-    icon = "ReplaceableTextures/CommandButtons/BTNpower_word_shield.tga",
+    icon = "ReplaceableTextures/CommandButtons/power_word_shield.tga",
     buff_desc = "Поглощение урона."
 }
 
@@ -5417,7 +4320,7 @@ weakened_soul = Ability {
     tooltip = "Ослабленная душа",
     key = "Q",
     text = "Персонаж не может быть целью заклинания 'Слово Силы: Щит'.",
-    icon = "ReplaceableTextures/CommandButtons/BTNweakened_soul.tga"
+    icon = "ReplaceableTextures/CommandButtons/weakened_soul.tga"
 }
 
 guardian_spirit = Ability {
@@ -5430,7 +4333,7 @@ guardian_spirit = Ability {
             "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
             "50% ее максимального запаса здоровья. Время действия – 10 сек.",
-    icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
+    icon = "ReplaceableTextures/CommandButtons/guardian_spirit.tga",
     buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
 }
 
@@ -5444,7 +4347,7 @@ prayer_of_mending = Ability {
             "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
             "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
             "только на одну цель одновременно.",
-    icon = "ReplaceableTextures/CommandButtons/BTNprayer_of_mending.tga",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
     buff_desc = "Восстанавливает 1043 ед. здоровья при последующем получении урона."
 }
 
@@ -5456,7 +4359,7 @@ circle_of_healing = Ability {
     key = "W",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
             "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
-    icon = "ReplaceableTextures/CommandButtons/BTNcircle_of_healing.tga"
+    icon = "ReplaceableTextures/CommandButtons/circle_of_healing.tga"
 }
 
 power_word_fortitude = Ability {
@@ -5465,7 +4368,7 @@ power_word_fortitude = Ability {
     tooltip = "Молитва стойкости",
     key = "Q",
     text = "Повышает выносливость всех участников группы или рейда на 165 ед. на 1 ч.",
-    icon = "ReplaceableTextures/CommandButtons/BTNprayer_of_mending.tga",
+    icon = "ReplaceableTextures/CommandButtons/prayer_of_mending.tga",
     buff_desc = "Выносливость повышена на 165."
 }
 
@@ -5488,7 +4391,7 @@ spirit_of_redemption = Ability {
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
-    icon = "ReplaceableTextures/CommandButtons/BTNspirit_of_redemption.tga",
+    icon = "ReplaceableTextures/CommandButtons/spirit_of_redemption.tga",
 }
 
 ALL_MAIN_PRIEST_SPELLS = {
@@ -5508,23 +4411,12 @@ ALL_OFF_PRIEST_SPELLS = {
 
 ------------------------------XXXXXXX------------------------------
 
----@author meiso
 
 function DummyForDPS(location)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(500000, true)
     d:SetBaseDamage(4000.)
-    d:SetMoveSpeed(0)
-end
-
-
-function TrashDummyForDPS(location, name)
-    local loc = location or Location(4480., 400.)
-    local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
-    d:SetName(name)
-    d:SetMaxLife(50000, true)
-    d:SetBaseDamage(200.)
 end
 
 
@@ -5533,13 +4425,6 @@ function DummyForHealing(location)
     local d = Unit(GetLocalPlayer(), FourCC('hfoo'), loc, 0.)
     d:SetMaxLife(500000)
     d:SetLife(100)
-end
-
-
-function SpawnTrashDummies(count)
-    for i = 1, count do
-        TrashDummyForDPS(Location(GetRandomReal(-600., -400.), 200.), tostring(i))
-    end
 end
 
 ---@author meiso
@@ -6228,6 +5113,8 @@ function Paladin.IsAvengersShield()
 end
 
 function Paladin.InitAvengersShield()
+    avengers_shield:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsAvengersShield)
@@ -6246,7 +5133,6 @@ function Paladin.RemoveBlessingOfKings(unit, stat)
 end
 
 function Paladin.BlessingOfKings()
-    BuffSystem.logger:Info("Blessing of kings...")
     local unit = Unit(GetSpellTargetUnit())
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
@@ -6273,7 +5159,6 @@ function Paladin.BlessingOfKings()
     BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
-    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfKings()
@@ -6281,6 +5166,8 @@ function Paladin.IsBlessingOfKings()
 end
 
 function Paladin.InitBlessingOfKings()
+    blessing_of_kings:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
@@ -6321,6 +5208,8 @@ function Paladin.IsBlessingOfMight()
 end
 
 function Paladin.InitBlessingOfMight()
+    blessing_of_might:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfMight)
@@ -6366,6 +5255,8 @@ function Paladin.IsBlessingOfSanctuary()
 end
 
 function Paladin.InitBlessingOfSanctuary()
+    blessing_of_sanctuary:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
@@ -6382,8 +5273,7 @@ function Paladin.RemoveBlessingOfWisdom(unit, items_list)
 end
 
 function Paladin.BlessingOfWisdom()
-    BuffSystem.logger:Info("Blessing of wisdom...")
-    local unit = Unit(GetSpellTargetUnit())
+    local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
     local items_list = { Items.BLESSING_OF_WISDOM_ITEM }
 
@@ -6402,7 +5292,6 @@ function Paladin.BlessingOfWisdom()
     BuffSystem.AddBuffToHero(unit, blessing_of_wisdom, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
-    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfWisdom()
@@ -6410,6 +5299,8 @@ function Paladin.IsBlessingOfWisdom()
 end
 
 function Paladin.InitBlessingOfWisdom()
+    blessing_of_wisdom:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
@@ -6459,6 +5350,8 @@ function Paladin.IsConsecration()
 end
 
 function Paladin.InitConsecration()
+    consecration:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsConsecration)
@@ -6519,6 +5412,8 @@ function Paladin.IsJudgementOfLight()
 end
 
 function Paladin.InitJudgementOfLight()
+    judgement_of_light_tr:Init()
+
     local event_ability = EventsPlayer()
     local event_jol = EventsPlayer()
 
@@ -6585,6 +5480,8 @@ function Paladin.IsJudgementOfWisdom()
 end
 
 function Paladin.InitJudgementOfWisdom()
+    judgement_of_wisdom_tr:Init()
+
     local event_ability = EventsPlayer()
     local event_jow = EventsPlayer()
 
@@ -6602,7 +5499,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42% от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -6612,6 +5509,8 @@ function Paladin.IsShieldOfRighteousness()
 end
 
 function Paladin.InitShieldOfRighteousness()
+    shield_of_righteousness:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
@@ -6646,6 +5545,8 @@ function Priest.IsCircleOfHealing()
 end
 
 function Priest.InitCircleOfHealing()
+    circle_of_healing:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
@@ -6680,6 +5581,8 @@ function Priest.IsFlashHeal()
 end
 
 function Priest.InitFlashHeal()
+    flash_heal:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsFlashHeal)
@@ -6729,6 +5632,8 @@ function Priest.IsGuardianSpirit()
 end
 
 function Priest.InitGuardianSpirit()
+    guardian_spirit:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsGuardianSpirit)
@@ -6787,6 +5692,8 @@ function Priest.IsInnerFire()
 end
 
 function Priest.InitInnerFire()
+    inner_fire:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsInnerFire)
@@ -6804,7 +5711,7 @@ end
 
 function Priest.PowerWordFortitude()
     --TODO: пока что даём как есть. потом отскалируем
-    local unit = Unit(GetSpellTargetUnit())
+    local unit = GetSpellTargetUnit()
     local timer = Timer(600.)
     local items = { Items.POWER_WORD_FORTITUDE_ITEM }
     local model = "Abilities/Spells/Human/InnerFire/InnerFireTarget.mdl"
@@ -6832,6 +5739,8 @@ function Priest.IsPowerWordFortitude()
 end
 
 function Priest.InitPowerWordFortitude()
+    power_word_fortitude:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordFortitude)
@@ -6913,6 +5822,8 @@ function Priest.IsPowerWordShield()
 end
 
 function Priest.InitPowerWordShield()
+    power_word_shield:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)
@@ -6928,7 +5839,7 @@ function Priest.RemovePrayerOfMending(unit)
 end
 
 function Priest.CastPrayerOfMending()
-    local unit = Unit(GetSpellTargetUnit())
+    local unit = GetSpellTargetUnit()
     local model = "Abilities/Weapons/ProcMissile/ProcMissile.mdl"
     local effect
     local last_unit
@@ -7002,6 +5913,8 @@ function Priest.IsPrayerOfMending()
 end
 
 function Priest.InitPrayerOfMending()
+    prayer_of_mending:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPrayerOfMending)
@@ -7030,6 +5943,8 @@ function Priest.IsRenew()
 end
 
 function Priest.InitRenew()
+    renew:Init()
+
     local event = EventsPlayer()
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
@@ -7094,6 +6009,7 @@ function Priest.IsSpiritOfRedemption()
 end
 
 function Priest.InitSpiritOfRedemption()
+    spirit_of_redemption:Init()
     Priest.hero:DisableAbility(spirit_of_redemption:GetId())
 
     local event = EventsPlayer()
@@ -7105,31 +6021,53 @@ end
 
 -- Точка входа для инициализации всего
 function EntryPoint()
-    ENABLE_LOGGER_STDOUT = true
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
 
     -- Механики
-    BuffSystem.LoadFrame()
-    BattleTextViewSystem.Init()
+    BattleSystem.Init()
     EquipSystem.RegisterItems()
 
+    -- Боссы
+    LordMarrowgar.Init()
+    LadyDeathwhisper.Init()
+
+    -- Персонажи
+    Priest.Init()
+    Paladin.Init()
+
+    -- Манекены
+    --DummyForHealing()
+end
+
+---@author meiso
+
+-- Точка входа для инициализации всего
+function TestEntryPoint()
+    -- Загрузка шаблонов фреймов
+    loadTOCFile("templates.toc")
+    --HeroSelector.Init()
+    BuffSystem.LoadFrame()
+
+    -- Механики
+    BattleSystem.Init()
+    EquipSystem.RegisterItems()
+
+    --SaveSystem.InitNewHeroEvent()
     SaveSystem.gamecache = InitGameCache("savesystem")
     SaveSystem.map_number = 1
     SaveSystem.InitSaveEvent()
     SaveSystem.InitLoadEvent()
 
-    -- Боссы
-    --LordMarrowgar.Init()
-    --LadyDeathwhisper.Init()
-
     -- Персонажи
-    --Priest.Init()
-    Paladin.Init(Location(930., -11000.))
+    Priest.Init(Location(300., -490.))
+    --Paladin.Init(Location(-400., -490.))
+    --DeathKnight.Init(Location(-400., -520.))
 
-    Movement.Init()
-    FogEnableOff()
-    FogMaskEnableOff()
+    -- Манекены
+    --DummyForHealing(Location(300., 200.))
+    DummyForDPS(Location(-400., 200.))
+
 end
 
 --CUSTOM_CODE
@@ -7166,13 +6104,41 @@ end
 function InitCustomPlayerSlots()
     SetPlayerStartLocation(Player(0), 0)
     SetPlayerColor(Player(0), ConvertPlayerColor(0))
-    SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
+    SetPlayerRacePreference(Player(0), RACE_PREF_RANDOM)
     SetPlayerRaceSelectable(Player(0), true)
     SetPlayerController(Player(0), MAP_CONTROL_USER)
+    SetPlayerStartLocation(Player(1), 1)
+    SetPlayerColor(Player(1), ConvertPlayerColor(1))
+    SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
+    SetPlayerRaceSelectable(Player(1), true)
+    SetPlayerController(Player(1), MAP_CONTROL_USER)
+    SetPlayerStartLocation(Player(10), 2)
+    SetPlayerColor(Player(10), ConvertPlayerColor(10))
+    SetPlayerRacePreference(Player(10), RACE_PREF_UNDEAD)
+    SetPlayerRaceSelectable(Player(10), false)
+    SetPlayerController(Player(10), MAP_CONTROL_COMPUTER)
 end
 
 function InitCustomTeams()
     SetPlayerTeam(Player(0), 0)
+    SetPlayerState(Player(0), PLAYER_STATE_ALLIED_VICTORY, 1)
+    SetPlayerTeam(Player(1), 0)
+    SetPlayerState(Player(1), PLAYER_STATE_ALLIED_VICTORY, 1)
+    SetPlayerAllianceStateAllyBJ(Player(0), Player(1), true)
+    SetPlayerAllianceStateAllyBJ(Player(1), Player(0), true)
+    SetPlayerAllianceStateVisionBJ(Player(0), Player(1), true)
+    SetPlayerAllianceStateVisionBJ(Player(1), Player(0), true)
+    SetPlayerTeam(Player(10), 1)
+end
+
+function InitAllyPriorities()
+    SetStartLocPrioCount(0, 1)
+    SetStartLocPrio(0, 0, 1, MAP_LOC_PRIO_HIGH)
+    SetStartLocPrioCount(1, 1)
+    SetStartLocPrio(1, 0, 0, MAP_LOC_PRIO_HIGH)
+    SetStartLocPrioCount(2, 2)
+    SetStartLocPrio(2, 0, 0, MAP_LOC_PRIO_LOW)
+    SetStartLocPrio(2, 1, 1, MAP_LOC_PRIO_LOW)
 end
 
 function main()
@@ -7192,12 +6158,14 @@ end
 function config()
     SetMapName("TRIGSTR_003")
     SetMapDescription("TRIGSTR_005")
-    SetPlayers(1)
-    SetTeams(1)
-    SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
-    DefineStartLocation(0, 6912.0, -8064.0)
+    SetPlayers(3)
+    SetTeams(3)
+    SetGamePlacement(MAP_PLACEMENT_TEAMS_TOGETHER)
+    DefineStartLocation(0, 8896.0, 12800.0)
+    DefineStartLocation(1, 8896.0, 12800.0)
+    DefineStartLocation(2, 8896.0, 12800.0)
     InitCustomPlayerSlots()
-    SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
-    InitGenericPlayerSlots()
+    InitCustomTeams()
+    InitAllyPriorities()
 end
 

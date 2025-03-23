@@ -27,6 +27,8 @@ KeyboardController = {
     keys = Pool(),
     ---@private
     _event = nil,
+    ---@type Logger
+    logger = Logger("keyboard"),
 }
 
 --- Регистрирует события нажатия клавиш
@@ -51,6 +53,7 @@ end
 function KeyboardController._process()
     local key = BlzGetTriggerPlayerKey()
     local pressed = BlzGetTriggerPlayerIsKeyDown()
+    KeyboardController.logger:Info("pressed key", GetHandleId(key))
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == key then
             local new = k

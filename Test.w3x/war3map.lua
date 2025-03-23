@@ -805,6 +805,8 @@ function Paladin.Init(location, unit, name)
     Paladin.hero = Unit(unit)
     Paladin.hero:SetName(name)
 
+    KeyboardController.Register(OSKEY_1, OSKEY_2, OSKEY_3, OSKEY_4)
+
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
     Paladin.InitBlessingOfMight()
@@ -995,6 +997,8 @@ KeyboardController = {
     keys = Pool(),
     ---@private
     _event = nil,
+    ---@type Logger
+    logger = Logger("keyboard"),
 }
 
 --- Регистрирует события нажатия клавиш
@@ -1019,6 +1023,7 @@ end
 function KeyboardController._process()
     local key = BlzGetTriggerPlayerKey()
     local pressed = BlzGetTriggerPlayerIsKeyDown()
+    KeyboardController.logger:Info("pressed key", GetHandleId(key))
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == key then
             local new = k
@@ -1070,16 +1075,16 @@ end
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
     local dist = 650.
-    local zoffset = GetLocationZ(Camera.unit:GetLoc())
+    local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
     Camera._set_dist(dist)
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
-        Camera._set_angle(-50.)
+        Camera._set_angle(-24.)
     else
-        Camera._set_angle(-15.)
+        Camera._set_angle(-12.)
     end
-    Camera._set_offset(100.)
+    Camera._set_offset(zoffset)
     Camera._set_facing(facing)
 end
 
@@ -4721,12 +4726,12 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
         if BuffSystem._getBuff(hero, i):IsBuff(buff) or
                 BuffSystem._getBuff(hero, i):IsDebuff(buff) then
             BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.main_frame_buff:Hide()
-            BuffSystem.main_frame_debuff:Hide()
             BuffSystem._getBuff(hero, i).func()
             BuffSystem.buffs[hero][i] = nil
         end
     end
+    BuffSystem._ShowBuffs(hero)
+    BuffSystem._ShowDebuffs(hero)
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -4866,7 +4871,7 @@ function BuffSystem._ShowBuffs(u)
     BuffSystem.logger:Info("buff count", tostring(#BuffSystem.buffs[u]))
     for i = 1, #BuffSystem.buffs[u] do
         local buff = BuffSystem._getBuff(u, i)
-        if buff then
+        if buff and not buff.is_debuff then
             count = count + 1
             BuffSystem.logger:Info("buff", buff.buff.tooltip)
             BuffSystem.logger:Info("icon", buff.buff.icon)
@@ -5251,7 +5256,7 @@ avengers_shield = Ability {
     tooltip = "Щит мстителя",
     manacost = 26,
     cooldown = 30.,
-    key = "C",
+    key = "F",
     text = "Бросает в противника священный щит, наносящий ему урон от светлой магии. " ..
             "Щит затем перескакивает на других находящихся поблизости противников. " ..
             "Способен воздействовать на 3 цели.",
@@ -5272,7 +5277,7 @@ blessing_of_might = Ability {
     ability = BLESSING_OF_MIGHT,
     manacost = 5,
     tooltip = "Благословение могущества",
-    key = "W",
+    key = "E",
     text = "Благословляет дружественную цель, увеличивая силу атаки на 550. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_might.tga",
     buff_desc = "Сила атаки увеличена на 550."
@@ -5282,7 +5287,7 @@ blessing_of_wisdom = Ability {
     ability = BLESSING_OF_WISDOM,
     manacost = 5,
     tooltip = "Благословение мудрости",
-    key = "E",
+    key = "R",
     text = "Благословляет дружественную цель, восполняя ей 92 ед. маны раз в 5 секунд в течение 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_wisdom.tga",
     buff_desc = "Восполнение 92 ед. маны раз в 5 сек."
@@ -5292,7 +5297,7 @@ blessing_of_sanctuary = Ability {
     ability = BLESSING_OF_SANCTUARY,
     manacost = 7,
     tooltip = "Благословение неприкосновенности",
-    key = "R",
+    key = "T",
     text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
             "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
@@ -5316,7 +5321,7 @@ judgement_of_light_tr = Ability {
     manacost = 5,
     cooldown = 10.,
     tooltip = "Правосудие света",
-    key = "D",
+    key = "C",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
@@ -5328,7 +5333,7 @@ judgement_of_wisdom_tr = Ability {
     manacost = 5,
     cooldown = 10.,
     tooltip = "Правосудие мудрости",
-    key = "F",
+    key = "V",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
             "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
@@ -5340,7 +5345,7 @@ shield_of_righteousness = Ability {
     manacost = 6,
     cooldown = 6.,
     tooltip = "Щит праведности",
-    key = "W",
+    key = "E",
     text = "Мощный удар щитом, наносящий урон от светлой магии. " ..
             "Величина урона рассчитывается исходя из показателя блока и увеличивается на 520 ед. дополнительно.",
     icon = "ReplaceableTextures/CommandButtons/BTNshield_of_righteousness.tga"
@@ -5410,7 +5415,7 @@ power_word_shield = Ability {
     manacost = 23,
     cooldown = 4.,
     tooltip = "Слово силы: Щит",
-    key = "S",
+    key = "F",
     text = "Вытягивает частичку души союзника и создает из нее щит, способный поглотить 2230 ед. урона. " ..
             "Время действия – 30 сек.. Пока персонаж защищен, произнесение им заклинаний не может быть прервано " ..
             "получением урона. Повторно наложить щит можно только через 15 сек.",
@@ -5445,7 +5450,7 @@ prayer_of_mending = Ability {
     manacost = 15,
     cooldown = 10.,
     tooltip = "Молитва восстановления",
-    key = "D",
+    key = "C",
     text = "Молитва оберегает союзника и восстанавливает ему 1043 ед. здоровья при следующем " ..
             "получении урона. После исцеления заклинание переходит к другому участнику рейда в пределах 20 м. " ..
             "Молитва может совершать переход 5 раз и длится 30 сек.. после смены цели. Это заклинание можно накладывать " ..
@@ -5459,7 +5464,7 @@ circle_of_healing = Ability {
     manacost = 21,
     cooldown = 6.,
     tooltip = "Круг исцеления",
-    key = "W",
+    key = "V",
     text = "Восстанавливает 958 - 1058 ед. здоровья участникам группы или рейда," ..
             "находящимся в радиусе 15 м от выбранной цели. Может излечить до 5 персонажей.",
     icon = "ReplaceableTextures/CommandButtons/BTNcircle_of_healing.tga"
@@ -5479,7 +5484,7 @@ inner_fire = Ability {
     ability = INNER_FIRE,
     manacost = 14,
     tooltip = "Внутренний огонь",
-    key = "W",
+    key = "E",
     text = "Наполняет заклинателя священной энергией, которая усиливает его броню на 2440 ед. " ..
             "и силу заклинаний на 120. Каждая полученная жрецом атака снимает один заряд щита. " ..
             "Заклинание действует 30 мин. или пока не будут сняты 20 зарядов.",
@@ -6475,7 +6480,7 @@ end
 
 function Paladin.RemoveJudgementOfLight(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_light_tr) then
-        UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target)
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_LIGHT_BUFF, target:GetId())
         BuffSystem.RemoveBuffFromHero(target, judgement_of_light_tr)
     end
 end
@@ -6492,7 +6497,8 @@ function Paladin.IsJudgementOfLightDebuff()
 end
 
 function Paladin.CastJudgementOfLight()
-    local target = GetSpellTargetUnit()
+    BuffSystem.logger:Info("Judgement Of Wisdom...")
+    local target = Unit(GetSpellTargetUnit())
     local model = "judgement_impact_chest.mdl"
     local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
@@ -6518,6 +6524,7 @@ function Paladin.CastJudgementOfLight()
     timer:Start()
     jol_unit:ApplyTimedLife(2.)
     effect:Destroy()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsJudgementOfLight()
@@ -6543,7 +6550,7 @@ end
 
 function Paladin.RemoveJudgementOfWisdom(target)
     if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
-        UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target)
+        UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target:GetId())
         BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
     end
 end
@@ -6560,7 +6567,8 @@ function Paladin.IsJudgementOfWisdomDebuff()
 end
 
 function Paladin.CastJudgementOfWisdom()
-    local target = GetSpellTargetUnit()
+    BuffSystem.logger:Info("Judgement Of Wisdom...")
+    local target = Unit(GetSpellTargetUnit())
     local model = "judgement_impact_chest_blue.mdl"
     local effect = Effect(target, model, "overhead")
     local timer = Timer(20.)
@@ -6584,6 +6592,7 @@ function Paladin.CastJudgementOfWisdom()
     timer:Start()
     jow_unit:ApplyTimedLife(2.)
     effect:Destroy()
+    BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsJudgementOfWisdom()
@@ -6903,7 +6912,6 @@ function Priest.CastPowerWordShield()
     end
 
     BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
-    --фиксируем дебаф на юните
     BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
     buff_timer:SetFunc(remove_buff)
     debuff_timer:SetFunc(remove_debuff)
@@ -7134,12 +7142,12 @@ function TestEntryPoint()
     Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
-    Movement.Init()
+    --Movement.Init()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
-    --DummyForDPS(Location(-400., 200.))
-    SpawnTrashDummies(5)
+    DummyForDPS(Location(-400., 200.))
+    --SpawnTrashDummies(5)
 end
 
 --CUSTOM_CODE

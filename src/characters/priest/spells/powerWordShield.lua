@@ -57,7 +57,6 @@ function Priest.CastPowerWordShield()
     end
 
     BuffSystem.AddBuffToHero(unit, power_word_shield, remove_buff)
-    --фиксируем дебаф на юните
     BuffSystem.AddBuffToHero(unit, weakened_soul, remove_debuff, true)
     buff_timer:SetFunc(remove_buff)
     debuff_timer:SetFunc(remove_debuff)
