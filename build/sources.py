@@ -1,5 +1,13 @@
 # Copyright meiso
-# 
+#
+"""
+Файлы должны собираться в чёткой последовательности:
+- файлы с общими константами и первичные файлы инициализации игры и юнитов
+- файлы ядра (движка) игры
+- интерфейсы над близзардовскими функциями
+- реализации различных игровых систем
+- реализации героев и юнитов
+"""
 COMMON_FILES = (
     "src/common",
 )
@@ -14,8 +22,8 @@ CORE_FILES = (
     "src/core/camera.lua",
     "src/core/movement.lua",
 )
-CLASSES_FILES = (
-    "src/classes",
+IFACES_FILES = (
+    "src/blzwraps",
 )
 AGRO_SYSTEM_FILES = (
     "src/libs/CombatSystem",
@@ -44,7 +52,7 @@ WRAPPER_FILES = (
     "src/libs/wrappers.lua",
 )
 HERO_SELECTOR_FILES = (
-    "src/libs/HeroSelector/frames_desc.lua",
+    "src/libs/HeroSelector/framesDesc.lua",
     "src/libs/HeroSelector/heroSelector.lua",
 )
 SOURCES_FILES = (
@@ -66,7 +74,7 @@ ALL_SOURCE_FILES = (
     *INIT_FILES,
     *CORE_FILES,
     *AGRO_SYSTEM_FILES,
-    *CLASSES_FILES,
+    *IFACES_FILES,
     *SAVE_SYSTEM_FILES,
     *EQUIPMENT_SYSTEM_FILES,
     *BUFF_SYSTEM_FILES,
