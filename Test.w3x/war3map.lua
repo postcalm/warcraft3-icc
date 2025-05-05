@@ -29,7 +29,6 @@ function SetCameraDistance(dist, duration)
     local d = duration or 0.25
     SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_TARGET_DISTANCE, dist, d)
 end
-
 function CreateUnitsForPlayer0()
     local p = Player(0)
     local u
@@ -117,277 +116,6 @@ end
 
 ---@author meiso
 
--- Based on TriggerHappy implementation (hiveworkshop.com)
--- Lua implementation by Luashine (hiveworkshop.com)
-
---[[
-Features:
- * file overwrite is implemented;
- * only line-by-line recording
-
-!!Attempt!!
-Heavily loads the system due to overwriting. Do not use in a real game, or very carefully.
-]]--
-
--- FileIO v1.1.0-lua1.0.1
-FileIO = {
-    BACKWARDS_COMPATIBILITY = false,
-    AbilityList = {
-        "Amls", "Aroc", "Amic", "Amil", "Aclf", "Acmg", "Adef", "Adis", "Afbt", "Afbk",
-        "ACmo", "ACwe", "ACbn", "ACua", "ACah", "ACnr", "ACat", "ACds", "ACtb", "ACbz",
-    },
-    AbilityCount = nil, -- set below
-    PreloadLimit = 200,
-
-    -- readonly
-    -- some vJass stuff to ensure read/writes are from within one scope (code section)
-    -- unused ReadEnabled = true,
-    -- readonly
-    -- unused Counter =
-    -- readonly
-    List = {},
-    cc2Int = function(str)
-        local n = 0
-        local len = #str
-        for i = len, 1, -1 do
-            n = n + (str:byte(i, i) << 8 * (len - i))
-        end
-        return n
-    end,
-    int2cc = function(int)
-        return string.char((int & 0xff000000) >> 24, (int & 0x00ff0000) >> 16, (int & 0x0000ff00) >> 8, int & 0x000000ff):match("[^\0]+")
-    end,
-}
-FileIO.AbilityCount = #FileIO.AbilityList
-
-function FileIO.hasInvalidChars(str)
-    -- Original Jass FileIO did not permit double-quotes and backslash
-    -- return str:find("[\0\"\\]") and true or false
-    -- Instead we'll escape them properly before writing to file
-    return str:find("[\0]") and true or false
-end
-
-do
-    local subst = {
-        -- only relevant if we saved it as  pure Lua
-        -- the Jass2Lua transpiler works correctly on multiline Jass strings
-        --["\n"] = "\\n",
-        ["\\"] = "\\\\",
-        ['"'] = '\"'
-    }
-    function FileIO.escapeChars(str)
-        -- \n removed, no functional difference to 1.0.0
-        return (str:gsub('["\\]', subst))
-    end
-end
-
-function FileIO:open(fileName)
-    if self.file then
-        error("FileIO: Cannot use :open() on an existing file")
-    end
-    local file = {}
-    setmetatable(file, { __index = self })
-    file.fileName = fileName
-    file.buffer = {}
-
-    return file
-end
-
-function FileIO:write(contents)
-    -- this is used to signify an empty string vs a null one
-    local prefix = "-"
-    --if self.hasInvalidChars(contents) then
-    --    error("FileIO: Invalid character in input: " .. tostring(contents))
-    --end
-    --contents = FileIO.escapeChars(contents)
-
-    self.buffer = {}
-
-    -- Begin file generation
-    PreloadGenClear()
-    PreloadGenStart()
-    -- loop start
-    local abilCount = 0
-    local bufOffset = 1
-
-    if isTable(contents) then
-        for _, chunk in ipairs(contents) do
-            local level = 0
-            if abilCount >= self.AbilityCount then
-                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
-            end
-
-            Preload(string.format(
-                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
-                    self.cc2Int(self.AbilityList[abilCount + 1]),
-                    prefix .. chunk,
-                    level
-            ))
-            bufOffset = bufOffset + self.PreloadLimit
-            abilCount = abilCount + 1
-        end
-    else
-        local len = #contents
-        while bufOffset < len do
-            --print(string.format("bufOffset=\037d, len=\037d", bufOffset, len))
-            local level = 0
-            if abilCount >= self.AbilityCount then
-                error("FileIO: String exceeds max length: " .. tostring(self.AbilityCount * self.PreloadLimit))
-            end
-
-            Preload(string.format(
-                    '" )\ncall BlzSetAbilityTooltip(\037d, "\037s", \037d)\n//',
-                    self.cc2Int(self.AbilityList[abilCount + 1]),
-                    prefix .. contents,
-                    level
-            ))
-            bufOffset = bufOffset + self.PreloadLimit
-            abilCount = abilCount + 1
-        end
-    end -- loop end
-    Preload('" )\nendfunction\nfunction a takes nothing returns nothing\n //')
-    PreloadGenEnd(self.fileName)
-    return self
-end
-
-function FileIO:clear()
-    return self:write("")
-end
-
-function FileIO:readPreload()
-    local originalDesc = {}
-    for n = 1, self.AbilityCount do
-        originalDesc[n] = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[n]), 0)
-        --print("Saving orig ab desc: ".. n ..": "..  originalDesc[n])
-    end
-
-    -- Execute the preload file
-    Preloader(self.fileName)
-
-    local level = 0
-    local chunk = ""
-    local output = ""
-    local output_buffer = {}
-    local i = 0
-
-    while true do
-        if i == self.AbilityCount then
-            break
-        end
-        level = 0
-
-        -- Make sure the tooltip has changed
-        chunk = BlzGetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), level)
-        --print("Loaded chunk=".. tostring(chunk))
-        if chunk == originalDesc[i + 1] then
-            if i == 0 and output == "" then
-                -- empty file
-                return output_buffer
-            end
-            return output_buffer
-        end
-
-        if not self.BACKWARDS_COMPATIBILITY then
-            if i == 0 then
-                if chunk:sub(1, 1) ~= "-" then
-                    -- empty file
-                    return output_buffer
-                end
-                -- exclude first "-" symbol
-                chunk = chunk:sub(2)
-            end
-        end
-
-        -- remove prefix
-        if i > 0 then
-            chunk = chunk:sub(2)
-        end
-        -- restore original
-        --print("Restoring original tooltip i=".. i)
-        BlzSetAbilityTooltip(self.cc2Int(self.AbilityList[i + 1]), originalDesc[i + 1], level)
-        output = output .. chunk
-        output_buffer[i + 1] = chunk
-
-        i = i + 1
-    end
-
-    return output_buffer
-end
-
-function FileIO:create(fileName)
-    return self:open(fileName):write("")
-end
-
-function FileIO:close()
-    local output = ""
-    for _, msg in  ipairs(self:readPreload()) do
-        output = output .. msg
-    end
-    if #self.buffer > 0 then
-        self:write(output .. table.concat(self.buffer))
-    end
-end
-
-function FileIO:readEx(toClose)
-    local output = ""
-    for _, msg in  ipairs(self:readPreload()) do
-        output = output .. msg
-    end
-    local buf = table.concat(self.buffer)
-
-    if toClose then
-        self:close()
-    end
-    if output == nil then
-        return buf
-    end
-
-    if buf ~= nil then
-        output = output .. buf
-    end
-
-    return output
-end
-
-function FileIO:read()
-    return self:readEx(false)
-end
-
-function FileIO:readAndClose()
-    return self:readEx(true)
-end
-
-function FileIO:appendBuffer(str)
-    table.insert(self.buffer, str)
-    return self
-end
-
-function FileIO:readBuffer()
-    return table.concat(self.buffer)
-end
-
-function FileIO:writeBuffer(str)
-    if type(str) == "table" then
-        self.buffer = str
-    elseif type(str) == "string" then
-        self.buffer = { str }
-    else
-        error("Expected new buffer of type table/string, received: " .. type(str))
-    end
-    return nil
-end
-
-function FileIO:Write(fileName, text)
-    self:open(fileName):write(text):close()
-    return nil
-end
-
-function FileIO:Read(fileName)
-    return self:open(fileName):readEx(true)
-end
-
----@author meiso
-
 Items = {
     --- Даёт 500 брони
     ARMOR_ITEM                  = { item = FourCC("I001"), spell = FourCC("A008"), str = "A008" },
@@ -443,14 +171,10 @@ setmetatable(Logger, {
 ---@private
 function Logger:_init(log_name)
     if not ENABLE_LOGGER then return end
-    local session_datetime = os.date("%d.%m.%Y_%H.%M.%S")
+    log_name = log_name or "log"
     self.current = self.counter:next()
     self.buffer[self.current] = {}
     self.log_dir = "logs"
-    self.log_file = session_datetime .. "_" .. (log_name or "log") .. ".txt"
-    --self.log_file = (log_name or "log") .. ".txt"
-    self.full_log_path = "save\\" .. self.log_dir .. "\\" .. self.log_file
-    self.file_handle = FileIO:open(self.full_log_path)
 end
 
 --- Записать в лог файл
@@ -463,8 +187,7 @@ function Logger:Log(level, ...)
     local args = table.pack(...)
     local message = ""
     if not ENABLE_LOGGER_STDOUT then
-        local log_datetime = "[" .. os.date("%d.%m.%Y %H:%M:%S") .. "]"
-        message = log_datetime .. " "
+        --message = log_datetime .. " "
     end
     message = message .. level.name .. ":"
     for _, arg in ipairs(args) do
@@ -743,6 +466,8 @@ EQUIP_CACHE = nil
 
 --- Система выбора героев
 HeroSelector = {
+    --- Кэш системы
+    cache = nil,
     --- Основной фрейм
     table = nil,
     --- Фрейм паладина
@@ -769,6 +494,8 @@ HeroSelector = {
     hero = nil,
     --- Список выбранных героев
     selected_heroes = {},
+    --- Выбранный юнит для локального игрока
+    local_unit = nil,
 }
 
 ---@author meiso
@@ -798,14 +525,12 @@ function Paladin.ResetToDefault()
 end
 
 function Paladin.Init(location, unit, name)
-    location = location or Location(4000., 200.)
+    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Paladin"
     unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
 
     Paladin.hero = Unit(unit)
     Paladin.hero:SetName(name)
-
-    KeyboardController.Register(OSKEY_1, OSKEY_2, OSKEY_3, OSKEY_4)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -849,7 +574,7 @@ function Priest.ResetToDefault()
 end
 
 function Priest.Init(location, unit, name)
-    location = location or Location(4200., 200.)
+    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Priest"
     unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.):GetId()
 
@@ -1044,10 +769,10 @@ Camera = {
 }
 
 --- Регистрирует камеру для игрока
-function Camera.Register()
+function Camera.Register(unit)
     Camera.logger:Info("Initialize Camera")
     --TODO: брать персонажа выбранного игроком
-    Camera.unit = Paladin.hero
+    Camera.unit = unit
     SetCameraTargetUnit(Camera.unit:GetId())
 
     local camera = Timer(0.04)
@@ -1128,9 +853,9 @@ Movement = {
 }
 
 --- Инициализация системы передвижения
-function Movement.Init()
+function Movement.Init(unit)
     Movement.logger:Info("Initialize movement system")
-    Camera.Register()
+    Camera.Register(unit or Paladin.hero)
     KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
     Movement.unit = Camera.unit
     Movement._set_default_anim()
@@ -2111,6 +1836,97 @@ end
 ---@return nil
 function Frame:Show()
     BlzFrameSetVisible(self.frame, true)
+end
+
+---@author meiso
+
+---@class GameCache Игровой кэш
+---@param filename string Название кэша
+GameCache = {}
+GameCache.__index = GameCache
+
+setmetatable(GameCache, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function GameCache:_init(filename)
+    self._cache = InitGameCache(filename .. ".w3v")
+end
+
+
+function GameCache:StoreInt(value, key, category, sync)
+    GameCache:_store(value, key, category, "int", sync)
+end
+
+function GameCache:StoreStr(value, key, category, sync)
+    GameCache:_store(value, key, category, "str", sync)
+end
+
+function GameCache:StoreReal(value, key, category, sync)
+    GameCache:_store(value, key, category, "real", sync)
+end
+
+function GameCache:StoreUnit(value, key, category, sync)
+    GameCache:_store(value, key, category, "unit", sync)
+end
+
+function GameCache:StoreBool(value, key, category, sync)
+    GameCache:_store(value, key, category, "bool", sync)
+end
+
+function GameCache:GetInt(key, category)
+    return GetStoredInteger(self._cache, key, category)
+end
+
+function GameCache:GetStr(key, category)
+    return GetStoredString(self._cache, key, category)
+end
+
+function GameCache:GetReal(key, category)
+    return GetStoredReal(self._cache, key, category)
+end
+
+function GameCache:GetBool(key, category)
+    return GetStoredBoolean(self._cache, key, category)
+end
+
+---@private
+function GameCache:_store(value, key, category, value_type, sync)
+    sync = sync or false
+    if value_type == "int" then
+        StoreInteger(self._cache, category, key, value)
+    elseif value_type == "str" then
+        StoreString(self._cache, category, key, value)
+    elseif value_type == "real" then
+        StoreReal(self._cache, category, key, value)
+    elseif value_type == "unit" then
+        StoreUnit(self._cache, category, key, value)
+    elseif value_type == "bool" then
+        StoreBoolean(self._cache, category, key, value)
+    end
+    if sync then
+        self:_sync(key, category, value_type)
+    end
+end
+
+---@private
+function GameCache:_sync(key, category, value_type)
+    if value_type == "int" then
+        SyncStoredInteger(self._cache, key, category)
+    elseif value_type == "str" then
+        SyncStoredString(self._cache, key, category)
+    elseif value_type == "real" then
+        SyncStoredReal(self._cache, key, category)
+    elseif value_type == "unit" then
+        SyncStoredUnit(self._cache, key, category)
+    elseif value_type == "bool" then
+        SyncStoredBoolean(self._cache, key, category)
+    end 
 end
 
 --- Created by meiso.
@@ -3355,7 +3171,7 @@ end
 
 --- Система сохранений
 SaveSystem = {
-    --- Фактический юнит/Игровой персонаж
+    --- Словарь всех выбранных героев: ID игрока - ID юнита
     hero       = {},
     --- Юнит, которого требуется сохранить
     unit       = nil,
@@ -3368,7 +3184,7 @@ SaveSystem = {
     --- Место воскрешения
     respawn    = nil,
     --- Директория, где будут лежать сохранения
-    directory  = "test",
+    directory  = "save",
     --- Идентификатор автора системы сохранений
     author     = 1546,
     --- Пользовательские данные
@@ -3385,7 +3201,7 @@ SaveSystem = {
     map_number = 0,
     -- Автор данного творения запихал все данные в один массив
     -- и дабы как-то различать что находится внутри него,
-    -- добавил специальные числа, разграничиваниющие области эти данных
+    -- добавил специальные числа, разграничивающие области эти данных
     scope = {
         --- Область, за которой следует номер карты
         map        = 2,
@@ -3491,6 +3307,12 @@ function SaveSystem.generation2()
     SaveSystem.hash2 = SaveSystem.hash2 * SaveSystem.magic_number.eight + SaveSystem.magic_number.six
     SaveSystem.hash2 = math.fmod(SaveSystem.hash2, SaveSystem.magic_number.five)
     return SaveSystem.hash2
+end
+
+--- Возвращает героя для текущего игрока
+---@return unit
+function SaveSystem.GetCurrentUnit()
+    return SaveSystem.hero[GetConvertedPlayerId(GetLocalPlayer())]
 end
 
 ---@author Vlod www.xgm.ru
@@ -4190,11 +4012,11 @@ function SaveSystem.InitHero(class, name)
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(loc, nil, name)
+        Paladin.Init(nil, nil, name)
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(loc, nil, name)
+        Priest.Init(nil, nil, name)
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end
@@ -5103,6 +4925,7 @@ hunter_text = "Охотники бьют врага на расстоянии и
 ---@author meiso
 
 function HeroSelector.Init()
+    HeroSelector.cache = GameCache("heroslt")
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 
@@ -5186,6 +5009,9 @@ function HeroSelector.InitHunterSelector()
     HeroSelector.ConfirmCharacter(HeroSelector.hunter)
 end
 
+--- Позывает окно подтверждения выбора
+---@param hero Frame Фрейм выбранного героя
+---@return nil
 function HeroSelector.ConfirmCharacter(hero)
     local dialog = EventsFrame(hero:GetHandle())
     dialog:RegisterControlClick()
@@ -5223,6 +5049,10 @@ function HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero)
 end
 
+--- Подтверждение выбранного героя
+---@param hero string Название выбранного героя (класс)
+---@param name string Имя героя
+---@return nil
 function HeroSelector.AcceptHero(hero, name)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
@@ -5232,13 +5062,21 @@ function HeroSelector.AcceptHero(hero, name)
         end
         return false
     end
+    local gc_selected = HeroSelector.cache:GetStr("hero", "hc")
+    print("gc_selected", gc_selected)
+    if gc_selected ~= "" then
+        table.insert(HeroSelector.selected_heroes, gc_selected)
+    end
     if check() then
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
+    HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
     --TODO
     --HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero, name)
+    HeroSelector.local_unit = SaveSystem.unit
+    Movement.Init(HeroSelector.local_unit)
 end
 
 function HeroSelector.Close()
@@ -7124,10 +6962,10 @@ function TestEntryPoint()
     --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
-    BuffSystem.LoadFrame()
+    HeroSelector.Init()
 
     -- Механики
+    BuffSystem.LoadFrame()
     BattleTextViewSystem.Init()
     EquipSystem.RegisterItems()
 
@@ -7139,10 +6977,10 @@ function TestEntryPoint()
 
     -- Персонажи
     Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    --Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
-    --Movement.Init()
+    --Movement.Init(HeroSelector.local_unit)
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))

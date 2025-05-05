@@ -778,3 +778,24 @@ STRING 274
 F
 }
 
+STRING 275
+{
+ICC: Lower Tier
+}
+
+STRING 276
+// Декорации: D000 (LowerTierFloor), Name (Название)
+{
+LowerTierFloor
+}
+
+STRING 277
+{
+1.0.0
+
+
+
+
+
+}
+

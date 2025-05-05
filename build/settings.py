@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from build.sources import ALL_SOURCE_FILES
 
 PROJECT_DIR: Path = Path.cwd()
+PATCHER: Path = PROJECT_DIR / "build" / "custom-code-replacer.exe"
 GAME_DIRS: tuple[Path, ...] = (
     Path("E:/Warcraft III/x86_64"),
     Path("E:/Games/Warcraft III/x86_64"),
@@ -16,7 +17,8 @@ GAME_DIRS: tuple[Path, ...] = (
 @dataclass
 class Settings:
     map: str = "NOT_SET"
-    custom_code: Path = "NOT_SET"
+    map_custom_code: Path = "NOT_SET"
+    wct_custom_code: Path = "NOT_SET"
     files: tuple = ALL_SOURCE_FILES
     entry_point: str = "NOT_SET"
     tag: str = "--CUSTOM_CODE"

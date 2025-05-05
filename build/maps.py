@@ -7,13 +7,15 @@ from build.settings import Settings
 test_map_settings = Settings(
     map="Test.w3x",
     entry_point="tests/main.lua",
-    custom_code=Path("custom-code.lua"),
+    map_custom_code=Path("map.cc"),
+    wct_custom_code=Path("wct.cc"),
 )
 
 lower_tier_settings = Settings(
     map="LowerTier.w3x",
     entry_point="src/entry_point/main.lua",
-    custom_code=Path("custom-code.lua"),
+    map_custom_code=Path("map.cc"),
+    wct_custom_code=Path("wct.cc"),
 )
 
 

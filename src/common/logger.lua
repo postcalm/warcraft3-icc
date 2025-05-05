@@ -34,14 +34,10 @@ setmetatable(Logger, {
 ---@private
 function Logger:_init(log_name)
     if not ENABLE_LOGGER then return end
-    local session_datetime = os.date("%d.%m.%Y_%H.%M.%S")
+    log_name = log_name or "log"
     self.current = self.counter:next()
     self.buffer[self.current] = {}
     self.log_dir = "logs"
-    self.log_file = session_datetime .. "_" .. (log_name or "log") .. ".txt"
-    --self.log_file = (log_name or "log") .. ".txt"
-    self.full_log_path = "save\\" .. self.log_dir .. "\\" .. self.log_file
-    self.file_handle = FileIO:open(self.full_log_path)
 end
 
 --- Записать в лог файл
@@ -54,8 +50,7 @@ function Logger:Log(level, ...)
     local args = table.pack(...)
     local message = ""
     if not ENABLE_LOGGER_STDOUT then
-        local log_datetime = "[" .. os.date("%d.%m.%Y %H:%M:%S") .. "]"
-        message = log_datetime .. " "
+        --message = log_datetime .. " "
     end
     message = message .. level.name .. ":"
     for _, arg in ipairs(args) do
