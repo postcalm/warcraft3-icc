@@ -1,6 +1,7 @@
 ---@author meiso
 
 function HeroSelector.Init()
+    HeroSelector.cache = GameCache("heroslt")
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 
@@ -84,6 +85,9 @@ function HeroSelector.InitHunterSelector()
     HeroSelector.ConfirmCharacter(HeroSelector.hunter)
 end
 
+--- Позывает окно подтверждения выбора
+---@param hero Frame Фрейм выбранного героя
+---@return nil
 function HeroSelector.ConfirmCharacter(hero)
     local dialog = EventsFrame(hero:GetHandle())
     dialog:RegisterControlClick()
@@ -121,6 +125,10 @@ function HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero)
 end
 
+--- Подтверждение выбранного героя
+---@param hero string Название выбранного героя (класс)
+---@param name string Имя героя
+---@return nil
 function HeroSelector.AcceptHero(hero, name)
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
@@ -130,13 +138,21 @@ function HeroSelector.AcceptHero(hero, name)
         end
         return false
     end
+    local gc_selected = HeroSelector.cache:GetStr("hero", "hc")
+    print("gc_selected", gc_selected)
+    if gc_selected ~= "" then
+        table.insert(HeroSelector.selected_heroes, gc_selected)
+    end
     if check() then
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
+    HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
     --TODO
     --HeroSelector.CreateHero()
     SaveSystem.InitHero(HeroSelector.hero, name)
+    HeroSelector.local_unit = SaveSystem.unit
+    Movement.Init(HeroSelector.local_unit)
 end
 
 function HeroSelector.Close()

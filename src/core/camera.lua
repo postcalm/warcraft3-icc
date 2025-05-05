@@ -9,10 +9,10 @@ Camera = {
 }
 
 --- Регистрирует камеру для игрока
-function Camera.Register()
+function Camera.Register(unit)
     Camera.logger:Info("Initialize Camera")
     --TODO: брать персонажа выбранного игроком
-    Camera.unit = Paladin.hero
+    Camera.unit = unit
     SetCameraTargetUnit(Camera.unit:GetId())
 
     local camera = Timer(0.04)

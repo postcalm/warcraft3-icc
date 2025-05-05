@@ -52,6 +52,8 @@ EQUIP_CACHE = nil
 
 --- Система выбора героев
 HeroSelector = {
+    --- Кэш системы
+    cache = nil,
     --- Основной фрейм
     table = nil,
     --- Фрейм паладина
@@ -78,4 +80,6 @@ HeroSelector = {
     hero = nil,
     --- Список выбранных героев
     selected_heroes = {},
+    --- Выбранный юнит для локального игрока
+    local_unit = nil,
 }

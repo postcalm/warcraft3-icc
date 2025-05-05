@@ -50,3 +50,9 @@ function SaveSystem.generation2()
     SaveSystem.hash2 = math.fmod(SaveSystem.hash2, SaveSystem.magic_number.five)
     return SaveSystem.hash2
 end
+
+--- Возвращает героя для текущего игрока
+---@return unit
+function SaveSystem.GetCurrentUnit()
+    return SaveSystem.hero[GetConvertedPlayerId(GetLocalPlayer())]
+end

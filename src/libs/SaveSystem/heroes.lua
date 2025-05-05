@@ -18,11 +18,11 @@ function SaveSystem.InitHero(class, name)
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(loc, nil, name)
+        Paladin.Init(nil, nil, name)
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(loc, nil, name)
+        Priest.Init(nil, nil, name)
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end

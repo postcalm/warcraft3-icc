@@ -25,7 +25,7 @@ function Paladin.ResetToDefault()
 end
 
 function Paladin.Init(location, unit, name)
-    location = location or Location(4000., 200.)
+    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Paladin"
     unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
 

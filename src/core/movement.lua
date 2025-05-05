@@ -14,9 +14,9 @@ Movement = {
 }
 
 --- Инициализация системы передвижения
-function Movement.Init()
+function Movement.Init(unit)
     Movement.logger:Info("Initialize movement system")
-    Camera.Register()
+    Camera.Register(unit or Paladin.hero)
     KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
     Movement.unit = Camera.unit
     Movement._set_default_anim()

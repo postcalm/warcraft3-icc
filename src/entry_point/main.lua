@@ -4,6 +4,7 @@ function EntryPoint()
     ENABLE_LOGGER_STDOUT = true
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
+    HeroSelector.Init()
 
     -- Механики
     BuffSystem.LoadFrame()
@@ -18,12 +19,7 @@ function EntryPoint()
     -- Боссы
     --LordMarrowgar.Init()
     --LadyDeathwhisper.Init()
-
-    -- Персонажи
-    --Priest.Init()
-    Paladin.Init(Location(930., -11000.))
-
-    Movement.Init()
+	
     FogEnableOff()
     FogMaskEnableOff()
 end
