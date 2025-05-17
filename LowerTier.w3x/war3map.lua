@@ -73,7 +73,7 @@ end
 
 function CreateRegions()
     local we
-    gg_rct_StartSpawn = Rect(416.0, -12608.0, 1216.0, -12000.0)
+    gg_rct_StartSpawn = Rect(544.0, -12608.0, 1344.0, -12000.0)
 end
 
 --CUSTOM_CODE
@@ -87,9 +87,9 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)
-    red = string.format("%x", red)
-    green = string.format("%x", green)
-    blue = string.format("%x", blue)
+    red = string.format("a", red)
+    green = string.format("342f4450", green)
+    blue = string.format("7", blue)
     return "00" .. red .. green .. blue
 end
 
@@ -146,7 +146,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3% снижения урона
+    --- Баф "Благословение неприкосновенности" - 3снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -792,7 +792,6 @@ Camera = {
 --- Регистрирует камеру для игрока
 function Camera.Register(unit)
     Camera.logger:Info("Initialize Camera")
-    --TODO: брать персонажа выбранного игроком
     Camera.unit = unit
     SetCameraTargetUnit(Camera.unit:GetId())
 
@@ -820,6 +819,9 @@ end
 ---@private
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
+    --print(GetCameraEyePositionX(), GetCameraEyePositionY())
+    --print(GetCameraEyePositionLoc())
+    print(RandomDestructableInRectSimpleBJ(RectFromLoc(GetCameraEyePositionLoc(), GetCameraEyePositionLoc())))
     local dist = 650.
     local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
@@ -1879,39 +1881,84 @@ function GameCache:_init(filename)
     self._cache = InitGameCache(filename .. ".w3v")
 end
 
-
+--- Сохранить целочисленное значение
+---@param value integer Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreInt(value, key, category, sync)
     GameCache:_store(value, key, category, "int", sync)
 end
 
+--- Сохранить строковое значение
+---@param value string Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreStr(value, key, category, sync)
     GameCache:_store(value, key, category, "str", sync)
 end
 
+--- Сохранить вещественное значение
+---@param value real Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreReal(value, key, category, sync)
     GameCache:_store(value, key, category, "real", sync)
 end
 
+--- Сохранить ID юнита
+---@param value unit Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreUnit(value, key, category, sync)
     GameCache:_store(value, key, category, "unit", sync)
 end
 
+--- Сохранить булевое значение
+---@param value boolean Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreBool(value, key, category, sync)
     GameCache:_store(value, key, category, "bool", sync)
 end
 
+--- Получить целочисленное значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return integer
 function GameCache:GetInt(key, category)
     return GetStoredInteger(self._cache, key, category)
 end
 
+--- Получить строковое значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return string
 function GameCache:GetStr(key, category)
     return GetStoredString(self._cache, key, category)
 end
 
+--- Получить вещественное значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return real
 function GameCache:GetReal(key, category)
     return GetStoredReal(self._cache, key, category)
 end
 
+--- Получить булевое значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return boolean
 function GameCache:GetBool(key, category)
     return GetStoredBoolean(self._cache, key, category)
 end
@@ -5127,9 +5174,9 @@ blessing_of_kings = Ability {
     manacost = 6,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10%."
+    buff_desc = "Все характеристики повышены на 10"
 }
 
 blessing_of_might = Ability {
@@ -5157,11 +5204,11 @@ blessing_of_sanctuary = Ability {
     manacost = 7,
     tooltip = "Благословение неприкосновенности",
     key = "T",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
-            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -5182,7 +5229,7 @@ judgement_of_light_tr = Ability {
     tooltip = "Правосудие света",
     key = "C",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+            "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
     buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
@@ -5194,7 +5241,7 @@ judgement_of_wisdom_tr = Ability {
     tooltip = "Правосудие мудрости",
     key = "V",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+            "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
     buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
@@ -5216,8 +5263,8 @@ divine_shield = Ability {
     cooldown = 60. * 5,
     tooltip = "Божественный щит",
     key = "Z",
-    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
-    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
 }
 
 hammer_of_righteous = Ability {
@@ -5297,11 +5344,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50% ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -5354,7 +5401,7 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+    text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -6476,7 +6523,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42% от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -6996,18 +7043,14 @@ function EntryPoint()
     -- Боссы
     --LordMarrowgar.Init()
     --LadyDeathwhisper.Init()
-
-    -- Персонажи
-    --Priest.Init()
-    --Paladin.Init(Location(930., -11000.))
-
-    --Movement.Init()
+	
     FogEnableOff()
     FogMaskEnableOff()
 end
 
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
+    KillDestructable(RandomDestructableInRectSimpleBJ(RectFromLoc(Location(0, 0), Location(0, 0))))
         EntryPoint()
 end
 
