@@ -276,6 +276,9 @@ DUMMY       = FourCC('h002')
 SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
 
+VISION_BLOCKER = FourCC("Ytlc")
+TRACK_BOTH_BLOCKER = FourCC("YTfc")
+
 ---@author meiso
 
 PLAYER_1   = Player(0)
@@ -762,6 +765,7 @@ end
 
 ---@class Camera
 Camera = {
+    dist = 650.,
     ---@type Unit
     unit = nil,
     ---@type Logger
@@ -771,7 +775,6 @@ Camera = {
 --- Регистрирует камеру для игрока
 function Camera.Register(unit)
     Camera.logger:Info("Initialize Camera")
-    --TODO: брать персонажа выбранного игроком
     Camera.unit = unit
     SetCameraTargetUnit(Camera.unit:GetId())
 
@@ -799,11 +802,12 @@ end
 ---@private
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    local dist = 650.
+    --local dist = 650.
     local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
-    Camera._set_dist(dist)
+    Camera._detect_collision()
+    --Camera._set_dist(dist)
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
         Camera._set_angle(-24.)
     else
@@ -811,6 +815,59 @@ function Camera._update()
     end
     Camera._set_offset(zoffset)
     Camera._set_facing(facing)
+end
+
+---@private
+function Camera._detect_collision()
+    -- коллизии вычисляются по следующей логике:
+    -- расстояние между камера-юнит больше чем расстояние камера-блок
+    -- и расстояние между камера-юнит больше чем расстояние блок-юнит
+    local block_loc = GetDestructableLoc(Camera._get_near_block())
+    local camera_loc = GetCameraEyePositionLoc()
+    -- приводим значения к удобной форме
+    local camera_unit_dist = DistanceBetweenPoints(camera_loc, Camera.unit:GetLoc()) // 10 * 10
+    local block_unit_dist = DistanceBetweenPoints(block_loc, Camera.unit:GetLoc()) // 10 * 10
+    local block_camera_dist = DistanceBetweenPoints(block_loc, camera_loc) // 10 * 10
+    -- сначала проверяем расстояние между камера-юнит и блок-камера, чтобы дистанция камеры не скакала
+    if camera_unit_dist > block_camera_dist then
+        -- проверяем расстояние между блок-юнит и камера-юнит
+        if block_unit_dist <= camera_unit_dist then
+            Camera.logger:Debug("set block dist:", block_unit_dist)
+            Camera._set_dist(block_unit_dist)
+        end
+    else
+        Camera.logger:Debug("set camera dist:", Camera.dist)
+        Camera._set_dist(Camera.dist)
+    end
+end
+
+--- Вычисляет ближайший блок к игроку
+---@private
+function Camera._get_near_block()
+    local block
+    local min_dist = Camera.dist
+    local unit_loc_x = Camera.unit:GetX()
+    local unit_loc_y = Camera.unit:GetY()
+    local border = 200
+    local unit_loc = Rect(
+            unit_loc_x - border,
+            unit_loc_y - border,
+            unit_loc_x + border,
+            unit_loc_y + border
+    )
+    local near_func = function()
+        local find = GetEnumDestructable()
+        local dest_id = GetDestructableTypeId(find)
+        if dest_id == VISION_BLOCKER or dest_id == TRACK_BOTH_BLOCKER then
+            local dist = DistanceBetweenPoints(GetDestructableLoc(find), Camera.unit:GetLoc())
+            if dist < min_dist then
+                min_dist = dist
+                block = find
+            end
+        end
+    end
+    EnumDestructablesInRectAll(unit_loc, near_func)
+    return block
 end
 
 ---@private
@@ -1858,39 +1915,84 @@ function GameCache:_init(filename)
     self._cache = InitGameCache(filename .. ".w3v")
 end
 
-
+--- Сохранить целочисленное значение
+---@param value integer Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreInt(value, key, category, sync)
     GameCache:_store(value, key, category, "int", sync)
 end
 
+--- Сохранить строковое значение
+---@param value string Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreStr(value, key, category, sync)
     GameCache:_store(value, key, category, "str", sync)
 end
 
+--- Сохранить вещественное значение
+---@param value real Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreReal(value, key, category, sync)
     GameCache:_store(value, key, category, "real", sync)
 end
 
+--- Сохранить ID юнита
+---@param value unit Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreUnit(value, key, category, sync)
     GameCache:_store(value, key, category, "unit", sync)
 end
 
+--- Сохранить булевое значение
+---@param value boolean Значение
+---@param key string Ключ/метка для сохранения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@param sync boolean Синхронизировать ли значение
+---@return nil
 function GameCache:StoreBool(value, key, category, sync)
     GameCache:_store(value, key, category, "bool", sync)
 end
 
+--- Получить целочисленное значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return integer
 function GameCache:GetInt(key, category)
     return GetStoredInteger(self._cache, key, category)
 end
 
+--- Получить строковое значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return string
 function GameCache:GetStr(key, category)
     return GetStoredString(self._cache, key, category)
 end
 
+--- Получить вещественное значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return real
 function GameCache:GetReal(key, category)
     return GetStoredReal(self._cache, key, category)
 end
 
+--- Получить булевое значение
+---@param key string Ключ/метка значения
+---@param category string Категория ключа/метки (по сути тоже самое, что и `key`)
+---@return boolean
 function GameCache:GetBool(key, category)
     return GetStoredBoolean(self._cache, key, category)
 end
@@ -6962,7 +7064,7 @@ function TestEntryPoint()
     --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
 
     -- Механики
     BuffSystem.LoadFrame()
@@ -6976,11 +7078,11 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
-    --Paladin.Init(Location(-400., -490.))
+    --Priest.Init(Location(300., -490.))
+    Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
-    --Movement.Init(HeroSelector.local_unit)
+    Movement.Init()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
@@ -6998,12 +7100,18 @@ function InitTrig_EntryPoint()
     TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
+function Trig_test_Func001001002()
+    return (GetDestructableTypeId(GetLastCreatedDestructable()) == FourCC("YTfc"))
+end
+
 function Trig_test_Actions()
+    KillDestructable(RandomDestructableInRectBJ(nil, Condition(Trig_test_Func001001002)))
     SetUnitAnimation(nil, "stand")
 end
 
 function InitTrig_test()
     gg_trg_test = CreateTrigger()
+    DisableTrigger(gg_trg_test)
     TriggerAddAction(gg_trg_test, Trig_test_Actions)
 end
 
@@ -7026,7 +7134,6 @@ end
 
 function RunInitializationTriggers()
     ConditionalTriggerExecute(gg_trg_EntryPoint)
-    ConditionalTriggerExecute(gg_trg_test)
 end
 
 function InitCustomPlayerSlots()

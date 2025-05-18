@@ -87,9 +87,9 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)
-    red = string.format("a", red)
-    green = string.format("342f4450", green)
-    blue = string.format("7", blue)
+    red = string.format("%x", red)
+    green = string.format("%x", green)
+    blue = string.format("%x", blue)
     return "00" .. red .. green .. blue
 end
 
@@ -146,7 +146,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3снижения урона
+    --- Баф "Благословение неприкосновенности" - 3% снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -296,6 +296,9 @@ BONE_SPIKE_OBJ = FourCC('h000')
 DUMMY       = FourCC('h002')
 SPELL_DUMMY = FourCC('h001')
 DUMMY_EQUIP = FourCC('e000')
+
+VISION_BLOCKER = FourCC("Ytlc")
+TRACK_BOTH_BLOCKER = FourCC("YTfc")
 
 ---@author meiso
 
@@ -783,6 +786,7 @@ end
 
 ---@class Camera
 Camera = {
+    dist = 650.,
     ---@type Unit
     unit = nil,
     ---@type Logger
@@ -819,14 +823,12 @@ end
 ---@private
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    --print(GetCameraEyePositionX(), GetCameraEyePositionY())
-    --print(GetCameraEyePositionLoc())
-    print(RandomDestructableInRectSimpleBJ(RectFromLoc(GetCameraEyePositionLoc(), GetCameraEyePositionLoc())))
-    local dist = 650.
+    --local dist = 650.
     local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
-    Camera._set_dist(dist)
+    Camera._detect_collision()
+    --Camera._set_dist(dist)
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
         Camera._set_angle(-24.)
     else
@@ -834,6 +836,59 @@ function Camera._update()
     end
     Camera._set_offset(zoffset)
     Camera._set_facing(facing)
+end
+
+---@private
+function Camera._detect_collision()
+    -- коллизии вычисляются по следующей логике:
+    -- расстояние между камера-юнит больше чем расстояние камера-блок
+    -- и расстояние между камера-юнит больше чем расстояние блок-юнит
+    local block_loc = GetDestructableLoc(Camera._get_near_block())
+    local camera_loc = GetCameraEyePositionLoc()
+    -- приводим значения к удобной форме
+    local camera_unit_dist = DistanceBetweenPoints(camera_loc, Camera.unit:GetLoc()) // 10 * 10
+    local block_unit_dist = DistanceBetweenPoints(block_loc, Camera.unit:GetLoc()) // 10 * 10
+    local block_camera_dist = DistanceBetweenPoints(block_loc, camera_loc) // 10 * 10
+    -- сначала проверяем расстояние между камера-юнит и блок-камера, чтобы дистанция камеры не скакала
+    if camera_unit_dist > block_camera_dist then
+        -- проверяем расстояние между блок-юнит и камера-юнит
+        if block_unit_dist <= camera_unit_dist then
+            Camera.logger:Debug("set block dist:", block_unit_dist)
+            Camera._set_dist(block_unit_dist)
+        end
+    else
+        Camera.logger:Debug("set camera dist:", Camera.dist)
+        Camera._set_dist(Camera.dist)
+    end
+end
+
+--- Вычисляет ближайший блок к игроку
+---@private
+function Camera._get_near_block()
+    local block
+    local min_dist = Camera.dist
+    local unit_loc_x = Camera.unit:GetX()
+    local unit_loc_y = Camera.unit:GetY()
+    local border = 200
+    local unit_loc = Rect(
+            unit_loc_x - border,
+            unit_loc_y - border,
+            unit_loc_x + border,
+            unit_loc_y + border
+    )
+    local near_func = function()
+        local find = GetEnumDestructable()
+        local dest_id = GetDestructableTypeId(find)
+        if dest_id == VISION_BLOCKER or dest_id == TRACK_BOTH_BLOCKER then
+            local dist = DistanceBetweenPoints(GetDestructableLoc(find), Camera.unit:GetLoc())
+            if dist < min_dist then
+                min_dist = dist
+                block = find
+            end
+        end
+    end
+    EnumDestructablesInRectAll(unit_loc, near_func)
+    return block
 end
 
 ---@private
@@ -5174,9 +5229,9 @@ blessing_of_kings = Ability {
     manacost = 6,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10"
+    buff_desc = "Все характеристики повышены на 10%."
 }
 
 blessing_of_might = Ability {
@@ -5204,11 +5259,11 @@ blessing_of_sanctuary = Ability {
     manacost = 7,
     tooltip = "Благословение неприкосновенности",
     key = "T",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-            "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -5229,7 +5284,7 @@ judgement_of_light_tr = Ability {
     tooltip = "Правосудие света",
     key = "C",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
+            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
     buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
@@ -5241,7 +5296,7 @@ judgement_of_wisdom_tr = Ability {
     tooltip = "Правосудие мудрости",
     key = "V",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
+            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
     buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
@@ -5263,8 +5318,8 @@ divine_shield = Ability {
     cooldown = 60. * 5,
     tooltip = "Божественный щит",
     key = "Z",
-    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
-    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
 }
 
 hammer_of_righteous = Ability {
@@ -5344,11 +5399,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50% ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -5401,7 +5456,7 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+    text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -6523,7 +6578,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -7050,7 +7105,6 @@ end
 
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
-    KillDestructable(RandomDestructableInRectSimpleBJ(RectFromLoc(Location(0, 0), Location(0, 0))))
         EntryPoint()
 end
 

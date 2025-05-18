@@ -7,9 +7,9 @@ function TestEntryPoint()
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     --HeroSelector.Init()
-    BuffSystem.LoadFrame()
 
     -- Механики
+    BuffSystem.LoadFrame()
     BattleTextViewSystem.Init()
     EquipSystem.RegisterItems()
 
@@ -20,11 +20,11 @@ function TestEntryPoint()
     SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.))
+    --Priest.Init(Location(300., -490.))
     Paladin.Init(Location(-400., -490.))
     --DeathKnight.Init(Location(-400., -520.))
 
-    --Movement.Init()
+    Movement.Init()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
