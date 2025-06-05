@@ -24,10 +24,10 @@ function Paladin.ResetToDefault()
     end
 end
 
-function Paladin.Init(location, unit, name)
+function Paladin.Init(location, unit, name, player)
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Paladin"
-    unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
+    unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
     Paladin.hero = Unit(unit)
     Paladin.hero:SetName(name)

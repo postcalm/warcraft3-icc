@@ -19,6 +19,8 @@ function Key:_init(key)
     self.key = key
     ---@type boolean
     self.pressed = false
+    ---@type integer
+    self.player_id = nil
 end
 
 ---@class KeyboardController
@@ -26,38 +28,43 @@ KeyboardController = {
     ---@type Pool
     keys = Pool(),
     ---@private
-    _event = nil,
+    _events = {},
     ---@type Logger
     logger = Logger("keyboard"),
 }
 
 --- Регистрирует события нажатия клавиш
----@param keys oskeytype Список клавиш
+---@param player player Игрок
+---@param ... oskeytype Список клавиш
 ---@return nil
-function KeyboardController.Register(...)
+function KeyboardController.Register(player_id, ...)
+    local player = PLAYERS[player_id]
     local keys = ...
     if type(...) ~= "table" then
         keys = table.pack(...)
     end
-    if KeyboardController._event == nil then
-        KeyboardController._event = EventsPlayer()
-        KeyboardController._event:AddAction(KeyboardController._process)
+    if KeyboardController._events[player_id] == nil then
+        KeyboardController.logger:Info("Init event for player", player_id)
+        KeyboardController._events[player_id] = EventsPlayer(player)
+        KeyboardController._events[player_id]:AddAction(KeyboardController._process)
     end
     for _, key in ipairs(keys) do
         KeyboardController.keys:Add(Key(key))
-        KeyboardController._event:RegisterKeyPressed(key)
+        KeyboardController._events[player_id]:RegisterKeyPressed(key)
     end
+    KeyboardController.logger:Info("Keyboard init success")
 end
 
 ---@private
 function KeyboardController._process()
     local key = BlzGetTriggerPlayerKey()
     local pressed = BlzGetTriggerPlayerIsKeyDown()
-    KeyboardController.logger:Info("pressed key", GetHandleId(key))
+    KeyboardController.logger:Debug("pressed key", GetHandleId(key))
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == key then
             local new = k
             new.pressed = pressed
+            new.player_id = GetConvertedPlayerId(GetTriggerPlayer())
             KeyboardController.keys:Update(new)
         end
     end

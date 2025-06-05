@@ -30,10 +30,12 @@ function Unit:_init(player, unit_id, location, face)
     local x = GetLocationX(location)
     local y = GetLocationY(location)
     local f = face or GetRandomDirectionDeg()
+    local p = player or GetTriggerPlayer()
     self.basemana = 0
     self.agro = 0
-    self.controlled = (player == GetLocalPlayer()) or false
-    self.unit = CreateUnit(player, unit_id, x, y, f)
+    self.controlled = (p == GetLocalPlayer()) or false
+    self.unit = CreateUnit(p, unit_id, x, y, f)
+    --TODO: синхронизировать пул отдельно, т.к. юниты создаются моментом для всех игроков
     UNITS_POOL.add(self)
     local agro = CombatSystem(self)
     agro:Register()
@@ -764,6 +766,13 @@ end
 ---@return player
 function Unit:GetOwner()
     return GetOwningPlayer(self.unit)
+end
+
+--- Сменить игрока, владеющего юнитом
+---@param player player
+---@return nil
+function Unit:SetOwner(player)
+    SetUnitOwner(self.unit, player, true)
 end
 
 --- Установить имя юниту

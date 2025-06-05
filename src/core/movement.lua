@@ -2,100 +2,114 @@
 
 ---@class Movement
 Movement = {
-    ---@type Unit
-    unit = nil,
-    to_up = false,
-    to_down = false,
-    to_left = false,
-    to_right = false,
-    animate = false,
+    ---@type table[Unit]
+    units = {},
+    to_up = {},
+    to_down = {},
+    to_left = {},
+    to_right = {},
+    animate = {},
+    ---@type Timer
+    timers = {},
     ---@type Logger
     logger = Logger("movement"),
 }
 
 --- Инициализация системы передвижения
-function Movement.Init(unit)
+function Movement.Init(unit, player)
     Movement.logger:Info("Initialize movement system")
-    Camera.Register(unit or Paladin.hero)
-    KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
-    Movement.unit = Camera.unit
-    Movement._set_default_anim()
-    local movement = Timer(0.03)
-    movement:SetFunc(Movement._update)
-    movement:EnablePeriodic()
-    movement:Start()
+    local player_id = GetConvertedPlayerId(player)
+
+    Camera.Register(unit, player)
+    KeyboardController.Register(player_id, OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
+
+    if Movement.units[player_id] == nil then
+        Movement.units[player_id] = unit
+    end
+    if Movement.timers[player_id] == nil then
+        Movement.timers[player_id] = Timer(0.04)
+    end
+
+    Movement._set_default_anim(player_id)
+    local timer = Movement.timers[player_id]
+    timer:SetFunc(function() Movement._update(player_id) end)
+    timer:EnablePeriodic()
+    timer:Start()
     Movement.logger:Info("Movement system start!")
 end
 
 ---@private
-function Movement._update()
-    Movement._process()
-    Movement._rotate_camera()
-    Movement._move()
-    Movement._play_anim()
+function Movement._update(player_id)
+    Movement._process(player_id)
+    Movement._rotate_camera(player_id)
+    Movement._move(player_id)
+    Movement._play_anim(player_id)
 end
 
 ---@private
-function Movement._process()
+function Movement._process(player_id)
     for _, k in pairs(KeyboardController.keys:All()) do
-        if k.key == OSKEY_W then
-            Movement.to_up = k.pressed
+        if k.key == OSKEY_W and player_id == k.player_id then
+            Movement.to_up[player_id] = k.pressed
         end
-        if k.key == OSKEY_S then
-            Movement.to_down = k.pressed
+        if k.key == OSKEY_S and player_id == k.player_id then
+            Movement.to_down[player_id] = k.pressed
         end
-        if k.key == OSKEY_A then
-            Movement.to_left = k.pressed
+        if k.key == OSKEY_A and player_id == k.player_id then
+            Movement.to_left[player_id] = k.pressed
         end
-        if k.key == OSKEY_D then
-            Movement.to_right = k.pressed
+        if k.key == OSKEY_D and player_id == k.player_id then
+            Movement.to_right[player_id] = k.pressed
         end
     end
 end
 
 ---@private
-function Movement._rotate_camera()
-    if Movement.to_left then
-        Camera.TurnLeft()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+function Movement._rotate_camera(player_id)
+    local unit = Movement.units[player_id]
+    if Movement.to_left[player_id] then
+        Camera.TurnLeft(player_id)
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to left")
-    elseif Movement.to_right then
-        Camera.TurnRight()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+    elseif Movement.to_right[player_id] then
+        Camera.TurnRight(player_id)
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to right")
     end
 end
 
 ---@private
-function Movement._move()
-    local unit = Movement.unit
-    if Movement.to_up then
+function Movement._move(player_id)
+    local unit = Movement.units[player_id]
+    if Movement.to_up[player_id] then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to up")
-    elseif Movement.to_down then
+    elseif Movement.to_down[player_id] then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to down")
     end
 end
 
 ---@private
-function Movement._play_anim()
-    if Movement.to_up and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 5)
-        Movement.animate = true
-    elseif Movement.to_down and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 13)
-        Movement.animate = true
+function Movement._play_anim(player_id)
+    local unit = Movement.units[player_id]
+    --TODO: поправить выбор анимаций (у каждого юнита он свой)
+    if Movement.to_up[player_id] and not Movement.animate[player_id] then
+        SetUnitAnimationByIndex(unit:GetId(), 5)
+        Movement.animate[player_id] = true
+    elseif Movement.to_down[player_id] and not Movement.animate[player_id] then
+        SetUnitAnimationByIndex(unit:GetId(), 13)
+        Movement.animate[player_id] = true
     end
-    if not Movement.to_up and not Movement.to_down and Movement.animate then
-        Movement._set_default_anim()
+    if not Movement.to_up[player_id] and not Movement.to_down[player_id] and Movement.animate[player_id] then
+        Movement._set_default_anim(player_id)
     end
 end
 
 ---@private
-function Movement._set_default_anim()
-    SetUnitAnimation(Movement.unit:GetId(), "Portrait")
-    Movement.animate = false
+function Movement._set_default_anim(player_id)
+    SetUnitAnimation(Movement.units[player_id]:GetId(), "Portrait")
+    Movement.animate[player_id] = false
 end

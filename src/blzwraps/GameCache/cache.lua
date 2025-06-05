@@ -131,5 +131,5 @@ function GameCache:_sync(key, category, value_type)
         SyncStoredUnit(self._cache, key, category)
     elseif value_type == "bool" then
         SyncStoredBoolean(self._cache, key, category)
-    end 
+    end
 end

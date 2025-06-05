@@ -81,5 +81,6 @@ HeroSelector = {
     --- Список выбранных героев
     selected_heroes = {},
     --- Выбранный юнит для локального игрока
-    local_unit = nil,
+    units = {},
+    logger = Logger("HeroSelector"),
 }

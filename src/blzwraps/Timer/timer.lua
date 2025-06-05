@@ -65,5 +65,10 @@ end
 --- Уничтожить первый истёкший таймер
 ---@return nil
 function Timer:DestroyExpired()
-    DestroyTimer(GetExpiredTimer())
+    if self.periodic then
+        PauseTimer(self.timer)
+        DestroyTimer(self.timer)
+    else
+        DestroyTimer(GetExpiredTimer())
+    end
 end

@@ -4,12 +4,23 @@
 Файлы должны собираться в чёткой последовательности:
 - файлы с общими константами и первичные файлы инициализации игры и юнитов
 - файлы ядра (движка) игры
-- интерфейсы над близзардовскими функциями
+- интерфейсы над близардовскими функциями
 - реализации различных игровых систем
 - реализации героев и юнитов
 """
 COMMON_FILES = (
-    "src/common",
+    "src/common/buffs.lua",
+    "src/common/color.lua",
+    "src/common/counter.lua",
+    "src/common/items.lua",
+    "src/common/logger.lua",
+    "src/common/measures.lua",
+    "src/common/objects.lua",
+    "src/common/other.lua",
+    "src/common/tools.lua",
+    "src/common/players.lua",
+    "src/common/spells.lua",
+    "src/common/units.lua",
 )
 INIT_FILES = (
     "src/preinitialize.lua",
@@ -57,6 +68,7 @@ HERO_SELECTOR_FILES = (
 )
 SOURCES_FILES = (
     "src/abilities.lua",
+    "src/session.lua",
 )
 UNITS_FILES = (
     "src/units/dummy",

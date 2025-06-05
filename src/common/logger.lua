@@ -34,6 +34,7 @@ setmetatable(Logger, {
 ---@private
 function Logger:_init(log_name)
     if not ENABLE_LOGGER then return end
+    print("INFO: Init logger - " .. log_name)
     log_name = log_name or "log"
     self.current = self.counter:next()
     self.buffer[self.current] = {}
@@ -54,7 +55,7 @@ function Logger:Log(level, ...)
     end
     message = message .. level.name .. ":"
     for _, arg in ipairs(args) do
-        message = message .. " " .. arg
+        message = message .. " " .. tostring(arg)
     end
     if ENABLE_LOGGER_STDOUT then
         print(message)

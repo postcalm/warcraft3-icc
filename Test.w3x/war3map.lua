@@ -6,29 +6,35 @@ gg_trg_RespawnHero = nil
 function InitGlobals()
 end
 
-function SetCameraTargetUnit(unit)
-    SetCameraTargetControllerNoZForPlayer(GetLocalPlayer(), unit, 0, 0, false)
+function SetCameraTargetUnit(unit, player)
+    local p = player or GetTriggerPlayer()
+    SetCameraTargetControllerNoZForPlayer(p, unit, 0, 0, false)
 end
 
-function SetCameraRotation(rotation, duration)
+function SetCameraRotation(rotation, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ROTATION, rotation, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ROTATION, rotation, d)
 end
 
-function SetCameraAngle(angle, duration)
+function SetCameraAngle(angle, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
 end
 
-function SetCameraZOffset(zoffset, duration)
+function SetCameraZOffset(zoffset, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ZOFFSET, zoffset, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ZOFFSET, zoffset, d)
 end
 
-function SetCameraDistance(dist, duration)
+function SetCameraDistance(dist, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_TARGET_DISTANCE, dist, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_TARGET_DISTANCE, dist, d)
 end
+
 function CreateUnitsForPlayer0()
     local p = Player(0)
     local u
@@ -66,9 +72,9 @@ JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
 
 -- Формат: transparency-red-green-blue
 function _dec2hex(red, green, blue)
-    red = string.format("%x", red)
-    green = string.format("%x", green)
-    blue = string.format("%x", blue)
+    red = string.format("a", red)
+    green = string.format("2dc4450", green)
+    blue = string.format("6", blue)
     return "00" .. red .. green .. blue
 end
 
@@ -125,7 +131,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3% снижения урона
+    --- Баф "Благословение неприкосновенности" - 3снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -171,6 +177,7 @@ setmetatable(Logger, {
 ---@private
 function Logger:_init(log_name)
     if not ENABLE_LOGGER then return end
+    print("INFO: Init logger - " .. log_name)
     log_name = log_name or "log"
     self.current = self.counter:next()
     self.buffer[self.current] = {}
@@ -191,7 +198,7 @@ function Logger:Log(level, ...)
     end
     message = message .. level.name .. ":"
     for _, arg in ipairs(args) do
-        message = message .. " " .. arg
+        message = message .. " " .. tostring(arg)
     end
     if ENABLE_LOGGER_STDOUT then
         print(message)
@@ -381,11 +388,17 @@ function round(number)
 end
 
 --- Проверяет, является ли объект типом "table".
----По сути проверяет, является ли объект экземпляром класса
+--- По сути проверяет, является ли объект экземпляром класса
 ---@param object type Проверяемый объект
 ---@return boolean
 function isTable(object)
     return type(object) == "table"
+end
+
+--- Проверяет, что локальный игрок запустил событие
+---@return boolean
+function isLocalPlayer()
+    return GetLocalPlayer() == GetTriggerPlayer()
 end
 
 ---@author meiso
@@ -499,6 +512,7 @@ HeroSelector = {
     selected_heroes = {},
     --- Выбранный юнит для локального игрока
     local_unit = nil,
+    logger = Logger("HeroSelector"),
 }
 
 ---@author meiso
@@ -527,13 +541,14 @@ function Paladin.ResetToDefault()
     end
 end
 
-function Paladin.Init(location, unit, name)
+function Paladin.Init(location, unit, name, player)
+    --Logger("Paladin"):Info("Initialize Paladin...")
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Paladin"
-    unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
+    unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
     Paladin.hero = Unit(unit)
-    Paladin.hero:SetName(name)
+    --Paladin.hero:SetName(name)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -546,6 +561,7 @@ function Paladin.Init(location, unit, name)
     Paladin.InitAvengersShield()
 
     Paladin.ResetToDefault()
+    --Logger("Paladin"):Info("Success!")
 end
 
 ---@author meiso
@@ -576,13 +592,13 @@ function Priest.ResetToDefault()
     end
 end
 
-function Priest.Init(location, unit, name)
+function Priest.Init(location, unit, name, player)
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Priest"
-    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.):GetId()
+    unit = unit or Unit(player, PRIEST, location, 90.):GetId()
 
     Priest.hero = Unit(unit)
-    Priest.hero:SetName(name)
+    --Priest.hero:SetName(name)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
@@ -768,15 +784,18 @@ Camera = {
     dist = 650.,
     ---@type Unit
     unit = nil,
+    ---@type player
+    player = nil,
     ---@type Logger
     logger = Logger("camera"),
 }
 
 --- Регистрирует камеру для игрока
-function Camera.Register(unit)
+function Camera.Register(unit, player)
     Camera.logger:Info("Initialize Camera")
     Camera.unit = unit
-    SetCameraTargetUnit(Camera.unit:GetId())
+    Camera.player = player
+    SetCameraTargetUnit(Camera.unit:GetId(), Camera.player)
 
     local camera = Timer(0.04)
     camera:SetFunc(Camera._update)
@@ -802,12 +821,10 @@ end
 ---@private
 function Camera._update()
     Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    --local dist = 650.
     local zoffset = 90. + Camera.unit:GetZ()
     local facing = Camera.unit:GetFacing()
     local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
     Camera._detect_collision()
-    --Camera._set_dist(dist)
     if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
         Camera._set_angle(-24.)
     else
@@ -872,25 +889,37 @@ end
 
 ---@private
 function Camera._set_dist(dist)
-    SetCameraDistance(dist)
+    SetCameraDistance {
+        dist = dist,
+        player = Camera.player
+    }
     Camera.logger:Debug("set camera fields: dist -", dist)
 end
 
 ---@private
 function Camera._set_angle(angle)
-    SetCameraAngle(angle)
+    SetCameraAngle {
+        angle = angle,
+        player = Camera.player
+    }
     Camera.logger:Debug("set camera fields: angle -", angle)
 end
 
 ---@private
 function Camera._set_offset(offset)
-    SetCameraZOffset(offset)
+    SetCameraZOffset {
+        zoffset = offset,
+        player = Camera.player
+    }
     Camera.logger:Debug("set camera fields: zoffset -", offset)
 end
 
 ---@private
 function Camera._set_facing(facing)
-    SetCameraRotation(facing)
+    SetCameraRotation {
+        rotation = facing,
+        player = Camera.player
+    }
     Camera.logger:Debug("set camera fields: facing -", facing)
 end
 
@@ -905,16 +934,18 @@ Movement = {
     to_left = false,
     to_right = false,
     animate = false,
+    player = nil,
     ---@type Logger
     logger = Logger("movement"),
 }
 
 --- Инициализация системы передвижения
-function Movement.Init(unit)
+function Movement.Init(unit, player)
     Movement.logger:Info("Initialize movement system")
-    Camera.Register(unit or Paladin.hero)
+    Camera.Register(unit, player)
     KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
     Movement.unit = Camera.unit
+    Movement.player = player
     Movement._set_default_anim()
     local movement = Timer(0.03)
     movement:SetFunc(Movement._update)
@@ -953,11 +984,11 @@ end
 function Movement._rotate_camera()
     if Movement.to_left then
         Camera.TurnLeft()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), Movement.player)
         Movement.logger:Debug("to left")
     elseif Movement.to_right then
         Camera.TurnRight()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(Movement.unit:GetId(), Movement.player)
         Movement.logger:Debug("to right")
     end
 end
@@ -967,11 +998,11 @@ function Movement._move()
     local unit = Movement.unit
     if Movement.to_up then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), Movement.player)
         Movement.logger:Debug("to up")
     elseif Movement.to_down then
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), Movement.player)
         Movement.logger:Debug("to down")
     end
 end
@@ -2028,7 +2059,7 @@ function GameCache:_sync(key, category, value_type)
         SyncStoredUnit(self._cache, key, category)
     elseif value_type == "bool" then
         SyncStoredBoolean(self._cache, key, category)
-    end 
+    end
 end
 
 --- Created by meiso.
@@ -2424,7 +2455,9 @@ function Unit:_init(player, unit_id, location, face)
     self.basemana = 0
     self.agro = 0
     self.controlled = (player == GetLocalPlayer()) or false
-    self.unit = CreateUnit(player, unit_id, x, y, f)
+    self.unit = CreateUnit(GetTriggerPlayer(), unit_id, x, y, f)
+    print(self.unit)
+    -- синхронизировать пул отдельно, т.к. юниты создаются моментом
     UNITS_POOL.add(self)
     local agro = CombatSystem(self)
     agro:Register()
@@ -3157,6 +3190,13 @@ function Unit:GetOwner()
     return GetOwningPlayer(self.unit)
 end
 
+--- Сменить игрока, владеющего юнитом
+---@param player player
+---@return nil
+function Unit:SetOwner(player)
+    SetUnitOwner(self.unit, player, true)
+end
+
 --- Установить имя юниту
 ---@param name string Имя юнита
 ---@return nil
@@ -3274,31 +3314,33 @@ end
 --- Система сохранений
 SaveSystem = {
     --- Словарь всех выбранных героев: ID игрока - ID юнита
-    hero       = {},
+    hero = {},
+    ---
+    player_unit = nil,
     --- Юнит, которого требуется сохранить
-    unit       = nil,
+    unit = nil,
     --- Идентификатор класса
-    classid    = 0,
+    classid = 0,
     --- Список способностей юнита
-    abilities  = {},
+    abilities = {},
     --- Книга заклинаний юнита
-    spellbook  = nil,
+    spellbook = nil,
     --- Место воскрешения
-    respawn    = nil,
+    respawn = nil,
     --- Директория, где будут лежать сохранения
-    directory  = "save",
+    directory = "save",
     --- Идентификатор автора системы сохранений
-    author     = 1546,
+    author = 1546,
     --- Пользовательские данные
-    user_data  = {},
+    user_data = {},
     --- Данные игрока и его юнита
-    data       = {},
+    data = {},
     --- Флаг процесса сохранения
-    process    = false,
-    hash1      = 0,
-    hash2      = 0,
+    process = false,
+    hash1 = 0,
+    hash2 = 0,
     --- Кэш для синхронизации данных
-    gamecache  = nil,
+    gamecache = nil,
     --- Номер карты
     map_number = 0,
     -- Автор данного творения запихал все данные в один массив
@@ -3306,45 +3348,46 @@ SaveSystem = {
     -- добавил специальные числа, разграничивающие области эти данных
     scope = {
         --- Область, за которой следует номер карты
-        map        = 2,
+        map = 2,
         --- Область, за которой следуют данные о ресурсах игрока
-        resources  = 3,
+        resources = 3,
         --- Область, за которой следуют данные о юните (положение, хп, мана)
-        hero_data  = 4,
+        hero_data = 4,
         --- Область, за которой следуют данные о количестве skill points
         hero_skill = 5,
         --- Область, за которой следуют данные о характеристиках
-        state      = 6,
+        state = 6,
         --- Область, за которой следуют данные о способностях героя
-        abilities  = 7,
+        abilities = 7,
         --- Область, за которой следуют данные об имеющихся предметах
-        items      = 8,
+        items = 8,
     },
     -- Числа, расшифровать смысл которых, так и не получилось
     magic_number = {
-        one   = 18259200,
-        two   = 44711,
+        one = 18259200,
+        two = 44711,
         three = 259183,
-        four  = 129593,
-        five  = 259200,
-        six   = 54773,
+        four = 129593,
+        five = 259200,
+        six = 54773,
         seven = 7141,
         eight = 421,
-        nine  = 259199,
-        ten   = 8286,
+        nine = 259199,
+        ten = 8286,
     },
+    logger = Logger("SaveSystem")
 }
 
 --- Условные идентификаторы классов для системы сохранений
 CLASSES = {
     paladin = 1,
-    priest  = 2,
+    priest = 2,
 }
 
 --- Фактические идентификаторы классов
 HEROES = {
     paladin = PALADIN,
-    priest  = PRIEST,
+    priest = PRIEST,
 }
 
 ---@author meiso
@@ -4109,16 +4152,18 @@ end
 
 --- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.InitHero(class, name)
+function SaveSystem.InitHero(class, name, player)
     SaveSystem.classid = CLASSES[class]
-    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
-    local loc = Location(-60., -750.)
+    local playerid = GetConvertedPlayerId(player)
+    --local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(nil, nil, name)
+        Paladin.Init(nil, nil, name, player)
+        SaveSystem.player_unit = Paladin.hero
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(nil, nil, name)
+        Priest.Init(nil, nil, name, player)
+        SaveSystem.player_unit = Priest.hero
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end
@@ -4133,9 +4178,9 @@ function SaveSystem.AddNewHero()
     local unit
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
-        unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
+        unit = Unit(GetTriggerPlayer(), PALADIN, GetRandomLocInRect(gg_rct_StartSpawn), 90.)
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.InitHero("paladin")
+        --SaveSystem.InitHero("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
@@ -5027,6 +5072,7 @@ hunter_text = "Охотники бьют врага на расстоянии и
 ---@author meiso
 
 function HeroSelector.Init()
+    HeroSelector.logger:Info("Initialize HeroSelector")
     HeroSelector.cache = GameCache("heroslt")
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -5115,9 +5161,8 @@ end
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
 function HeroSelector.ConfirmCharacter(hero)
-    local dialog = EventsFrame(hero:GetHandle())
-    dialog:RegisterControlClick()
-    dialog:AddAction(function()
+
+    local process = function()
         local confirm = Frame("ConfirmCharacter")
         local trig = EventsFrame(confirm:GetHandle())
         trig:RegisterDialogAccept()
@@ -5141,6 +5186,16 @@ function HeroSelector.ConfirmCharacter(hero)
             end
             confirm:Destroy()
         end)
+    end
+
+    local dialog = EventsFrame(hero:GetHandle())
+    dialog:RegisterControlClick()
+    dialog:AddAction(function()
+        HeroSelector.logger:Info("Is local player:", isLocalPlayer())
+        local tmp = split(hero:GetName(), "_")[1]
+        HeroSelector.hero = tmp:lower()
+        HeroSelector.AcceptHero(HeroSelector.hero)
+        --HeroSelector.Close()
     end)
 end
 
@@ -5156,6 +5211,7 @@ end
 ---@param name string Имя героя
 ---@return nil
 function HeroSelector.AcceptHero(hero, name)
+    local player = GetTriggerPlayer()
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
             if h == hero then
@@ -5170,20 +5226,23 @@ function HeroSelector.AcceptHero(hero, name)
         table.insert(HeroSelector.selected_heroes, gc_selected)
     end
     if check() then
+        HeroSelector.logger:Warning(hero, "is selected")
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
-    --TODO
-    --HeroSelector.CreateHero()
-    SaveSystem.InitHero(HeroSelector.hero, name)
-    HeroSelector.local_unit = SaveSystem.unit
-    Movement.Init(HeroSelector.local_unit)
+    SaveSystem.InitHero(HeroSelector.hero, name, player)
+    HeroSelector.local_unit = SaveSystem.player_unit
+    Movement.Init(HeroSelector.local_unit, player)
+    HeroSelector.Close()
 end
 
 function HeroSelector.Close()
+    if not isLocalPlayer() then
+        return
+    end
     if HeroSelector.table ~= nil then
-        HeroSelector.table:Destroy()
+        HeroSelector.table:Hide()
     end
 end
 
@@ -5208,9 +5267,9 @@ blessing_of_kings = Ability {
     manacost = 6,
     tooltip = "Благословение королей",
     key = "Q",
-    text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
+    text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-    buff_desc = "Все характеристики повышены на 10%."
+    buff_desc = "Все характеристики повышены на 10"
 }
 
 blessing_of_might = Ability {
@@ -5238,11 +5297,11 @@ blessing_of_sanctuary = Ability {
     manacost = 7,
     tooltip = "Благословение неприкосновенности",
     key = "T",
-    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
-            "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
+    text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+            "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
     icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-    buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
-            "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
+    buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
+            "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
 }
 
 consecration = Ability {
@@ -5263,7 +5322,7 @@ judgement_of_light_tr = Ability {
     tooltip = "Правосудие света",
     key = "C",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+            "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
     buff_desc = "Атакуя цель, противник может восстановить здоровье."
 }
@@ -5275,7 +5334,7 @@ judgement_of_wisdom_tr = Ability {
     tooltip = "Правосудие мудрости",
     key = "V",
     text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-            "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+            "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
     icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
     buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
 }
@@ -5297,8 +5356,8 @@ divine_shield = Ability {
     cooldown = 60. * 5,
     tooltip = "Божественный щит",
     key = "Z",
-    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
-    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
+    text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
+    buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
 }
 
 hammer_of_righteous = Ability {
@@ -5378,11 +5437,11 @@ guardian_spirit = Ability {
     tooltip = "Оберегающий дух",
     key = "R",
     text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
+            "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
             "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-            "50% ее максимального запаса здоровья. Время действия – 10 сек.",
+            "50ее максимального запаса здоровья. Время действия – 10 сек.",
     icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-    buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
+    buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
 }
 
 prayer_of_mending = Ability {
@@ -5435,7 +5494,7 @@ inner_fire = Ability {
 spirit_of_redemption = Ability {
     ability = SPIRIT_OF_REDEMPTION,
     tooltip = "Дух воздаяния",
-    text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+    text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
             "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
             "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
             "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -5458,6 +5517,12 @@ ALL_OFF_PRIEST_SPELLS = {
 }
 
 ------------------------------XXXXXXX------------------------------
+
+---@author meiso
+
+Session = {
+    cache = nil
+}
 
 ---@author meiso
 
@@ -6557,7 +6622,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42% от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end

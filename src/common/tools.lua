@@ -54,9 +54,15 @@ function round(number)
 end
 
 --- Проверяет, является ли объект типом "table".
----По сути проверяет, является ли объект экземпляром класса
+--- По сути проверяет, является ли объект экземпляром класса
 ---@param object type Проверяемый объект
 ---@return boolean
 function isTable(object)
     return type(object) == "table"
+end
+
+--- Проверяет, что локальный игрок запустил событие
+---@return boolean
+function isLocalPlayer()
+    return GetLocalPlayer() == GetTriggerPlayer()
 end

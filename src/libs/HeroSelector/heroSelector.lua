@@ -1,6 +1,7 @@
 ---@author meiso
 
 function HeroSelector.Init()
+    HeroSelector.logger:Info("Initialize HeroSelector")
     HeroSelector.cache = GameCache("heroslt")
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -89,9 +90,8 @@ end
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
 function HeroSelector.ConfirmCharacter(hero)
-    local dialog = EventsFrame(hero:GetHandle())
-    dialog:RegisterControlClick()
-    dialog:AddAction(function()
+    --TODO: включить выбор имени персонажа
+    local process = function()
         local confirm = Frame("ConfirmCharacter")
         local trig = EventsFrame(confirm:GetHandle())
         trig:RegisterDialogAccept()
@@ -115,6 +115,16 @@ function HeroSelector.ConfirmCharacter(hero)
             end
             confirm:Destroy()
         end)
+    end
+
+    local dialog = EventsFrame(hero:GetHandle())
+    dialog:RegisterControlClick()
+    dialog:AddAction(function()
+        HeroSelector.logger:Info("Is local player:", isLocalPlayer())
+        local tmp = split(hero:GetName(), "_")[1]
+        HeroSelector.hero = tmp:lower()
+        HeroSelector.AcceptHero(HeroSelector.hero)
+        --HeroSelector.Close()
     end)
 end
 
@@ -130,6 +140,7 @@ end
 ---@param name string Имя героя
 ---@return nil
 function HeroSelector.AcceptHero(hero, name)
+    local player = GetTriggerPlayer()
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
             if h == hero then
@@ -139,24 +150,28 @@ function HeroSelector.AcceptHero(hero, name)
         return false
     end
     local gc_selected = HeroSelector.cache:GetStr("hero", "hc")
-    print("gc_selected", gc_selected)
     if gc_selected ~= "" then
         table.insert(HeroSelector.selected_heroes, gc_selected)
     end
     if check() then
+        HeroSelector.logger:Warning(hero, "is selected")
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
-    --TODO
-    --HeroSelector.CreateHero()
-    SaveSystem.InitHero(HeroSelector.hero, name)
-    HeroSelector.local_unit = SaveSystem.unit
-    Movement.Init(HeroSelector.local_unit)
+    SaveSystem.InitHero(HeroSelector.hero, name, player)
+    if HeroSelector.units[player] == nil then
+        HeroSelector.units[player] = SaveSystem.player_unit
+        Movement.Init(HeroSelector.units[player], player)
+    end
+    HeroSelector.Close()
 end
 
 function HeroSelector.Close()
+    if not isLocalPlayer() then
+        return
+    end
     if HeroSelector.table ~= nil then
-        HeroSelector.table:Destroy()
+        HeroSelector.table:Hide()
     end
 end

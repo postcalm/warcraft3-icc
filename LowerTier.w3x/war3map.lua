@@ -5,28 +5,33 @@ gg_trg_RespawnHero = nil
 function InitGlobals()
 end
 
-function SetCameraTargetUnit(unit)
-    SetCameraTargetControllerNoZForPlayer(GetLocalPlayer(), unit, 0, 0, false)
+function SetCameraTargetUnit(unit, player)
+    local p = player or GetTriggerPlayer()
+    SetCameraTargetControllerNoZForPlayer(p, unit, 0, 0, false)
 end
 
-function SetCameraRotation(rotation, duration)
+function SetCameraRotation(rotation, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ROTATION, rotation, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ROTATION, rotation, d)
 end
 
-function SetCameraAngle(angle, duration)
+function SetCameraAngle(angle, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ANGLE_OF_ATTACK, angle, d)
 end
 
-function SetCameraZOffset(zoffset, duration)
+function SetCameraZOffset(zoffset, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_ZOFFSET, zoffset, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_ZOFFSET, zoffset, d)
 end
 
-function SetCameraDistance(dist, duration)
+function SetCameraDistance(dist, duration, player)
     local d = duration or 0.25
-    SetCameraFieldForPlayer(GetLocalPlayer(), CAMERA_FIELD_TARGET_DISTANCE, dist, d)
+    local p = player or GetTriggerPlayer()
+    SetCameraFieldForPlayer(p, CAMERA_FIELD_TARGET_DISTANCE, dist, d)
 end
 
 function CreateUnitsForPlayer0()
@@ -36,7 +41,7 @@ function CreateUnitsForPlayer0()
     local t
     local life
     u = CreateUnit(p, FourCC("hpea"), 1364.9, 16793.0, 348.673)
-    u = CreateUnit(p, FourCC("hpea"), 934.4, -11016.2, 281.215)
+    u = CreateUnit(p, FourCC("hpea"), 198.3, -11833.1, 281.215)
 end
 
 function CreateUnitsForPlayer1()
@@ -45,7 +50,7 @@ function CreateUnitsForPlayer1()
     local unitID
     local t
     local life
-    u = CreateUnit(p, FourCC("hpea"), 1302.1, -11076.8, 38.124)
+    u = CreateUnit(p, FourCC("hpea"), 1848.8, -11850.6, 38.124)
 end
 
 function CreateUnitsForPlayer10()
@@ -192,6 +197,7 @@ setmetatable(Logger, {
 ---@private
 function Logger:_init(log_name)
     if not ENABLE_LOGGER then return end
+    print("INFO: Init logger - " .. log_name)
     log_name = log_name or "log"
     self.current = self.counter:next()
     self.buffer[self.current] = {}
@@ -212,7 +218,7 @@ function Logger:Log(level, ...)
     end
     message = message .. level.name .. ":"
     for _, arg in ipairs(args) do
-        message = message .. " " .. arg
+        message = message .. " " .. tostring(arg)
     end
     if ENABLE_LOGGER_STDOUT then
         print(message)
@@ -302,49 +308,9 @@ TRACK_BOTH_BLOCKER = FourCC("YTfc")
 
 ---@author meiso
 
-PLAYER_1   = Player(0)
-PLAYER_2   = Player(1)
-LICH_KING  = Player(10)
-
 COMMON_TIMER = FourCC("BTLF")
 ARROW_MODEL = "Abilities/Spells/Other/Aneu/AneuCaster.mdl"
 CHANNEL_EFFECT = "Abilities/Spells/Undead/DeathPact/DeathPactTarget.mdl"
-
----@author meiso
-
---Lord Marrowgar
-COLDFLAME               = FourCC("A001")
-WHIRLWIND               = FourCC("A005")
-
---Paladin
-DIVINE_SHIELD           = FourCC("AHds")
-CONSECRATION            = FourCC("A00A")
-HAMMER_RIGHTEOUS        = FourCC("A00B")
-BLESSING_OF_KINGS       = FourCC("A00C")
-BLESSING_OF_SANCTUARY   = FourCC("A00H")
-BLESSING_OF_WISDOM      = FourCC("A00G")
-BLESSING_OF_MIGHT       = FourCC("A00M")
-CRUSADER_AURA           = FourCC("A00J")
-JUDGEMENT_OF_LIGHT      = FourCC("A00N")
-JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
-JUDGEMENT_OF_WISDOM     = FourCC("A00O")
-JUDGEMENT_OF_WISDOM_TR  = FourCC("A00Q")
-SHIELD_OF_RIGHTEOUSNESS = FourCC("A00R")
-AVENGERS_SHIELD         = FourCC("A004")
-SPELLBOOK_PALADIN       = FourCC("A00L")
-
---Priest
-FLASH_HEAL              = FourCC("A00S")
-RENEW                   = FourCC("A00T")
-CIRCLE_OF_HEALING       = FourCC("A00U")
-PRAYER_OF_MENDING       = FourCC("A009")
-POWER_WORD_SHIELD       = FourCC("A00V")
-GUARDIAN_SPIRIT         = FourCC("A00X")
-SPELLBOOK_PRIEST        = FourCC("A00Y")
-POWER_WORD_FORTITUDE    = FourCC("A011")
-INNER_FIRE              = FourCC("A00Z")
-SPIRIT_OF_REDEMPTION    = FourCC("A012")
-
 
 ---@author meiso
 
@@ -402,12 +368,76 @@ function round(number)
 end
 
 --- Проверяет, является ли объект типом "table".
----По сути проверяет, является ли объект экземпляром класса
+--- По сути проверяет, является ли объект экземпляром класса
 ---@param object type Проверяемый объект
 ---@return boolean
 function isTable(object)
     return type(object) == "table"
 end
+
+--- Проверяет, что локальный игрок запустил событие
+---@return boolean
+function isLocalPlayer()
+    return GetLocalPlayer() == GetTriggerPlayer()
+end
+
+function getTableLength(t)
+    local count = 0
+    for _ in pairs(t) do count = count + 1 end
+    return count
+end
+
+function getTableItemByIndex(t, index)
+    for k, v in ipairs(t) do
+    end
+end
+
+---@author meiso
+
+PLAYERS = {
+    Player(0),
+    Player(1),
+    Player(2),
+    Player(10),
+}
+
+LICH_KING = Player(10)
+
+---@author meiso
+
+--Lord Marrowgar
+COLDFLAME               = FourCC("A001")
+WHIRLWIND               = FourCC("A005")
+
+--Paladin
+DIVINE_SHIELD           = FourCC("AHds")
+CONSECRATION            = FourCC("A00A")
+HAMMER_RIGHTEOUS        = FourCC("A00B")
+BLESSING_OF_KINGS       = FourCC("A00C")
+BLESSING_OF_SANCTUARY   = FourCC("A00H")
+BLESSING_OF_WISDOM      = FourCC("A00G")
+BLESSING_OF_MIGHT       = FourCC("A00M")
+CRUSADER_AURA           = FourCC("A00J")
+JUDGEMENT_OF_LIGHT      = FourCC("A00N")
+JUDGEMENT_OF_LIGHT_TR   = FourCC("A00P")
+JUDGEMENT_OF_WISDOM     = FourCC("A00O")
+JUDGEMENT_OF_WISDOM_TR  = FourCC("A00Q")
+SHIELD_OF_RIGHTEOUSNESS = FourCC("A00R")
+AVENGERS_SHIELD         = FourCC("A004")
+SPELLBOOK_PALADIN       = FourCC("A00L")
+
+--Priest
+FLASH_HEAL              = FourCC("A00S")
+RENEW                   = FourCC("A00T")
+CIRCLE_OF_HEALING       = FourCC("A00U")
+PRAYER_OF_MENDING       = FourCC("A009")
+POWER_WORD_SHIELD       = FourCC("A00V")
+GUARDIAN_SPIRIT         = FourCC("A00X")
+SPELLBOOK_PRIEST        = FourCC("A00Y")
+POWER_WORD_FORTITUDE    = FourCC("A011")
+INNER_FIRE              = FourCC("A00Z")
+SPIRIT_OF_REDEMPTION    = FourCC("A012")
+
 
 ---@author meiso
 
@@ -519,7 +549,8 @@ HeroSelector = {
     --- Список выбранных героев
     selected_heroes = {},
     --- Выбранный юнит для локального игрока
-    local_unit = nil,
+    units = {},
+    logger = Logger("HeroSelector"),
 }
 
 ---@author meiso
@@ -548,13 +579,14 @@ function Paladin.ResetToDefault()
     end
 end
 
-function Paladin.Init(location, unit, name)
+function Paladin.Init(location, unit, name, player)
+    --Logger("Paladin"):Info("Initialize Paladin...")
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Paladin"
-    unit = unit or Unit(GetLocalPlayer(), PALADIN, location, 90.):GetId()
+    unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
     Paladin.hero = Unit(unit)
-    Paladin.hero:SetName(name)
+    --Paladin.hero:SetName(name)
 
     Paladin.InitConsecration()
     Paladin.InitBlessingOfKings()
@@ -567,6 +599,7 @@ function Paladin.Init(location, unit, name)
     Paladin.InitAvengersShield()
 
     Paladin.ResetToDefault()
+    --Logger("Paladin"):Info("Success!")
 end
 
 ---@author meiso
@@ -597,13 +630,13 @@ function Priest.ResetToDefault()
     end
 end
 
-function Priest.Init(location, unit, name)
+function Priest.Init(location, unit, name, player)
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
     name = name or "Priest"
-    unit = unit or Unit(GetLocalPlayer(), PRIEST, location, 90.):GetId()
+    unit = unit or Unit(player, PRIEST, location, 90.):GetId()
 
     Priest.hero = Unit(unit)
-    Priest.hero:SetName(name)
+    --Priest.hero:SetName(name)
 
     Priest.InitFlashHeal()
     Priest.InitRenew()
@@ -738,6 +771,7 @@ function Key:_init(key)
     self.key = key
     ---@type boolean
     self.pressed = false
+    self.player_id = nil
 end
 
 ---@class KeyboardController
@@ -745,38 +779,43 @@ KeyboardController = {
     ---@type Pool
     keys = Pool(),
     ---@private
-    _event = nil,
+    _events = {},
     ---@type Logger
     logger = Logger("keyboard"),
 }
 
 --- Регистрирует события нажатия клавиш
----@param keys oskeytype Список клавиш
+---@param player player Игрок
+---@param ... oskeytype Список клавиш
 ---@return nil
-function KeyboardController.Register(...)
+function KeyboardController.Register(player_id, ...)
+    local player = PLAYERS[player_id]
     local keys = ...
     if type(...) ~= "table" then
         keys = table.pack(...)
     end
-    if KeyboardController._event == nil then
-        KeyboardController._event = EventsPlayer()
-        KeyboardController._event:AddAction(KeyboardController._process)
+    if KeyboardController._events[player_id] == nil then
+        KeyboardController.logger:Info("Init event for player", player_id)
+        KeyboardController._events[player_id] = EventsPlayer(player)
+        KeyboardController._events[player_id]:AddAction(KeyboardController._process)
     end
     for _, key in ipairs(keys) do
         KeyboardController.keys:Add(Key(key))
-        KeyboardController._event:RegisterKeyPressed(key)
+        KeyboardController._events[player_id]:RegisterKeyPressed(key)
     end
+    KeyboardController.logger:Info("Keyboard init success")
 end
 
 ---@private
 function KeyboardController._process()
     local key = BlzGetTriggerPlayerKey()
     local pressed = BlzGetTriggerPlayerIsKeyDown()
-    KeyboardController.logger:Info("pressed key", GetHandleId(key))
+    KeyboardController.logger:Debug("pressed key", GetHandleId(key))
     for _, k in pairs(KeyboardController.keys:All()) do
         if k.key == key then
             local new = k
             new.pressed = pressed
+            new.player_id = GetConvertedPlayerId(GetTriggerPlayer())
             KeyboardController.keys:Update(new)
         end
     end
@@ -787,88 +826,98 @@ end
 ---@class Camera
 Camera = {
     dist = 650.,
-    ---@type Unit
-    unit = nil,
+    ---@type table[Unit]
+    units = {},
     ---@type Logger
     logger = Logger("camera"),
+    ---@type table[Timer]
+    timers = {},
 }
 
 --- Регистрирует камеру для игрока
-function Camera.Register(unit)
+function Camera.Register(unit, player)
     Camera.logger:Info("Initialize Camera")
-    Camera.unit = unit
-    SetCameraTargetUnit(Camera.unit:GetId())
+    local player_id = GetConvertedPlayerId(player)
 
-    local camera = Timer(0.04)
-    camera:SetFunc(Camera._update)
-    camera:EnablePeriodic()
-    camera:Start()
+    if Camera.units[player_id] == nil then
+        Camera.units[player_id] = unit
+    end
+
+    if Camera.timers[player_id] == nil then
+        Camera.timers[player_id] = Timer(0.04)
+    end
+    local timer = Camera.timers[player_id]
+    SetCameraTargetControllerNoZForPlayer(player, Camera.units[player_id]:GetId(), 0, 0, false)
+    timer:SetFunc(function() Camera._update(player_id) end)
+    timer:EnablePeriodic()
+    timer:Start()
     Camera.logger:Info("Start camera!")
 end
 
 --- Повернуть камеру влево
 ---@return nil
-function Camera.TurnLeft()
-    local facing = Camera.unit:GetFacing() + 10
-    Camera.unit:SetFacing(facing)
+function Camera.TurnLeft(player_id)
+    local facing = Camera.units[player_id]:GetFacing() + 10
+    Camera.units[player_id]:SetFacing(facing)
 end
 
 --- Повернуть камеру вправо
 ---@return nil
-function Camera.TurnRight()
-    local facing = Camera.unit:GetFacing() - 10
-    Camera.unit:SetFacing(facing)
+function Camera.TurnRight(player_id)
+    local facing = Camera.units[player_id]:GetFacing() - 10
+    Camera.units[player_id]:SetFacing(facing)
 end
 
 ---@private
-function Camera._update()
-    Camera.logger:Debug("Unit is", Camera.unit:GetName())
-    --local dist = 650.
-    local zoffset = 90. + Camera.unit:GetZ()
-    local facing = Camera.unit:GetFacing()
-    local loc = PolarProjectionBJ(Camera.unit:GetLoc(), -400., facing)
-    Camera._detect_collision()
-    --Camera._set_dist(dist)
-    if GetLocationZ(loc) - Camera.unit:GetZ() > 200 then
-        Camera._set_angle(-24.)
+function Camera._update(player_id)
+    local unit = Camera.units[player_id]
+    Camera.logger:Debug("Unit is", unit:GetName())
+    local zoffset = 90. + unit:GetZ()
+    local facing = unit:GetFacing()
+    local loc = PolarProjectionBJ(unit:GetLoc(), -400., facing)
+    Camera._detect_collision(player_id)
+    if GetLocationZ(loc) - unit:GetZ() > 200 then
+        Camera._set_angle(player_id, -24.)
     else
-        Camera._set_angle(-12.)
+        Camera._set_angle(player_id, -12.)
     end
-    Camera._set_offset(zoffset)
-    Camera._set_facing(facing)
+    Camera._set_offset(player_id, zoffset)
+    Camera._set_facing(player_id, facing)
 end
 
 ---@private
-function Camera._detect_collision()
+function Camera._detect_collision(player_id)
+    local unit = Camera.units[player_id]
     -- коллизии вычисляются по следующей логике:
     -- расстояние между камера-юнит больше чем расстояние камера-блок
     -- и расстояние между камера-юнит больше чем расстояние блок-юнит
-    local block_loc = GetDestructableLoc(Camera._get_near_block())
+    local block_loc = GetDestructableLoc(Camera._get_near_block(player_id))
     local camera_loc = GetCameraEyePositionLoc()
     -- приводим значения к удобной форме
-    local camera_unit_dist = DistanceBetweenPoints(camera_loc, Camera.unit:GetLoc()) // 10 * 10
-    local block_unit_dist = DistanceBetweenPoints(block_loc, Camera.unit:GetLoc()) // 10 * 10
+    local camera_unit_dist = DistanceBetweenPoints(camera_loc, unit:GetLoc()) // 10 * 10
+    local block_unit_dist = DistanceBetweenPoints(block_loc, unit:GetLoc()) // 10 * 10
     local block_camera_dist = DistanceBetweenPoints(block_loc, camera_loc) // 10 * 10
     -- сначала проверяем расстояние между камера-юнит и блок-камера, чтобы дистанция камеры не скакала
     if camera_unit_dist > block_camera_dist then
         -- проверяем расстояние между блок-юнит и камера-юнит
         if block_unit_dist <= camera_unit_dist then
             Camera.logger:Debug("set block dist:", block_unit_dist)
-            Camera._set_dist(block_unit_dist)
+            Camera._set_dist(player_id, block_unit_dist)
         end
     else
         Camera.logger:Debug("set camera dist:", Camera.dist)
-        Camera._set_dist(Camera.dist)
+        Camera._set_dist(player_id, Camera.dist)
     end
 end
 
 --- Вычисляет ближайший блок к игроку
 ---@private
-function Camera._get_near_block()
+function Camera._get_near_block(player_id)
+    local unit = Camera.units[player_id]
     local block
     local min_dist = Camera.dist
-    local unit_loc_x = Camera.unit:GetX()
-    local unit_loc_y = Camera.unit:GetY()
+    local unit_loc_x = unit:GetX()
+    local unit_loc_y = unit:GetY()
     local border = 200
     local unit_loc = Rect(
             unit_loc_x - border,
@@ -880,7 +929,7 @@ function Camera._get_near_block()
         local find = GetEnumDestructable()
         local dest_id = GetDestructableTypeId(find)
         if dest_id == VISION_BLOCKER or dest_id == TRACK_BOTH_BLOCKER then
-            local dist = DistanceBetweenPoints(GetDestructableLoc(find), Camera.unit:GetLoc())
+            local dist = DistanceBetweenPoints(GetDestructableLoc(find), unit:GetLoc())
             if dist < min_dist then
                 min_dist = dist
                 block = find
@@ -892,129 +941,145 @@ function Camera._get_near_block()
 end
 
 ---@private
-function Camera._set_dist(dist)
-    SetCameraDistance(dist)
-    Camera.logger:Debug("set camera fields: dist -", dist)
+function Camera._set_dist(player_id, dist)
+    SetCameraFieldForPlayer(PLAYERS[player_id], CAMERA_FIELD_TARGET_DISTANCE, dist, 0.25)
+    Camera.logger:Debug("set camera fields: dist -", dist, "for player", player_id, PLAYERS[player_id])
 end
 
 ---@private
-function Camera._set_angle(angle)
-    SetCameraAngle(angle)
-    Camera.logger:Debug("set camera fields: angle -", angle)
+function Camera._set_angle(player_id, angle)
+    SetCameraFieldForPlayer(PLAYERS[player_id], CAMERA_FIELD_ANGLE_OF_ATTACK, angle, 0.25)
+    Camera.logger:Debug("set camera fields: angle -", angle, "for player", player_id, PLAYERS[player_id])
 end
 
 ---@private
-function Camera._set_offset(offset)
-    SetCameraZOffset(offset)
-    Camera.logger:Debug("set camera fields: zoffset -", offset)
+function Camera._set_offset(player_id, offset)
+    SetCameraFieldForPlayer(PLAYERS[player_id], CAMERA_FIELD_ZOFFSET, offset, 0.25)
+    Camera.logger:Debug("set camera fields: zoffset -", offset, "for player", player_id, PLAYERS[player_id])
 end
 
 ---@private
-function Camera._set_facing(facing)
-    SetCameraRotation(facing)
-    Camera.logger:Debug("set camera fields: facing -", facing)
+function Camera._set_facing(player_id, facing)
+    SetCameraFieldForPlayer(PLAYERS[player_id], CAMERA_FIELD_ROTATION, facing, 0.25)
+    Camera.logger:Debug("set camera fields: facing -", facing, "for player", player_id, PLAYERS[player_id])
 end
 
 ---@author meiso
 
 ---@class Movement
 Movement = {
-    ---@type Unit
-    unit = nil,
-    to_up = false,
-    to_down = false,
-    to_left = false,
-    to_right = false,
-    animate = false,
+    ---@type table[Unit]
+    units = {},
+    to_up = {},
+    to_down = {},
+    to_left = {},
+    to_right = {},
+    animate = {},
+    ---@type Timer
+    timers = {},
     ---@type Logger
     logger = Logger("movement"),
 }
 
 --- Инициализация системы передвижения
-function Movement.Init(unit)
+function Movement.Init(unit, player)
     Movement.logger:Info("Initialize movement system")
-    Camera.Register(unit or Paladin.hero)
-    KeyboardController.Register(OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
-    Movement.unit = Camera.unit
-    Movement._set_default_anim()
-    local movement = Timer(0.03)
-    movement:SetFunc(Movement._update)
-    movement:EnablePeriodic()
-    movement:Start()
+    local player_id = GetConvertedPlayerId(player)
+
+    Camera.Register(unit, player)
+    KeyboardController.Register(player_id, OSKEY_W, OSKEY_A, OSKEY_S, OSKEY_D)
+
+    if Movement.units[player_id] == nil then
+        Movement.units[player_id] = unit
+    end
+    if Movement.timers[player_id] == nil then
+        Movement.timers[player_id] = Timer(0.04)
+    end
+
+    Movement._set_default_anim(player_id)
+    local timer = Movement.timers[player_id]
+    timer:SetFunc(function() Movement._update(player_id) end)
+    timer:EnablePeriodic()
+    timer:Start()
     Movement.logger:Info("Movement system start!")
 end
 
 ---@private
-function Movement._update()
-    Movement._process()
-    Movement._rotate_camera()
-    Movement._move()
-    Movement._play_anim()
+function Movement._update(player_id)
+    Movement._process(player_id)
+    Movement._rotate_camera(player_id)
+    Movement._move(player_id)
+    Movement._play_anim(player_id)
 end
 
 ---@private
-function Movement._process()
+function Movement._process(player_id)
     for _, k in pairs(KeyboardController.keys:All()) do
-        if k.key == OSKEY_W then
-            Movement.to_up = k.pressed
+        if k.key == OSKEY_W and player_id == k.player_id then
+            Movement.to_up[player_id] = k.pressed
         end
-        if k.key == OSKEY_S then
-            Movement.to_down = k.pressed
+        if k.key == OSKEY_S and player_id == k.player_id then
+            Movement.to_down[player_id] = k.pressed
         end
-        if k.key == OSKEY_A then
-            Movement.to_left = k.pressed
+        if k.key == OSKEY_A and player_id == k.player_id then
+            Movement.to_left[player_id] = k.pressed
         end
-        if k.key == OSKEY_D then
-            Movement.to_right = k.pressed
+        if k.key == OSKEY_D and player_id == k.player_id then
+            Movement.to_right[player_id] = k.pressed
         end
     end
 end
 
 ---@private
-function Movement._rotate_camera()
-    if Movement.to_left then
-        Camera.TurnLeft()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+function Movement._rotate_camera(player_id)
+    local unit = Movement.units[player_id]
+    if Movement.to_left[player_id] then
+        Camera.TurnLeft(player_id)
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to left")
-    elseif Movement.to_right then
-        Camera.TurnRight()
-        SelectUnitForPlayerSingle(Movement.unit:GetId(), GetLocalPlayer())
+    elseif Movement.to_right[player_id] then
+        Camera.TurnRight(player_id)
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to right")
     end
 end
 
 ---@private
-function Movement._move()
-    local unit = Movement.unit
-    if Movement.to_up then
+function Movement._move(player_id)
+    local unit = Movement.units[player_id]
+    if Movement.to_up[player_id] then
+        print("unit:", unit:GetName(), player_id)
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to up")
-    elseif Movement.to_down then
+    elseif Movement.to_down[player_id] then
+        print("unit:", unit:GetName(), player_id)
         SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
-        SelectUnitForPlayerSingle(unit:GetId(), GetLocalPlayer())
+        SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
         Movement.logger:Debug("to down")
     end
 end
 
 ---@private
-function Movement._play_anim()
-    if Movement.to_up and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 5)
-        Movement.animate = true
-    elseif Movement.to_down and not Movement.animate then
-        SetUnitAnimationByIndex(Movement.unit:GetId(), 13)
-        Movement.animate = true
+function Movement._play_anim(player_id)
+    local unit = Movement.units[player_id]
+    --TODO: поправить выбор анимаций (у каждого юнита он свой)
+    if Movement.to_up[player_id] and not Movement.animate[player_id] then
+        SetUnitAnimationByIndex(unit:GetId(), 5)
+        Movement.animate[player_id] = true
+    elseif Movement.to_down[player_id] and not Movement.animate[player_id] then
+        SetUnitAnimationByIndex(unit:GetId(), 13)
+        Movement.animate[player_id] = true
     end
-    if not Movement.to_up and not Movement.to_down and Movement.animate then
-        Movement._set_default_anim()
+    if not Movement.to_up[player_id] and not Movement.to_down[player_id] and Movement.animate[player_id] then
+        Movement._set_default_anim(player_id)
     end
 end
 
 ---@private
-function Movement._set_default_anim()
-    SetUnitAnimation(Movement.unit:GetId(), "Portrait")
-    Movement.animate = false
+function Movement._set_default_anim(player_id)
+    SetUnitAnimation(Movement.units[player_id]:GetId(), "Portrait")
+    Movement.animate[player_id] = false
 end
 
 ---@author meiso
@@ -1434,7 +1499,7 @@ setmetatable(EventsPlayer, {
 --- Конструктор класса
 function EventsPlayer:_init(player)
     Events._init(self)
-    self.player = player or GetLocalPlayer()
+    self.player = player or GetTriggerPlayer()
 end
 
 --- Регистрирует нажатие клавиши
@@ -2049,7 +2114,7 @@ function GameCache:_sync(key, category, value_type)
         SyncStoredUnit(self._cache, key, category)
     elseif value_type == "bool" then
         SyncStoredBoolean(self._cache, key, category)
-    end 
+    end
 end
 
 --- Created by meiso.
@@ -2353,7 +2418,12 @@ end
 --- Уничтожить первый истёкший таймер
 ---@return nil
 function Timer:DestroyExpired()
-    DestroyTimer(GetExpiredTimer())
+    if self.periodic then
+        PauseTimer(self.timer)
+        DestroyTimer(self.timer)
+    else
+        DestroyTimer(GetExpiredTimer())
+    end
 end
 
 ---@author meiso
@@ -2445,7 +2515,9 @@ function Unit:_init(player, unit_id, location, face)
     self.basemana = 0
     self.agro = 0
     self.controlled = (player == GetLocalPlayer()) or false
-    self.unit = CreateUnit(player, unit_id, x, y, f)
+    self.unit = CreateUnit(GetTriggerPlayer(), unit_id, x, y, f)
+    print(self.unit)
+    --TODO: синхронизировать пул отдельно, т.к. юниты создаются моментом для всех игроков
     UNITS_POOL.add(self)
     local agro = CombatSystem(self)
     agro:Register()
@@ -3178,6 +3250,13 @@ function Unit:GetOwner()
     return GetOwningPlayer(self.unit)
 end
 
+--- Сменить игрока, владеющего юнитом
+---@param player player
+---@return nil
+function Unit:SetOwner(player)
+    SetUnitOwner(self.unit, player, true)
+end
+
 --- Установить имя юниту
 ---@param name string Имя юнита
 ---@return nil
@@ -3295,31 +3374,33 @@ end
 --- Система сохранений
 SaveSystem = {
     --- Словарь всех выбранных героев: ID игрока - ID юнита
-    hero       = {},
+    hero = {},
+    ---
+    player_unit = nil,
     --- Юнит, которого требуется сохранить
-    unit       = nil,
+    unit = nil,
     --- Идентификатор класса
-    classid    = 0,
+    classid = 0,
     --- Список способностей юнита
-    abilities  = {},
+    abilities = {},
     --- Книга заклинаний юнита
-    spellbook  = nil,
+    spellbook = nil,
     --- Место воскрешения
-    respawn    = nil,
+    respawn = nil,
     --- Директория, где будут лежать сохранения
-    directory  = "save",
+    directory = "save",
     --- Идентификатор автора системы сохранений
-    author     = 1546,
+    author = 1546,
     --- Пользовательские данные
-    user_data  = {},
+    user_data = {},
     --- Данные игрока и его юнита
-    data       = {},
+    data = {},
     --- Флаг процесса сохранения
-    process    = false,
-    hash1      = 0,
-    hash2      = 0,
+    process = false,
+    hash1 = 0,
+    hash2 = 0,
     --- Кэш для синхронизации данных
-    gamecache  = nil,
+    gamecache = nil,
     --- Номер карты
     map_number = 0,
     -- Автор данного творения запихал все данные в один массив
@@ -3327,45 +3408,46 @@ SaveSystem = {
     -- добавил специальные числа, разграничивающие области эти данных
     scope = {
         --- Область, за которой следует номер карты
-        map        = 2,
+        map = 2,
         --- Область, за которой следуют данные о ресурсах игрока
-        resources  = 3,
+        resources = 3,
         --- Область, за которой следуют данные о юните (положение, хп, мана)
-        hero_data  = 4,
+        hero_data = 4,
         --- Область, за которой следуют данные о количестве skill points
         hero_skill = 5,
         --- Область, за которой следуют данные о характеристиках
-        state      = 6,
+        state = 6,
         --- Область, за которой следуют данные о способностях героя
-        abilities  = 7,
+        abilities = 7,
         --- Область, за которой следуют данные об имеющихся предметах
-        items      = 8,
+        items = 8,
     },
     -- Числа, расшифровать смысл которых, так и не получилось
     magic_number = {
-        one   = 18259200,
-        two   = 44711,
+        one = 18259200,
+        two = 44711,
         three = 259183,
-        four  = 129593,
-        five  = 259200,
-        six   = 54773,
+        four = 129593,
+        five = 259200,
+        six = 54773,
         seven = 7141,
         eight = 421,
-        nine  = 259199,
-        ten   = 8286,
+        nine = 259199,
+        ten = 8286,
     },
+    logger = Logger("SaveSystem")
 }
 
 --- Условные идентификаторы классов для системы сохранений
 CLASSES = {
     paladin = 1,
-    priest  = 2,
+    priest = 2,
 }
 
 --- Фактические идентификаторы классов
 HEROES = {
     paladin = PALADIN,
-    priest  = PRIEST,
+    priest = PRIEST,
 }
 
 ---@author meiso
@@ -4130,16 +4212,18 @@ end
 
 --- Инициализирует выбранного героя
 ---@return nil
-function SaveSystem.InitHero(class, name)
+function SaveSystem.InitHero(class, name, player)
     SaveSystem.classid = CLASSES[class]
-    local playerid = GetConvertedPlayerId(GetTriggerPlayer())
-    local loc = Location(-60., -750.)
+    local playerid = GetConvertedPlayerId(player)
+    --local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
-        Paladin.Init(nil, nil, name)
+        Paladin.Init(nil, nil, name, player)
+        SaveSystem.player_unit = Paladin.hero
         SaveSystem.hero[playerid] = Paladin.hero:GetId()
         SaveSystem.abilities = {}
     elseif SaveSystem.classid == CLASSES["priest"] then
-        Priest.Init(nil, nil, name)
+        Priest.Init(nil, nil, name, player)
+        SaveSystem.player_unit = Priest.hero
         SaveSystem.hero[playerid] = Priest.hero:GetId()
         SaveSystem.abilities = {}
     end
@@ -4154,9 +4238,9 @@ function SaveSystem.AddNewHero()
     local unit
     local playerid = GetConvertedPlayerId(GetTriggerPlayer())
     if text:find("paladin") then
-        unit = Unit(GetTriggerPlayer(), PALADIN, GetRectCenter(gg_rct_RespawZone))
+        unit = Unit(GetTriggerPlayer(), PALADIN, GetRandomLocInRect(gg_rct_StartSpawn), 90.)
         SaveSystem.hero[playerid] = unit:GetId()
-        SaveSystem.InitHero("paladin")
+        --SaveSystem.InitHero("paladin")
     elseif text:find("priest") then
         unit = Unit(GetTriggerPlayer(), PRIEST, GetRectCenter(gg_rct_RespawZone))
         SaveSystem.hero[playerid] = unit:GetId()
@@ -5048,6 +5132,7 @@ hunter_text = "Охотники бьют врага на расстоянии и
 ---@author meiso
 
 function HeroSelector.Init()
+    HeroSelector.logger:Info("Initialize HeroSelector")
     HeroSelector.cache = GameCache("heroslt")
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -5136,9 +5221,8 @@ end
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
 function HeroSelector.ConfirmCharacter(hero)
-    local dialog = EventsFrame(hero:GetHandle())
-    dialog:RegisterControlClick()
-    dialog:AddAction(function()
+
+    local process = function()
         local confirm = Frame("ConfirmCharacter")
         local trig = EventsFrame(confirm:GetHandle())
         trig:RegisterDialogAccept()
@@ -5162,6 +5246,16 @@ function HeroSelector.ConfirmCharacter(hero)
             end
             confirm:Destroy()
         end)
+    end
+
+    local dialog = EventsFrame(hero:GetHandle())
+    dialog:RegisterControlClick()
+    dialog:AddAction(function()
+        HeroSelector.logger:Info("Is local player:", isLocalPlayer())
+        local tmp = split(hero:GetName(), "_")[1]
+        HeroSelector.hero = tmp:lower()
+        HeroSelector.AcceptHero(HeroSelector.hero)
+        --HeroSelector.Close()
     end)
 end
 
@@ -5177,6 +5271,7 @@ end
 ---@param name string Имя героя
 ---@return nil
 function HeroSelector.AcceptHero(hero, name)
+    local player = GetTriggerPlayer()
     local function check()
         for _, h in pairs(HeroSelector.selected_heroes) do
             if h == hero then
@@ -5186,25 +5281,29 @@ function HeroSelector.AcceptHero(hero, name)
         return false
     end
     local gc_selected = HeroSelector.cache:GetStr("hero", "hc")
-    print("gc_selected", gc_selected)
     if gc_selected ~= "" then
         table.insert(HeroSelector.selected_heroes, gc_selected)
     end
     if check() then
+        HeroSelector.logger:Warning(hero, "is selected")
         return
     end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
-    --TODO
-    --HeroSelector.CreateHero()
-    SaveSystem.InitHero(HeroSelector.hero, name)
-    HeroSelector.local_unit = SaveSystem.unit
-    Movement.Init(HeroSelector.local_unit)
+    SaveSystem.InitHero(HeroSelector.hero, name, player)
+    if HeroSelector.units[player] == nil then
+        HeroSelector.units[player] = SaveSystem.player_unit
+        Movement.Init(HeroSelector.units[player], player)
+    end
+    HeroSelector.Close()
 end
 
 function HeroSelector.Close()
+    if not isLocalPlayer() then
+        return
+    end
     if HeroSelector.table ~= nil then
-        HeroSelector.table:Destroy()
+        HeroSelector.table:Hide()
     end
 end
 
@@ -5479,6 +5578,12 @@ ALL_OFF_PRIEST_SPELLS = {
 }
 
 ------------------------------XXXXXXX------------------------------
+
+---@author meiso
+
+Session = {
+    cache = nil
+}
 
 ---@author meiso
 
@@ -7081,19 +7186,22 @@ end
 -- Точка входа для инициализации всего
 function EntryPoint()
     ENABLE_LOGGER_STDOUT = true
+    --LOGGER_LEVEL = LogLevel.DEBUG
+    Session.cache = GameCache("session")
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
     HeroSelector.Init()
 
     -- Механики
-    BuffSystem.LoadFrame()
-    BattleTextViewSystem.Init()
-    EquipSystem.RegisterItems()
+    --BuffSystem.LoadFrame()
+    --BattleTextViewSystem.Init()
+    --EquipSystem.RegisterItems()
 
-    SaveSystem.gamecache = InitGameCache("savesystem")
-    SaveSystem.map_number = 1
-    SaveSystem.InitSaveEvent()
-    SaveSystem.InitLoadEvent()
+    --SaveSystem.gamecache = InitGameCache("savesystem")
+    --SaveSystem.map_number = 1
+    --SaveSystem.InitNewHeroEvent()
+    --SaveSystem.InitSaveEvent()
+    --SaveSystem.InitLoadEvent()
 
     -- Боссы
     --LordMarrowgar.Init()
