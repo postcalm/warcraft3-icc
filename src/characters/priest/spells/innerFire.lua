@@ -49,8 +49,8 @@ function Priest.IsInnerFire()
     return inner_fire:SpellCasted()
 end
 
-function Priest.InitInnerFire()
-    local event = EventsPlayer()
+function Priest.InitInnerFire(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsInnerFire)
     event:AddAction(Priest.InnerFire)

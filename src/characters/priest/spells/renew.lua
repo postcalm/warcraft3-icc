@@ -19,8 +19,8 @@ function Priest.IsRenew()
     return renew:SpellCasted()
 end
 
-function Priest.InitRenew()
-    local event = EventsPlayer()
+function Priest.InitRenew(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsRenew)
     event:AddAction(Priest.CastRenew)

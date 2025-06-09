@@ -71,8 +71,8 @@ function Priest.IsPowerWordShield()
     return power_word_shield:SpellCasted()
 end
 
-function Priest.InitPowerWordShield()
-    local event = EventsPlayer()
+function Priest.InitPowerWordShield(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordShield)
     event:AddAction(Priest.CastPowerWordShield)

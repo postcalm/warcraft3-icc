@@ -10,8 +10,8 @@ function Paladin.IsShieldOfRighteousness()
     return shield_of_righteousness:SpellCasted()
 end
 
-function Paladin.InitShieldOfRighteousness()
-    local event = EventsPlayer()
+function Paladin.InitShieldOfRighteousness(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsShieldOfRighteousness)
     event:AddAction(Paladin.ShieldOfRighteousness)

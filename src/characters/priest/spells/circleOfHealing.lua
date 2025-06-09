@@ -25,8 +25,8 @@ function Priest.IsCircleOfHealing()
     return circle_of_healing:SpellCasted()
 end
 
-function Priest.InitCircleOfHealing()
-    local event = EventsPlayer()
+function Priest.InitCircleOfHealing(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsCircleOfHealing)
     event:AddAction(Priest.CastCircleOfHealing)

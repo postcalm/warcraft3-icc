@@ -36,8 +36,8 @@ function Paladin.IsBlessingOfSanctuary()
     return blessing_of_sanctuary:SpellCasted()
 end
 
-function Paladin.InitBlessingOfSanctuary()
-    local event = EventsPlayer()
+function Paladin.InitBlessingOfSanctuary(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfSanctuary)
     event:AddAction(Paladin.BlessingOfSanctuary)

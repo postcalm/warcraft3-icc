@@ -40,8 +40,8 @@ function Priest.IsGuardianSpirit()
     return guardian_spirit:SpellCasted()
 end
 
-function Priest.InitGuardianSpirit()
-    local event = EventsPlayer()
+function Priest.InitGuardianSpirit(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsGuardianSpirit)
     event:AddAction(Priest.CastGuardianSpirit)

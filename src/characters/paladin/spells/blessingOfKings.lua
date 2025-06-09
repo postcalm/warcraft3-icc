@@ -44,8 +44,8 @@ function Paladin.IsBlessingOfKings()
     return blessing_of_kings:SpellCasted()
 end
 
-function Paladin.InitBlessingOfKings()
-    local event = EventsPlayer()
+function Paladin.InitBlessingOfKings(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfKings)
     event:AddAction(Paladin.BlessingOfKings)

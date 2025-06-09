@@ -35,8 +35,8 @@ function Paladin.IsBlessingOfWisdom()
     return blessing_of_wisdom:SpellCasted()
 end
 
-function Paladin.InitBlessingOfWisdom()
-    local event = EventsPlayer()
+function Paladin.InitBlessingOfWisdom(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Paladin.IsBlessingOfWisdom)
     event:AddAction(Paladin.BlessingOfWisdom)

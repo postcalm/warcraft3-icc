@@ -36,8 +36,8 @@ function Priest.IsPowerWordFortitude()
     return power_word_fortitude:SpellCasted()
 end
 
-function Priest.InitPowerWordFortitude()
-    local event = EventsPlayer()
+function Priest.InitPowerWordFortitude(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPowerWordFortitude)
     event:AddAction(Priest.PowerWordFortitude)

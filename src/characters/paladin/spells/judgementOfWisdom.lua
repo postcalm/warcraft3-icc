@@ -51,9 +51,9 @@ function Paladin.IsJudgementOfWisdom()
     return judgement_of_wisdom_tr:SpellCasted()
 end
 
-function Paladin.InitJudgementOfWisdom()
-    local event_ability = EventsPlayer()
-    local event_jow = EventsPlayer()
+function Paladin.InitJudgementOfWisdom(player)
+    local event_ability = EventsPlayer(player)
+    local event_jow = EventsPlayer(player)
 
     --событие того, что персонаж использовал способность
     event_ability:RegisterUnitSpellCast()

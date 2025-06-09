@@ -80,8 +80,8 @@ function Priest.IsPrayerOfMending()
     return prayer_of_mending:SpellCasted()
 end
 
-function Priest.InitPrayerOfMending()
-    local event = EventsPlayer()
+function Priest.InitPrayerOfMending(player)
+    local event = EventsPlayer(player)
     event:RegisterUnitSpellCast()
     event:AddCondition(Priest.IsPrayerOfMending)
     event:AddAction(Priest.CastPrayerOfMending)
