@@ -47,6 +47,10 @@ function Frame:CastBar(cd, spell, unit)
     self:SetScale(1)
     self:SetModel("ui/feedback/progressbar/timerbar.mdx")
 
+    if unit:GetOwner() ~= GetLocalPlayer() then
+        self:Hide()
+    end
+
     local amount = period * 100 / cd
     local full = 0
 
