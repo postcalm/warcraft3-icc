@@ -9,6 +9,28 @@ from pathlib import Path
 from build.settings import Settings, PROJECT_DIR, PATCHER
 
 
+class BuildCounter:
+    _counter: Path = PROJECT_DIR / "build" / "counter"
+
+    def current(self):
+        return self._read()
+
+    def next(self):
+        value = self._read()
+        value += 1
+        self._write(value)
+        return value
+
+    def _read(self) -> int:
+        data = self._counter.open().read()
+        if not data:
+            data = 0
+        return int(data)
+
+    def _write(self, value: int) -> None:
+        self._counter.write_text(str(value))
+
+
 @dataclass
 class Builder:
     """
@@ -94,9 +116,11 @@ class Builder:
         """
         Задать версию карты
         """
+        counter = BuildCounter().next()
         version = (PROJECT_DIR / "version").read_text().strip()
+        version = f"{version}.{counter}"
         wts = PROJECT_DIR / self.settings.map / "war3map.wts"
-        rpl = re.sub(r"\d.\d.\d", version, wts.read_text(encoding="utf8"))
+        rpl = re.sub(r"\d+\.\d+\.\d+", version, wts.read_text(encoding="utf8"), re.MULTILINE)
         wts.write_text(rpl, encoding="utf8")
 
     def _map_cc(self, file: IOBase, src_files: tuple | list):

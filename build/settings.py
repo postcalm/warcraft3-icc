@@ -12,6 +12,8 @@ GAME_DIRS: tuple[Path, ...] = (
     Path("E:/Warcraft III/x86_64"),
     Path("E:/Games/Warcraft III/x86_64"),
 )
+MAP_FOLDER = PROJECT_DIR / "maps"
+RELEASE_FOLDER = PROJECT_DIR / "_release"
 
 
 @dataclass

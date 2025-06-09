@@ -12,4 +12,8 @@ models/origin
 *.w3x/**/*.toc
 *.w3x/units/*
 
+build/copy_rel_map.py
+_release
+
+# excludes
 !*.w3x/war3mapMap.blp
