@@ -37,7 +37,7 @@ function Paladin.Consecration()
 end
 
 function Paladin.IsConsecration()
-    return consecration:SpellCasted()
+    return Spells.paladin.consecration:SpellCasted()
 end
 
 function Paladin.InitConsecration(player)

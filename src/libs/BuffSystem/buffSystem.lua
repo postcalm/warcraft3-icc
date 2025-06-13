@@ -163,7 +163,12 @@ end
 function BuffSystem.CheckingBuffsExceptions(hero, buff)
     BuffSystem.logger:Info("Check buffs exceptions")
     local buffs_exceptions = {
-        paladin = { blessing_of_kings, blessing_of_wisdom, blessing_of_sanctuary, blessing_of_might },
+        paladin = {
+            Spells.paladin.blessing_of_kings,
+            Spells.paladin.blessing_of_wisdom,
+            Spells.paladin.blessing_of_sanctuary,
+            Spells.paladin.blessing_of_might
+        },
         priest = {},
         shaman = {},
         druid = {},
@@ -242,7 +247,7 @@ end
 ---@return real
 function BuffSystem.ImproveSpell(hero, value)
     local improving_buffs = {
-        guardian_spirit,
+        Spells.priest.guardian_spirit,
     }
     if not BuffSystem.IsHeroInSystem(hero) then
         return value

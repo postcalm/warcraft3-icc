@@ -7,7 +7,7 @@ function Paladin.ShieldOfRighteousness()
 end
 
 function Paladin.IsShieldOfRighteousness()
-    return shield_of_righteousness:SpellCasted()
+    return Spells.paladin.shield_of_righteousness:SpellCasted()
 end
 
 function Paladin.InitShieldOfRighteousness(player)

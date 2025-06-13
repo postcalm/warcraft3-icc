@@ -1,10 +1,10 @@
 ---@author meiso
 
 function Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_sanctuary) then
         unit:AddStr(-stat)
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffFromHero(unit, blessing_of_sanctuary)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.blessing_of_sanctuary)
     end
 end
 
@@ -15,8 +15,8 @@ function Paladin.BlessingOfSanctuary()
 
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_sanctuary) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_sanctuary)
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_sanctuary) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.blessing_of_sanctuary)
     end
 
     EquipSystem.AddItemsToUnit(unit, items_list)
@@ -27,13 +27,13 @@ function Paladin.BlessingOfSanctuary()
         Paladin.RemoveBlessingOfSanctuary(unit, stat, items_list)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(unit, blessing_of_sanctuary, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.paladin.blessing_of_sanctuary, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 end
 
 function Paladin.IsBlessingOfSanctuary()
-    return blessing_of_sanctuary:SpellCasted()
+    return Spells.paladin.blessing_of_sanctuary:SpellCasted()
 end
 
 function Paladin.InitBlessingOfSanctuary(player)

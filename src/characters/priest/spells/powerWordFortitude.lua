@@ -1,9 +1,9 @@
 ---@author meiso
 
 function Priest.RemovePowerWordFortitude(unit, items_list)
-    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_fortitude) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffFromHero(unit, power_word_fortitude)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.power_word_fortitude)
     end
 end
 
@@ -18,8 +18,8 @@ function Priest.PowerWordFortitude()
     Timer(2., function() effect:Destroy() end):Start()
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, power_word_fortitude) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, power_word_fortitude)
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_fortitude) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.power_word_fortitude)
     end
     EquipSystem.AddItemsToUnit(unit, items)
 
@@ -27,13 +27,13 @@ function Priest.PowerWordFortitude()
         Paladin.RemovePowerWordFortitude(unit, items)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(unit, power_word_fortitude, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.paladin.power_word_fortitude, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 end
 
 function Priest.IsPowerWordFortitude()
-    return power_word_fortitude:SpellCasted()
+    return Spells.paladin.power_word_fortitude:SpellCasted()
 end
 
 function Priest.InitPowerWordFortitude(player)

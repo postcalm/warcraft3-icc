@@ -10,8 +10,8 @@ function Priest.InnerFire()
 
     BuffSystem.RegisterHero(Priest.hero)
 
-    if BuffSystem.IsBuffOnHero(Priest.hero, inner_fire) then
-        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, inner_fire)
+    if BuffSystem.IsBuffOnHero(Priest.hero, Spells.paladin.inner_fire) then
+        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, Spells.paladin.inner_fire)
     end
 
     local effect = Effect(Priest.hero, model)
@@ -27,7 +27,7 @@ function Priest.InnerFire()
         event:Destroy()
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(Priest.hero, inner_fire, remove_buff)
+    BuffSystem.AddBuffToHero(Priest.hero, Spells.paladin.inner_fire, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 
@@ -46,7 +46,7 @@ function Priest.InnerFire()
 end
 
 function Priest.IsInnerFire()
-    return inner_fire:SpellCasted()
+    return Spells.paladin.inner_fire:SpellCasted()
 end
 
 function Priest.InitInnerFire(player)

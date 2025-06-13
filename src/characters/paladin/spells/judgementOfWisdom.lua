@@ -1,9 +1,9 @@
 ---@author meiso
 
 function Paladin.RemoveJudgementOfWisdom(target)
-    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
+    if BuffSystem.IsBuffOnHero(target, Spells.paladin.judgement_of_wisdom_tr) then
         UnitRemoveAbilityBJ(JUDGEMENT_OF_WISDOM_BUFF, target:GetId())
-        BuffSystem.RemoveBuffFromHero(target, judgement_of_wisdom_tr)
+        BuffSystem.RemoveBuffFromHero(target, Spells.paladin.judgement_of_wisdom_tr)
     end
 end
 
@@ -26,8 +26,8 @@ function Paladin.CastJudgementOfWisdom()
     local timer = Timer(20.)
 
     BuffSystem.RegisterHero(target)
-    if BuffSystem.IsBuffOnHero(target, judgement_of_wisdom_tr) then
-        BuffSystem.RemoveBuffFromHeroByFunc(target, judgement_of_wisdom_tr)
+    if BuffSystem.IsBuffOnHero(target, Spells.paladin.judgement_of_wisdom_tr) then
+        BuffSystem.RemoveBuffFromHeroByFunc(target, Spells.paladin.judgement_of_wisdom_tr)
     end
 
     local jow_unit = Unit(GetTriggerPlayer(), DUMMY, Paladin.hero:GetLoc())
@@ -39,7 +39,7 @@ function Paladin.CastJudgementOfWisdom()
         timer:Destroy()
     end
 
-    BuffSystem.AddBuffToHero(target, judgement_of_wisdom_tr, remove_buff)
+    BuffSystem.AddBuffToHero(target, Spells.paladin.judgement_of_wisdom_tr, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
     jow_unit:ApplyTimedLife(2.)
@@ -48,7 +48,7 @@ function Paladin.CastJudgementOfWisdom()
 end
 
 function Paladin.IsJudgementOfWisdom()
-    return judgement_of_wisdom_tr:SpellCasted()
+    return Spells.paladin.judgement_of_wisdom_tr:SpellCasted()
 end
 
 function Paladin.InitJudgementOfWisdom(player)

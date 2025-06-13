@@ -16,7 +16,7 @@ function Priest.CastRenew()
 end
 
 function Priest.IsRenew()
-    return renew:SpellCasted()
+    return Spells.paladin.renew:SpellCasted()
 end
 
 function Priest.InitRenew(player)

@@ -56,7 +56,7 @@ function Priest.IsSpiritOfRedemption()
 end
 
 function Priest.InitSpiritOfRedemption(player)
-    Priest.hero:DisableAbility(spirit_of_redemption:GetId())
+    Priest.hero:DisableAbility(Spells.paladin.spirit_of_redemption:GetId())
 
     local event = EventsPlayer(player)
     event:RegisterUnitDamaged()

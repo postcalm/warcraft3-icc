@@ -71,7 +71,7 @@ function Paladin.AvengersShield()
 end
 
 function Paladin.IsAvengersShield()
-    return avengers_shield:SpellCasted()
+    return Spells.paladin.avengers_shield:SpellCasted()
 end
 
 function Paladin.InitAvengersShield(player)

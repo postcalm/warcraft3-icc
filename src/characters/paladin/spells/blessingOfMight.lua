@@ -1,9 +1,9 @@
 ---@author meiso
 
 function Paladin.RemoveBlessingOfMight(unit)
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_might) then
         unit:SetBaseDamage(unit:GetBaseDamage() - 550 // DPS)
-        BuffSystem.RemoveBuffFromHero(unit, blessing_of_might)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.blessing_of_might)
     end
 end
 
@@ -12,8 +12,8 @@ function Paladin.BlessingOfMight()
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_might) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_might)
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_might) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.blessing_of_might)
     end
 
     unit:SetBaseDamage(unit:GetBaseDamage() + 550 // DPS)
@@ -22,13 +22,13 @@ function Paladin.BlessingOfMight()
         Paladin.RemoveBlessingOfMight(unit)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(unit, blessing_of_might, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.paladin.blessing_of_might, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 end
 
 function Paladin.IsBlessingOfMight()
-    return blessing_of_might:SpellCasted()
+    return Spells.paladin.blessing_of_might:SpellCasted()
 end
 
 function Paladin.InitBlessingOfMight(player)

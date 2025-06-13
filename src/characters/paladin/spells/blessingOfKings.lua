@@ -1,11 +1,11 @@
 ---@author meiso
 
 function Paladin.RemoveBlessingOfKings(unit, stat)
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_kings) then
         unit:AddStr(-stat[1])
         unit:AddAgi(-stat[2])
         unit:AddInt(-stat[3])
-        BuffSystem.RemoveBuffFromHero(unit, blessing_of_kings)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.blessing_of_kings)
     end
 end
 
@@ -15,8 +15,8 @@ function Paladin.BlessingOfKings()
     local timer = Timer(600.)
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, blessing_of_kings) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, blessing_of_kings)
+    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.blessing_of_kings) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.blessing_of_kings)
     end
 
     --массив с доп. статами
@@ -34,14 +34,14 @@ function Paladin.BlessingOfKings()
         Paladin.RemoveBlessingOfKings(unit, stat)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(unit, blessing_of_kings, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.paladin.blessing_of_kings, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
     BuffSystem.logger:Info("...cast!")
 end
 
 function Paladin.IsBlessingOfKings()
-    return blessing_of_kings:SpellCasted()
+    return Spells.paladin.blessing_of_kings:SpellCasted()
 end
 
 function Paladin.InitBlessingOfKings(player)
