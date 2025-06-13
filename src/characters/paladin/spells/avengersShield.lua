@@ -30,15 +30,16 @@ function Paladin.AvengersShield()
         local group = GroupUnitsInRangeOfLocUnit(200, target_:GetLoc())
         for _ = 1, CountUnitsInGroup(group) do
             TriggerSleepAction(0.)
-            temp = GroupPickRandomUnit(group)
-            if not TargetTookDamage(temp, exc) and
-                    not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
-                return Unit(temp)
+            temp = Unit(GroupPickRandomUnit(group))
+            if not TargetTookDamage(temp:GetId(), exc)
+                    and not IsUnitAlly(temp:GetId(), GetOwningPlayer(GetTriggerUnit()))
+                    and temp:GetCurrentLife() > 0 then
+                return temp
             end
-            GroupRemoveUnit(group, temp)
+            GroupRemoveUnit(group, temp:GetId())
         end
         DestroyGroup(group)
-        return 0
+        return nil
     end
 
     local i = 0
@@ -49,7 +50,7 @@ function Paladin.AvengersShield()
         shield:MoveToUnit(target)
         if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            if target == 0 then
+            if target == nil then
                 break
             end
             i = i + 1
@@ -60,7 +61,7 @@ function Paladin.AvengersShield()
             TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            if target == 0 then
+            if target == nil then
                 break
             end
             i = i + 1

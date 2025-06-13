@@ -5551,11 +5551,12 @@ function DummyForDPS(location)
 end
 
 
-function TrashDummyForDPS(location, name)
+function TrashDummyForDPS(location, name, health)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
+    health = health or 50000
     d:SetName(name)
-    d:SetMaxLife(50000, true)
+    d:SetMaxLife(health, true)
     d:SetBaseDamage(200.)
 end
 
@@ -5570,7 +5571,7 @@ end
 
 function SpawnTrashDummies(count)
     for i = 1, count do
-        TrashDummyForDPS(Location(GetRandomReal(-600., -400.), 200.), tostring(i))
+        TrashDummyForDPS(Location(GetRandomReal(-600., -400.), 200.), tostring(i), 5000)
     end
 end
 
@@ -6215,15 +6216,16 @@ function Paladin.AvengersShield()
         local group = GroupUnitsInRangeOfLocUnit(200, target_:GetLoc())
         for _ = 1, CountUnitsInGroup(group) do
             TriggerSleepAction(0.)
-            temp = GroupPickRandomUnit(group)
-            if not TargetTookDamage(temp, exc) and
-                    not IsUnitAlly(temp, GetOwningPlayer(GetTriggerUnit())) then
-                return Unit(temp)
+            temp = Unit(GroupPickRandomUnit(group))
+            if not TargetTookDamage(temp:GetId(), exc)
+                    and not IsUnitAlly(temp:GetId(), GetOwningPlayer(GetTriggerUnit()))
+                    and temp:GetCurrentLife() > 0 then
+                return temp
             end
-            GroupRemoveUnit(group, temp)
+            GroupRemoveUnit(group, temp:GetId())
         end
         DestroyGroup(group)
-        return 0
+        return nil
     end
 
     local i = 0
@@ -6234,7 +6236,7 @@ function Paladin.AvengersShield()
         shield:MoveToUnit(target)
         if target:IsDied() then
             target = GetTarget(target, exclude_targets)
-            if target == 0 then
+            if target == nil then
                 break
             end
             i = i + 1
@@ -6245,7 +6247,7 @@ function Paladin.AvengersShield()
             TextTag(damage, target):Preset("spell")
             AddTarget(target, exclude_targets)
             target = GetTarget(target, exclude_targets)
-            if target == 0 then
+            if target == nil then
                 break
             end
             i = i + 1
@@ -7161,7 +7163,7 @@ function TestEntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
+    --Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 
@@ -7169,8 +7171,8 @@ function TestEntryPoint()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200.))
-    --SpawnTrashDummies(5)
+    --DummyForDPS(Location(-400., 200.))
+    SpawnTrashDummies(5)
 end
 
 --CUSTOM_CODE

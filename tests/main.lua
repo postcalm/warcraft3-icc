@@ -20,7 +20,7 @@ function TestEntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
+    --Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 
@@ -28,6 +28,6 @@ function TestEntryPoint()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))
-    DummyForDPS(Location(-400., 200.))
-    --SpawnTrashDummies(5)
+    --DummyForDPS(Location(-400., 200.))
+    SpawnTrashDummies(5)
 end

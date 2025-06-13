@@ -9,11 +9,12 @@ function DummyForDPS(location)
 end
 
 
-function TrashDummyForDPS(location, name)
+function TrashDummyForDPS(location, name, health)
     local loc = location or Location(4480., 400.)
     local d = Unit(LICH_KING, FourCC('hfoo'), loc, 0.)
+    health = health or 50000
     d:SetName(name)
-    d:SetMaxLife(50000, true)
+    d:SetMaxLife(health, true)
     d:SetBaseDamage(200.)
 end
 
@@ -28,6 +29,6 @@ end
 
 function SpawnTrashDummies(count)
     for i = 1, count do
-        TrashDummyForDPS(Location(GetRandomReal(-600., -400.), 200.), tostring(i))
+        TrashDummyForDPS(Location(GetRandomReal(-600., -400.), 200.), tostring(i), 5000)
     end
 end
