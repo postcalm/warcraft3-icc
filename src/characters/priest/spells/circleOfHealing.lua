@@ -22,7 +22,7 @@ function Priest.CastCircleOfHealing()
 end
 
 function Priest.IsCircleOfHealing()
-    return Spells.paladin.circle_of_healing:SpellCasted()
+    return Spells.priest.circle_of_healing:SpellCasted()
 end
 
 function Priest.InitCircleOfHealing(player)

@@ -1,6 +1,7 @@
 
 -- Точка входа для инициализации всего
 function EntryPoint()
+    ENABLE_LOGGER = false
     ENABLE_LOGGER_STDOUT = true
     --LOGGER_LEVEL = LogLevel.DEBUG
     Session.cache = GameCache("session")
@@ -9,7 +10,7 @@ function EntryPoint()
     HeroSelector.Init()
 
     -- Механики
-    --BuffSystem.LoadFrame()
+    BuffSystem.LoadFrame()
     --BattleTextViewSystem.Init()
     --EquipSystem.RegisterItems()
 

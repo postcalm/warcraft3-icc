@@ -1,42 +1,44 @@
 ---@author meiso
 
 function Priest.RemovePowerWordShield(unit)
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_shield) then
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.power_word_shield)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_shield) then
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.power_word_shield)
     end
 end
 
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local buff_timer = Timer(30.)
-    local debuff_timer = Timer(15.)
+    local buff_timer = Timer(7.)
+    local debuff_timer = Timer(5.)
     local absorb = 2230
     local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
 
     --ничего не делаем, если есть дебаф на повтор
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.weakened_soul) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.weakened_soul) then
         return
     end
     --проверяем есть ли щит, если да - сбрасываем и обновляем
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_shield) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.power_word_shield)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_shield) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.priest.power_word_shield)
     end
 
     local pws_effect = Effect(unit, model, "origin")
     event:RegisterDamaged()
 
     local remove_buff = function()
+        Logger("priest"):Info("remove")
         Priest.RemovePowerWordShield(unit)
         buff_timer:Destroy()
         event:Destroy()
         pws_effect:Destroy()
+        Logger("priest"):Info("ok")
     end
 
     local remove_debuff = function()
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.weakened_soul)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.weakened_soul)
         debuff_timer:Destroy()
     end
 
@@ -56,8 +58,8 @@ function Priest.CastPowerWordShield()
         return absorb > 0.
     end
 
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.power_word_shield, remove_buff)
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.weakened_soul, remove_debuff, true)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.power_word_shield, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.weakened_soul, remove_debuff, true)
     buff_timer:SetFunc(remove_buff)
     debuff_timer:SetFunc(remove_debuff)
     buff_timer:Start()
@@ -68,7 +70,7 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return Spells.paladin.power_word_shield:SpellCasted()
+    return Spells.priest.power_word_shield:SpellCasted()
 end
 
 function Priest.InitPowerWordShield(player)

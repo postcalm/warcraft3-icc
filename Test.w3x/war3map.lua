@@ -4625,13 +4625,17 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
         BuffSystem.logger:Info("Show debuff frame...")
-        BuffSystem.main_frame_debuff:Show()
-        BuffSystem._ShowDebuffs(hero)
+        if BuffSystem.main_frame_debuff ~= nil then
+            BuffSystem.main_frame_debuff:Show()
+            BuffSystem._ShowDebuffs(hero)
+        end
         BuffSystem.logger:Info("...ok")
     else
         BuffSystem.logger:Info("Show buff frame...")
-        BuffSystem.main_frame_buff:Show()
-        BuffSystem._ShowBuffs(hero)
+        if BuffSystem.main_frame_buff ~= nil then
+            BuffSystem.main_frame_buff:Show()
+            BuffSystem._ShowBuffs(hero)
+        end
         BuffSystem.logger:Info("...ok")
     end
 end
@@ -4696,8 +4700,10 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
             BuffSystem.buffs[hero][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(hero)
-    BuffSystem._ShowDebuffs(hero)
+    if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+        BuffSystem._ShowBuffs(hero)
+        BuffSystem._ShowDebuffs(hero)
+    end
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -4719,8 +4725,10 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
             BuffSystem.buffs[hero][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(hero)
-    BuffSystem._ShowDebuffs(hero)
+    if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+        BuffSystem._ShowBuffs(hero)
+        BuffSystem._ShowDebuffs(hero)
+    end
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -4795,8 +4803,10 @@ function BuffSystem.RemoveBuffFromUnits(buff)
                 BuffSystem.buffs[u][i] = nil
             end
         end
-        BuffSystem._ShowBuffs(u)
-        BuffSystem._ShowDebuffs(u)
+        if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+            BuffSystem._ShowBuffs(u)
+            BuffSystem._ShowDebuffs(u)
+        end
     end
 end
 
@@ -6668,7 +6678,7 @@ function Priest.CastCircleOfHealing()
 end
 
 function Priest.IsCircleOfHealing()
-    return Spells.paladin.circle_of_healing:SpellCasted()
+    return Spells.priest.circle_of_healing:SpellCasted()
 end
 
 function Priest.InitCircleOfHealing(player)
@@ -6702,7 +6712,7 @@ function Priest.CastFlashHeal()
 end
 
 function Priest.IsFlashHeal()
-    return Spells.paladin.flash_heal:SpellCasted()
+    return Spells.priest.flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal(player)
@@ -6726,7 +6736,7 @@ function Priest.CastGuardianSpirit()
     event:RegisterDamaged()
 
     local remove_buff = function()
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.guardian_spirit)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.guardian_spirit)
         timer:Destroy()
         gs_effect:Destroy()
         event:Destroy()
@@ -6743,7 +6753,7 @@ function Priest.CastGuardianSpirit()
         local current_hp = unit:GetCurrentLife()
         return current_hp < damage
     end
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.guardian_spirit)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.guardian_spirit)
     timer:SetFunc(remove_buff)
     timer:Start()
     event:AddCondition(GetLife)
@@ -6751,7 +6761,7 @@ function Priest.CastGuardianSpirit()
 end
 
 function Priest.IsGuardianSpirit()
-    return Spells.paladin.guardian_spirit:SpellCasted()
+    return Spells.priest.guardian_spirit:SpellCasted()
 end
 
 function Priest.InitGuardianSpirit(player)
@@ -6773,8 +6783,8 @@ function Priest.InnerFire()
 
     BuffSystem.RegisterHero(Priest.hero)
 
-    if BuffSystem.IsBuffOnHero(Priest.hero, Spells.paladin.inner_fire) then
-        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, Spells.paladin.inner_fire)
+    if BuffSystem.IsBuffOnHero(Priest.hero, Spells.priest.inner_fire) then
+        BuffSystem.RemoveBuffFromHeroByFunc(Priest.hero, Spells.priest.inner_fire)
     end
 
     local effect = Effect(Priest.hero, model)
@@ -6790,7 +6800,7 @@ function Priest.InnerFire()
         event:Destroy()
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(Priest.hero, Spells.paladin.inner_fire, remove_buff)
+    BuffSystem.AddBuffToHero(Priest.hero, Spells.priest.inner_fire, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 
@@ -6809,7 +6819,7 @@ function Priest.InnerFire()
 end
 
 function Priest.IsInnerFire()
-    return Spells.paladin.inner_fire:SpellCasted()
+    return Spells.priest.inner_fire:SpellCasted()
 end
 
 function Priest.InitInnerFire(player)
@@ -6822,9 +6832,9 @@ end
 ---@author meiso
 
 function Priest.RemovePowerWordFortitude(unit, items_list)
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_fortitude) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_fortitude) then
         EquipSystem.RemoveItemsToUnit(unit, items_list)
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.power_word_fortitude)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.power_word_fortitude)
     end
 end
 
@@ -6839,8 +6849,8 @@ function Priest.PowerWordFortitude()
     Timer(2., function() effect:Destroy() end):Start()
     BuffSystem.RegisterHero(unit)
 
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_fortitude) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.power_word_fortitude)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_fortitude) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.priest.power_word_fortitude)
     end
     EquipSystem.AddItemsToUnit(unit, items)
 
@@ -6848,13 +6858,13 @@ function Priest.PowerWordFortitude()
         Paladin.RemovePowerWordFortitude(unit, items)
         timer:Destroy()
     end
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.power_word_fortitude, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.power_word_fortitude, remove_buff)
     timer:SetFunc(remove_buff)
     timer:Start()
 end
 
 function Priest.IsPowerWordFortitude()
-    return Spells.paladin.power_word_fortitude:SpellCasted()
+    return Spells.priest.power_word_fortitude:SpellCasted()
 end
 
 function Priest.InitPowerWordFortitude(player)
@@ -6867,42 +6877,44 @@ end
 ---@author meiso
 
 function Priest.RemovePowerWordShield(unit)
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_shield) then
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.power_word_shield)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_shield) then
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.power_word_shield)
     end
 end
 
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local buff_timer = Timer(30.)
-    local debuff_timer = Timer(15.)
+    local buff_timer = Timer(7.)
+    local debuff_timer = Timer(5.)
     local absorb = 2230
     local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
     BuffSystem.RegisterHero(unit)
 
     --ничего не делаем, если есть дебаф на повтор
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.weakened_soul) then
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.weakened_soul) then
         return
     end
     --проверяем есть ли щит, если да - сбрасываем и обновляем
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.power_word_shield) then
-        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.paladin.power_word_shield)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.power_word_shield) then
+        BuffSystem.RemoveBuffFromHeroByFunc(unit, Spells.priest.power_word_shield)
     end
 
     local pws_effect = Effect(unit, model, "origin")
     event:RegisterDamaged()
 
     local remove_buff = function()
+        Logger("priest"):Info("remove")
         Priest.RemovePowerWordShield(unit)
         buff_timer:Destroy()
         event:Destroy()
         pws_effect:Destroy()
+        Logger("priest"):Info("ok")
     end
 
     local remove_debuff = function()
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.weakened_soul)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.weakened_soul)
         debuff_timer:Destroy()
     end
 
@@ -6922,8 +6934,8 @@ function Priest.CastPowerWordShield()
         return absorb > 0.
     end
 
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.power_word_shield, remove_buff)
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.weakened_soul, remove_debuff, true)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.power_word_shield, remove_buff)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.weakened_soul, remove_debuff, true)
     buff_timer:SetFunc(remove_buff)
     debuff_timer:SetFunc(remove_debuff)
     buff_timer:Start()
@@ -6934,7 +6946,7 @@ function Priest.CastPowerWordShield()
 end
 
 function Priest.IsPowerWordShield()
-    return Spells.paladin.power_word_shield:SpellCasted()
+    return Spells.priest.power_word_shield:SpellCasted()
 end
 
 function Priest.InitPowerWordShield(player)
@@ -6947,8 +6959,8 @@ end
 ---@author meiso
 
 function Priest.RemovePrayerOfMending(unit)
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending) then
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.prayer_of_mending)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending) then
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.prayer_of_mending)
     end
 end
 
@@ -6962,8 +6974,8 @@ function Priest.CastPrayerOfMending()
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending) then
-        BuffSystem.RemoveBuffFromUnits(Spells.paladin.prayer_of_mending)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending) then
+        BuffSystem.RemoveBuffFromUnits(Spells.priest.prayer_of_mending)
         POM_JUMP_COUNT = 5
     end
 
@@ -6986,12 +6998,12 @@ function Priest.CastPrayerOfMending()
                 Priest.RemovePrayerOfMending(unit)
                 timer:Destroy()
             end
-            BuffSystem.AddBuffToHero(unit, Spells.paladin.prayer_of_mending, remove_buff)
+            BuffSystem.AddBuffToHero(unit, Spells.priest.prayer_of_mending, remove_buff)
             timer:SetFunc(remove_buff)
             timer:Start()
 
             event:AddCondition(function()
-                return BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending)
+                return BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending)
             end)
             event:AddAction(function()
                 local heal = 1043
@@ -7014,7 +7026,7 @@ function Priest.CastPrayerOfMending()
                 end
                 GroupRemoveUnit(group, temp)
             end
-            BuffSystem.RemoveBuffFromHero(last_unit, Spells.paladin.prayer_of_mending)
+            BuffSystem.RemoveBuffFromHero(last_unit, Spells.priest.prayer_of_mending)
             DestroyGroup(group)
         end
     end
@@ -7023,7 +7035,7 @@ function Priest.CastPrayerOfMending()
 end
 
 function Priest.IsPrayerOfMending()
-    return Spells.paladin.prayer_of_mending:SpellCasted()
+    return Spells.priest.prayer_of_mending:SpellCasted()
 end
 
 function Priest.InitPrayerOfMending(player)
@@ -7051,7 +7063,7 @@ function Priest.CastRenew()
 end
 
 function Priest.IsRenew()
-    return Spells.paladin.renew:SpellCasted()
+    return Spells.priest.renew:SpellCasted()
 end
 
 function Priest.InitRenew(player)
@@ -7119,7 +7131,7 @@ function Priest.IsSpiritOfRedemption()
 end
 
 function Priest.InitSpiritOfRedemption(player)
-    Priest.hero:DisableAbility(Spells.paladin.spirit_of_redemption:GetId())
+    Priest.hero:DisableAbility(Spells.priest.spirit_of_redemption:GetId())
 
     local event = EventsPlayer(player)
     event:RegisterUnitDamaged()
@@ -7149,7 +7161,7 @@ function TestEntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.))
+    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 

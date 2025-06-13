@@ -12,7 +12,7 @@ function Priest.CastGuardianSpirit()
     event:RegisterDamaged()
 
     local remove_buff = function()
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.guardian_spirit)
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.guardian_spirit)
         timer:Destroy()
         gs_effect:Destroy()
         event:Destroy()
@@ -29,7 +29,7 @@ function Priest.CastGuardianSpirit()
         local current_hp = unit:GetCurrentLife()
         return current_hp < damage
     end
-    BuffSystem.AddBuffToHero(unit, Spells.paladin.guardian_spirit)
+    BuffSystem.AddBuffToHero(unit, Spells.priest.guardian_spirit)
     timer:SetFunc(remove_buff)
     timer:Start()
     event:AddCondition(GetLife)
@@ -37,7 +37,7 @@ function Priest.CastGuardianSpirit()
 end
 
 function Priest.IsGuardianSpirit()
-    return Spells.paladin.guardian_spirit:SpellCasted()
+    return Spells.priest.guardian_spirit:SpellCasted()
 end
 
 function Priest.InitGuardianSpirit(player)

@@ -22,7 +22,7 @@ function Priest.CastFlashHeal()
 end
 
 function Priest.IsFlashHeal()
-    return Spells.paladin.flash_heal:SpellCasted()
+    return Spells.priest.flash_heal:SpellCasted()
 end
 
 function Priest.InitFlashHeal(player)

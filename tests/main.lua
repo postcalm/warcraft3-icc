@@ -9,22 +9,22 @@ function TestEntryPoint()
     --HeroSelector.Init()
 
     -- Механики
-    BuffSystem.LoadFrame()
+    --BuffSystem.LoadFrame()
     BattleTextViewSystem.Init()
-    EquipSystem.RegisterItems()
+    --EquipSystem.RegisterItems()
 
     --SaveSystem.InitNewHeroEvent()
-    SaveSystem.gamecache = InitGameCache("savesystem")
-    SaveSystem.map_number = 1
-    SaveSystem.InitSaveEvent()
-    SaveSystem.InitLoadEvent()
+    --SaveSystem.gamecache = InitGameCache("savesystem")
+    --SaveSystem.map_number = 1
+    --SaveSystem.InitSaveEvent()
+    --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.))
-    Paladin.Init(Location(-400., -490.))
+    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
+    Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 
-    Movement.Init()
+    --Movement.Init()
 
     -- Манекены
     --DummyForHealing(Location(300., 200.))

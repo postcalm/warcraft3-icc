@@ -57,13 +57,17 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     BuffSystem.CheckingBuffsExceptions(hero, buff)
     if is_debuff then
         BuffSystem.logger:Info("Show debuff frame...")
-        BuffSystem.main_frame_debuff:Show()
-        BuffSystem._ShowDebuffs(hero)
+        if BuffSystem.main_frame_debuff ~= nil then
+            BuffSystem.main_frame_debuff:Show()
+            BuffSystem._ShowDebuffs(hero)
+        end
         BuffSystem.logger:Info("...ok")
     else
         BuffSystem.logger:Info("Show buff frame...")
-        BuffSystem.main_frame_buff:Show()
-        BuffSystem._ShowBuffs(hero)
+        if BuffSystem.main_frame_buff ~= nil then
+            BuffSystem.main_frame_buff:Show()
+            BuffSystem._ShowBuffs(hero)
+        end
         BuffSystem.logger:Info("...ok")
     end
 end
@@ -128,8 +132,10 @@ function BuffSystem.RemoveBuffFromHero(hero, buff)
             BuffSystem.buffs[hero][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(hero)
-    BuffSystem._ShowDebuffs(hero)
+    if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+        BuffSystem._ShowBuffs(hero)
+        BuffSystem._ShowDebuffs(hero)
+    end
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -151,8 +157,10 @@ function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
             BuffSystem.buffs[hero][i] = nil
         end
     end
-    BuffSystem._ShowBuffs(hero)
-    BuffSystem._ShowDebuffs(hero)
+    if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+        BuffSystem._ShowBuffs(hero)
+        BuffSystem._ShowDebuffs(hero)
+    end
     BuffSystem.logger:Info("Remove successfully")
 end
 
@@ -227,8 +235,10 @@ function BuffSystem.RemoveBuffFromUnits(buff)
                 BuffSystem.buffs[u][i] = nil
             end
         end
-        BuffSystem._ShowBuffs(u)
-        BuffSystem._ShowDebuffs(u)
+        if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
+            BuffSystem._ShowBuffs(u)
+            BuffSystem._ShowDebuffs(u)
+        end
     end
 end
 

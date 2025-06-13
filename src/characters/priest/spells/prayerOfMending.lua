@@ -1,8 +1,8 @@
 ---@author meiso
 
 function Priest.RemovePrayerOfMending(unit)
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending) then
-        BuffSystem.RemoveBuffFromHero(unit, Spells.paladin.prayer_of_mending)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending) then
+        BuffSystem.RemoveBuffFromHero(unit, Spells.priest.prayer_of_mending)
     end
 end
 
@@ -16,8 +16,8 @@ function Priest.CastPrayerOfMending()
     local POM_JUMP_COUNT = 5
 
     --при повторном наложении сбрасываем со всех
-    if BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending) then
-        BuffSystem.RemoveBuffFromUnits(Spells.paladin.prayer_of_mending)
+    if BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending) then
+        BuffSystem.RemoveBuffFromUnits(Spells.priest.prayer_of_mending)
         POM_JUMP_COUNT = 5
     end
 
@@ -40,12 +40,12 @@ function Priest.CastPrayerOfMending()
                 Priest.RemovePrayerOfMending(unit)
                 timer:Destroy()
             end
-            BuffSystem.AddBuffToHero(unit, Spells.paladin.prayer_of_mending, remove_buff)
+            BuffSystem.AddBuffToHero(unit, Spells.priest.prayer_of_mending, remove_buff)
             timer:SetFunc(remove_buff)
             timer:Start()
 
             event:AddCondition(function()
-                return BuffSystem.IsBuffOnHero(unit, Spells.paladin.prayer_of_mending)
+                return BuffSystem.IsBuffOnHero(unit, Spells.priest.prayer_of_mending)
             end)
             event:AddAction(function()
                 local heal = 1043
@@ -68,7 +68,7 @@ function Priest.CastPrayerOfMending()
                 end
                 GroupRemoveUnit(group, temp)
             end
-            BuffSystem.RemoveBuffFromHero(last_unit, Spells.paladin.prayer_of_mending)
+            BuffSystem.RemoveBuffFromHero(last_unit, Spells.priest.prayer_of_mending)
             DestroyGroup(group)
         end
     end
@@ -77,7 +77,7 @@ function Priest.CastPrayerOfMending()
 end
 
 function Priest.IsPrayerOfMending()
-    return Spells.paladin.prayer_of_mending:SpellCasted()
+    return Spells.priest.prayer_of_mending:SpellCasted()
 end
 
 function Priest.InitPrayerOfMending(player)
