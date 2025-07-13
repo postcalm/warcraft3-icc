@@ -54,7 +54,9 @@ EQUIPMENT_SYSTEM_FILES = (
     "src/libs/EquipmentSystem",
 )
 BUFF_SYSTEM_FILES = (
-    "src/libs/BuffSystem",
+    "src/libs/BuffSystem/buff.lua",
+    "src/libs/BuffSystem/buffSystem.lua",
+    "src/libs/BuffSystem/helpers.lua",
 )
 BATTLE_TEXT_VIEW_SYSTEM_FILES = (
     "src/libs/battleTextViewSystem.lua",

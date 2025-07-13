@@ -9,7 +9,8 @@ function TestEntryPoint()
     --HeroSelector.Init()
 
     -- Механики
-    --BuffSystem.LoadFrame()
+    BuffSystem.LoadFrame()
+
     BattleTextViewSystem.Init()
     --EquipSystem.RegisterItems()
 
@@ -20,7 +21,7 @@ function TestEntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
+    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 

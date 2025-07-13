@@ -66,3 +66,10 @@ end
 function isLocalPlayer()
     return GetLocalPlayer() == GetTriggerPlayer()
 end
+
+--- Возвращает идентификатор игрока по идентификатору юнита
+---@param unit unit Юнит игрока
+---@return integer
+function playerIdByUnit(unit)
+    return GetConvertedPlayerId(GetOwningPlayer(unit))
+end

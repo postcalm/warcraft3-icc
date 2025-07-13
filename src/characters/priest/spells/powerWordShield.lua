@@ -9,8 +9,8 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local buff_timer = Timer(7.)
-    local debuff_timer = Timer(5.)
+    local buff_timer = Timer(30.)
+    local debuff_timer = Timer(15.)
     local absorb = 2230
     local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
