@@ -6,6 +6,13 @@ Frame "EDITBOX" "NameSetter" {
     EditBorderSize 0.009,
     EditCursorColor 1.0 0.0 0.0,
 
+    Frame "TEXT" "NameSetterTitleText" INHERITS "StandardTitleTextTemplate" {
+        UseActiveContext,
+
+        SetPoint CENTER, "NameSetter", CENTER, 0.0, 0.02,
+        Text "Введите имя персонажа:",
+    }
+
     ControlBackdrop "EditBoxBackdrop",
     Frame "BACKDROP" "EditBoxBackdrop" {
         DecorateFileNames,

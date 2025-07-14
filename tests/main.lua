@@ -6,7 +6,7 @@ function TestEntryPoint()
     --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
 
     -- Механики
     BuffSystem.LoadFrame()
