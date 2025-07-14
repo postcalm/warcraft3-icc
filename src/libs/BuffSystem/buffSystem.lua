@@ -1,6 +1,10 @@
 ---@author meiso
 
 --- Система отслеживания положительных и отрицательных эффектов.
+--- Снизу по краям отрисовываются основные фреймы, в которых отрисовываются
+--- иконки положительных (слева) и отрицательных (справа) эффектов.
+--- Изначально основные фреймы скрыты и появляются только при наложении эффектов.
+--- Основные фреймы расширяются в зависимости от количества соответствующих эффектов.
 
 ---@class BuffSystem
 BuffSystem = {
@@ -62,7 +66,7 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     if is_debuff then
         BuffSystem.logger:Info("Show debuff frame...")
         if BuffSystem.main_frame_debuff ~= nil then
-            if BuffSystem._is_local_player(hero) then
+            if BuffSystem._IsLocalPlayer(hero) then
                 BuffSystem.main_frame_debuff:Show()
             end
             BuffSystem._ShowDebuffs(hero)
@@ -71,7 +75,7 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
     else
         BuffSystem.logger:Info("Show buff frame...")
         if BuffSystem.main_frame_buff ~= nil then
-            if BuffSystem._is_local_player(hero) then
+            if BuffSystem._IsLocalPlayer(hero) then
                 BuffSystem.main_frame_buff:Show()
             end
             BuffSystem._ShowBuffs(hero)

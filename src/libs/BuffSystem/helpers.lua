@@ -71,7 +71,7 @@ function BuffSystem._ShowBuffs(u)
             count = count + 1
             BuffSystem.logger:Info("buff", buff.buff.tooltip)
             BuffSystem.logger:Info("icon", buff.buff.icon)
-            if BuffSystem._is_local_player(u) then
+            if BuffSystem._IsLocalPlayer(u) then
                 BuffSystem._ResizeMainFrame(
                         BuffSystem.main_frame_buff,
                         buff.frame,
@@ -79,7 +79,7 @@ function BuffSystem._ShowBuffs(u)
                 )
             end
             local icon_frame = BuffSystem._SetIcon(buff.buff.icon)
-            if not BuffSystem._is_local_player(u) then
+            if not BuffSystem._IsLocalPlayer(u) then
                 icon_frame:Hide()
                 buff.frame:Hide()
             end
@@ -106,7 +106,7 @@ function BuffSystem._ShowDebuffs(u)
             count = count + 1
             BuffSystem.logger:Info("debuff", debuff.buff.tooltip)
             BuffSystem.logger:Info("icon", debuff.buff.icon)
-            if BuffSystem._is_local_player(u) then
+            if BuffSystem._IsLocalPlayer(u) then
                 BuffSystem._ResizeMainFrame(
                         BuffSystem.main_frame_debuff,
                         debuff.frame,
@@ -114,7 +114,7 @@ function BuffSystem._ShowDebuffs(u)
                 )
             end
             local icon_frame = BuffSystem._SetIcon(debuff.buff.icon)
-            if not BuffSystem._is_local_player(u) then
+            if not BuffSystem._IsLocalPlayer(u) then
                 icon_frame:Hide()
                 debuff.frame:Hide()
             end
@@ -137,7 +137,6 @@ function BuffSystem._GetBuff(u, i)
     return BuffSystem._GetBuffs(u)[i]
 end
 
-function BuffSystem._is_local_player(u)
-    --return Unit(u):GetOwner() == GetLocalPlayer()
-    return true
+function BuffSystem._IsLocalPlayer(u)
+    return Unit(u):GetOwner() == GetLocalPlayer()
 end
