@@ -1,9 +1,7 @@
+---@author meiso
 
-function LordMarrowgar.Init()
+function LordMarrowgar.ResetToDefault()
     local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
-
-    LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
 
     EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
@@ -11,8 +9,17 @@ function LordMarrowgar.Init()
 
     LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
     LordMarrowgar.unit:AddAbilities(WHIRLWIND)
+end
+
+function LordMarrowgar.Init()
+    local location = GetRandomLocInRect(gg_rct_LordMarrowSpawn)
+
+    LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, location, -90.)
+    LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, location, -90.)
 
     LordMarrowgar.InitColdflame()
     LordMarrowgar.InitBoneSpike()
     LordMarrowgar.InitWhirlwind()
+
+    LordMarrowgar.ResetToDefault()
 end

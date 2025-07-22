@@ -1,14 +1,18 @@
+---@author meiso
 
-function LadyDeathwhisper.Init()
+function LadyDeathwhisper.ResetToDefault()
     local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
-
-    LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
-
-    LadyDeathwhisper.unit:SetLevel(83)
-    LadyDeathwhisper.unit:SetMana(500)
 
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
     EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
+
+    LadyDeathwhisper.unit:SetLevel(83)
+    LadyDeathwhisper.unit:SetMana(500)
+end
+
+function LadyDeathwhisper.Init()
+    local location = GetRandomLocInRect(gg_rct_LadyDeathSpawn)
+    LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, location, -90.)
 
     -- both phase
     LadyDeathwhisper.InitDeathAndDecay()
@@ -23,4 +27,6 @@ function LadyDeathwhisper.Init()
     -- second phase
     LadyDeathwhisper.InitFrostBolt()
     LadyDeathwhisper.InitFrostBoltVolley()
+
+    LadyDeathwhisper.ResetToDefault()
 end

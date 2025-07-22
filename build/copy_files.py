@@ -24,7 +24,12 @@ other_icons = (
 model_files = (
     "models/creatures/Paladin",
     "models/creatures/Priest",
+    "models/creatures/spirithealer",
+    "models/creatures/Lord Marrowgar",
+    "models/creatures/Lady Deathwhisper",
     "models/spells/Paladin",
+    "models/spells/Lady Deathwisper",
+    "models/spells/Bone Spike Graveyard",
 )
 ui_files = (
     "frames",

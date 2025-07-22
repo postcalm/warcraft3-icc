@@ -21,8 +21,8 @@ function EntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Боссы
-    --LordMarrowgar.Init()
-    --LadyDeathwhisper.Init()
+    LordMarrowgar.Init()
+    LadyDeathwhisper.Init()
 	
     FogEnableOff()
     FogMaskEnableOff()
