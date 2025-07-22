@@ -25,9 +25,9 @@ COMMON_FILES = (
 INIT_FILES = (
     "src/preinitialize.lua",
     "src/session.lua",
-    "src/characters/animations.lua",
-    "src/characters/paladin/init.lua",
-    "src/characters/priest/init.lua",
+    "src/heroes/animations.lua",
+    "src/heroes/paladin/init.lua",
+    "src/heroes/priest/init.lua",
 )
 CORE_FILES = (
     "src/core/pool.lua",
@@ -80,8 +80,8 @@ UNITS_FILES = (
     "src/units/lady_deathwhisper",
 )
 CHARACTER_SPELLS_FILES = (
-    "src/characters/paladin/spells",
-    "src/characters/priest/spells",
+    "src/heroes/paladin/spells",
+    "src/heroes/priest/spells",
 )
 
 ALL_SOURCE_FILES = (

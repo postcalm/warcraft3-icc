@@ -96,7 +96,6 @@ end
 ---@private
 function Movement._play_anim(player_id)
     local unit = Movement.units[player_id]
-    --TODO: поправить выбор анимаций (у каждого юнита он свой)
     local class_ = Session.selected_class[PLAYERS[player_id]]
     ---@type HeroAnimations
     local animations = HERO_ANIMATIONS[class_]
