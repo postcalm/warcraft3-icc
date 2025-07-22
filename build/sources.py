@@ -24,6 +24,8 @@ COMMON_FILES = (
 )
 INIT_FILES = (
     "src/preinitialize.lua",
+    "src/session.lua",
+    "src/characters/animations.lua",
     "src/characters/paladin/init.lua",
     "src/characters/priest/init.lua",
 )
@@ -70,7 +72,6 @@ HERO_SELECTOR_FILES = (
 )
 SOURCES_FILES = (
     "src/abilities.lua",
-    "src/session.lua",
 )
 UNITS_FILES = (
     "src/units/dummy",

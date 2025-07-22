@@ -21,7 +21,7 @@ function Camera.Register(unit, player)
     end
 
     if Camera.timers[player_id] == nil then
-        Camera.timers[player_id] = Timer(0.04)
+        Camera.timers[player_id] = Timer(0.02)
     end
     local timer = Camera.timers[player_id]
     SetCameraTargetControllerNoZForPlayer(player, Camera.units[player_id]:GetId(), 0, 0, false)
@@ -53,6 +53,7 @@ function Camera._update(player_id)
     local facing = unit:GetFacing()
     local loc = PolarProjectionBJ(unit:GetLoc(), -400., facing)
     Camera._detect_collision(player_id)
+    -- правим камеру по высоте
     if GetLocationZ(loc) - unit:GetZ() > 200 then
         Camera._set_angle(player_id, -24.)
     else

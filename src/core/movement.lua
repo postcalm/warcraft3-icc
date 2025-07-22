@@ -9,6 +9,7 @@ Movement = {
     to_left = {},
     to_right = {},
     animate = {},
+    speed = 10,
     ---@type Timer
     timers = {},
     ---@type Logger
@@ -27,7 +28,7 @@ function Movement.Init(unit, player)
         Movement.units[player_id] = unit
     end
     if Movement.timers[player_id] == nil then
-        Movement.timers[player_id] = Timer(0.04)
+        Movement.timers[player_id] = Timer(0.02)
     end
 
     Movement._set_default_anim(player_id)
@@ -82,13 +83,13 @@ end
 function Movement._move(player_id)
     local unit = Movement.units[player_id]
     if Movement.to_up[player_id] then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
+        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), Movement.speed, unit:GetFacing()))
         SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
-        Movement.logger:Debug("to up")
+        Movement.logger:Debug("forward")
     elseif Movement.to_down[player_id] then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
+        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -Movement.speed, unit:GetFacing()))
         SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
-        Movement.logger:Debug("to down")
+        Movement.logger:Debug("backward")
     end
 end
 
@@ -96,11 +97,14 @@ end
 function Movement._play_anim(player_id)
     local unit = Movement.units[player_id]
     --TODO: поправить выбор анимаций (у каждого юнита он свой)
+    local class_ = Session.selected_class[PLAYERS[player_id]]
+    ---@type HeroAnimations
+    local animations = HERO_ANIMATIONS[class_]
     if Movement.to_up[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), 5)
+        SetUnitAnimationByIndex(unit:GetId(), animations.move_forward)
         Movement.animate[player_id] = true
     elseif Movement.to_down[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), 13)
+        SetUnitAnimationByIndex(unit:GetId(), animations.move_backward)
         Movement.animate[player_id] = true
     end
     if not Movement.to_up[player_id] and not Movement.to_down[player_id] and Movement.animate[player_id] then
@@ -110,6 +114,9 @@ end
 
 ---@private
 function Movement._set_default_anim(player_id)
-    SetUnitAnimation(Movement.units[player_id]:GetId(), "Portrait")
+    local class_ = Session.selected_class[PLAYERS[player_id]]
+    ---@type HeroAnimations
+    local animations = HERO_ANIMATIONS[class_]
+    SetUnitAnimationByIndex(Movement.units[player_id]:GetId(), animations.idle)
     Movement.animate[player_id] = false
 end

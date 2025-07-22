@@ -90,6 +90,7 @@ function HeroSelector.AcceptHero(hero, name)
     end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
+    Session.selected_class[player] = hero
     SaveSystem.InitHero(HeroSelector.hero, name, player)
     if HeroSelector.units[player] == nil then
         HeroSelector.units[player] = SaveSystem.player_unit
