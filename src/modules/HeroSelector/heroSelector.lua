@@ -94,6 +94,7 @@ function HeroSelector.AcceptHero(hero, name)
     SaveSystem.InitHero(HeroSelector.hero, name, player)
     if HeroSelector.units[player] == nil then
         HeroSelector.units[player] = SaveSystem.player_unit
+        Session.all_selected_heroes:Add(SaveSystem.player_unit)
         Movement.Init(HeroSelector.units[player], player)
     end
     HeroSelector.Close()

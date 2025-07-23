@@ -32,7 +32,7 @@ HERO_ANIMATIONS = {
         attack = 37,
         move_forward = 5,
         move_backward = 13,
-        idle = 11
+        idle = 10
     },
     priest = HeroAnimations {
         attack = 26,

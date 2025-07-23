@@ -37,8 +37,8 @@ function Unit:_init(player, unit_id, location, face)
     self.unit = CreateUnit(p, unit_id, x, y, f)
     --TODO: синхронизировать пул отдельно, т.к. юниты создаются моментом для всех игроков
     UNITS_POOL.add(self)
-    local agro = CombatSystem(self)
-    agro:Register()
+    self.agro = AgroSystem(self)
+    self.agro:Register()
 end
 
 -- Уровень угрозы
@@ -720,6 +720,10 @@ function Unit:SetFacing(facing)
     SetUnitFacingTimed(self.unit, facing, 0)
 end
 
+function Unit:IsAlive()
+    return self:GetCurrentLife() > 0.
+end
+
 --- Проверяет мертв ли юнит
 ---@return boolean
 function Unit:IsDied()
@@ -747,6 +751,7 @@ function Unit:Revive(location)
     local loc = location or self:GetLoc()
     local x = GetLocationX(loc)
     local y = GetLocationY(loc)
+    self.agro:Reset()
     ReviveHero(self.unit, x, y, false)
 end
 

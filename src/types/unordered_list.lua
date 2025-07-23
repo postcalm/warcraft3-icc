@@ -15,19 +15,25 @@ setmetatable(UnorderedList, {
 ---@private
 function UnorderedList:_init()
     ---@private
-    self._pool = {}
+    self._list = {}
 end
 
 --- Возвращает все элементы
 ---@return table
 function UnorderedList:All()
-    return self._pool
+    return self._list
 end
 
---- Проверят не пуст ли пул
+--- Возвращает пару: индекс и элемент
+---@return (number, any)
+function UnorderedList:Pairs()
+    return pairs(self._list)
+end
+
+--- Проверят не пуст ли список
 ---@return boolean
 function UnorderedList:IsEmpty()
-    return next(self._pool) == nil
+    return next(self._list) == nil
 end
 
 --- Добавить элемент
@@ -35,7 +41,7 @@ end
 ---@return nil
 function UnorderedList:Add(value)
     if not self:Contain(value) then
-        table.insert(self._pool, value)
+        table.insert(self._list, value)
     end
 end
 
@@ -45,8 +51,8 @@ end
 function UnorderedList:Update(value)
     local index = self:Find(value)
     if self:Contain(value) then
-        table.remove(self._pool, index)
-        table.insert(self._pool, value)
+        table.remove(self._list, index)
+        table.insert(self._list, value)
     end
 end
 
@@ -54,7 +60,7 @@ end
 ---@param index number
 ---@return any
 function UnorderedList:Get(index)
-    return self._pool[index]
+    return self._list[index]
 end
 
 --- Удалить элемент
@@ -62,15 +68,15 @@ end
 ---@return nil
 function UnorderedList:Remove(value)
     if self:Contain(value) then
-        table.remove(self._pool, self:Find(value))
+        table.remove(self._list, self:Find(value))
     end
 end
 
---- Входит ли элемент в пул
+--- Входит ли элемент в список
 ---@param value any
 ---@return boolean
 function UnorderedList:Contain(value)
-    for _, v in pairs(self._pool) do
+    for _, v in pairs(self._list) do
         if v == value then
             return true
         end
@@ -82,7 +88,7 @@ end
 ---@param value any
 ---@return number
 function UnorderedList:Find(value)
-    for i, v in pairs(self._pool) do
+    for i, v in pairs(self._list) do
         if v == value then
             return i
         end
@@ -93,5 +99,5 @@ end
 --- Очистить пул
 ---@return nil
 function UnorderedList:Clear()
-    self._pool = {}
+    self._list = {}
 end

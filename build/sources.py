@@ -41,8 +41,9 @@ CORE_FILES = (
 IFACES_FILES = (
     "src/blzwraps",
 )
-AGRO_SYSTEM_FILES = (
-    "src/modules/CombatSystem",
+COMBAT_SYSTEM_FILES = (
+    "src/modules/CombatSystem/agro.lua",
+    "src/modules/CombatSystem/global.lua",
 )
 SAVE_SYSTEM_FILES = (
     "src/modules/SaveSystem/init.lua",
@@ -93,7 +94,7 @@ ALL_SOURCE_FILES = (
     *TYPES_FILES,
     *INIT_FILES,
     *CORE_FILES,
-    *AGRO_SYSTEM_FILES,
+    *COMBAT_SYSTEM_FILES,
     *IFACES_FILES,
     *SAVE_SYSTEM_FILES,
     *EQUIPMENT_SYSTEM_FILES,
