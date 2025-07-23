@@ -17,7 +17,7 @@ function CombatSystem:_init(unit)
     ---@type Unit
     self.unit = unit
     self.combat = false
-    self.pool_attacked = Pool()
+    self.pool_attacked = UnorderedList()
 end
 
 function CombatSystem:Register()

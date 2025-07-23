@@ -3,6 +3,7 @@
 """
 Файлы должны собираться в чёткой последовательности:
 - файлы с общими константами и первичные файлы инициализации игры и юнитов
+- кастомные типы данных
 - файлы ядра (движка) игры
 - интерфейсы над близардовскими функциями
 - реализации различных игровых модулей
@@ -22,6 +23,9 @@ COMMON_FILES = (
     "src/common/spells.lua",
     "src/common/units.lua",
 )
+TYPES_FILES = (
+    "src/types/unordered_list.lua",
+)
 INIT_FILES = (
     "src/preinitialize.lua",
     "src/session.lua",
@@ -30,7 +34,6 @@ INIT_FILES = (
     "src/heroes/priest/init.lua",
 )
 CORE_FILES = (
-    "src/core/pool.lua",
     "src/core/keyboard.lua",
     "src/core/camera.lua",
     "src/core/movement.lua",
@@ -87,6 +90,7 @@ HEROES_SPELLS_FILES = (
 
 ALL_SOURCE_FILES = (
     *COMMON_FILES,
+    *TYPES_FILES,
     *INIT_FILES,
     *CORE_FILES,
     *AGRO_SYSTEM_FILES,

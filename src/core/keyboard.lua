@@ -25,8 +25,8 @@ end
 
 ---@class KeyboardController
 KeyboardController = {
-    ---@type Pool
-    keys = Pool(),
+    ---@type UnorderedList
+    keys = UnorderedList(),
     ---@private
     _events = {},
     ---@type Logger

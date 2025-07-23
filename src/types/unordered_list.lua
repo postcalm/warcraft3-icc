@@ -1,11 +1,10 @@
 ---@author meiso
 
+---@class UnorderedList Неупорядоченный список с элементами одного типа.
+UnorderedList = {}
+UnorderedList.__index = UnorderedList
 
----@class Pool Неупорядоченная коллекция, представляющая пул (список) элементов одного типа.
-Pool = {}
-Pool.__index = Pool
-
-setmetatable(Pool, {
+setmetatable(UnorderedList, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
         self:_init(...)
@@ -14,27 +13,27 @@ setmetatable(Pool, {
 })
 
 ---@private
-function Pool:_init()
+function UnorderedList:_init()
     ---@private
     self._pool = {}
 end
 
 --- Возвращает все элементы
 ---@return table
-function Pool:All()
+function UnorderedList:All()
     return self._pool
 end
 
 --- Проверят не пуст ли пул
 ---@return boolean
-function Pool:IsEmpty()
+function UnorderedList:IsEmpty()
     return next(self._pool) == nil
 end
 
 --- Добавить элемент
 ---@param value any
 ---@return nil
-function Pool:Add(value)
+function UnorderedList:Add(value)
     if not self:Contain(value) then
         table.insert(self._pool, value)
     end
@@ -43,7 +42,7 @@ end
 --- Обновить существующий элемент
 ---@param value any
 ---@return nil
-function Pool:Update(value)
+function UnorderedList:Update(value)
     local index = self:Find(value)
     if self:Contain(value) then
         table.remove(self._pool, index)
@@ -54,14 +53,14 @@ end
 --- Получить элемент по индексу
 ---@param index number
 ---@return any
-function Pool:Get(index)
+function UnorderedList:Get(index)
     return self._pool[index]
 end
 
 --- Удалить элемент
 ---@param value any
 ---@return nil
-function Pool:Remove(value)
+function UnorderedList:Remove(value)
     if self:Contain(value) then
         table.remove(self._pool, self:Find(value))
     end
@@ -70,7 +69,7 @@ end
 --- Входит ли элемент в пул
 ---@param value any
 ---@return boolean
-function Pool:Contain(value)
+function UnorderedList:Contain(value)
     for _, v in pairs(self._pool) do
         if v == value then
             return true
@@ -82,7 +81,7 @@ end
 --- Найти элемент. Возвращает индекс
 ---@param value any
 ---@return number
-function Pool:Find(value)
+function UnorderedList:Find(value)
     for i, v in pairs(self._pool) do
         if v == value then
             return i
@@ -93,6 +92,6 @@ end
 
 --- Очистить пул
 ---@return nil
-function Pool:Clear()
+function UnorderedList:Clear()
     self._pool = {}
 end
