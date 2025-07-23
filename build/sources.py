@@ -5,7 +5,7 @@
 - файлы с общими константами и первичные файлы инициализации игры и юнитов
 - файлы ядра (движка) игры
 - интерфейсы над близардовскими функциями
-- реализации различных игровых систем
+- реализации различных игровых модулей
 - реализации героев и юнитов
 """
 COMMON_FILES = (
@@ -39,39 +39,40 @@ IFACES_FILES = (
     "src/blzwraps",
 )
 AGRO_SYSTEM_FILES = (
-    "src/libs/CombatSystem",
+    "src/modules/CombatSystem",
 )
 SAVE_SYSTEM_FILES = (
-    "src/libs/SaveSystem/init.lua",
-    "src/libs/SaveSystem/modules",
-    "src/libs/SaveSystem/userData.lua",
-    "src/libs/SaveSystem/heroData.lua",
-    "src/libs/SaveSystem/saveSystem.lua",
-    "src/libs/SaveSystem/heroes.lua",
-    "src/libs/SaveSystem/newHero.lua",
-    "src/libs/SaveSystem/saveHero.lua",
-    "src/libs/SaveSystem/loadHero.lua",
+    "src/modules/SaveSystem/init.lua",
+    "src/modules/SaveSystem/modules",
+    "src/modules/SaveSystem/userData.lua",
+    "src/modules/SaveSystem/heroData.lua",
+    "src/modules/SaveSystem/saveSystem.lua",
+    "src/modules/SaveSystem/heroes.lua",
+    "src/modules/SaveSystem/newHero.lua",
+    "src/modules/SaveSystem/saveHero.lua",
+    "src/modules/SaveSystem/loadHero.lua",
 )
 EQUIPMENT_SYSTEM_FILES = (
-    "src/libs/EquipmentSystem",
+    "src/modules/EquipmentSystem",
 )
 BUFF_SYSTEM_FILES = (
-    "src/libs/BuffSystem/buff.lua",
-    "src/libs/BuffSystem/buffSystem.lua",
-    "src/libs/BuffSystem/helpers.lua",
+    "src/modules/BuffSystem/buff.lua",
+    "src/modules/BuffSystem/buffSystem.lua",
+    "src/modules/BuffSystem/helpers.lua",
 )
 BATTLE_TEXT_VIEW_SYSTEM_FILES = (
-    "src/libs/battleTextViewSystem.lua",
+    "src/modules/battleTextViewSystem.lua",
 )
 WRAPPER_FILES = (
-    "src/libs/wrappers.lua",
+    "src/modules/wrappers.lua",
 )
 HERO_SELECTOR_FILES = (
-    "src/libs/HeroSelector/framesDesc.lua",
-    "src/libs/HeroSelector/heroSelector.lua",
+    "src/modules/HeroSelector/framesDesc.lua",
+    "src/modules/HeroSelector/heroSelector.lua",
 )
 SOURCES_FILES = (
     "src/abilities.lua",
+    "src/modules/respawn.lua",
 )
 UNITS_FILES = (
     "src/units/dummy",
@@ -79,7 +80,7 @@ UNITS_FILES = (
     "src/units/lord_marrowgar",
     "src/units/lady_deathwhisper",
 )
-CHARACTER_SPELLS_FILES = (
+HEROES_SPELLS_FILES = (
     "src/heroes/paladin/spells",
     "src/heroes/priest/spells",
 )
@@ -98,5 +99,5 @@ ALL_SOURCE_FILES = (
     *HERO_SELECTOR_FILES,
     *SOURCES_FILES,
     *UNITS_FILES,
-    *CHARACTER_SPELLS_FILES,
+    *HEROES_SPELLS_FILES,
 )

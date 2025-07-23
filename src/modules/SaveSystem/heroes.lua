@@ -1,22 +1,11 @@
 ---@author Vlod www.xgm.ru
 ---@author meiso
 
---- Возрождает юнита
----@return nil
-function SaveSystem.UnitsRespawn()
-    local unit = Unit(GetTriggerUnit())
-    if unit:IsHero() then
-        TriggerSleepAction(5)
-        unit:Revive()
-    end
-end
-
 --- Инициализирует выбранного героя
 ---@return nil
 function SaveSystem.InitHero(class, name, player)
     SaveSystem.classid = CLASSES[class]
     local playerid = GetConvertedPlayerId(player)
-    --local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
         Paladin.Init(nil, nil, name, player)
         SaveSystem.player_unit = Paladin.hero
