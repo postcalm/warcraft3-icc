@@ -14,6 +14,8 @@ function LadyDeathwhisper.Init()
     local location = GetRandomLocInRect(gg_rct_LadyDeathSpawn)
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, location, -90.)
 
+    LadyDeathwhisper.unit:AutoRegen()
+
     -- both phase
     LadyDeathwhisper.InitDeathAndDecay()
     LadyDeathwhisper.InitSummoning()

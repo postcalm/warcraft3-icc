@@ -5,8 +5,6 @@ GlobalCombatSystem = {
     active = false,
 }
 
--- TODO: убедиться что не требуется вешать доп проверку на активный бой
--- TODO: а то мало ли не по синкается этот модуль с системой агро
 --- Инициализация системы
 function GlobalCombatSystem.Init()
     local timer = Timer(2.)

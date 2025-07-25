@@ -17,6 +17,7 @@ function AgroSystem:_init(unit)
     ---@type Unit
     self.unit = unit
     self.combat = false
+    self.value = 0
     self.pool_attacked = UnorderedList()
     self.logger = Logger("AgroSystem")
 end

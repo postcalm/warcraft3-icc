@@ -17,6 +17,8 @@ function LordMarrowgar.Init()
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, location, -90.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, location, -90.)
 
+    LordMarrowgar.unit:AutoRegen()
+
     LordMarrowgar.InitColdflame()
     LordMarrowgar.InitBoneSpike()
     LordMarrowgar.InitWhirlwind()

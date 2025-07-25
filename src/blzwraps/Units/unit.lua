@@ -32,7 +32,6 @@ function Unit:_init(player, unit_id, location, face)
     local f = face or GetRandomDirectionDeg()
     local p = player or GetTriggerPlayer()
     self.basemana = 0
-    self.agro = 0
     self.controlled = (p == GetLocalPlayer()) or false
     self.unit = CreateUnit(p, unit_id, x, y, f)
     --TODO: синхронизировать пул отдельно, т.к. юниты создаются моментом для всех игроков
@@ -41,28 +40,45 @@ function Unit:_init(player, unit_id, location, face)
     self.agro:Register()
 end
 
+--- Авторегенерация юнита.
+--- Восстанавливает по 15% здоровья и маны
+---@return nil
+function Unit:AutoRegen()
+    Logger("Unit"):Info("Enable auto regen")
+    local timer = Timer(1.)
+    timer:EnablePeriodic()
+    timer:SetFunc(function()
+        if not self.agro.combat then
+            self:GainLife { percent = 15. }
+            self:GainMana { percent = 15. }
+            Logger("Unit"):Info("gain life & mana for", self:GetName())
+        end
+    end)
+    timer:Start()
+end
+
 -- Уровень угрозы
 
 --- Добавить уровень агрессии
 ---@param value number Уровень угрозы
 ---@return nil
 function Unit:AddAgro(value)
-    if self.agro > 100 then
+    if self.agro.value > 100 then
         return
     end
-    self.agro = self.agro + value
+    self.agro.value = self.agro.value + value
 end
 
 --- Получить текущий уровень угрозы
 ---@return number
 function Unit:GetAgro()
-    return self.agro
+    return self.agro.value
 end
 
 --- Сбросить уровень угрозы
 ---@return nil
 function Unit:ResetAgro()
-    self.agro = 0
+    self.agro.value = 0
 end
 
 -- Характеристики
@@ -720,6 +736,8 @@ function Unit:SetFacing(facing)
     SetUnitFacingTimed(self.unit, facing, 0)
 end
 
+--- Проверяет жив ли юнит
+---@return boolean
 function Unit:IsAlive()
     return self:GetCurrentLife() > 0.
 end

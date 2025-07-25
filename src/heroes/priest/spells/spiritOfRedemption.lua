@@ -33,6 +33,7 @@ function Priest.SpiritOfRedemption()
         Priest.hero:Kill()
         Priest.spirit_of_redemption = false
         u_sor:Hide()
+        u_sor:Kill()
         u_sor:Remove()
         timer:Destroy()
         Priest.ResetToDefault()

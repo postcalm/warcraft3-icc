@@ -6,6 +6,7 @@ function DummyForDPS(location)
     d:SetMaxLife(500000, true)
     d:SetBaseDamage(4000.)
     d:SetMoveSpeed(0)
+    d:AutoRegen()
 end
 
 
@@ -15,7 +16,8 @@ function TrashDummyForDPS(location, name, health)
     health = health or 50000
     d:SetName(name)
     d:SetMaxLife(health, true)
-    d:SetBaseDamage(200.)
+    d:SetBaseDamage(2000.)
+    d:AutoRegen()
 end
 
 
