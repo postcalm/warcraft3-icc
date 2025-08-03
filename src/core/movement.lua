@@ -95,15 +95,14 @@ end
 
 ---@private
 function Movement._play_anim(player_id)
-    local unit = Movement.units[player_id]
     local class_ = Session.selected_class[PLAYERS[player_id]]
     ---@type HeroAnimations
     local animations = HERO_ANIMATIONS[class_]
     if Movement.to_up[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), animations.move_forward)
+        Movement.units[player_id]:SetAnimation { index = animations.move_forward }
         Movement.animate[player_id] = true
     elseif Movement.to_down[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), animations.move_backward)
+        Movement.units[player_id]:SetAnimation { index = animations.move_backward }
         Movement.animate[player_id] = true
     end
     if not Movement.to_up[player_id] and not Movement.to_down[player_id] and Movement.animate[player_id] then
@@ -116,6 +115,6 @@ function Movement._set_default_anim(player_id)
     local class_ = Session.selected_class[PLAYERS[player_id]]
     ---@type HeroAnimations
     local animations = HERO_ANIMATIONS[class_]
-    SetUnitAnimationByIndex(Movement.units[player_id]:GetId(), animations.idle)
+    Movement.units[player_id]:SetAnimation { index = animations.idle}
     Movement.animate[player_id] = false
 end

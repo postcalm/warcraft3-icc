@@ -29,6 +29,12 @@ function Timer:Start()
     TimerStart(self.timer, self.timeout, self.periodic, self.func)
 end
 
+--- Остановить таймер
+---@return nil
+function Timer:Pause()
+    PauseTimer(self.timer)
+end
+
 --- Задать время действия
 ---@param timeout real Время действия
 ---@return nil

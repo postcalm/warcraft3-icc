@@ -1,14 +1,13 @@
 ---@author meiso
 
 function LordMarrowgar.ResetToDefault()
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
+    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM }
 
     EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
 
     LordMarrowgar.unit:SetLevel(83)
 
     LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
-    LordMarrowgar.unit:AddAbilities(WHIRLWIND)
 end
 
 function LordMarrowgar.Init()

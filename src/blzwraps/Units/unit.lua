@@ -225,6 +225,31 @@ function Unit:DealPhysicalDamage(target, damage, attack_type)
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
 end
 
+--- Нанести физический урон по площади.
+--- Урон снижается как от количества защиты, так и от её типа
+---@param damage real Урон
+---@param overtime real Частота нанесения урона
+---@param location location Место нанесения урона
+---@param radius real Радиус в метрах
+---@param attack_type attacktype Тип атаки. По умолчанию ближняя
+---@return nil
+function Unit:DealPhysicalDamageLoc(args)
+    local t = args.attack_type or ATTACK_TYPE_MELEE
+    local meters = METER * args.radius
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsEnemy(u) then
+            self:DealPhysicalDamage(u, args.damage, t)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
+end
+
 --- Нанести физический урон, проходящий через защиту.
 --- Урон снижается только от типа защиты
 ---@param target unit Цель
@@ -693,6 +718,19 @@ end
 ---@return nil
 function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
+end
+
+--- Применить анимацию по индексу или по тэгу
+---@param index number Номер анимации в модели
+---@param tag string Название анимации в модели
+---@return nil
+function Unit:SetAnimation(args)
+    if args.index ~= nil then
+        SetUnitAnimationByIndex(self.unit, args.index)
+    end
+    if args.tag ~= nil then
+        SetUnitAnimation(self.unit, args.tag)
+    end
 end
 
 -- Прочие методы

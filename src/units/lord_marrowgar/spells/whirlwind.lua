@@ -1,27 +1,41 @@
 ---@author meiso
 
 function LordMarrowgar.Whirlwind()
-    local whirlwind_timer = Timer(GetRandomReal(20., 30.))
-    local timer_reset = Timer(5.)
+    local spell_anim = "Attack Walk Stand Spin" -- 16
+    local start_time = GetRandomInt(20, 30)
+    local duration = 5.
+    -- физ. урон сильно режется бронёй, хотя у этой абилки такого не должно быть
+    local damage = 6000
+    -- время анимации см. в редакторе WE
+    local animate = Timer(0.267)
+    animate:EnablePeriodic()
+    animate:SetFunc(function()
+        LordMarrowgar.unit:SetAnimation { tag = spell_anim }
+    end)
 
-    local function reset_anim()
-        if LordMarrowgar.whirlwind_effect then
-            LordMarrowgar.whirlwind_effect = false
-        end
-        timer_reset:Destroy()
+    if not LordMarrowgar.whirlwind_effect then
+        return
     end
 
-    local function action()
-        IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
-        timer_reset:SetFunc(reset_anim)
-        timer_reset:Start()
-        whirlwind_timer:Destroy()
+    LordMarrowgar.whirlwind_effect = true
+
+    TriggerSleepAction(start_time)
+    animate:Start()
+
+    while duration > 0 do
+        print(duration)
+        TriggerSleepAction(1.)
+        LordMarrowgar.unit:DealPhysicalDamageLoc {
+            damage = damage,
+            location = LordMarrowgar.unit:GetLoc(),
+            radius = 15.
+        }
+        duration = duration - 1
     end
 
-    if LordMarrowgar.whirlwind_effect then
-        whirlwind_timer:SetFunc(action)
-        whirlwind_timer:Start()
-    end
+    LordMarrowgar.whirlwind_effect = false
+    animate:Pause()
+
 end
 
 function LordMarrowgar.StartWhirlwind()
