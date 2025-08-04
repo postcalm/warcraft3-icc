@@ -83,6 +83,7 @@ UNITS_FILES = (
     "src/units/enemies",
     "src/units/lord_marrowgar",
     "src/units/lady_deathwhisper",
+    "src/units/trashSpawn.lua",
 )
 HEROES_SPELLS_FILES = (
     "src/heroes/paladin/spells",

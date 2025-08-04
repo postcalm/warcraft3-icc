@@ -17,3 +17,5 @@ _release
 
 # excludes
 !*.w3x/war3mapMap.blp
+models/creatures/heroes/Paladin/DraeneiFemale.mdl
+models/creatures/heroes/Priest/BloodElfFemale.mdl

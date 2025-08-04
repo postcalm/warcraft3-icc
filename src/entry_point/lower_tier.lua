@@ -1,6 +1,6 @@
 
 -- Точка входа для инициализации всего
-function EntryPoint()
+function LowerTierEntryPoint()
     ENABLE_LOGGER = false
     ENABLE_LOGGER_STDOUT = true
     --LOGGER_LEVEL = LogLevel.DEBUG
@@ -23,6 +23,8 @@ function EntryPoint()
     -- Боссы
     LordMarrowgar.Init()
     LadyDeathwhisper.Init()
+
+    LowerTierTrashSpawn()
 	
     FogEnableOff()
     FogMaskEnableOff()

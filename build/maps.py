@@ -17,7 +17,7 @@ test_map_settings = Settings(
 
 lower_tier_settings = Settings(
     map="LowerTier.w3x",
-    entry_point="src/entry_point/main.lua",
+    entry_point="src/entry_point/lower_tier.lua",
     map_custom_code=Path(MAP_CUSTOM_CODE),
     wct_custom_code=Path(WCT_CUSTOM_CODE),
 )

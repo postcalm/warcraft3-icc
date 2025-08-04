@@ -791,11 +791,36 @@ LowerTierFloor
 
 STRING 277
 {
-1.0.0
+1.0.332
+}
 
+STRING 278
+// Войска: u004 (The Damned), Name (Название)
+{
+The Damned
+}
 
+STRING 279
+// Войска: u005 (Servant of the Throne), Name (Название)
+{
+Servant of the Throne
+}
 
+STRING 280
+// Войска: u006 (Nerub'ar Broodkeeper), Name (Название)
+{
+Nerub'ar Broodkeeper
+}
 
+STRING 281
+// Войска: u007 (Deathbound Ward), Name (Название)
+{
+Deathbound Ward
+}
 
+STRING 282
+// Войска: u008 (Ancient Skeletal Soldier), Name (Название)
+{
+Ancient Skeletal Soldier
 }
 
