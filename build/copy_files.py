@@ -6,9 +6,6 @@ from pathlib import Path
 
 from build.settings import PROJECT_DIR
 
-test_map = PROJECT_DIR / "Test.w3x"
-release_map = PROJECT_DIR / "ICC.w3x"
-
 skip_files = (
     "template.fdf",
     "readme.html",
@@ -22,11 +19,14 @@ other_icons = (
     "icons/classes",
 )
 model_files = (
-    "models/creatures/Paladin",
-    "models/creatures/Priest",
-    "models/creatures/spirithealer",
-    "models/creatures/Lord Marrowgar",
-    "models/creatures/Lady Deathwhisper",
+    "models/creatures/heroes/Paladin",
+    "models/creatures/heroes/Priest",
+    "models/creatures/heroes/spirithealer",
+    "models/creatures/lower tier/Lord Marrowgar",
+    "models/creatures/lower tier/Lady Deathwhisper",
+    "models/creatures/lower tier/bonegolem",
+    "models/creatures/lower tier/nerubiancaster",
+    "models/creatures/lower tier/skeletonmage",
     "models/spells/Paladin",
     "models/spells/Lady Deathwisper",
     "models/spells/Bone Spike Graveyard",
