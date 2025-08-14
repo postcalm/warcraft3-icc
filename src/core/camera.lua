@@ -51,13 +51,14 @@ function Camera._update(player_id)
     Camera.logger:Debug("Unit is", unit:GetName())
     local zoffset = 90. + unit:GetZ()
     local facing = unit:GetFacing()
+    local angle = 8.
     local loc = PolarProjectionBJ(unit:GetLoc(), -400., facing)
     Camera._detect_collision(player_id)
     -- правим камеру по высоте
     if GetLocationZ(loc) - unit:GetZ() > 200 then
-        Camera._set_angle(player_id, -24.)
+        Camera._set_angle(player_id, -angle * 2)
     else
-        Camera._set_angle(player_id, -12.)
+        Camera._set_angle(player_id, -angle)
     end
     Camera._set_offset(player_id, zoffset)
     Camera._set_facing(player_id, facing)

@@ -24,8 +24,8 @@ function Line:getPoints(quantity)
     local new_points = {}
     local points = {}
     quantity = quantity or 1
-    local ydiff, xdiff = self.point2.Y - self.point1.Y,
-                         self.point2.X - self.point1.X
+    local ydiff, xdiff = self.point2.y - self.point1.y,
+                         self.point2.x - self.point1.x
     local slope = (ydiff) / (xdiff)
     local x, y
 
@@ -43,18 +43,18 @@ function Line:getPoints(quantity)
         end
 
         points = Point(
-                round(x) + self.point1.X,
-                round(y) + self.point1.Y
+                round(x) + self.point1.x,
+                round(y) + self.point1.y
         )
-        table.insert(new_points, i, points:get2DPoint())
+        table.insert(new_points, i, points:Get2DPoint())
     end
-    table.insert(new_points, 1, self.point1:get2DPoint())
+    table.insert(new_points, 1, self.point1:Get2DPoint())
     return new_points
 end
 
 function Line:getLength()
-    local x = (self.point2.X - self.point1.X) ^ 2
-    local y = (self.point2.Y - self.point1.Y) ^ 2
+    local x = (self.point2.x - self.point1.x) ^ 2
+    local y = (self.point2.y - self.point1.y) ^ 2
     local len = math.sqrt(x + y)
     return len
 end

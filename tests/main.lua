@@ -6,10 +6,18 @@ function TestEntryPoint()
     --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    HeroSelector.Init()
+    --HeroSelector.Init()
+
+    Screen.Register()
+    MouseDetector.Init()
+
+    Timer(1, function()
+        print("pos", MouseDetector.pos)
+    end, true):Start()
 
     -- Механики
     BuffSystem.LoadFrame()
+    GlobalCombatSystem.Init()
 
     BattleTextViewSystem.Init()
     --EquipSystem.RegisterItems()
@@ -23,6 +31,10 @@ function TestEntryPoint()
     -- Персонажи
     Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
+    Priest.hero:SetLife(50)
+    Paladin.hero:SetLife(50)
+    Session.all_selected_heroes:Add(Priest.hero)
+    Session.all_selected_heroes:Add(Paladin.hero)
     --DeathKnight.Init(Location(-400., -520.))
 
     --Movement.Init()
@@ -30,5 +42,5 @@ function TestEntryPoint()
     -- Манекены
     --DummyForHealing(Location(300., 200.))
     --DummyForDPS(Location(-400., 200.))
-    SpawnTrashDummies(5)
+    --SpawnTrashDummies(5)
 end

@@ -6,6 +6,7 @@ function Paladin.ResetToDefault()
     EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
+    Paladin.hero:SetMaxLife(30000, true)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)
 
@@ -26,6 +27,7 @@ end
 
 function Paladin.Init(location, unit, name, player)
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
+    --location = Location(950., 3000.)
     name = name or "Paladin"
     unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 

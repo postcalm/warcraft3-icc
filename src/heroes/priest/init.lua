@@ -3,11 +3,10 @@
 function Priest.ResetToDefault()
     local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
-    EquipSystem.AddItemsToUnit(Priest.hero, items)
+    --EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
-
-    Priest.hero:SetLife(100)
+    --Priest.hero:SetMaxLife(25000, true)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 

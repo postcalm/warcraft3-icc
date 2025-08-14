@@ -8,6 +8,28 @@
 - интерфейсы над близардовскими функциями
 - реализации различных игровых модулей
 - реализации героев и юнитов
+
+Прим.: "верхние" модули могут использовать модули из уровня "ниже", если инициализация "верхнего" модуля
+происходит в точке входа. Например, core-модули объявляются раньше, но часть из них инициализируется
+только в точке входа, а значит могут использовать модули объявленные ниже.
+
+Пример:
+```
+ModuleA = {}
+
+function ModuleA.Init()
+    ModuleB.Method()
+end
+
+ModuleB = {}
+function ModuleB.Method() return end
+
+function EntryPoint()
+    ModuleA.Init()
+end
+
+```
+
 """
 COMMON_FILES = (
     "src/common/buffs.lua",
@@ -25,6 +47,7 @@ COMMON_FILES = (
 )
 TYPES_FILES = (
     "src/types/unordered_list.lua",
+    "src/types/vector.lua",
 )
 INIT_FILES = (
     "src/preinitialize.lua",
@@ -34,6 +57,9 @@ INIT_FILES = (
     "src/heroes/priest/init.lua",
 )
 CORE_FILES = (
+    "src/core/screen.lua",
+    "src/core/grid.lua",
+    "src/core/detector.lua",
     "src/core/keyboard.lua",
     "src/core/camera.lua",
     "src/core/movement.lua",

@@ -56,6 +56,14 @@ function EventsFrame:RegisterEditBoxEnter()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_EDITBOX_ENTER)
 end
 
+--- Регистрирует отслеживание событий фрейма по таймаут
+---@param timeout real Частота отслеживания
+---@return nil
+function EventsFrame:RegisterTimerEventSingle(timeout)
+    timeout = timeout or 1.
+    TriggerRegisterTimerEventSingle(self.trigger, timeout)
+end
+
 --- Получить фрейм
 ---@return framehandle
 function EventsFrame:GetFrame()

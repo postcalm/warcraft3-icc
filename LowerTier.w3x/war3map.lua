@@ -124,7 +124,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3снижения урона
+    --- Баф "Благословение неприкосновенности" - 3% снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -361,6 +361,17 @@ function playerIdByUnit(unit)
     return GetConvertedPlayerId(GetOwningPlayer(unit))
 end
 
+--- Объединяет таблицы
+---@param t1 table
+---@param t2 table
+---@return table
+function concatenateTables(t1, t2)
+    for i = 1, #t2 do
+        t1[#t1 + 1] = t2[i]
+    end
+    return t1
+end
+
 ---@author meiso
 
 PLAYERS = {
@@ -410,30 +421,38 @@ SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
 ---@author meiso
 
---Bosses
-LORD_MARROWGAR      = FourCC("U001")
-LADY_DEATHWHISPER   = FourCC("U000")
---mobs
---adds
-CULT_ADHERENT       = FourCC("u002")
+-- Bosses
+LORD_MARROWGAR = FourCC("U001")
+LADY_DEATHWHISPER = FourCC("U000")
+-- mobs
+-- adds
+CULT_ADHERENT = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
-CULT_FANATIC        = FourCC("h003")
-CULT_FANATIC_MORPH  = FourCC("h004")
+CULT_FANATIC = FourCC("h003")
+CULT_FANATIC_MORPH = FourCC("h004")
+-- trash
+THE_DAMNED = FourCC("u004")
+SERVANT_OF_THE_THRONE = FourCC("u005")
+NERUBAR_BROODKEEPER = FourCC("u006")
+DEATHBOUND_WARD = FourCC("u007")
+ANCIENT_SKELETAL_SOLDIER = FourCC("u008")
 
---tanks
-PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = FourCC("Udea")
-WARRIOR             = nil
---damage dealers
-WARLOCK             = nil
-HUNTER              = nil
-ROGUE               = nil
-MAGE                = nil
---healers
-DRUID               = nil
-SHAMAN              = nil
-PRIEST              = FourCC("Hblm")
-PRIEST_SOR          = FourCC("h006")
+-- -------------------------
+
+-- tanks
+PALADIN = FourCC("Hpal")
+DEATH_KNIGHT = FourCC("Udea")
+WARRIOR = nil
+-- damage dealers
+WARLOCK = nil
+HUNTER = nil
+ROGUE = nil
+MAGE = nil
+-- healers
+DRUID = nil
+SHAMAN = nil
+PRIEST = FourCC("Hblm")
+PRIEST_SOR = FourCC("h006")
 
 ---@author meiso
 
@@ -537,6 +556,29 @@ end
 ---@return nil
 function UnorderedList:Clear()
     self._list = {}
+end
+
+---@author meiso
+
+---@class Vector
+Vector = {}
+Vector.__index = Vector
+
+setmetatable(Vector, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+function Vector:_init(x, y)
+    self.x = x
+    self.y = y
+end
+
+function Vector:Pretty()
+    return "Vector(" .. self.x .. ", " .. self.y .. ")"
 end
 
 ---@author meiso
@@ -668,10 +710,10 @@ HERO_ANIMATIONS = {
 function Paladin.ResetToDefault()
     local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
-    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
-    --Paladin.hero:SetMaxLife(30000, true)
+    Paladin.hero:SetMaxLife(30000, true)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)
 
@@ -692,7 +734,7 @@ end
 
 function Paladin.Init(location, unit, name, player)
     location = location or GetRandomLocInRect(gg_rct_StartSpawn)
-    location = Location(950., 3000.)
+    --location = Location(950., 3000.)
     name = name or "Paladin"
     unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
@@ -758,6 +800,182 @@ function Priest.Init(location, unit, name, player)
     Priest.InitSpiritOfRedemption(player)
 
     Priest.ResetToDefault()
+end
+
+---@author meiso
+
+Screen = {
+    pos = Vector(0, 0),
+    size = Vector(0.8, 0.6),
+    width = 0,
+    height = 0,
+}
+
+function Screen.Register()
+    local timer = Timer(1)
+    timer:EnablePeriodic()
+    timer:SetFunc(Screen._update)
+    timer:Start()
+end
+
+function Screen._update()
+    local current_width = BlzGetLocalClientWidth()
+    local current_height = BlzGetLocalClientHeight()
+
+    print(current_width, Screen.width)
+    print(current_height, Screen.height)
+    if current_width == Screen.width and current_height == Screen.height then
+        return
+    end
+
+    Screen.width = current_width
+    Screen.height = current_height
+
+    local default_zone_width = current_height * 0.8 / 0.6
+    Screen.size.x = 0.8 * current_width / default_zone_width
+    Screen.pos.x = (Screen.size.x - 0.8) / 2 * -1
+end
+
+---@author meiso
+
+ScreenGrid = {
+    COLUMNS = 7,
+    ROWS = 7,
+    pos = Vector(0, 0),
+    size = Vector(0, 0),
+    buttons = {},
+    tools = {},
+    parent_frame = nil
+}
+
+function ScreenGrid.Init()
+    ScreenGrid._init()
+end
+
+---@param position Vector
+function ScreenGrid.SetPosition(position)
+    ScreenGrid.pos = position
+    ScreenGrid._update()
+end
+
+---@param size Vector
+function ScreenGrid.SetSize(size)
+    ScreenGrid.size = size
+    ScreenGrid._update()
+end
+
+function ScreenGrid.MouseROI()
+    local width = ScreenGrid.size.x / ScreenGrid.COLUMNS
+    local height = ScreenGrid.size.y / ScreenGrid.ROWS
+    local found
+    local button
+
+    for x = 1, ScreenGrid.COLUMNS do
+        for y = 1, ScreenGrid.ROWS do
+            found = BlzFrameIsVisible(ScreenGrid.tools[x][y])
+            if found then
+                button = ScreenGrid.buttons[x][y]
+                local w = BlzFrameGetWidth(button)
+                local h = BlzFrameGetHeight(button)
+                return true, ScreenGrid.pos.x + x * width, ScreenGrid.pos.y + y * height, w, h
+            end
+        end
+    end
+
+    return false, nil, nil, nil, nil
+end
+
+function ScreenGrid._init()
+    local parent = BlzGetFrameByName("ConsoleUIBackdrop", 0)
+    local button
+    local tool
+
+    for x = 1, ScreenGrid.COLUMNS do
+        ScreenGrid.buttons[x] = {}
+        ScreenGrid.tools[x] = {}
+        for y = 1, ScreenGrid.ROWS do
+            button = BlzCreateFrameByType("GLUETEXTBUTTON", "MB", parent, "ScriptDialogButton", 0)
+            BlzFrameSetAlpha(button, 25)
+            BlzFrameSetAbsPoint(button, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+            BlzFrameSetSize(button, 0, 0)
+            ScreenGrid.buttons[x][y] = button
+
+            tool = BlzCreateFrameByType("FRAME", "FF", parent, "", 0)
+            BlzFrameSetAlpha(tool, 0)
+            BlzFrameSetAbsPoint(tool, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+            BlzFrameSetSize(tool, 0, 0)
+            ScreenGrid.tools[x][y] = tool
+
+            BlzFrameSetTooltip(button, tool)
+        end
+    end
+end
+
+function ScreenGrid._update()
+    local width = ScreenGrid.size.x / ScreenGrid.COLUMNS
+    local height = ScreenGrid.size.y / ScreenGrid.ROWS
+
+    for x = 1, ScreenGrid.COLUMNS do
+        for y = 1, ScreenGrid.ROWS do
+            BlzFrameSetAbsPoint(
+                    ScreenGrid.buttons[x][y],
+                    FRAMEPOINT_BOTTOMLEFT,
+                    ScreenGrid.pos.x + x * width,
+                    ScreenGrid.pos.y + y * height
+            )
+        end
+    end
+end
+
+---@author meiso
+
+MouseDetector = {
+    ROI = 3,
+    precision = 0.01,
+    x = 0,
+    y = 0,
+    width = 0,
+    height = 0,
+}
+
+function MouseDetector.Init()
+    local timer = CreateTimer()
+    TimerStart(timer, 0.5, true, function()
+        MouseDetector.x = Screen.pos.x
+        MouseDetector.y = Screen.pos.y
+        MouseDetector.width = Screen.size.x
+        MouseDetector.height = Screen.size.y
+        MouseDetector._getBetterPosition()
+    end)
+end
+
+function MouseDetector._getBetterPosition()
+    local timer = CreateTimer()
+    TimerStart(timer, 0.025, false, function()
+        DestroyTimer(timer)
+
+        local found, x, y, width, height = ScreenGrid.MouseROI()
+        MouseDetector.x = x
+        MouseDetector.y = y
+        MouseDetector.width = width
+        MouseDetector.height = height
+
+        if not found then
+            return
+        end
+
+        if width > MouseDetector.precision or height > MouseDetector.precision then
+            MouseDetector._getBetterPosition()
+        end
+
+        ScreenGrid.SetPosition(
+                Vector(
+                        x - width * (MouseDetector.ROI - 1) / 2,
+                        y - height * (MouseDetector.ROI - 1) / 2
+                )
+        )
+        ScreenGrid.SetSize(Vector(width * MouseDetector.ROI, height * MouseDetector.ROI))
+    end)
 end
 
 ---@author meiso
@@ -1492,6 +1710,14 @@ function EventsFrame:RegisterEditBoxEnter()
     BlzTriggerRegisterFrameEvent(self.trigger, self.frame, FRAMEEVENT_EDITBOX_ENTER)
 end
 
+--- Регистрирует отслеживание событий фрейма по таймаут
+---@param timeout real Частота отслеживания
+---@return nil
+function EventsFrame:RegisterTimerEventSingle(timeout)
+    timeout = timeout or 1.
+    TriggerRegisterTimerEventSingle(self.trigger, timeout)
+end
+
 --- Получить фрейм
 ---@return framehandle
 function EventsFrame:GetFrame()
@@ -1826,7 +2052,7 @@ function Frame:CastBar(cd, spell, unit)
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
         -- проверяем двинулся ли игрок, если да - дропаем кастбар
-        if not point:atPoint(new_point, false) then
+        if not point:AtPoint(new_point, false) then
             self.drop = true
         end
         -- завершаем анимацию если кастбар завершился успешно или был сброшен
@@ -2212,8 +2438,8 @@ function Line:getPoints(quantity)
     local new_points = {}
     local points = {}
     quantity = quantity or 1
-    local ydiff, xdiff = self.point2.Y - self.point1.Y,
-                         self.point2.X - self.point1.X
+    local ydiff, xdiff = self.point2.y - self.point1.y,
+                         self.point2.x - self.point1.x
     local slope = (ydiff) / (xdiff)
     local x, y
 
@@ -2231,18 +2457,18 @@ function Line:getPoints(quantity)
         end
 
         points = Point(
-                round(x) + self.point1.X,
-                round(y) + self.point1.Y
+                round(x) + self.point1.x,
+                round(y) + self.point1.y
         )
-        table.insert(new_points, i, points:get2DPoint())
+        table.insert(new_points, i, points:Get2DPoint())
     end
-    table.insert(new_points, 1, self.point1:get2DPoint())
+    table.insert(new_points, 1, self.point1:Get2DPoint())
     return new_points
 end
 
 function Line:getLength()
-    local x = (self.point2.X - self.point1.X) ^ 2
-    local y = (self.point2.Y - self.point1.Y) ^ 2
+    local x = (self.point2.x - self.point1.x) ^ 2
+    local y = (self.point2.y - self.point1.y) ^ 2
     local len = math.sqrt(x + y)
     return len
 end
@@ -2251,9 +2477,9 @@ end
 ---@author meiso
 
 ---@class Point Простой point-класс
----@param X real Координата X. По умолчанию 0
----@param Y real Координата Y. По умолчанию 0
----@param Z real Координата Z. По умолчанию 0
+---@param x real Координата X. По умолчанию 0
+---@param y real Координата Y. По умолчанию 0
+---@param z real Координата Z. По умолчанию 0
 Point = {}
 Point.__index = Point
 
@@ -2266,32 +2492,32 @@ setmetatable(Point, {
 })
 
 --- Конструктор класса
-function Point:_init(X, Y, Z)
-    self.X = X or 0.
-    self.Y = Y or 0.
-    self.Z = Z or 0.
+function Point:_init(x, y, z)
+    self.x = x or 0.
+    self.y = y or 0.
+    self.z = z or 0.
 end
 
-function Point:get2DPoint()
-    return { self.X, self.Y }
+function Point:Get2DPoint()
+    return { self.x, self.y }
 end
 
-function Point:get3DPoint()
-    return { self.X, self.Y, self.Z }
+function Point:Get3DPoint()
+    return { self.x, self.y, self.z }
 end
 
 --- Проверяет равны ли указанные точки
 ---@param point Point
 ---@param inaccuracy boolean Учитывать ли погрешность
 ---@return boolean
-function Point:atPoint(point, inaccuracy)
+function Point:AtPoint(point, inaccuracy)
     if not inaccuracy then
         inaccuracy = 0
     else
         inaccuracy = 30.
     end
-    if math.abs(self.X - point.X) <= inaccuracy and
-            math.abs(self.Y - point.Y) <= inaccuracy then
+    if math.abs(self.x - point.x) <= inaccuracy and
+            math.abs(self.y - point.y) <= inaccuracy then
         return true
     end
     return false
@@ -2598,7 +2824,7 @@ function Unit:_init(player, unit_id, location, face)
 end
 
 --- Авторегенерация юнита.
---- Восстанавливает по 15здоровья и маны
+--- Восстанавливает по 15% здоровья и маны
 ---@return nil
 function Unit:AutoRegen()
     Logger("Unit"):Info("Enable auto regen")
@@ -3501,7 +3727,7 @@ function UnitSpell:NearTarget(target)
     local target_point = Point(GetLocationX(loc), GetLocationY(loc))
     local unit_loc = self:GetLoc()
     local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))
-    return target_point:atPoint(unit_point, true)
+    return target_point:AtPoint(unit_point, true)
 end
 
 ---@author Vlod www.xgm.ru
@@ -5543,9 +5769,9 @@ Spells = {
             manacost = 6,
             tooltip = "Благословение королей",
             key = "Q",
-            text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
+            text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-            buff_desc = "Все характеристики повышены на 10"
+            buff_desc = "Все характеристики повышены на 10%."
         },
         blessing_of_might = Ability {
             ability = BLESSING_OF_MIGHT,
@@ -5570,11 +5796,11 @@ Spells = {
             manacost = 7,
             tooltip = "Благословение неприкосновенности",
             key = "T",
-            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-                    "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
+            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+                    "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-            buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
-                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
+            buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
         },
         consecration = Ability {
             ability = CONSECRATION,
@@ -5593,7 +5819,7 @@ Spells = {
             tooltip = "Правосудие света",
             key = "C",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
+                    "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
             buff_desc = "Атакуя цель, противник может восстановить здоровье."
         },
@@ -5604,7 +5830,7 @@ Spells = {
             tooltip = "Правосудие мудрости",
             key = "V",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
+                    "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
             buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
         },
@@ -5624,8 +5850,8 @@ Spells = {
             cooldown = 60. * 5,
             tooltip = "Божественный щит",
             key = "Z",
-            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
-            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
+            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
         },
         hammer_of_righteous = Ability {
             ability = HAMMER_RIGHTEOUS,
@@ -5682,11 +5908,11 @@ Spells = {
             tooltip = "Оберегающий дух",
             key = "R",
             text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
+                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
                     "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-                    "50ее максимального запаса здоровья. Время действия – 10 сек.",
+                    "50% ее максимального запаса здоровья. Время действия – 10 сек.",
             icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-            buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
+            buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
         },
         prayer_of_mending = Ability {
             ability = PRAYER_OF_MENDING,
@@ -5734,7 +5960,7 @@ Spells = {
         spirit_of_redemption = Ability {
             ability = SPIRIT_OF_REDEMPTION,
             tooltip = "Дух воздаяния",
-            text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
                     "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
                     "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
                     "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -6467,6 +6693,85 @@ end
 
 ---@author meiso
 
+function LowerTierTrashSpawn()
+    ---@type Unit
+    local trash
+    local owner = PLAYERS[1]
+    local damned_points = {
+        { 660, -8160, -90 },
+        { 1060, -8160, -90 },
+        { 1420, -6160, 180 },
+        { -2170, -6260 },
+        { -1760, -6180 },
+        { -1690, -6420 },
+        { 3750, -6220 },
+        { 3900, -6240 },
+        { 3850, -6480 },
+        { -1870, -2180 },
+        { -1950, -2000 },
+        { -1850, -1810 },
+        { -1580, -1810 },
+        { 2500, -2450 },
+        { 3080, -1810 },
+        { 3400, -1780 },
+        { 3640, -2030 },
+    }
+    local servants_points = {
+        { -1000, -5570, 0 },
+        { 860, -3350, -90 },
+        { 850, -1940, -90 },
+        { 150, -1230, -90 },
+        { 1520, -1260, -90 },
+        { -200, 2300, -90 },
+        { 1870, 2280, -90 },
+    }
+    local broodkeeper_points = {
+        { 360, -3640, -90 },
+        { 1340, -3660, -90 },
+        { 2870, -3420, 180 },
+        { -1060, -3340, 0 },
+        { 470, -1500, -90 },
+        { 1190, -1500, -90 },
+        { 350, 1880, -90 },
+        { 1310, 1880, -90 },
+    }
+    local skeletal_points = {
+        { 680, 1440, -90 },
+        { 1120, 1440, -90 },
+        { 50, -3870, -90 },
+        { 1670, -3870, -90 },
+    }
+    -- добавить точки ловушек
+    local ward_points = {
+        { -3260, -4510, 0 },
+        { 4930, -4510, 180 },
+        { -900, 1280, 0 },
+        { 2560, 1280, 180 },
+    }
+    for _, i in pairs(damned_points) do
+        trash = Unit(owner, THE_DAMNED, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(servants_points) do
+        trash = Unit(owner, SERVANT_OF_THE_THRONE, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(broodkeeper_points) do
+        trash = Unit(owner, NERUBAR_BROODKEEPER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(skeletal_points) do
+        trash = Unit(owner, ANCIENT_SKELETAL_SOLDIER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(ward_points) do
+        trash = Unit(owner, DEATHBOUND_WARD, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+end
+
+---@author meiso
+
 function Paladin.AvengersShield()
     local target = Unit(GetSpellTargetUnit())
     local light_magic_damage = 1
@@ -6921,7 +7226,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -7425,7 +7730,7 @@ end
 
 
 -- Точка входа для инициализации всего
-function EntryPoint()
+function LowerTierEntryPoint()
     ENABLE_LOGGER = false
     ENABLE_LOGGER_STDOUT = true
     --LOGGER_LEVEL = LogLevel.DEBUG
@@ -7448,6 +7753,8 @@ function EntryPoint()
     -- Боссы
     LordMarrowgar.Init()
     LadyDeathwhisper.Init()
+
+    LowerTierTrashSpawn()
 	
     FogEnableOff()
     FogMaskEnableOff()

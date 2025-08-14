@@ -34,6 +34,12 @@ function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
 end
 
+--- Регистрирует событие отпускания кнопки мыши
+---@return nil
+function EventsPlayer:RegisterPlayerMouseUp()
+    TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_UP)
+end
+
 --- Регистрирует событие, написания в чат
 ---@param text string Сообщение, которое необходимо отследить
 ---@param exact boolean Проверять как точное вхождение

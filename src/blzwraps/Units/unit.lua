@@ -40,6 +40,10 @@ function Unit:_init(player, unit_id, location, face)
     self.agro:Register()
 end
 
+function Unit:__tostring()
+    return "Unit(name = ".. self:GetName() .. ", owner = " .. self:GetOwner() .. ")"
+end
+
 --- Авторегенерация юнита.
 --- Восстанавливает по 15% здоровья и маны
 ---@return nil

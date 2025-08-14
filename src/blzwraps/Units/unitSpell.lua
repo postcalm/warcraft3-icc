@@ -37,5 +37,5 @@ function UnitSpell:NearTarget(target)
     local target_point = Point(GetLocationX(loc), GetLocationY(loc))
     local unit_loc = self:GetLoc()
     local unit_point = Point(GetLocationX(unit_loc), GetLocationY(unit_loc))
-    return target_point:atPoint(unit_point, true)
+    return target_point:AtPoint(unit_point, true)
 end

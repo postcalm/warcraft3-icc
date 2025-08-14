@@ -24,6 +24,13 @@ function Events:RegisterAnyUnitDying()
     TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
 end
 
+--- Регистрирует событие на истекающий таймер
+---@param timer Timer
+---@return nil
+function Events:RegisterExpireTimer(timer)
+    TriggerRegisterTimerExpireEvent(self.trigger, timer.timer)
+end
+
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 ---@return nil

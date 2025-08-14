@@ -66,7 +66,7 @@ function Frame:CastBar(cd, spell, unit)
         new_point = Point(GetLocationX(unit:GetLoc()), GetLocationY(unit:GetLoc()))
         self:SetValue(full)
         -- проверяем двинулся ли игрок, если да - дропаем кастбар
-        if not point:atPoint(new_point, false) then
+        if not point:AtPoint(new_point, false) then
             self.drop = true
         end
         -- завершаем анимацию если кастбар завершился успешно или был сброшен
@@ -107,6 +107,13 @@ function Frame:SetPoint(point, relative, relative_point, x, y)
         r = relative:GetHandle()
     end
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
+end
+
+--- Задать прозрачность
+---@param value integer Прозрачность
+---@return nil
+function Frame:SetAlpha(value)
+    BlzFrameSetAlpha(self.frame, value)
 end
 
 --- Установить размер границ фрейма
@@ -186,6 +193,13 @@ function Frame:SetTooltip(title, text)
     tooltip:SetPoint(FRAMEPOINT_TOPLEFT, self.frame, FRAMEPOINT_TOPRIGHT, 0.005, 0.005)
 end
 
+--- Привязать кастомный тултип
+---@param frame Frame Тултип
+---@return nil
+function Frame:SetCustomTooltip(frame)
+    BlzFrameSetTooltip(self.frame, frame:GetHandle())
+end
+
 --- Получить главный фрейм
 ---@return framehandle
 function Frame:GetOriginFrame()
@@ -197,6 +211,17 @@ end
 ---@return framehandle
 function Frame:GetFrameByName(name)
     return BlzGetFrameByName(name, self:GetContext())
+end
+
+--- Создать фрейм на основе другого фрейма
+---@param type string Тип фрейма
+---@param name string Название фрейма
+---@param owner framehandle Родительский фрейм
+---@param context integer Контекст
+---@return Frame
+function Frame:CreateFrameByType(type, name, owner, context)
+    context = context or 0
+    return Frame(BlzCreateFrameByType(type, name, owner, "", context))
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -288,4 +313,10 @@ end
 ---@return nil
 function Frame:Show()
     BlzFrameSetVisible(self.frame, true)
+end
+
+--- Виден ли фрейм
+---@return boolean
+function Frame:IsVisible()
+    return BlzFrameIsVisible(self.frame)
 end

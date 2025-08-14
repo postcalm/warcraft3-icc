@@ -13,9 +13,11 @@ setmetatable(UnorderedList, {
 })
 
 ---@private
-function UnorderedList:_init()
+function UnorderedList:_init(...)
     ---@private
     self._list = {}
+    ---@private
+    self._type = nil
 end
 
 --- Возвращает все элементы
@@ -40,6 +42,17 @@ end
 ---@param value any
 ---@return nil
 function UnorderedList:Add(value)
+    if type(value) == "nil" then
+        print("Error: incorrect type: nil")
+        return
+    end
+    if self._type == nil then
+        self._type = type(value)
+    end
+    if self._type ~= type(value) then
+        print("Error: incorrect type. Required: " .. self._type)
+        return
+    end
     if not self:Contain(value) then
         table.insert(self._list, value)
     end
@@ -96,8 +109,10 @@ function UnorderedList:Find(value)
     return nil
 end
 
---- Очистить пул
+--- Очистить список
 ---@return nil
 function UnorderedList:Clear()
     self._list = {}
 end
+
+list = UnorderedList()

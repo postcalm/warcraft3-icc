@@ -1,9 +1,9 @@
 ---@author meiso
 
 ---@class Point Простой point-класс
----@param X real Координата X. По умолчанию 0
----@param Y real Координата Y. По умолчанию 0
----@param Z real Координата Z. По умолчанию 0
+---@param x real Координата X. По умолчанию 0
+---@param y real Координата Y. По умолчанию 0
+---@param z real Координата Z. По умолчанию 0
 Point = {}
 Point.__index = Point
 
@@ -16,32 +16,32 @@ setmetatable(Point, {
 })
 
 --- Конструктор класса
-function Point:_init(X, Y, Z)
-    self.X = X or 0.
-    self.Y = Y or 0.
-    self.Z = Z or 0.
+function Point:_init(x, y, z)
+    self.x = x or 0.
+    self.y = y or 0.
+    self.z = z or 0.
 end
 
-function Point:get2DPoint()
-    return { self.X, self.Y }
+function Point:Get2DPoint()
+    return { self.x, self.y }
 end
 
-function Point:get3DPoint()
-    return { self.X, self.Y, self.Z }
+function Point:Get3DPoint()
+    return { self.x, self.y, self.z }
 end
 
 --- Проверяет равны ли указанные точки
 ---@param point Point
 ---@param inaccuracy boolean Учитывать ли погрешность
 ---@return boolean
-function Point:atPoint(point, inaccuracy)
+function Point:AtPoint(point, inaccuracy)
     if not inaccuracy then
         inaccuracy = 0
     else
         inaccuracy = 30.
     end
-    if math.abs(self.X - point.X) <= inaccuracy and
-            math.abs(self.Y - point.Y) <= inaccuracy then
+    if math.abs(self.x - point.x) <= inaccuracy and
+            math.abs(self.y - point.y) <= inaccuracy then
         return true
     end
     return false
