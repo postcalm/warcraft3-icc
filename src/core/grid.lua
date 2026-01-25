@@ -37,16 +37,22 @@ end
 
 ---@return (boolean, Vector, Vector)
 function ScreenGrid:MouseROI()
+    print("MouseROI")
     local width = self.size.x / self.COLUMNS
     local height = self.size.y / self.ROWS
     local found
+    ---@type Frame
+    local button
 
     for x = 1, self.COLUMNS do
         for y = 1, self.ROWS do
             found = self.tools[x][y]:IsVisible()
             if found then
-                print(self.pos, Vector(x * width, y * height))
-                return true, self.pos + Vector(x * width, y * height), Vector(width, height)
+                button = self.buttons[x][y]
+                print("button pos", button:GetPosition())
+                --print(self.pos, Vector(x * width, y * height))
+                --print(self.pos, Vector(x * button:GetSize().x, y * button:GetSize().y), button:GetSize())
+                return true, self.pos + button:GetPosition(), button:GetSize()
             end
         end
     end
@@ -56,7 +62,7 @@ end
 
 ---@private
 function ScreenGrid:_init()
-    local parent = Frame:GetFrameByName("ConsoleUIBackdrop", 0)
+    local parent = Frame:GetFrameByName("ConsoleUIBackdrop")
     ---@type Frame
     local button
     ---@type Frame
@@ -66,13 +72,14 @@ function ScreenGrid:_init()
         self.buttons[x] = {}
         self.tools[x] = {}
         for y = 1, self.ROWS do
-            button = Frame("ScriptDialogButton", parent)
-            button:SetAlpha(25)
+            button = Frame("ScriptDialogButton")
+            --button = Frame:CreateFrameByType("FRAME", "MB", parent)
+            button:SetAlpha(75)
             button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, 0, 0)
-            button:SetSize(0, 0)
+            button:SetSize(0.05, 0.05)
             self.buttons[x][y] = button
 
-            tool = Frame:CreateFrameByType("FRAME", "FaceFrame", parent)
+            tool = Frame:CreateFrameByType("FRAME", "FF")
             tool:SetAlpha(0)
             tool:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, 0, 0)
             tool:SetSize(0, 0)
@@ -95,8 +102,10 @@ function ScreenGrid:_update()
     for x = 1, self.COLUMNS do
         for y = 1, self.ROWS do
             button = self.buttons[x][y]
-            button:SetSize(size.x, size.y)
-            button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, self.pos.x + x * size.x, self.pos.y + y * size.y)
+            --button:SetSize(size.x, size.y)
+            --button.pos = Vector(x * size.x, y * size.y)
+            --print("new point", self.pos.x + x * size.x, self.pos.y + y * size.y)
+            button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, x * size.x, y * size.y)
         end
     end
 end

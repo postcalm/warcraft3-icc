@@ -896,16 +896,22 @@ end
 
 ---@return (boolean, Vector, Vector)
 function ScreenGrid:MouseROI()
+    print("MouseROI")
     local width = self.size.x / self.COLUMNS
     local height = self.size.y / self.ROWS
     local found
+    ---@type Frame
+    local button
 
     for x = 1, self.COLUMNS do
         for y = 1, self.ROWS do
             found = self.tools[x][y]:IsVisible()
             if found then
-                print(self.pos, Vector(x * width, y * height))
-                return true, self.pos + Vector(x * width, y * height), Vector(width, height)
+                button = self.buttons[x][y]
+                print("button pos", button:GetPosition())
+                --print(self.pos, Vector(x * width, y * height))
+                --print(self.pos, Vector(x * button:GetSize().x, y * button:GetSize().y), button:GetSize())
+                return true, self.pos + button:GetPosition(), button:GetSize()
             end
         end
     end
@@ -915,7 +921,7 @@ end
 
 ---@private
 function ScreenGrid:_init()
-    local parent = Frame:GetFrameByName("ConsoleUIBackdrop", 0)
+    local parent = Frame:GetFrameByName("ConsoleUIBackdrop")
     ---@type Frame
     local button
     ---@type Frame
@@ -925,13 +931,14 @@ function ScreenGrid:_init()
         self.buttons[x] = {}
         self.tools[x] = {}
         for y = 1, self.ROWS do
-            button = Frame("ScriptDialogButton", parent)
-            button:SetAlpha(25)
+            button = Frame("ScriptDialogButton")
+            --button = Frame:CreateFrameByType("FRAME", "MB", parent)
+            button:SetAlpha(75)
             button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, 0, 0)
-            button:SetSize(0, 0)
+            button:SetSize(0.05, 0.05)
             self.buttons[x][y] = button
 
-            tool = Frame:CreateFrameByType("FRAME", "FaceFrame", parent)
+            tool = Frame:CreateFrameByType("FRAME", "FF")
             tool:SetAlpha(0)
             tool:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, 0, 0)
             tool:SetSize(0, 0)
@@ -954,8 +961,10 @@ function ScreenGrid:_update()
     for x = 1, self.COLUMNS do
         for y = 1, self.ROWS do
             button = self.buttons[x][y]
-            button:SetSize(size.x, size.y)
-            button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, self.pos.x + x * size.x, self.pos.y + y * size.y)
+            --button:SetSize(size.x, size.y)
+            --button.pos = Vector(x * size.x, y * size.y)
+            --print("new point", self.pos.x + x * size.x, self.pos.y + y * size.y)
+            button:SetAbsPoint(FRAMEPOINT_BOTTOMLEFT, x * size.x, y * size.y)
         end
     end
 end
@@ -967,6 +976,7 @@ end
 MouseDetector = {
     ROI = 3,
     GRID_SIZE = 7,
+    STEP_TIME = 0.025,
     precision = 0.01,
     grid = nil,
     pos = nil,
@@ -984,15 +994,23 @@ function MouseDetector.Init()
     timer:SetFunc(function()
         MouseDetector.pos = Screen.pos
         MouseDetector.size = Screen.size
-        MouseDetector.grid.pos = MouseDetector.pos
-        MouseDetector.grid.size = MouseDetector.size
+        MouseDetector.grid.pos = MouseDetector.size
+        MouseDetector.grid:MouseROI()
         MouseDetector._getBetterPosition()
     end)
+    local period = MouseDetector.STEP_TIME
+    local tmp = MouseDetector.precision
+    while tmp < Screen.size.x do
+        tmp = tmp * MouseDetector.GRID_SIZE / MouseDetector.ROI
+        period = period + MouseDetector.STEP_TIME
+    end
+    --timer:SetTimeout(period)
     timer:Start()
 end
 
 function MouseDetector._getBetterPosition()
-    local timer = Timer(0.025)
+    print("_getBetterPosition")
+    local timer = Timer(MouseDetector.STEP_TIME)
     timer:SetFunc(function()
         timer:Destroy()
 
@@ -1004,18 +1022,17 @@ function MouseDetector._getBetterPosition()
             return
         end
 
-        --print(MouseDetector.pos, MouseDetector.size, ((MouseDetector.ROI - 1) / 2))
+        print(MouseDetector.pos, MouseDetector.size, ((MouseDetector.ROI - 1) / 2))
         local new_pos = MouseDetector.pos - MouseDetector.size * ((MouseDetector.ROI - 1) / 2)
         local new_size = MouseDetector.size * MouseDetector.ROI
         --print("new", new_pos, new_size)
-        MouseDetector.grid:SetPosition(new_pos)
-        MouseDetector.grid:SetSize(new_size)
-
-        print("pos", MouseDetector.pos)
-        print("size", MouseDetector.size)
+        --print("pos", MouseDetector.pos)
+        --print("size", MouseDetector.size)
         if MouseDetector.size.x > MouseDetector.precision or MouseDetector.size.y > MouseDetector.precision then
             MouseDetector._getBetterPosition()
         end
+        MouseDetector.grid:SetPosition(new_pos)
+        MouseDetector.grid:SetSize(new_size)
     end)
     timer:Start()
 end
@@ -2051,6 +2068,7 @@ setmetatable(Frame, {
 --- Конструктор класса
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
+    self.pos = Vector(0, 0)
     if simple then
         self.frame = BlzCreateSimpleFrame(name, own, 0, self:GetContext())
     else
@@ -2119,6 +2137,7 @@ end
 ---@param y real Значение y-координаты
 ---@return nil
 function Frame:SetAbsPoint(point, x, y)
+    self.pos = Vector(x, y)
     BlzFrameSetAbsPoint(self.frame, point, x, y)
 end
 
@@ -2134,6 +2153,7 @@ function Frame:SetPoint(point, relative, relative_point, x, y)
     if isTable(relative) then
         r = relative:GetHandle()
     end
+    self.pos = Vector(x, y)
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 
@@ -2247,9 +2267,11 @@ end
 ---@param owner framehandle Родительский фрейм
 ---@param context integer Контекст
 ---@return Frame
-function Frame:CreateFrameByType(type, name, owner, context)
+function Frame:CreateFrameByType(type, name, owner, inherits, context)
+    owner = owner or self:GetOriginFrame()
+    inherits = inherits or ""
     context = context or 0
-    return Frame(BlzCreateFrameByType(type, name, owner, "", context))
+    return Frame(BlzCreateFrameByType(type, name, owner, inherits, context))
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -2299,6 +2321,18 @@ end
 ---@return integer
 function Frame:GetWidth()
     return BlzFrameGetWidth(self.frame)
+end
+
+--- Возвращает размеры фрейма
+---@return Vector
+function Frame:GetSize()
+    return Vector(self:GetWidth(), self:GetHeight())
+end
+
+--- Возвращает позицию фрейма
+---@return Vector
+function Frame:GetPosition()
+    return self.pos
 end
 
 --- Сброс анимации фрейма

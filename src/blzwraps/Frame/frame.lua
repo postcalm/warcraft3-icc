@@ -23,6 +23,7 @@ setmetatable(Frame, {
 --- Конструктор класса
 function Frame:_init(name, owner, simple)
     local own = owner or self:GetOriginFrame()
+    self.pos = Vector(0, 0)
     if simple then
         self.frame = BlzCreateSimpleFrame(name, own, 0, self:GetContext())
     else
@@ -91,6 +92,7 @@ end
 ---@param y real Значение y-координаты
 ---@return nil
 function Frame:SetAbsPoint(point, x, y)
+    self.pos = Vector(x, y)
     BlzFrameSetAbsPoint(self.frame, point, x, y)
 end
 
@@ -106,6 +108,7 @@ function Frame:SetPoint(point, relative, relative_point, x, y)
     if isTable(relative) then
         r = relative:GetHandle()
     end
+    self.pos = Vector(x, y)
     BlzFrameSetPoint(self.frame, point, r, relative_point, x, y)
 end
 
@@ -219,9 +222,11 @@ end
 ---@param owner framehandle Родительский фрейм
 ---@param context integer Контекст
 ---@return Frame
-function Frame:CreateFrameByType(type, name, owner, context)
+function Frame:CreateFrameByType(type, name, owner, inherits, context)
+    owner = owner or self:GetOriginFrame()
+    inherits = inherits or ""
     context = context or 0
-    return Frame(BlzCreateFrameByType(type, name, owner, "", context))
+    return Frame(BlzCreateFrameByType(type, name, owner, inherits, context))
 end
 
 --- Возвращает значение фрейма. Возможна десинхронизация!
@@ -271,6 +276,18 @@ end
 ---@return integer
 function Frame:GetWidth()
     return BlzFrameGetWidth(self.frame)
+end
+
+--- Возвращает размеры фрейма
+---@return Vector
+function Frame:GetSize()
+    return Vector(self:GetWidth(), self:GetHeight())
+end
+
+--- Возвращает позицию фрейма
+---@return Vector
+function Frame:GetPosition()
+    return self.pos
 end
 
 --- Сброс анимации фрейма
