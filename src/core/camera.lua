@@ -2,7 +2,14 @@
 
 ---@class Camera
 Camera = {
-    dist = 650.,
+    -- дистанция камеры
+    dist = 800.,
+    -- скорость поворота
+    rotate_spd = 10,
+    -- время обновления камеры
+    update_time = 0.02,
+    -- высота камеры по оси z
+    angle = -20.,
     ---@type table[Unit]
     units = {},
     ---@type Logger
@@ -21,7 +28,7 @@ function Camera.Register(unit, player)
     end
 
     if Camera.timers[player_id] == nil then
-        Camera.timers[player_id] = Timer(0.02)
+        Camera.timers[player_id] = Timer(Camera.update_time)
     end
     local timer = Camera.timers[player_id]
     SetCameraTargetControllerNoZForPlayer(player, Camera.units[player_id]:GetId(), 0, 0, false)
@@ -34,14 +41,14 @@ end
 --- Повернуть камеру влево
 ---@return nil
 function Camera.TurnLeft(player_id)
-    local facing = Camera.units[player_id]:GetFacing() + 10
+    local facing = Camera.units[player_id]:GetFacing() + Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
 --- Повернуть камеру вправо
 ---@return nil
 function Camera.TurnRight(player_id)
-    local facing = Camera.units[player_id]:GetFacing() - 10
+    local facing = Camera.units[player_id]:GetFacing() - Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
@@ -55,9 +62,9 @@ function Camera._update(player_id)
     Camera._detect_collision(player_id)
     -- правим камеру по высоте
     if GetLocationZ(loc) - unit:GetZ() > 200 then
-        Camera._set_angle(player_id, -24.)
+        Camera._set_angle(player_id, Camera.angle)
     else
-        Camera._set_angle(player_id, -12.)
+        Camera._set_angle(player_id, Camera.angle / 2)
     end
     Camera._set_offset(player_id, zoffset)
     Camera._set_facing(player_id, facing)

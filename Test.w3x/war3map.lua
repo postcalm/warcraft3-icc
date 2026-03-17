@@ -64,6 +64,22 @@ end
 --CUSTOM_CODE
 ---@author meiso
 
+AREAS = {
+    START_SPAWN = nil,
+    LORD_MARROW_SPAWN = nil,
+    LADY_DEATH_SPAWN = nil,
+    LORD_MARROW_ARENA = nil,
+
+    init = function ()
+        AREAS.START_SPAWN = gg_rct_StartSpawn
+        AREAS.LORD_MARROW_SPAWN = gg_rct_LordMarrowSpawn
+        AREAS.LADY_DEATH_SPAWN = gg_rct_LadyDeathSpawn
+        AREAS.LORD_MARROW_ARENA = gg_rct_LordMarrowArena
+    end
+}
+
+---@author meiso
+
 --Paladin
 JUDGEMENT_OF_LIGHT_BUFF = FourCC("B002")
 JUDGEMENT_OF_WISDOM_BUFF = FourCC("B003")
@@ -143,8 +159,8 @@ LogLevel = {
 
 --- Включить логгер
 ENABLE_LOGGER = true
---- Включить запись в чат игры
-ENABLE_LOGGER_STDOUT = false
+--- Включить запись в чат игры, иначе пишет в файл (!!!)
+ENABLE_LOGGER_STDOUT = true
 --- Уровень логирования
 LOGGER_LEVEL = LogLevel.INFO
 
@@ -193,7 +209,7 @@ function Logger:Log(level, ...)
     if ENABLE_LOGGER_STDOUT then
         print(message)
     else
-        self:_write(message)
+        --self:_write(message)
     end
 end
 
@@ -351,6 +367,13 @@ function isLocalPlayer()
     return GetLocalPlayer() == GetTriggerPlayer()
 end
 
+--- Возвращает идентификатор игрока по идентификатору юнита
+---@param unit unit Юнит игрока
+---@return integer
+function playerIdByUnit(unit)
+    return GetConvertedPlayerId(GetOwningPlayer(unit))
+end
+
 ---@author meiso
 
 PLAYERS = {
@@ -400,30 +423,148 @@ SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
 ---@author meiso
 
---Bosses
-LORD_MARROWGAR      = FourCC("U001")
-LADY_DEATHWHISPER   = FourCC("U000")
---mobs
---adds
-CULT_ADHERENT       = FourCC("u002")
+-- Bosses
+LORD_MARROWGAR = FourCC("U001")
+LADY_DEATHWHISPER = FourCC("U000")
+-- mobs
+-- adds
+CULT_ADHERENT = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
-CULT_FANATIC        = FourCC("h003")
-CULT_FANATIC_MORPH  = FourCC("h004")
+CULT_FANATIC = FourCC("h003")
+CULT_FANATIC_MORPH = FourCC("h004")
+-- trash
+THE_DAMNED = FourCC("u004")
+SERVANT_OF_THE_THRONE = FourCC("u005")
+NERUBAR_BROODKEEPER = FourCC("u006")
+DEATHBOUND_WARD = FourCC("u007")
+ANCIENT_SKELETAL_SOLDIER = FourCC("u008")
 
---tanks
-PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = FourCC("Udea")
-WARRIOR             = nil
---damage dealers
-WARLOCK             = nil
-HUNTER              = nil
-ROGUE               = nil
-MAGE                = nil
---healers
-DRUID               = nil
-SHAMAN              = nil
-PRIEST              = FourCC("Hblm")
-PRIEST_SOR          = FourCC("h006")
+-- -------------------------
+
+-- tanks
+PALADIN = FourCC("Hpal")
+DEATH_KNIGHT = FourCC("Udea")
+WARRIOR = nil
+-- damage dealers
+WARLOCK = nil
+HUNTER = nil
+ROGUE = nil
+MAGE = nil
+-- healers
+DRUID = nil
+SHAMAN = nil
+PRIEST = FourCC("Hblm")
+PRIEST_SOR = FourCC("h006")
+
+---@author meiso
+
+UPGRADES = {
+    ADD_RANGE = FourCC("R000"),
+}
+
+---@author meiso
+
+---@class UnorderedList Неупорядоченный список с элементами одного типа.
+UnorderedList = {}
+UnorderedList.__index = UnorderedList
+
+setmetatable(UnorderedList, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function UnorderedList:_init()
+    ---@private
+    self._list = {}
+end
+
+--- Возвращает все элементы
+---@return table
+function UnorderedList:All()
+    return self._list
+end
+
+--- Возвращает пару: индекс и элемент
+---@return (number, any)
+function UnorderedList:Pairs()
+    return pairs(self._list)
+end
+
+--- Проверят не пуст ли список
+---@return boolean
+function UnorderedList:IsEmpty()
+    return next(self._list) == nil
+end
+
+--- Добавить элемент
+---@param value any
+---@return nil
+function UnorderedList:Add(value)
+    if not self:Contain(value) then
+        table.insert(self._list, value)
+    end
+end
+
+--- Обновить существующий элемент
+---@param value any
+---@return nil
+function UnorderedList:Update(value)
+    local index = self:Find(value)
+    if self:Contain(value) then
+        table.remove(self._list, index)
+        table.insert(self._list, value)
+    end
+end
+
+--- Получить элемент по индексу
+---@param index number
+---@return any
+function UnorderedList:Get(index)
+    return self._list[index]
+end
+
+--- Удалить элемент
+---@param value any
+---@return nil
+function UnorderedList:Remove(value)
+    if self:Contain(value) then
+        table.remove(self._list, self:Find(value))
+    end
+end
+
+--- Входит ли элемент в список
+---@param value any
+---@return boolean
+function UnorderedList:Contain(value)
+    for _, v in pairs(self._list) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+
+--- Найти элемент. Возвращает индекс
+---@param value any
+---@return number
+function UnorderedList:Find(value)
+    for i, v in pairs(self._list) do
+        if v == value then
+            return i
+        end
+    end
+    return nil
+end
+
+--- Очистить пул
+---@return nil
+function UnorderedList:Clear()
+    self._list = {}
+end
 
 ---@author meiso
 
@@ -483,26 +624,8 @@ HeroSelector = {
     cache = nil,
     --- Основной фрейм
     table = nil,
-    --- Фрейм паладина
-    paladin = nil,
-    --- Фрейм жреца
-    priest = nil,
-    --- Фрейм рыцаря смерти
-    dk = nil,
-    --- Фрейм друида
-    druid = nil,
-    --- Фрейм шамана
-    shaman = nil,
-    --- Фрейм воина
-    warrior = nil,
-    --- Фрейм мага
-    mage = nil,
-    --- Фрейм разбойника
-    rogue = nil,
-    --- Фрейм чернокнижника
-    warlock = nil,
-    --- Фрейм охотника
-    hunter = nil,
+    --- Все фреймы героев
+    all_frames = {},
     --- Выбранный герой
     hero = nil,
     --- Список выбранных героев
@@ -510,6 +633,61 @@ HeroSelector = {
     --- Выбранный юнит для локального игрока
     units = {},
     logger = Logger("HeroSelector"),
+}
+
+---@author meiso
+
+Session = {
+    cache = nil,
+    -- список выбранных классов. словарь в формате: игрок - класс
+    selected_class = {},
+    ---@type UnorderedList список всех выбранных героев
+    all_selected_heroes = UnorderedList()
+}
+
+---@author meiso
+
+---@class HeroAnimations Структура, описывающая анимации персонажа.
+--- Анимации необходимо смотреть в самой модели через MdlVis
+---@param attack number
+---@param spell_cast number
+---@param move_forward number
+---@param move_backward number
+---@param idle number
+HeroAnimations = {}
+HeroAnimations.__index = HeroAnimations
+
+setmetatable(HeroAnimations, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function HeroAnimations:_init(args)
+    self.attack = args.attack
+    self.spell_cast = args.spell_cast
+    self.move_forward = args.move_forward
+    self.move_backward = args.move_backward
+    self.idle = args.idle
+end
+
+HERO_ANIMATIONS = {
+    paladin = HeroAnimations {
+        attack = 37,
+        move_forward = 5,
+        move_backward = 13,
+        idle = 10
+    },
+    priest = HeroAnimations {
+        attack = 26,
+        spell_cast = 71,
+        move_forward = 9,
+        move_backward = 6,
+        idle = 2
+    }
 }
 
 ---@author meiso
@@ -539,7 +717,8 @@ function Paladin.ResetToDefault()
 end
 
 function Paladin.Init(location, unit, name, player)
-    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
+    location = location or GetRandomLocInRect(AREAS.START_SPAWN)
+    location = Location(850., 3850.)
     name = name or "Paladin"
     unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
@@ -588,7 +767,7 @@ function Priest.ResetToDefault()
 end
 
 function Priest.Init(location, unit, name, player)
-    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
+    location = location or GetRandomLocInRect(AREAS.START_SPAWN)
     name = name or "Priest"
     unit = unit or Unit(player, PRIEST, location, 90.):GetId()
 
@@ -606,105 +785,6 @@ function Priest.Init(location, unit, name, player)
     Priest.InitSpiritOfRedemption(player)
 
     Priest.ResetToDefault()
-end
-
----@author meiso
-
-
----@class Pool Неупорядоченная коллекция, представляющая пул (список) элементов одного типа.
-Pool = {}
-Pool.__index = Pool
-
-setmetatable(Pool, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        self:_init(...)
-        return self
-    end,
-})
-
----@private
-function Pool:_init()
-    ---@private
-    self._pool = {}
-end
-
---- Возвращает все элементы
----@return table
-function Pool:All()
-    return self._pool
-end
-
---- Проверят не пуст ли пул
----@return boolean
-function Pool:IsEmpty()
-    return next(self._pool) == nil
-end
-
---- Добавить элемент
----@param value any
----@return nil
-function Pool:Add(value)
-    if not self:Contain(value) then
-        table.insert(self._pool, value)
-    end
-end
-
---- Обновить существующий элемент
----@param value any
----@return nil
-function Pool:Update(value)
-    local index = self:Find(value)
-    if self:Contain(value) then
-        table.remove(self._pool, index)
-        table.insert(self._pool, value)
-    end
-end
-
---- Получить элемент по индексу
----@param index number
----@return any
-function Pool:Get(index)
-    return self._pool[index]
-end
-
---- Удалить элемент
----@param value any
----@return nil
-function Pool:Remove(value)
-    if self:Contain(value) then
-        table.remove(self._pool, self:Find(value))
-    end
-end
-
---- Входит ли элемент в пул
----@param value any
----@return boolean
-function Pool:Contain(value)
-    for _, v in pairs(self._pool) do
-        if v == value then
-            return true
-        end
-    end
-    return false
-end
-
---- Найти элемент. Возвращает индекс
----@param value any
----@return number
-function Pool:Find(value)
-    for i, v in pairs(self._pool) do
-        if v == value then
-            return i
-        end
-    end
-    return nil
-end
-
---- Очистить пул
----@return nil
-function Pool:Clear()
-    self._pool = {}
 end
 
 ---@author meiso
@@ -734,8 +814,8 @@ end
 
 ---@class KeyboardController
 KeyboardController = {
-    ---@type Pool
-    keys = Pool(),
+    ---@type UnorderedList
+    keys = UnorderedList(),
     ---@private
     _events = {},
     ---@type Logger
@@ -783,7 +863,14 @@ end
 
 ---@class Camera
 Camera = {
-    dist = 650.,
+    -- дистанция камеры
+    dist = 800.,
+    -- скорость поворота
+    rotate_spd = 10,
+    -- время обновления камеры
+    update_time = 0.02,
+    -- высота камеры по оси z
+    angle = -20.,
     ---@type table[Unit]
     units = {},
     ---@type Logger
@@ -802,7 +889,7 @@ function Camera.Register(unit, player)
     end
 
     if Camera.timers[player_id] == nil then
-        Camera.timers[player_id] = Timer(0.04)
+        Camera.timers[player_id] = Timer(Camera.update_time)
     end
     local timer = Camera.timers[player_id]
     SetCameraTargetControllerNoZForPlayer(player, Camera.units[player_id]:GetId(), 0, 0, false)
@@ -815,14 +902,14 @@ end
 --- Повернуть камеру влево
 ---@return nil
 function Camera.TurnLeft(player_id)
-    local facing = Camera.units[player_id]:GetFacing() + 10
+    local facing = Camera.units[player_id]:GetFacing() + Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
 --- Повернуть камеру вправо
 ---@return nil
 function Camera.TurnRight(player_id)
-    local facing = Camera.units[player_id]:GetFacing() - 10
+    local facing = Camera.units[player_id]:GetFacing() - Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
@@ -834,10 +921,11 @@ function Camera._update(player_id)
     local facing = unit:GetFacing()
     local loc = PolarProjectionBJ(unit:GetLoc(), -400., facing)
     Camera._detect_collision(player_id)
+    -- правим камеру по высоте
     if GetLocationZ(loc) - unit:GetZ() > 200 then
-        Camera._set_angle(player_id, -24.)
+        Camera._set_angle(player_id, Camera.angle)
     else
-        Camera._set_angle(player_id, -12.)
+        Camera._set_angle(player_id, Camera.angle / 2)
     end
     Camera._set_offset(player_id, zoffset)
     Camera._set_facing(player_id, facing)
@@ -933,6 +1021,7 @@ Movement = {
     to_left = {},
     to_right = {},
     animate = {},
+    speed = 10,
     ---@type Timer
     timers = {},
     ---@type Logger
@@ -951,7 +1040,7 @@ function Movement.Init(unit, player)
         Movement.units[player_id] = unit
     end
     if Movement.timers[player_id] == nil then
-        Movement.timers[player_id] = Timer(0.04)
+        Movement.timers[player_id] = Timer(0.02)
     end
 
     Movement._set_default_anim(player_id)
@@ -1006,25 +1095,26 @@ end
 function Movement._move(player_id)
     local unit = Movement.units[player_id]
     if Movement.to_up[player_id] then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), 10.0, unit:GetFacing()))
+        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), Movement.speed, unit:GetFacing()))
         SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
-        Movement.logger:Debug("to up")
+        Movement.logger:Debug("forward")
     elseif Movement.to_down[player_id] then
-        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -10.0, unit:GetFacing()))
+        SetUnitPositionLoc(unit:GetId(), PolarProjectionBJ(unit:GetLoc(), -Movement.speed, unit:GetFacing()))
         SelectUnitForPlayerSingle(unit:GetId(), PLAYERS[player_id])
-        Movement.logger:Debug("to down")
+        Movement.logger:Debug("backward")
     end
 end
 
 ---@private
 function Movement._play_anim(player_id)
-    local unit = Movement.units[player_id]
-    --TODO: поправить выбор анимаций (у каждого юнита он свой)
+    local class_ = Session.selected_class[PLAYERS[player_id]]
+    ---@type HeroAnimations
+    local animations = HERO_ANIMATIONS[class_]
     if Movement.to_up[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), 5)
+        Movement.units[player_id]:SetAnimation { index = animations.move_forward }
         Movement.animate[player_id] = true
     elseif Movement.to_down[player_id] and not Movement.animate[player_id] then
-        SetUnitAnimationByIndex(unit:GetId(), 13)
+        Movement.units[player_id]:SetAnimation { index = animations.move_backward }
         Movement.animate[player_id] = true
     end
     if not Movement.to_up[player_id] and not Movement.to_down[player_id] and Movement.animate[player_id] then
@@ -1034,17 +1124,20 @@ end
 
 ---@private
 function Movement._set_default_anim(player_id)
-    SetUnitAnimation(Movement.units[player_id]:GetId(), "Portrait")
+    local class_ = Session.selected_class[PLAYERS[player_id]]
+    ---@type HeroAnimations
+    local animations = HERO_ANIMATIONS[class_]
+    Movement.units[player_id]:SetAnimation { index = animations.idle}
     Movement.animate[player_id] = false
 end
 
 ---@author meiso
 
----@class CombatSystem
-CombatSystem = {}
-CombatSystem.__index = CombatSystem
+---@class AgroSystem
+AgroSystem = {}
+AgroSystem.__index = AgroSystem
 
-setmetatable(CombatSystem, {
+setmetatable(AgroSystem, {
     __call = function(cls, ...)
         local self = setmetatable({}, cls)
         self:_init(...)
@@ -1053,23 +1146,27 @@ setmetatable(CombatSystem, {
 })
 
 ---@private
-function CombatSystem:_init(unit)
+function AgroSystem:_init(unit)
     ---@type Unit
     self.unit = unit
     self.combat = false
-    self.pool_attacked = Pool()
+    self.value = 0
+    self.pool_attacked = UnorderedList()
+    self.logger = Logger("AgroSystem")
 end
 
-function CombatSystem:Register()
+function AgroSystem:Register()
+    self.logger:Info("Initialize Agro system")
     self:_detectedCombat()
 end
 
-function CombatSystem:Reset()
+function AgroSystem:Reset()
     self.unit:ResetAgro()
+    self.combat = false
 end
 
 ---@private
-function CombatSystem:_detectedCombat()
+function AgroSystem:_detectedCombat()
     local tr_attacked = EventsUnit(self.unit)
     local tr_damaged = EventsUnit(self.unit)
     local tr_killed = Events()
@@ -1082,16 +1179,18 @@ function CombatSystem:_detectedCombat()
 end
 
 ---@private
-function CombatSystem:_detectedAttackedUnit()
+function AgroSystem:_detectedAttackedUnit()
     local attacker = Unit(GetAttacker())
+    self.combat = true
     if attacker:IsControlled() then
         attacker:AddAgro(self:_getAgro(attacker))
     end
 end
 
 ---@private
-function CombatSystem:_detectedDamagedUnit()
+function AgroSystem:_detectedDamagedUnit()
     local attacked = Unit(GetEventDamageSource())
+    self.combat = true
     self.pool_attacked:Add(attacked)
     if not self.unit:IsControlled() then
         self.unit:Attack(self:_findHighAgroUnit())
@@ -1099,7 +1198,7 @@ function CombatSystem:_detectedDamagedUnit()
 end
 
 ---@private
-function CombatSystem:_getAgro(unit)
+function AgroSystem:_getAgro(unit)
     local high_agro = {
         Paladin.hero,
         DEATH_KNIGHT,
@@ -1128,7 +1227,7 @@ function CombatSystem:_getAgro(unit)
 end
 
 ---@private
-function CombatSystem:_remove()
+function AgroSystem:_remove()
     local killed = Unit(GetTriggerUnit())
     self.pool_attacked:Remove(killed)
 
@@ -1139,7 +1238,7 @@ end
 
 ---@private
 ---@return Unit
-function CombatSystem:_findHighAgroUnit()
+function AgroSystem:_findHighAgroUnit()
     local target
     local agro = 0
     for _, unit in pairs(self.pool_attacked:All()) do
@@ -1149,6 +1248,36 @@ function CombatSystem:_findHighAgroUnit()
         end
     end
     return target
+end
+
+---@author meiso
+
+--- Система глобального слежения за активным боем
+GlobalCombatSystem = {
+    active = false,
+}
+
+--- Инициализация системы
+function GlobalCombatSystem.Init()
+    local timer = Timer(2.)
+    timer:EnablePeriodic()
+    timer:SetFunc(GlobalCombatSystem._process)
+    timer:Start()
+end
+
+function GlobalCombatSystem._process()
+    -- смотрим у кого активен бой и активируем, если хоть кто-то в бою
+    local check = false
+    for _, hero in Session.all_selected_heroes:Pairs() do
+        if hero:IsAlive() then
+            check = check or hero.agro.combat
+        end
+        GlobalCombatSystem.active = check
+    end
+    -- всем остальным выставляем то же значение
+    for _, hero in Session.all_selected_heroes:Pairs() do
+        hero.agro.combat = GlobalCombatSystem.active
+    end
 end
 
 ---@author meiso
@@ -1297,6 +1426,18 @@ end
 ---@return nil
 function Events:RegisterAnyUnitDying()
     TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
+end
+
+--- Регистрирует вхождение в область
+---@return nil
+function Events:RegisterEnterRect(rect)
+    TriggerRegisterEnterRectSimple(self.trigger, rect)
+end
+
+--- Регистрирует выход из области
+---@return nil
+function Events:RegisterLeaveRect(rect)
+    TriggerRegisterLeaveRectSimple(self.trigger, rect)
 end
 
 --- Добавляет условие для выполнения события
@@ -2190,6 +2331,43 @@ end
 
 ---@author meiso
 
+---@class Player Класс игрока
+---@param playerid player Id игрока
+CPlayer = {}
+CPlayer.__index = CPlayer
+
+setmetatable(CPlayer, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function CPlayer:_init(playerid)
+    self.player = playerid
+end
+
+--- Установить уровень для технологии
+---@param tech integer Id технологии
+---@param level integer Уровень технологии
+function CPlayer:SetTechResearched(tech, level)
+    SetPlayerTechResearched(self.player, tech, level)
+end
+
+--- Вернуть текущий уровень технологии
+---@param tech integer Id технологии
+function CPlayer:GetTechCount(tech)
+    return GetPlayerTechCountSimple(tech, self.player)
+end
+
+function CPlayer:GetId()
+    return self.player
+end
+
+---@author meiso
+
 ---@class TextTag Класс для создания "плавающего" текста
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
@@ -2342,6 +2520,12 @@ function Timer:Start()
     TimerStart(self.timer, self.timeout, self.periodic, self.func)
 end
 
+--- Остановить таймер
+---@return nil
+function Timer:Pause()
+    PauseTimer(self.timer)
+end
+
 --- Задать время действия
 ---@param timeout real Время действия
 ---@return nil
@@ -2474,13 +2658,29 @@ function Unit:_init(player, unit_id, location, face)
     local f = face or GetRandomDirectionDeg()
     local p = player or GetTriggerPlayer()
     self.basemana = 0
-    self.agro = 0
     self.controlled = (p == GetLocalPlayer()) or false
     self.unit = CreateUnit(p, unit_id, x, y, f)
     --TODO: синхронизировать пул отдельно, т.к. юниты создаются моментом для всех игроков
     UNITS_POOL.add(self)
-    local agro = CombatSystem(self)
-    agro:Register()
+    self.agro = AgroSystem(self)
+    self.agro:Register()
+end
+
+--- Авторегенерация юнита.
+--- Восстанавливает по 15% здоровья и маны
+---@return nil
+function Unit:AutoRegen()
+    Logger("Unit"):Info("Enable auto regen")
+    local timer = Timer(1.)
+    timer:EnablePeriodic()
+    timer:SetFunc(function()
+        if not self.agro.combat then
+            self:GainLife { percent = 15. }
+            self:GainMana { percent = 15. }
+            Logger("Unit"):Info("gain life & mana for", self:GetName())
+        end
+    end)
+    timer:Start()
 end
 
 -- Уровень угрозы
@@ -2489,22 +2689,22 @@ end
 ---@param value number Уровень угрозы
 ---@return nil
 function Unit:AddAgro(value)
-    if self.agro > 100 then
+    if self.agro.value > 100 then
         return
     end
-    self.agro = self.agro + value
+    self.agro.value = self.agro.value + value
 end
 
 --- Получить текущий уровень угрозы
 ---@return number
 function Unit:GetAgro()
-    return self.agro
+    return self.agro.value
 end
 
 --- Сбросить уровень угрозы
 ---@return nil
 function Unit:ResetAgro()
-    self.agro = 0
+    self.agro.value = 0
 end
 
 -- Характеристики
@@ -2649,6 +2849,31 @@ function Unit:DealPhysicalDamage(target, damage, attack_type)
         u = target:GetId()
     end
     UnitDamageTargetBJ(self.unit, u, damage, t, DAMAGE_TYPE_NORMAL)
+end
+
+--- Нанести физический урон по площади.
+--- Урон снижается как от количества защиты, так и от её типа
+---@param damage real Урон
+---@param overtime real Частота нанесения урона
+---@param location location Место нанесения урона
+---@param radius real Радиус в метрах
+---@param attack_type attacktype Тип атаки. По умолчанию ближняя
+---@return nil
+function Unit:DealPhysicalDamageLoc(args)
+    local t = args.attack_type or ATTACK_TYPE_MELEE
+    local meters = METER * args.radius
+    local ot = args.overtime or 0.
+    local group = GetUnitsInRangeOfLocAll(meters, args.location)
+
+    local function act()
+        local u = GetEnumUnit()
+        if self:IsEnemy(u) then
+            self:DealPhysicalDamage(u, args.damage, t)
+        end
+    end
+    ForGroupBJ(group, act)
+    TriggerSleepAction(ot)
+    DestroyGroup(group)
 end
 
 --- Нанести физический урон, проходящий через защиту.
@@ -3121,6 +3346,19 @@ function Unit:RemoveAnimationTag(tag)
     AddUnitAnimationProperties(self.unit, tag, false)
 end
 
+--- Применить анимацию по индексу или по тэгу
+---@param index number Номер анимации в модели
+---@param tag string Название анимации в модели
+---@return nil
+function Unit:SetAnimation(args)
+    if args.index ~= nil then
+        SetUnitAnimationByIndex(self.unit, args.index)
+    end
+    if args.tag ~= nil then
+        SetUnitAnimation(self.unit, args.tag)
+    end
+end
+
 -- Прочие методы
 
 --- Проверяет является ли юнит героем
@@ -3162,6 +3400,12 @@ function Unit:SetFacing(facing)
     SetUnitFacingTimed(self.unit, facing, 0)
 end
 
+--- Проверяет жив ли юнит
+---@return boolean
+function Unit:IsAlive()
+    return self:GetCurrentLife() > 0.
+end
+
 --- Проверяет мертв ли юнит
 ---@return boolean
 function Unit:IsDied()
@@ -3189,6 +3433,7 @@ function Unit:Revive(location)
     local loc = location or self:GetLoc()
     local x = GetLocationX(loc)
     local y = GetLocationY(loc)
+    self.agro:Reset()
     ReviveHero(self.unit, x, y, false)
 end
 
@@ -4160,22 +4405,11 @@ end
 ---@author Vlod www.xgm.ru
 ---@author meiso
 
---- Возрождает юнита
----@return nil
-function SaveSystem.UnitsRespawn()
-    local unit = Unit(GetTriggerUnit())
-    if unit:IsHero() then
-        TriggerSleepAction(5)
-        unit:Revive()
-    end
-end
-
 --- Инициализирует выбранного героя
 ---@return nil
 function SaveSystem.InitHero(class, name, player)
     SaveSystem.classid = CLASSES[class]
     local playerid = GetConvertedPlayerId(player)
-    --local loc = Location(-60., -750.)
     if SaveSystem.classid == CLASSES["paladin"] then
         Paladin.Init(nil, nil, name, player)
         SaveSystem.player_unit = Paladin.hero
@@ -4568,9 +4802,15 @@ end
 
 ---@author meiso
 
+--- Система отслеживания положительных и отрицательных эффектов.
+--- Снизу по краям отрисовываются основные фреймы, в которых отрисовываются
+--- иконки положительных (слева) и отрицательных (справа) эффектов.
+--- Изначально основные фреймы скрыты и появляются только при наложении эффектов.
+--- Основные фреймы расширяются в зависимости от количества соответствующих эффектов.
+
 ---@class BuffSystem
 BuffSystem = {
-    ---@type table<Unit, table[Buff]>
+    ---@type table<integer<Unit, table[Buff]>>
     buffs = {},
     ---@type Frame
     main_frame_buff = nil,
@@ -4580,6 +4820,7 @@ BuffSystem = {
     logger = Logger("buffsys"),
 }
 
+--- Инициализирует фрейм
 function BuffSystem.LoadFrame()
     BuffSystem.logger:Info("Initialize BuffSystem")
 
@@ -4602,7 +4843,7 @@ function BuffSystem.RegisterHero(hero)
         BuffSystem.logger:Info(hero:GetName(), "already registered")
         return
     end
-    BuffSystem.buffs[hero] = {}
+    BuffSystem._AddHero(hero)
     BuffSystem.logger:Info(hero:GetName(), "successfully added")
 end
 
@@ -4620,20 +4861,25 @@ function BuffSystem.AddBuffToHero(hero, buff, func, is_debuff)
         return
     end
 
-    table.insert(BuffSystem.buffs[hero], Buff(buff, func, Frame("BSIconTemp"), is_debuff))
-
     BuffSystem.CheckingBuffsExceptions(hero, buff)
+
+    BuffSystem._AddBuff(hero, Buff(buff, func, Frame("BSIconTemp"), is_debuff))
+
     if is_debuff then
         BuffSystem.logger:Info("Show debuff frame...")
         if BuffSystem.main_frame_debuff ~= nil then
-            BuffSystem.main_frame_debuff:Show()
+            if BuffSystem._IsLocalPlayer(hero) then
+                BuffSystem.main_frame_debuff:Show()
+            end
             BuffSystem._ShowDebuffs(hero)
         end
         BuffSystem.logger:Info("...ok")
     else
         BuffSystem.logger:Info("Show buff frame...")
         if BuffSystem.main_frame_buff ~= nil then
-            BuffSystem.main_frame_buff:Show()
+            if BuffSystem._IsLocalPlayer(hero) then
+                BuffSystem.main_frame_buff:Show()
+            end
             BuffSystem._ShowBuffs(hero)
         end
         BuffSystem.logger:Info("...ok")
@@ -4645,7 +4891,8 @@ end
 ---@return boolean
 function BuffSystem.IsHeroInSystem(hero)
     BuffSystem.logger:Info("Checking for a hero in the system...")
-    for name, _ in pairs(BuffSystem.buffs) do
+    local buffs = BuffSystem._GetBuffs(hero)
+    for name, _ in pairs(buffs) do
         if name == hero then
             BuffSystem.logger:Info("...founded")
             return true
@@ -4665,20 +4912,21 @@ function BuffSystem.IsBuffOnHero(hero, buff)
         BuffSystem.logger:Info(hero:GetName(), "is not registered")
         return false
     end
-    if #BuffSystem.buffs[hero] == 0 then
+    local buffs = BuffSystem._GetBuffs(hero)
+    if #buffs == 0 then
         BuffSystem.logger:Info("No buffs")
         return false
     end
     BuffSystem.CheckingBuffsExceptions(hero, buff)
-    for i = 1, #BuffSystem.buffs[hero] do
-        local b = BuffSystem._getBuff(hero, i)
+    for i = 1, #buffs do
+        local b = BuffSystem._GetBuff(hero, i)
         if b == nil then
             BuffSystem.logger:Info("Not found buff")
             return false
         end
         BuffSystem.logger:Info("checking", b.buff.tooltip, "...")
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
+        if BuffSystem._GetBuff(hero, i):IsBuff(buff) or
+                BuffSystem._GetBuff(hero, i):IsDebuff(buff) then
             BuffSystem.logger:Info("buff on hero")
             return true
         end
@@ -4693,18 +4941,21 @@ end
 ---@return nil
 function BuffSystem.RemoveBuffFromHero(hero, buff)
     BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName())
-    for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
-            BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem.buffs[hero][i] = nil
+    local buffs = BuffSystem._GetBuffs(hero)
+    for i = 1, #buffs do
+        if BuffSystem._GetBuff(hero, i):IsBuff(buff) or
+                BuffSystem._GetBuff(hero, i):IsDebuff(buff) then
+            BuffSystem._GetBuff(hero, i).frame:Destroy()
+            local player_id = playerIdByUnit(hero:GetId())
+            BuffSystem.buffs[player_id][hero][i] = nil
+            BuffSystem.logger:Info("Remove successfully")
         end
     end
     if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
         BuffSystem._ShowBuffs(hero)
         BuffSystem._ShowDebuffs(hero)
     end
-    BuffSystem.logger:Info("Remove successfully")
+    BuffSystem.logger:Info("There's nothing")
 end
 
 --- Использует функцию для удаления бафа
@@ -4713,23 +4964,26 @@ end
 ---@return nil
 function BuffSystem.RemoveBuffFromHeroByFunc(hero, buff)
     BuffSystem.logger:Info("Remove", buff.tooltip, "from", hero:GetName(), "by func")
-    for i = 1, #BuffSystem.buffs[hero] do
-        if BuffSystem.buffs[hero][i] == nil then
+    local buffs = BuffSystem._GetBuffs(hero)
+    local player_id = playerIdByUnit(hero:GetId())
+    for i = 1, #buffs do
+        if buffs[i] == nil then
             return
         end
 
-        if BuffSystem._getBuff(hero, i):IsBuff(buff) or
-                BuffSystem._getBuff(hero, i):IsDebuff(buff) then
-            BuffSystem._getBuff(hero, i).frame:Destroy()
-            BuffSystem._getBuff(hero, i).func()
-            BuffSystem.buffs[hero][i] = nil
+        if BuffSystem._GetBuff(hero, i):IsBuff(buff) or
+                BuffSystem._GetBuff(hero, i):IsDebuff(buff) then
+            BuffSystem._GetBuff(hero, i).frame:Destroy()
+            BuffSystem._GetBuff(hero, i).func()
+            BuffSystem.buffs[player_id][hero][i] = nil
+            BuffSystem.logger:Info("Remove successfully")
         end
     end
     if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
         BuffSystem._ShowBuffs(hero)
         BuffSystem._ShowDebuffs(hero)
     end
-    BuffSystem.logger:Info("Remove successfully")
+    BuffSystem.logger:Info("There's nothing")
 end
 
 --- Проверяет относится ли баф к группе однотипных бафов
@@ -4755,20 +5009,25 @@ function BuffSystem.CheckingBuffsExceptions(hero, buff)
     }
 
     local function getBuffsByClass()
+        BuffSystem.logger:Info("check buffs exceptions...")
         for class, buffs in pairs(buffs_exceptions) do
             for i in pairs(buffs) do
                 if buffs[i] == buff then
+                    BuffSystem.logger:Info("founded buffs exceptions")
                     return buffs_exceptions[class]
                 end
             end
         end
+        BuffSystem.logger:Info("check debuffs exceptions...")
         for class, buffs in pairs(debuffs_exceptions) do
             for i in pairs(buffs) do
                 if buffs[i] == buff then
+                    BuffSystem.logger:Info("founded debuffs exceptions")
                     return debuffs_exceptions[class]
                 end
             end
         end
+        BuffSystem.logger:Info("not found")
         return {}
     end
 
@@ -4783,8 +5042,9 @@ end
 ---@param hero Unit Экземпляр класса Unit
 ---@return nil
 function BuffSystem.RemoveAllBuffs(hero)
-    for i = 1, #BuffSystem.buffs[hero] do
-        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem._getBuff(hero, i).buff)
+    local buffs = BuffSystem._GetBuffs(hero)
+    for i = 1, #buffs do
+        BuffSystem.RemoveBuffFromHeroByFunc(hero, BuffSystem._GetBuff(hero, i).buff)
     end
 end
 
@@ -4792,20 +5052,24 @@ end
 ---@param buff Ability Название бафа
 ---@return nil
 function BuffSystem.RemoveBuffFromUnits(buff)
-    for u, _ in pairs(BuffSystem.buffs) do
-        for i = 1, #BuffSystem.buffs[u] do
-            if BuffSystem._getBuff(u, i) == nil then
-                return
+    for player, buffs in pairs(BuffSystem.buffs) do
+        for u, _ in pairs(buffs) do
+            for i = 1, #BuffSystem.buffs[player][u] do
+                if BuffSystem._GetBuff(u, i) == nil then
+                    return
+                end
+                if BuffSystem._GetBuff(u, i):IsBuff(buff) or
+                        BuffSystem._GetBuff(u, i):IsDebuff(buff) then
+                    BuffSystem._GetBuff(u, i).frame:Destroy()
+                    BuffSystem.buffs[player][u][i] = nil
+                end
             end
-            if BuffSystem._getBuff(u, i):IsBuff(buff) or
-                    BuffSystem._getBuff(u, i):IsDebuff(buff) then
-                BuffSystem._getBuff(u, i).frame:Destroy()
-                BuffSystem.buffs[u][i] = nil
+            if BuffSystem.main_frame_buff ~= nil then
+                BuffSystem._ShowBuffs(u)
             end
-        end
-        if BuffSystem.main_frame_buff ~= nil and BuffSystem.main_frame_debuff ~= nil then
-            BuffSystem._ShowBuffs(u)
-            BuffSystem._ShowDebuffs(u)
+            if BuffSystem.main_frame_debuff ~= nil then
+                BuffSystem._ShowDebuffs(u)
+            end
         end
     end
 end
@@ -4815,8 +5079,9 @@ end
 ---@return nil
 function BuffSystem.RemoveHero(hero)
     BuffSystem.logger:Info("Remove", hero:GetName(), "from system")
+    local player_id = playerIdByUnit(hero:GetId())
     --TODO: корректно удалять все бафы и фреймы!!
-    BuffSystem.buffs[hero] = nil
+    BuffSystem.buffs[player_id][hero] = nil
 end
 
 --- Усилить воздействие способности на цель в зависимости от наличия определенного бафа
@@ -4830,17 +5095,53 @@ function BuffSystem.ImproveSpell(hero, value)
     if not BuffSystem.IsHeroInSystem(hero) then
         return value
     end
-    for i = 1, #BuffSystem.buffs[hero] do
+    local buffs = BuffSystem._GetBuffs(hero)
+    for i = 1, #buffs do
         for _, buff in pairs(improving_buffs) do
-            if BuffSystem._getBuff(hero, i) == nil then
+            if BuffSystem._GetBuff(hero, i) == nil then
                 return value
             end
-            if BuffSystem._getBuff(hero, i):IsBuff(buff) then
+            if BuffSystem._GetBuff(hero, i):IsBuff(buff) then
                 return value * 1.4
             end
         end
     end
     return value
+end
+
+---@author meiso
+
+
+---@private
+---@param hero Unit
+function BuffSystem._AddHero(hero)
+    local player_id = playerIdByUnit(hero:GetId())
+    if BuffSystem.buffs[player_id] == nil then
+        BuffSystem.buffs[player_id] = {}
+    end
+    if BuffSystem.buffs[player_id][hero] == nil then
+        BuffSystem.buffs[player_id][hero] = {}
+    end
+end
+
+---@private
+---@param hero Unit
+---@param buff Buff
+function BuffSystem._AddBuff(hero, buff)
+    BuffSystem.logger:Info("add buff...")
+    local player_id = playerIdByUnit(hero:GetId())
+    table.insert(BuffSystem.buffs[player_id][hero], buff)
+    BuffSystem.logger:Info("...success. Current count", #BuffSystem._GetBuffs(hero))
+end
+
+---@private
+---@param hero Unit
+function BuffSystem._GetBuffs(hero)
+    local buffs = BuffSystem.buffs[playerIdByUnit(hero:GetId())]
+    if buffs == nil then
+        return {}
+    end
+    return buffs[hero]
 end
 
 --- Расширяет основной фрейм с бафа/дебафами
@@ -4865,6 +5166,7 @@ function BuffSystem._SetIcon(icon)
     BuffSystem.logger:Info("Set icon")
     local buff_icon = Frame(Frame:GetFrameByName("BSIcon"))
     buff_icon:SetTexture(icon)
+    return buff_icon
 end
 
 ---@private
@@ -4872,19 +5174,26 @@ end
 function BuffSystem._ShowBuffs(u)
     BuffSystem.logger:Debug("_ShowBuffs start")
     local count = 0
-    BuffSystem.logger:Info("buff count", tostring(#BuffSystem.buffs[u]))
-    for i = 1, #BuffSystem.buffs[u] do
-        local buff = BuffSystem._getBuff(u, i)
+    local buffs = BuffSystem._GetBuffs(u)
+    BuffSystem.logger:Info("effects count", tostring(#buffs))
+    for i = 1, #buffs do
+        local buff = BuffSystem._GetBuff(u, i)
         if buff and not buff.is_debuff then
             count = count + 1
             BuffSystem.logger:Info("buff", buff.buff.tooltip)
             BuffSystem.logger:Info("icon", buff.buff.icon)
-            BuffSystem._ResizeMainFrame(
-                    BuffSystem.main_frame_buff,
-                    buff.frame,
-                    count - 1
-            )
-            BuffSystem._SetIcon(buff.buff.icon)
+            if BuffSystem._IsLocalPlayer(u) then
+                BuffSystem._ResizeMainFrame(
+                        BuffSystem.main_frame_buff,
+                        buff.frame,
+                        count - 1
+                )
+            end
+            local icon_frame = BuffSystem._SetIcon(buff.buff.icon)
+            if not BuffSystem._IsLocalPlayer(u) then
+                icon_frame:Hide()
+                buff.frame:Hide()
+            end
             BuffSystem.logger:Info("Set tooltip")
             buff.frame:SetTooltip(buff.buff.buff_tooltip, buff.buff.buff_desc)
         end
@@ -4900,19 +5209,26 @@ end
 function BuffSystem._ShowDebuffs(u)
     BuffSystem.logger:Debug("_ShowDebuffs start")
     local count = 0
-    BuffSystem.logger:Info("debuff count", tostring(#BuffSystem.buffs[u]))
-    for i = 1, #BuffSystem.buffs[u] do
-        local debuff = BuffSystem._getBuff(u, i)
+    local buffs = BuffSystem._GetBuffs(u)
+    BuffSystem.logger:Info("effects count", tostring(#buffs))
+    for i = 1, #buffs do
+        local debuff = BuffSystem._GetBuff(u, i)
         if debuff and debuff.is_debuff then
             count = count + 1
             BuffSystem.logger:Info("debuff", debuff.buff.tooltip)
             BuffSystem.logger:Info("icon", debuff.buff.icon)
-            BuffSystem._ResizeMainFrame(
-                    BuffSystem.main_frame_debuff,
-                    debuff.frame,
-                    count - 1
-            )
-            BuffSystem._SetIcon(debuff.buff.icon)
+            if BuffSystem._IsLocalPlayer(u) then
+                BuffSystem._ResizeMainFrame(
+                        BuffSystem.main_frame_debuff,
+                        debuff.frame,
+                        count - 1
+                )
+            end
+            local icon_frame = BuffSystem._SetIcon(debuff.buff.icon)
+            if not BuffSystem._IsLocalPlayer(u) then
+                icon_frame:Hide()
+                debuff.frame:Hide()
+            end
             BuffSystem.logger:Info("Set tooltip")
             debuff.frame:SetTooltip(debuff.buff.buff_tooltip, debuff.buff.buff_desc)
         end
@@ -4928,8 +5244,12 @@ end
 ---@param u Unit Юнит
 ---@param i number Индекс бафа
 ---@return Buff
-function BuffSystem._getBuff(u, i)
-    return BuffSystem.buffs[u][i]
+function BuffSystem._GetBuff(u, i)
+    return BuffSystem._GetBuffs(u)[i]
+end
+
+function BuffSystem._IsLocalPlayer(u)
+    return Unit(u):GetOwner() == GetLocalPlayer()
 end
 
 ---@author meiso
@@ -5034,75 +5354,129 @@ end
 
 ---@author meiso
 
--- Описания классов
+---@class _HSClassDesc Описание фрейма выбора персонажа
+---@field frame_name string Название фрейма
+---@field tooltip string Название персонажа
+---@field text string Описание персонажа
+---@field hide boolean Скрыть фрейм при инициализации
+_HSClassDesc = {}
+_HSClassDesc.__index = _HSClassDesc
 
-paladin_tooltip = "Паладин"
-paladin_text = "Паладины бьются с врагом лицом к лицу, " ..
-        "полагаясь на тяжелые доспехи и навыки целительства. " ..
-        "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
-        "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
-        "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+setmetatable(_HSClassDesc, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
 
-priest_tooltip = "Жрец"
-priest_text = "Жрецы могут задействовать мощную целительную магию, " ..
-        "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
-        "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
-        "доспехов заставляют жрецов бояться сближения с противником. " ..
-        "Опытные жрецы используют боевые и контролирующие способности, " ..
-        "не допуская гибели членов отряда."
+---@private
+function _HSClassDesc:_init(frame_name, tooltip, text, hide)
+    self.frame_name = frame_name
+    self.tooltip = tooltip
+    self.text = text
+    self.hide = hide or false
+end
 
-deathknight_tooltip = "Рыцарь смерти"
-deathknight_text = "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
-        "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
-        "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
-        "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
-        "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
-        "соответствующим образом направлять свои атаки."
+HeroSelectorClassDesc = {
+    paladin = _HSClassDesc(
+            "Paladin_Button",
+            "Паладин",
+            "Паладины бьются с врагом лицом к лицу, " ..
+                    "полагаясь на тяжелые доспехи и навыки целительства. " ..
+                    "Прочный щит или двуручное оружие — не столь важно, чем владеет паладин. " ..
+                    "Он сумеет не только защитить соратников от вражеских когтей и клинков, " ..
+                    "но и удержит группу на ногах при помощи исцеляющих заклинаний."
+    ),
+    priest = _HSClassDesc(
+            "Priest_Button",
+            "Жрец",
+            "Жрецы могут задействовать мощную целительную магию, " ..
+                    "чтобы спасти себя и своих спутников. Им подвластны и сильные " ..
+                    "атакующие заклинания, но физическая слабость и отсутствие прочных " ..
+                    "доспехов заставляют жрецов бояться сближения с противником. " ..
+                    "Опытные жрецы используют боевые и контролирующие способности, " ..
+                    "не допуская гибели членов отряда."
+    ),
+    deathknight = _HSClassDesc(
+            "DeathKnight_Button",
+            "Рыцарь смерти",
+            "Рыцари смерти сходятся с противником в ближнем бою, дополняя удары " ..
+                    "клинка темной магией, которая делает врага уязвимым или ранит его нечестивой " ..
+                    "энергией. Они провоцируют противников, вынуждая их сражаться один на один и " ..
+                    "не подпуская их к более слабым союзникам. Чтобы не дать противнику ускользнуть, " ..
+                    "рыцари смерти должны постоянно помнить о силе, извлекаемой из рун, и " ..
+                    "соответствующим образом направлять свои атаки.",
+            true
+    ),
+    druid = _HSClassDesc(
+            "Druid_Button",
+            "Друид",
+            "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
+                    "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
+                    "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
+                    "подбирать облик к ситуации, так как каждый из них служит определенной цели.",
+            true
+    ),
+    shaman = _HSClassDesc(
+            "Shaman_Button",
+            "Шаман",
+            "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
+                    "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
+                    "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
+                    "учитывать сильные и слабые стороны врага.",
+            true
+    ),
+    warrior = _HSClassDesc(
+            "Warrior_Button",
+            "Воин",
+            "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
+                    "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
+                    "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
+                    "хрупких союзников. Для максимальной эффективности воины должны " ..
+                    "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки.",
+            true
+    ),
 
-druid_tooltip = "Друид"
-druid_text = "Друиды могут подходить к сражению совершенно по-разному. Они вольны " ..
-        "играть почти любую роль в команде: быть целителями, танками или бойцами, но " ..
-        "должны помнить об особенностях каждой роли. Друид вынужден внимательно " ..
-        "подбирать облик к ситуации, так как каждый из них служит определенной цели."
-
-shaman_tooltip = "Шаман"
-shaman_text = "В бою шаман ставит на землю контролирующие и наносящие урон тотемы, " ..
-        "чтобы помочь союзникам и ослабить противника. Шаманы могут как вступать в " ..
-        "ближний бой, так и атаковать с расстояния. Мудрый шаман всегда старается " ..
-        "учитывать сильные и слабые стороны врага."
-
-warrior_tooltip = "Воин"
-warrior_text = "Воины тщательно готовятся к бою, а с противником сражаются лицом к лицу, " ..
-        "принимая все удары на свои доспехи. Они пользуются различными боевыми " ..
-        "тактиками и применяют разнообразное оружие, чтобы защитить своих более " ..
-        "хрупких союзников. Для максимальной эффективности воины должны " ..
-        "контролировать свою ярость — ту силу, что питает их наиболее опасные атаки."
-
-mage_tooltip = "Маг"
-mage_text = "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
-        "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
-        "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
-        "обездвиживают его."
-
-rogue_tooltip = "Разбойник"
-rogue_text = "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
-        "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
-        "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
-        "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
-        "когда надо спрятаться или бежать, если ситуация складывается не в их пользу."
-
-warlock_tooltip = "Чернокнижник"
-warlock_text = "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
-        "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
-        "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
-        "поэтому подставляют под вражеские удары своих слуг."
-
-hunter_tooltip = "Охотник"
-hunter_text = "Охотники бьют врага на расстоянии или в ближнем бою, " ..
-        "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
-        "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
-        "и издалека. Кроме того, охотники очень подвижны. " ..
-        "Они могут уклониться от атаки или задержать противника, контролируя поле боя."
+    mage = _HSClassDesc(
+            "Mage_Button",
+            "Маг",
+            "Маги уничтожают врагов тайными заклинаниями. Несмотря на магическую силу, " ..
+                    "маги хрупки, не носят тяжелых доспехов, поэтому уязвимы в ближнем бою. " ..
+                    "Умные маги при помощи заклинаний удерживают врага на расстоянии или вовсе " ..
+                    "обездвиживают его.",
+            true
+    ),
+    rogue = _HSClassDesc(
+            "Rogue_Button",
+            "Разбойник",
+            "Разбойники часто нападают из теней, начиная бой комбинацией свирепых ударов. " ..
+                    "В затяжном бою они изматывают врага тщательно продуманной серией атак, " ..
+                    "прежде чем нанести решающий удар. Разбойнику следует внимательно отнестись " ..
+                    "к выбору противника, чтобы оптимально использовать тактику, и не упустить момент, " ..
+                    "когда надо спрятаться или бежать, если ситуация складывается не в их пользу.",
+            true
+    ),
+    warlock = _HSClassDesc(
+            "Warlock_Button",
+            "Чернокнижник",
+            "Чернокнижники уничтожают ослабленного противника, сочетая увечащие болезни и " ..
+                    "темную магию. Находясь под защитой своих питомцев, чернокнижники разят врага " ..
+                    "на расстоянии. Физически слабые колдуны не могут носить тяжелую броню, " ..
+                    "поэтому подставляют под вражеские удары своих слуг.",
+            true
+    ),
+    hunter = _HSClassDesc(
+            "Hunter_Button",
+            "Охотник",
+            "Охотники бьют врага на расстоянии или в ближнем бою, " ..
+                    "приказывая питомцам атаковать, пока сами натягивают тетиву, " ..
+                    "заряжают ружье или разят древковым оружием. Их оружие действенно и вблизи, " ..
+                    "и издалека. Кроме того, охотники очень подвижны. " ..
+                    "Они могут уклониться от атаки или задержать противника, контролируя поле боя.",
+            true
+    ),
+}
 
 ---@author meiso
 
@@ -5112,91 +5486,27 @@ function HeroSelector.Init()
     HeroSelector.table = Frame("HeroSelector")
     HeroSelector.table:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
 
-    HeroSelector.InitPaladinSelector()
-    HeroSelector.InitPriestSelector()
-    HeroSelector.InitDKSelector()
-    HeroSelector.InitDruidSelector()
-    HeroSelector.InitShamanSelector()
-    HeroSelector.InitWarriorSelector()
-    HeroSelector.InitMageSelector()
-    HeroSelector.InitRogueSelector()
-    HeroSelector.InitWarlockSelector()
-    HeroSelector.InitHunterSelector()
+    HeroSelector.InitFrameSelector()
 end
 
-function HeroSelector.InitPaladinSelector()
-    HeroSelector.paladin = Frame(Frame:GetFrameByName("Paladin_Button"))
-    HeroSelector.paladin:SetTooltip(paladin_tooltip, paladin_text)
-    HeroSelector.ConfirmCharacter(HeroSelector.paladin)
+function HeroSelector.InitFrameSelector()
+    for _, item in pairs(HeroSelectorClassDesc) do
+        local frame = Frame(Frame:GetFrameByName(item.frame_name))
+        frame:SetTooltip(item.tooltip, item.text)
+        if item.hide then
+            frame:Hide()
+        end
+        HeroSelector.ConfirmCharacter(frame)
+        table.insert(HeroSelector.all_frames, frame)
+    end
 end
 
-function HeroSelector.InitPriestSelector()
-    HeroSelector.priest = Frame(Frame:GetFrameByName("Priest_Button"))
-    HeroSelector.priest:SetTooltip(priest_tooltip, priest_text)
-    HeroSelector.ConfirmCharacter(HeroSelector.priest)
-end
-
-function HeroSelector.InitDKSelector()
-    HeroSelector.dk = Frame(Frame:GetFrameByName("DeathKnight_Button"))
-    HeroSelector.dk:SetTooltip(deathknight_tooltip, deathknight_text)
-    HeroSelector.dk:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.dk)
-end
-
-function HeroSelector.InitDruidSelector()
-    HeroSelector.druid = Frame(Frame:GetFrameByName("Druid_Button"))
-    HeroSelector.druid:SetTooltip(druid_tooltip, druid_text)
-    HeroSelector.druid:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.druid)
-end
-
-function HeroSelector.InitShamanSelector()
-    HeroSelector.shaman = Frame(Frame:GetFrameByName("Shaman_Button"))
-    HeroSelector.shaman:SetTooltip(shaman_tooltip, shaman_text)
-    HeroSelector.shaman:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.shaman)
-end
-
-function HeroSelector.InitWarriorSelector()
-    HeroSelector.warrior = Frame(Frame:GetFrameByName("Warrior_Button"))
-    HeroSelector.warrior:SetTooltip(warrior_tooltip, warrior_text)
-    HeroSelector.warrior:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.warrior)
-end
-
-function HeroSelector.InitMageSelector()
-    HeroSelector.mage = Frame(Frame:GetFrameByName("Mage_Button"))
-    HeroSelector.mage:SetTooltip(mage_tooltip, mage_text)
-    HeroSelector.mage:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.mage)
-end
-
-function HeroSelector.InitRogueSelector()
-    HeroSelector.rogue = Frame(Frame:GetFrameByName("Rogue_Button"))
-    HeroSelector.rogue:SetTooltip(rogue_tooltip, rogue_text)
-    HeroSelector.rogue:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.rogue)
-end
-
-function HeroSelector.InitWarlockSelector()
-    HeroSelector.warlock = Frame(Frame:GetFrameByName("Warlock_Button"))
-    HeroSelector.warlock:SetTooltip(warlock_tooltip, warlock_text)
-    HeroSelector.warlock:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.warlock)
-end
-
-function HeroSelector.InitHunterSelector()
-    HeroSelector.hunter = Frame(Frame:GetFrameByName("Hunter_Button"))
-    HeroSelector.hunter:SetTooltip(hunter_tooltip, hunter_text)
-    HeroSelector.hunter:Hide()
-    HeroSelector.ConfirmCharacter(HeroSelector.hunter)
-end
-
---- Позывает окно подтверждения выбора
+--- Показывает окно подтверждения выбора
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
-function HeroSelector.ConfirmCharacter(hero)
-    --TODO: включить выбор имени персонажа
+function HeroSelector.ConfirmCharacter(frame_hero)
+    local dialog = EventsFrame(frame_hero:GetHandle())
+
     local process = function()
         local confirm = Frame("ConfirmCharacter")
         local trig = EventsFrame(confirm:GetHandle())
@@ -5205,6 +5515,7 @@ function HeroSelector.ConfirmCharacter(hero)
         trig:AddAction(function()
             if dialog:GetEvent() == FRAMEEVENT_DIALOG_ACCEPT then
                 dialog:Destroy()
+                HeroSelector.table:Hide()
                 local naming = Frame("NameSetter")
                 local name = Frame(Frame:GetFrameByName("EditBoxText"))
                 naming:SetAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3)
@@ -5212,7 +5523,8 @@ function HeroSelector.ConfirmCharacter(hero)
                 local n_trig = EventsFrame(naming:GetHandle())
                 n_trig:RegisterEditBoxEnter()
                 n_trig:AddAction(function()
-                    local tmp = split(hero:GetName(), "_")[1]
+                    HeroSelector.logger:Info("Is local player:", isLocalPlayer())
+                    local tmp = split(frame_hero:GetName(), "_")[1]
                     HeroSelector.hero = tmp:lower()
                     HeroSelector.AcceptHero(HeroSelector.hero, name:GetTriggerText())
                     naming:Destroy()
@@ -5223,15 +5535,8 @@ function HeroSelector.ConfirmCharacter(hero)
         end)
     end
 
-    local dialog = EventsFrame(hero:GetHandle())
     dialog:RegisterControlClick()
-    dialog:AddAction(function()
-        HeroSelector.logger:Info("Is local player:", isLocalPlayer())
-        local tmp = split(hero:GetName(), "_")[1]
-        HeroSelector.hero = tmp:lower()
-        HeroSelector.AcceptHero(HeroSelector.hero)
-        --HeroSelector.Close()
-    end)
+    dialog:AddAction(process)
 end
 
 function HeroSelector.CreateHero()
@@ -5265,9 +5570,11 @@ function HeroSelector.AcceptHero(hero, name)
     end
     table.insert(HeroSelector.selected_heroes, hero)
     HeroSelector.cache:StoreStr(hero, "hero", "hc", true)
+    Session.selected_class[player] = hero
     SaveSystem.InitHero(HeroSelector.hero, name, player)
     if HeroSelector.units[player] == nil then
         HeroSelector.units[player] = SaveSystem.player_unit
+        Session.all_selected_heroes:Add(SaveSystem.player_unit)
         Movement.Init(HeroSelector.units[player], player)
     end
     HeroSelector.Close()
@@ -5278,7 +5585,10 @@ function HeroSelector.Close()
         return
     end
     if HeroSelector.table ~= nil then
-        HeroSelector.table:Hide()
+        for _, frame in pairs(HeroSelector.all_frames) do
+            frame:Destroy()
+        end
+        HeroSelector.table:Destroy()
     end
 end
 
@@ -5536,9 +5846,45 @@ ALL_OFF_PRIEST_SPELLS = {
 
 ---@author meiso
 
-Session = {
-    cache = nil
-}
+function FixRangesHeroes()
+    local event_enter = Events()
+    local event_leave = Events()
+    ---@type CPlayer
+    local owner
+
+    -- TODO: сделать через выдачу технологии "длинноствольные мушкеты"
+    --  если хотя бы один игрок в бою, то выдавать улучшение всем
+
+    local function set_range(range)
+        local unit = Unit(GetTriggerUnit())
+        if unit:IsHero() then
+            owner = CPlayer(unit:GetOwner())
+            owner:SetTechResearched(UPGRADES.ADD_RANGE, range)
+            print(owner:GetTechCount(UPGRADES.ADD_RANGE))
+        end
+    end
+
+    event_enter:RegisterEnterRect(AREAS.LORD_MARROW_ARENA)
+    event_enter:AddAction(function() set_range(2) end)
+
+    event_leave:RegisterLeaveRect(AREAS.LORD_MARROW_ARENA)
+    event_leave:AddAction(function() set_range(0) end)
+end
+
+---@author meiso
+
+--- Возрождает юнита
+---@return nil
+function UnitsRespawn()
+    local unit = Unit(GetTriggerUnit())
+    if unit:IsHero() and unit:GetOwner() ~= LICH_KING then
+        -- откладываем воскрешение, если активен бой
+        while GlobalCombatSystem.active do
+            TriggerSleepAction(2.5)
+        end
+        unit:Revive(GetRandomLocInRect(gg_rct_StartSpawn))
+    end
+end
 
 ---@author meiso
 
@@ -5548,6 +5894,7 @@ function DummyForDPS(location)
     d:SetMaxLife(500000, true)
     d:SetBaseDamage(4000.)
     d:SetMoveSpeed(0)
+    d:AutoRegen()
 end
 
 
@@ -5557,7 +5904,8 @@ function TrashDummyForDPS(location, name, health)
     health = health or 50000
     d:SetName(name)
     d:SetMaxLife(health, true)
-    d:SetBaseDamage(200.)
+    d:SetBaseDamage(2000.)
+    d:AutoRegen()
 end
 
 
@@ -5702,6 +6050,33 @@ end
 
 ---@author meiso
 
+function LordMarrowgar.ResetToDefault()
+    local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM }
+
+    EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
+
+    LordMarrowgar.unit:SetLevel(83)
+
+    LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
+end
+
+function LordMarrowgar.Init()
+    local location = GetRandomLocInRect(AREAS.LORD_MARROW_SPAWN)
+
+    LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, location, -90.)
+    LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, location, -90.)
+
+    LordMarrowgar.unit:AutoRegen()
+
+    LordMarrowgar.InitColdflame()
+    LordMarrowgar.InitBoneSpike()
+    LordMarrowgar.InitWhirlwind()
+
+    LordMarrowgar.ResetToDefault()
+end
+
+---@author meiso
+
 function LordMarrowgar.BoneSpike()
     TriggerSleepAction(GetRandomReal(14., 17.))
     local gr = GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))
@@ -5770,8 +6145,7 @@ end
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM,
-            GetOwningPlayer(GetAttacker()))))
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
     local target_location = target:GetLoc()
 
@@ -5812,49 +6186,44 @@ function LordMarrowgar.InitColdflame()
     event:AddAction(LordMarrowgar.Coldflame)
 end
 
-
-function LordMarrowgar.Init()
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
-
-    LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, Location(4090., -1750.), -131.)
-    LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, Location(4410., -1750.), -131.)
-
-    EquipSystem.AddItemsToUnit(LordMarrowgar.unit, items_list)
-
-    LordMarrowgar.unit:SetLevel(83)
-
-    LordMarrowgar.coldflame:AddAbilities(COLDFLAME)
-    LordMarrowgar.unit:AddAbilities(WHIRLWIND)
-
-    LordMarrowgar.InitColdflame()
-    LordMarrowgar.InitBoneSpike()
-    LordMarrowgar.InitWhirlwind()
-end
-
 ---@author meiso
 
 function LordMarrowgar.Whirlwind()
-    local whirlwind_timer = Timer(GetRandomReal(20., 30.))
-    local timer_reset = Timer(5.)
+    local spell_anim = "Attack Walk Stand Spin" -- 16
+    local start_time = GetRandomInt(20, 30)
+    local duration = 5.
+    -- физ. урон сильно режется бронёй, хотя у этой абилки такого не должно быть
+    local damage = 6000
+    -- время анимации см. в редакторе WE
+    local animate = Timer(0.267)
+    animate:EnablePeriodic()
+    animate:SetFunc(function()
+        LordMarrowgar.unit:SetAnimation { tag = spell_anim }
+    end)
 
-    local function reset_anim()
-        if LordMarrowgar.whirlwind_effect then
-            LordMarrowgar.whirlwind_effect = false
-        end
-        timer_reset:Destroy()
+    if not LordMarrowgar.whirlwind_effect then
+        return
     end
 
-    local function action()
-        IssueImmediateOrder(LordMarrowgar.unit:GetId(), "whirlwind")
-        timer_reset:SetFunc(reset_anim)
-        timer_reset:Start()
-        whirlwind_timer:Destroy()
+    LordMarrowgar.whirlwind_effect = true
+
+    TriggerSleepAction(start_time)
+    animate:Start()
+
+    while duration > 0 do
+        print(duration)
+        TriggerSleepAction(1.)
+        LordMarrowgar.unit:DealPhysicalDamageLoc {
+            damage = damage,
+            location = LordMarrowgar.unit:GetLoc(),
+            radius = 15.
+        }
+        duration = duration - 1
     end
 
-    if LordMarrowgar.whirlwind_effect then
-        whirlwind_timer:SetFunc(action)
-        whirlwind_timer:Start()
-    end
+    LordMarrowgar.whirlwind_effect = false
+    animate:Pause()
+
 end
 
 function LordMarrowgar.StartWhirlwind()
@@ -5870,6 +6239,41 @@ function LordMarrowgar.InitWhirlwind()
     event:RegisterAttacked()
     event:AddCondition(LordMarrowgar.StartWhirlwind)
     event:AddAction(LordMarrowgar.Whirlwind)
+end
+
+---@author meiso
+
+function LadyDeathwhisper.ResetToDefault()
+    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
+
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
+    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
+
+    LadyDeathwhisper.unit:SetLevel(83)
+    LadyDeathwhisper.unit:SetMana(500)
+end
+
+function LadyDeathwhisper.Init()
+    local location = GetRandomLocInRect(AREAS.LADY_DEATH_SPAWN)
+    LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, location, -90.)
+
+    LadyDeathwhisper.unit:AutoRegen()
+
+    -- both phase
+    LadyDeathwhisper.InitDeathAndDecay()
+    LadyDeathwhisper.InitSummoning()
+    -- только в 25-ке
+    --LadyDeathwhisper.InitDominateMind()
+
+    -- first phase
+    LadyDeathwhisper.InitManaShield()
+    LadyDeathwhisper.InitShadowBolt()
+
+    -- second phase
+    LadyDeathwhisper.InitFrostBolt()
+    LadyDeathwhisper.InitFrostBoltVolley()
+
+    LadyDeathwhisper.ResetToDefault()
 end
 
 ---@author meiso
@@ -6024,33 +6428,6 @@ function LadyDeathwhisper.InitFrostBoltVolley()
     event:AddAction(LadyDeathwhisper.FrostBoltVolley)
 end
 
-
-function LadyDeathwhisper.Init()
-    local items_list = {Items.ARMOR_ITEM, Items.ATTACK_ITEM, Items.HP_ITEM}
-
-    LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, Location(4095., 1498.), 270.)
-
-    LadyDeathwhisper.unit:SetLevel(83)
-    LadyDeathwhisper.unit:SetMana(500)
-
-    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, items_list)
-    EquipSystem.AddItemsToUnit(LadyDeathwhisper.unit, {Items.MP_ITEM}, 4)
-
-    -- both phase
-    LadyDeathwhisper.InitDeathAndDecay()
-    LadyDeathwhisper.InitSummoning()
-    -- только в 25-ке
-    --LadyDeathwhisper.InitDominateMind()
-
-    -- first phase
-    LadyDeathwhisper.InitManaShield()
-    LadyDeathwhisper.InitShadowBolt()
-
-    -- second phase
-    LadyDeathwhisper.InitFrostBolt()
-    LadyDeathwhisper.InitFrostBoltVolley()
-end
-
 ---@author meiso
 
 function LadyDeathwhisper.ManaShield()
@@ -6182,6 +6559,85 @@ function LadyDeathwhisper.InitSummoning()
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SummonCheckPhase)
     event:AddAction(LadyDeathwhisper.Summoning)
+end
+
+---@author meiso
+
+function LowerTierTrashSpawn()
+    ---@type Unit
+    local trash
+    local owner = PLAYERS[1]
+    local damned_points = {
+        { 660, -8160, -90 },
+        { 1060, -8160, -90 },
+        { 1420, -6160, 180 },
+        { -2170, -6260 },
+        { -1760, -6180 },
+        { -1690, -6420 },
+        { 3750, -6220 },
+        { 3900, -6240 },
+        { 3850, -6480 },
+        { -1870, -2180 },
+        { -1950, -2000 },
+        { -1850, -1810 },
+        { -1580, -1810 },
+        { 2500, -2450 },
+        { 3080, -1810 },
+        { 3400, -1780 },
+        { 3640, -2030 },
+    }
+    local servants_points = {
+        { -1000, -5570, 0 },
+        { 860, -3350, -90 },
+        { 850, -1940, -90 },
+        { 150, -1230, -90 },
+        { 1520, -1260, -90 },
+        { -200, 2300, -90 },
+        { 1870, 2280, -90 },
+    }
+    local broodkeeper_points = {
+        { 360, -3640, -90 },
+        { 1340, -3660, -90 },
+        { 2870, -3420, 180 },
+        { -1060, -3340, 0 },
+        { 470, -1500, -90 },
+        { 1190, -1500, -90 },
+        { 350, 1880, -90 },
+        { 1310, 1880, -90 },
+    }
+    local skeletal_points = {
+        { 680, 1440, -90 },
+        { 1120, 1440, -90 },
+        { 50, -3870, -90 },
+        { 1670, -3870, -90 },
+    }
+    -- TODO: добавить точки ловушек
+    local ward_points = {
+        { -3260, -4510, 0 },
+        { 4930, -4510, 180 },
+        { -900, 1280, 0 },
+        { 2560, 1280, 180 },
+    }
+    for _, i in pairs(damned_points) do
+        trash = Unit(owner, THE_DAMNED, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(servants_points) do
+        trash = Unit(owner, SERVANT_OF_THE_THRONE, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(broodkeeper_points) do
+        trash = Unit(owner, NERUBAR_BROODKEEPER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(skeletal_points) do
+        trash = Unit(owner, ANCIENT_SKELETAL_SOLDIER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(ward_points) do
+        trash = Unit(owner, DEATHBOUND_WARD, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
 end
 
 ---@author meiso
@@ -6887,8 +7343,8 @@ end
 function Priest.CastPowerWordShield()
     local unit = Unit(GetSpellTargetUnit())
     local event = EventsUnit(unit)
-    local buff_timer = Timer(7.)
-    local debuff_timer = Timer(5.)
+    local buff_timer = Timer(30.)
+    local debuff_timer = Timer(15.)
     local absorb = 2230
     local model = "Abilities/Spells/Human/ManaShield/ManaShieldCaster.mdx"
 
@@ -7110,6 +7566,7 @@ function Priest.SpiritOfRedemption()
         Priest.hero:Kill()
         Priest.spirit_of_redemption = false
         u_sor:Hide()
+        u_sor:Kill()
         u_sor:Remove()
         timer:Destroy()
         Priest.ResetToDefault()
@@ -7149,10 +7606,11 @@ function TestEntryPoint()
     --LOGGER_LEVEL = LogLevel.DEBUG
     -- Загрузка шаблонов фреймов
     loadTOCFile("templates.toc")
-    --HeroSelector.Init()
+    HeroSelector.Init()
 
     -- Механики
-    --BuffSystem.LoadFrame()
+    BuffSystem.LoadFrame()
+
     BattleTextViewSystem.Init()
     --EquipSystem.RegisterItems()
 
@@ -7163,7 +7621,7 @@ function TestEntryPoint()
     --SaveSystem.InitLoadEvent()
 
     -- Персонажи
-    --Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
+    Priest.Init(Location(300., -490.), nil, nil, GetLocalPlayer())
     Paladin.Init(Location(-400., -490.), nil, nil, GetLocalPlayer())
     --DeathKnight.Init(Location(-400., -520.))
 
@@ -7185,18 +7643,19 @@ function InitTrig_EntryPoint()
     TriggerAddAction(gg_trg_EntryPoint, Trig_EntryPoint_Actions)
 end
 
-function Trig_test_Func001001002()
+function Trig_test_Func002001002()
     return (GetDestructableTypeId(GetLastCreatedDestructable()) == FourCC("YTfc"))
 end
 
 function Trig_test_Actions()
-    KillDestructable(RandomDestructableInRectBJ(nil, Condition(Trig_test_Func001001002)))
+    KillDestructable(RandomDestructableInRectBJ(nil, Condition(Trig_test_Func002001002)))
     SetUnitAnimation(nil, "stand")
 end
 
 function InitTrig_test()
     gg_trg_test = CreateTrigger()
     DisableTrigger(gg_trg_test)
+    TriggerRegisterEnterRectSimple(gg_trg_test, gg_rct________________000)
     TriggerAddAction(gg_trg_test, Trig_test_Actions)
 end
 

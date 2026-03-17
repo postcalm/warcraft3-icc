@@ -3,8 +3,7 @@
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM,
-            GetOwningPlayer(GetAttacker()))))
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
     local target_location = target:GetLoc()
 

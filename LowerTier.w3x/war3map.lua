@@ -1,6 +1,7 @@
 gg_rct_StartSpawn = nil
 gg_rct_LordMarrowSpawn = nil
 gg_rct_LadyDeathSpawn = nil
+gg_rct_LordMarrowArena = nil
 gg_trg_EntryPoint = nil
 gg_trg_Alert = nil
 gg_trg_RespawnHero = nil
@@ -62,9 +63,26 @@ function CreateRegions()
     gg_rct_StartSpawn = Rect(544.0, -12608.0, 1344.0, -12000.0)
     gg_rct_LordMarrowSpawn = Rect(800.0, 6624.0, 1056.0, 6880.0)
     gg_rct_LadyDeathSpawn = Rect(832.0, 19840.0, 1024.0, 20000.0)
+    gg_rct_LordMarrowArena = Rect(-1600.0, 3456.0, 3776.0, 7744.0)
 end
 
 --CUSTOM_CODE
+---@author meiso
+
+AREAS = {
+    START_SPAWN = nil,
+    LORD_MARROW_SPAWN = nil,
+    LADY_DEATH_SPAWN = nil,
+    LORD_MARROW_ARENA = nil,
+
+    init = function ()
+        AREAS.START_SPAWN = gg_rct_StartSpawn
+        AREAS.LORD_MARROW_SPAWN = gg_rct_LordMarrowSpawn
+        AREAS.LADY_DEATH_SPAWN = gg_rct_LadyDeathSpawn
+        AREAS.LORD_MARROW_ARENA = gg_rct_LordMarrowArena
+    end
+}
+
 ---@author meiso
 
 --Paladin
@@ -124,7 +142,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3снижения урона
+    --- Баф "Благословение неприкосновенности" - 3% снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -146,8 +164,8 @@ LogLevel = {
 
 --- Включить логгер
 ENABLE_LOGGER = true
---- Включить запись в чат игры
-ENABLE_LOGGER_STDOUT = false
+--- Включить запись в чат игры, иначе пишет в файл (!!!)
+ENABLE_LOGGER_STDOUT = true
 --- Уровень логирования
 LOGGER_LEVEL = LogLevel.INFO
 
@@ -196,7 +214,7 @@ function Logger:Log(level, ...)
     if ENABLE_LOGGER_STDOUT then
         print(message)
     else
-        self:_write(message)
+        --self:_write(message)
     end
 end
 
@@ -410,30 +428,44 @@ SPIRIT_OF_REDEMPTION    = FourCC("A012")
 
 ---@author meiso
 
---Bosses
-LORD_MARROWGAR      = FourCC("U001")
-LADY_DEATHWHISPER   = FourCC("U000")
---mobs
---adds
-CULT_ADHERENT       = FourCC("u002")
+-- Bosses
+LORD_MARROWGAR = FourCC("U001")
+LADY_DEATHWHISPER = FourCC("U000")
+-- mobs
+-- adds
+CULT_ADHERENT = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
-CULT_FANATIC        = FourCC("h003")
-CULT_FANATIC_MORPH  = FourCC("h004")
+CULT_FANATIC = FourCC("h003")
+CULT_FANATIC_MORPH = FourCC("h004")
+-- trash
+THE_DAMNED = FourCC("u004")
+SERVANT_OF_THE_THRONE = FourCC("u005")
+NERUBAR_BROODKEEPER = FourCC("u006")
+DEATHBOUND_WARD = FourCC("u007")
+ANCIENT_SKELETAL_SOLDIER = FourCC("u008")
 
---tanks
-PALADIN             = FourCC("Hpal")
-DEATH_KNIGHT        = FourCC("Udea")
-WARRIOR             = nil
---damage dealers
-WARLOCK             = nil
-HUNTER              = nil
-ROGUE               = nil
-MAGE                = nil
---healers
-DRUID               = nil
-SHAMAN              = nil
-PRIEST              = FourCC("Hblm")
-PRIEST_SOR          = FourCC("h006")
+-- -------------------------
+
+-- tanks
+PALADIN = FourCC("Hpal")
+DEATH_KNIGHT = FourCC("Udea")
+WARRIOR = nil
+-- damage dealers
+WARLOCK = nil
+HUNTER = nil
+ROGUE = nil
+MAGE = nil
+-- healers
+DRUID = nil
+SHAMAN = nil
+PRIEST = FourCC("Hblm")
+PRIEST_SOR = FourCC("h006")
+
+---@author meiso
+
+UPGRADES = {
+    ADD_RANGE = FourCC("R000"),
+}
 
 ---@author meiso
 
@@ -668,10 +700,9 @@ HERO_ANIMATIONS = {
 function Paladin.ResetToDefault()
     local items_list = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
-    --EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
+    EquipSystem.AddItemsToUnit(Paladin.hero, items_list)
 
     Paladin.hero:SetLevel(80)
-    --Paladin.hero:SetMaxLife(30000, true)
     Paladin.hero:SetBaseMana(4394)
     Paladin.hero:SetMaxMana(4394, true)
 
@@ -691,8 +722,8 @@ function Paladin.ResetToDefault()
 end
 
 function Paladin.Init(location, unit, name, player)
-    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
-    location = Location(950., 3000.)
+    location = location or GetRandomLocInRect(AREAS.START_SPAWN)
+    location = Location(850., 3850.)
     name = name or "Paladin"
     unit = unit or Unit(player, PALADIN, location, 90.):GetId()
 
@@ -717,10 +748,11 @@ end
 function Priest.ResetToDefault()
     local items = { Items.ARMOR_ITEM, Items.ATTACK_ITEM }
 
-    --EquipSystem.AddItemsToUnit(Priest.hero, items)
+    EquipSystem.AddItemsToUnit(Priest.hero, items)
 
     Priest.hero:SetLevel(80)
-    --Priest.hero:SetMaxLife(25000, true)
+
+    Priest.hero:SetLife(100)
     Priest.hero:SetBaseMana(3863)
     Priest.hero:SetMaxMana(5000, true)
 
@@ -740,7 +772,7 @@ function Priest.ResetToDefault()
 end
 
 function Priest.Init(location, unit, name, player)
-    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
+    location = location or GetRandomLocInRect(AREAS.START_SPAWN)
     name = name or "Priest"
     unit = unit or Unit(player, PRIEST, location, 90.):GetId()
 
@@ -836,7 +868,14 @@ end
 
 ---@class Camera
 Camera = {
-    dist = 650.,
+    -- дистанция камеры
+    dist = 800.,
+    -- скорость поворота
+    rotate_spd = 10,
+    -- время обновления камеры
+    update_time = 0.02,
+    -- высота камеры по оси z
+    angle = -20.,
     ---@type table[Unit]
     units = {},
     ---@type Logger
@@ -855,7 +894,7 @@ function Camera.Register(unit, player)
     end
 
     if Camera.timers[player_id] == nil then
-        Camera.timers[player_id] = Timer(0.02)
+        Camera.timers[player_id] = Timer(Camera.update_time)
     end
     local timer = Camera.timers[player_id]
     SetCameraTargetControllerNoZForPlayer(player, Camera.units[player_id]:GetId(), 0, 0, false)
@@ -868,14 +907,14 @@ end
 --- Повернуть камеру влево
 ---@return nil
 function Camera.TurnLeft(player_id)
-    local facing = Camera.units[player_id]:GetFacing() + 10
+    local facing = Camera.units[player_id]:GetFacing() + Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
 --- Повернуть камеру вправо
 ---@return nil
 function Camera.TurnRight(player_id)
-    local facing = Camera.units[player_id]:GetFacing() - 10
+    local facing = Camera.units[player_id]:GetFacing() - Camera.rotate_spd
     Camera.units[player_id]:SetFacing(facing)
 end
 
@@ -885,14 +924,13 @@ function Camera._update(player_id)
     Camera.logger:Debug("Unit is", unit:GetName())
     local zoffset = 90. + unit:GetZ()
     local facing = unit:GetFacing()
-    local angle = 8.
     local loc = PolarProjectionBJ(unit:GetLoc(), -400., facing)
     Camera._detect_collision(player_id)
     -- правим камеру по высоте
     if GetLocationZ(loc) - unit:GetZ() > 200 then
-        Camera._set_angle(player_id, -angle * 2)
+        Camera._set_angle(player_id, Camera.angle)
     else
-        Camera._set_angle(player_id, -angle)
+        Camera._set_angle(player_id, Camera.angle / 2)
     end
     Camera._set_offset(player_id, zoffset)
     Camera._set_facing(player_id, facing)
@@ -1395,11 +1433,16 @@ function Events:RegisterAnyUnitDying()
     TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
 end
 
---- Регистрирует событие на истекающий таймер
----@param timer Timer
+--- Регистрирует вхождение в область
 ---@return nil
-function Events:RegisterExpireTimer(timer)
-    TriggerRegisterTimerExpireEvent(self.trigger, timer.timer)
+function Events:RegisterEnterRect(rect)
+    TriggerRegisterEnterRectSimple(self.trigger, rect)
+end
+
+--- Регистрирует выход из области
+---@return nil
+function Events:RegisterLeaveRect(rect)
+    TriggerRegisterLeaveRectSimple(self.trigger, rect)
 end
 
 --- Добавляет условие для выполнения события
@@ -1573,12 +1616,6 @@ end
 ---@return nil
 function EventsPlayer:RegisterPlayerMouseDown()
     TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_DOWN)
-end
-
---- Регистрирует событие отпускания кнопки мыши
----@return nil
-function EventsPlayer:RegisterPlayerMouseUp()
-    TriggerRegisterPlayerEvent(self.trigger, self.player, EVENT_PLAYER_MOUSE_UP)
 end
 
 --- Регистрирует событие, написания в чат
@@ -2299,6 +2336,43 @@ end
 
 ---@author meiso
 
+---@class Player Класс игрока
+---@param playerid player Id игрока
+CPlayer = {}
+CPlayer.__index = CPlayer
+
+setmetatable(CPlayer, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        self:_init(...)
+        return self
+    end,
+})
+
+---@private
+function CPlayer:_init(playerid)
+    self.player = playerid
+end
+
+--- Установить уровень для технологии
+---@param tech integer Id технологии
+---@param level integer Уровень технологии
+function CPlayer:SetTechResearched(tech, level)
+    SetPlayerTechResearched(self.player, tech, level)
+end
+
+--- Вернуть текущий уровень технологии
+---@param tech integer Id технологии
+function CPlayer:GetTechCount(tech)
+    return GetPlayerTechCountSimple(tech, self.player)
+end
+
+function CPlayer:GetId()
+    return self.player
+end
+
+---@author meiso
+
 ---@class TextTag Класс для создания "плавающего" текста
 ---@param text string Текст
 ---@param unit unitid Id юнита, относительно которого крепится текст
@@ -2598,7 +2672,7 @@ function Unit:_init(player, unit_id, location, face)
 end
 
 --- Авторегенерация юнита.
---- Восстанавливает по 15здоровья и маны
+--- Восстанавливает по 15% здоровья и маны
 ---@return nil
 function Unit:AutoRegen()
     Logger("Unit"):Info("Enable auto regen")
@@ -5432,7 +5506,7 @@ function HeroSelector.InitFrameSelector()
     end
 end
 
---- Позывает окно подтверждения выбора
+--- Показывает окно подтверждения выбора
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
 function HeroSelector.ConfirmCharacter(frame_hero)
@@ -5543,9 +5617,9 @@ Spells = {
             manacost = 6,
             tooltip = "Благословение королей",
             key = "Q",
-            text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
+            text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-            buff_desc = "Все характеристики повышены на 10"
+            buff_desc = "Все характеристики повышены на 10%."
         },
         blessing_of_might = Ability {
             ability = BLESSING_OF_MIGHT,
@@ -5570,11 +5644,11 @@ Spells = {
             manacost = 7,
             tooltip = "Благословение неприкосновенности",
             key = "T",
-            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-                    "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
+            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+                    "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-            buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
-                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
+            buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
         },
         consecration = Ability {
             ability = CONSECRATION,
@@ -5593,7 +5667,7 @@ Spells = {
             tooltip = "Правосудие света",
             key = "C",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
+                    "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
             buff_desc = "Атакуя цель, противник может восстановить здоровье."
         },
@@ -5604,7 +5678,7 @@ Spells = {
             tooltip = "Правосудие мудрости",
             key = "V",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
+                    "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
             buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
         },
@@ -5624,8 +5698,8 @@ Spells = {
             cooldown = 60. * 5,
             tooltip = "Божественный щит",
             key = "Z",
-            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
-            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
+            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
         },
         hammer_of_righteous = Ability {
             ability = HAMMER_RIGHTEOUS,
@@ -5682,11 +5756,11 @@ Spells = {
             tooltip = "Оберегающий дух",
             key = "R",
             text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
+                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
                     "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-                    "50ее максимального запаса здоровья. Время действия – 10 сек.",
+                    "50% ее максимального запаса здоровья. Время действия – 10 сек.",
             icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-            buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
+            buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
         },
         prayer_of_mending = Ability {
             ability = PRAYER_OF_MENDING,
@@ -5734,7 +5808,7 @@ Spells = {
         spirit_of_redemption = Ability {
             ability = SPIRIT_OF_REDEMPTION,
             tooltip = "Дух воздаяния",
-            text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
                     "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
                     "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
                     "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -5774,6 +5848,33 @@ ALL_OFF_PRIEST_SPELLS = {
     Spells.priest.inner_fire,
     Spells.priest.spirit_of_redemption,
 }
+
+---@author meiso
+
+function FixRangesHeroes()
+    local event_enter = Events()
+    local event_leave = Events()
+    ---@type CPlayer
+    local owner
+
+    -- TODO: сделать через выдачу технологии "длинноствольные мушкеты"
+    --  если хотя бы один игрок в бою, то выдавать улучшение всем
+
+    local function set_range(range)
+        local unit = Unit(GetTriggerUnit())
+        if unit:IsHero() then
+            owner = CPlayer(unit:GetOwner())
+            owner:SetTechResearched(UPGRADES.ADD_RANGE, range)
+            print(owner:GetTechCount(UPGRADES.ADD_RANGE))
+        end
+    end
+
+    event_enter:RegisterEnterRect(AREAS.LORD_MARROW_ARENA)
+    event_enter:AddAction(function() set_range(2) end)
+
+    event_leave:RegisterLeaveRect(AREAS.LORD_MARROW_ARENA)
+    event_leave:AddAction(function() set_range(0) end)
+end
 
 ---@author meiso
 
@@ -5965,7 +6066,7 @@ function LordMarrowgar.ResetToDefault()
 end
 
 function LordMarrowgar.Init()
-    local location = GetRandomLocInRect(gg_rct_LordMarrowSpawn)
+    local location = GetRandomLocInRect(AREAS.LORD_MARROW_SPAWN)
 
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, location, -90.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, location, -90.)
@@ -6049,7 +6150,7 @@ end
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
 
-    local target = Unit(GetUnitInArea(GroupHeroesInArea(gg_rct_areaLM, GetOwningPlayer(GetAttacker()))))
+    local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
     local target_location = target:GetLoc()
 
@@ -6158,7 +6259,7 @@ function LadyDeathwhisper.ResetToDefault()
 end
 
 function LadyDeathwhisper.Init()
-    local location = GetRandomLocInRect(gg_rct_LadyDeathSpawn)
+    local location = GetRandomLocInRect(AREAS.LADY_DEATH_SPAWN)
     LadyDeathwhisper.unit = Unit(LICH_KING, LADY_DEATHWHISPER, location, -90.)
 
     LadyDeathwhisper.unit:AutoRegen()
@@ -6463,6 +6564,85 @@ function LadyDeathwhisper.InitSummoning()
     event:RegisterAttacked()
     event:AddCondition(LadyDeathwhisper.SummonCheckPhase)
     event:AddAction(LadyDeathwhisper.Summoning)
+end
+
+---@author meiso
+
+function LowerTierTrashSpawn()
+    ---@type Unit
+    local trash
+    local owner = PLAYERS[1]
+    local damned_points = {
+        { 660, -8160, -90 },
+        { 1060, -8160, -90 },
+        { 1420, -6160, 180 },
+        { -2170, -6260 },
+        { -1760, -6180 },
+        { -1690, -6420 },
+        { 3750, -6220 },
+        { 3900, -6240 },
+        { 3850, -6480 },
+        { -1870, -2180 },
+        { -1950, -2000 },
+        { -1850, -1810 },
+        { -1580, -1810 },
+        { 2500, -2450 },
+        { 3080, -1810 },
+        { 3400, -1780 },
+        { 3640, -2030 },
+    }
+    local servants_points = {
+        { -1000, -5570, 0 },
+        { 860, -3350, -90 },
+        { 850, -1940, -90 },
+        { 150, -1230, -90 },
+        { 1520, -1260, -90 },
+        { -200, 2300, -90 },
+        { 1870, 2280, -90 },
+    }
+    local broodkeeper_points = {
+        { 360, -3640, -90 },
+        { 1340, -3660, -90 },
+        { 2870, -3420, 180 },
+        { -1060, -3340, 0 },
+        { 470, -1500, -90 },
+        { 1190, -1500, -90 },
+        { 350, 1880, -90 },
+        { 1310, 1880, -90 },
+    }
+    local skeletal_points = {
+        { 680, 1440, -90 },
+        { 1120, 1440, -90 },
+        { 50, -3870, -90 },
+        { 1670, -3870, -90 },
+    }
+    -- TODO: добавить точки ловушек
+    local ward_points = {
+        { -3260, -4510, 0 },
+        { 4930, -4510, 180 },
+        { -900, 1280, 0 },
+        { 2560, 1280, 180 },
+    }
+    for _, i in pairs(damned_points) do
+        trash = Unit(owner, THE_DAMNED, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(servants_points) do
+        trash = Unit(owner, SERVANT_OF_THE_THRONE, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(broodkeeper_points) do
+        trash = Unit(owner, NERUBAR_BROODKEEPER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(skeletal_points) do
+        trash = Unit(owner, ANCIENT_SKELETAL_SOLDIER, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
+    for _, i in pairs(ward_points) do
+        trash = Unit(owner, DEATHBOUND_WARD, Location(i[1], i[2]), i[3])
+        trash:AutoRegen()
+    end
 end
 
 ---@author meiso
@@ -6921,7 +7101,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -7425,7 +7605,7 @@ end
 
 
 -- Точка входа для инициализации всего
-function EntryPoint()
+function LowerTierEntryPoint()
     ENABLE_LOGGER = false
     ENABLE_LOGGER_STDOUT = true
     --LOGGER_LEVEL = LogLevel.DEBUG
@@ -7445,16 +7625,23 @@ function EntryPoint()
     --SaveSystem.InitSaveEvent()
     --SaveSystem.InitLoadEvent()
 
+    AREAS.init()
+
     -- Боссы
     LordMarrowgar.Init()
     LadyDeathwhisper.Init()
-	
+
+    LowerTierTrashSpawn()
+
+    FixRangesHeroes()
+
     FogEnableOff()
     FogMaskEnableOff()
 end
 
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
+    SetPlayerTechResearchedSwap(FourCC("R000"), 0, Player(0))
         LowerTierEntryPoint()
 end
 

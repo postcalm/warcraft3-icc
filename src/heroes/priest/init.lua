@@ -27,7 +27,7 @@ function Priest.ResetToDefault()
 end
 
 function Priest.Init(location, unit, name, player)
-    location = location or GetRandomLocInRect(gg_rct_StartSpawn)
+    location = location or GetRandomLocInRect(AREAS.START_SPAWN)
     name = name or "Priest"
     unit = unit or Unit(player, PRIEST, location, 90.):GetId()
 

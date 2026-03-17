@@ -10,8 +10,8 @@ LogLevel = {
 
 --- Включить логгер
 ENABLE_LOGGER = true
---- Включить запись в чат игры
-ENABLE_LOGGER_STDOUT = false
+--- Включить запись в чат игры, иначе пишет в файл (!!!)
+ENABLE_LOGGER_STDOUT = true
 --- Уровень логирования
 LOGGER_LEVEL = LogLevel.INFO
 
@@ -60,7 +60,7 @@ function Logger:Log(level, ...)
     if ENABLE_LOGGER_STDOUT then
         print(message)
     else
-        self:_write(message)
+        --self:_write(message)
     end
 end
 

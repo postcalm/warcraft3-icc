@@ -20,12 +20,16 @@ function LowerTierEntryPoint()
     --SaveSystem.InitSaveEvent()
     --SaveSystem.InitLoadEvent()
 
+    AREAS.init()
+
     -- Боссы
     LordMarrowgar.Init()
     LadyDeathwhisper.Init()
 
     LowerTierTrashSpawn()
-	
+
+    FixRangesHeroes()
+
     FogEnableOff()
     FogMaskEnableOff()
 end

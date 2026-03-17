@@ -24,6 +24,18 @@ function Events:RegisterAnyUnitDying()
     TriggerRegisterAnyUnitEventBJ(self.trigger, EVENT_PLAYER_UNIT_DEATH)
 end
 
+--- Регистрирует вхождение в область
+---@return nil
+function Events:RegisterEnterRect(rect)
+    TriggerRegisterEnterRectSimple(self.trigger, rect)
+end
+
+--- Регистрирует выход из области
+---@return nil
+function Events:RegisterLeaveRect(rect)
+    TriggerRegisterLeaveRectSimple(self.trigger, rect)
+end
+
 --- Добавляет условие для выполнения события
 ---@param func function Функция, возвращающая bool или boolexpr
 ---@return nil

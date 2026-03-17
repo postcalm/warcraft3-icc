@@ -11,7 +11,7 @@ function LordMarrowgar.ResetToDefault()
 end
 
 function LordMarrowgar.Init()
-    local location = GetRandomLocInRect(gg_rct_LordMarrowSpawn)
+    local location = GetRandomLocInRect(AREAS.LORD_MARROW_SPAWN)
 
     LordMarrowgar.unit = Unit(LICH_KING, LORD_MARROWGAR, location, -90.)
     LordMarrowgar.coldflame = Unit(LICH_KING, DUMMY, location, -90.)

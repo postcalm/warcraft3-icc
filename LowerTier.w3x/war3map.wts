@@ -791,7 +791,7 @@ LowerTierFloor
 
 STRING 277
 {
-1.0.332
+1.0.349
 }
 
 STRING 278
@@ -822,5 +822,17 @@ STRING 282
 // Войска: u008 (Ancient Skeletal Soldier), Name (Название)
 {
 Ancient Skeletal Soldier
+}
+
+STRING 284
+// Улучшения: R000 (Длинноствольные мушкеты), Name (Название)
+{
+add_range
+}
+
+STRING 285
+// Улучшения: R000 (Длинноствольные мушкеты), Name (Название)
+{
+add_range
 }
 

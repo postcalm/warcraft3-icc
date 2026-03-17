@@ -21,7 +21,7 @@ function HeroSelector.InitFrameSelector()
     end
 end
 
---- Позывает окно подтверждения выбора
+--- Показывает окно подтверждения выбора
 ---@param hero Frame Фрейм выбранного героя
 ---@return nil
 function HeroSelector.ConfirmCharacter(frame_hero)

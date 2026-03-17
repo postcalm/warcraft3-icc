@@ -10,6 +10,7 @@
 - реализации героев и юнитов
 """
 COMMON_FILES = (
+    "src/common/areas.lua",
     "src/common/buffs.lua",
     "src/common/color.lua",
     "src/common/counter.lua",
@@ -22,6 +23,7 @@ COMMON_FILES = (
     "src/common/players.lua",
     "src/common/spells.lua",
     "src/common/units.lua",
+    "src/common/upgrades.lua",
 )
 TYPES_FILES = (
     "src/types/unordered_list.lua",
@@ -76,6 +78,7 @@ HERO_SELECTOR_FILES = (
 )
 SOURCES_FILES = (
     "src/abilities.lua",
+    "src/fixRanges.lua",
     "src/modules/respawn.lua",
 )
 UNITS_FILES = (
