@@ -783,15 +783,9 @@ STRING 275
 ICC: Lower Tier
 }
 
-STRING 276
-// Декорации: D000 (LowerTierFloor), Name (Название)
-{
-LowerTierFloor
-}
-
 STRING 277
 {
-1.0.349
+1.0.374
 }
 
 STRING 278
@@ -834,5 +828,35 @@ STRING 285
 // Улучшения: R000 (Длинноствольные мушкеты), Name (Название)
 {
 add_range
+}
+
+STRING 286
+// Войска: u009 (Deathspeaker High Priest), Name (Название)
+{
+Deathspeaker High Priest
+}
+
+STRING 287
+// Войска: u00A (Deathspeaker Attendant), Name (Название)
+{
+Deathspeaker Attendant
+}
+
+STRING 288
+// Войска: u00B (Deathspeaker Servant), Name (Название)
+{
+Deathspeaker Servant
+}
+
+STRING 289
+// Войска: u00C (Deathspeaker Zealot), Name (Название)
+{
+Deathspeaker Zealot
+}
+
+STRING 290
+// Войска: u00D (Deathspeaker Disciple), Name (Название)
+{
+Deathspeaker Disciple
 }
 

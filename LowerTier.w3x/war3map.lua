@@ -142,7 +142,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3% снижения урона
+    --- Баф "Благословение неприкосновенности" - 3снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -437,12 +437,19 @@ CULT_ADHERENT = FourCC("u002")
 CULT_ADHERENT_MORPH = FourCC("u003")
 CULT_FANATIC = FourCC("h003")
 CULT_FANATIC_MORPH = FourCC("h004")
--- trash
-THE_DAMNED = FourCC("u004")
-SERVANT_OF_THE_THRONE = FourCC("u005")
-NERUBAR_BROODKEEPER = FourCC("u006")
-DEATHBOUND_WARD = FourCC("u007")
-ANCIENT_SKELETAL_SOLDIER = FourCC("u008")
+
+TRASH = {
+    DAMNED = FourCC("u004"),
+    SERVANT_THRONE = FourCC("u005"),
+    NERUBAR_BROODKEEPER = FourCC("u006"),
+    DEATHBOUND_WARD = FourCC("u007"),
+    ANCIENT_SKELETAL_SOLDIER = FourCC("u008"),
+    DEATHSPEAKER_HIGH_PRIEST = FourCC("u009"),
+    DEATHSPEAKER_ATTENDANT = FourCC("u00A"),
+    DEATHSPEAKER_SERVANT = FourCC("u00B"),
+    DEATHSPEAKER_ZEALOT = FourCC("u00C"),
+    DEATHSPEAKER_DISCIPLE = FourCC("u00D"),
+}
 
 -- -------------------------
 
@@ -2336,7 +2343,7 @@ end
 
 ---@author meiso
 
----@class Player Класс игрока
+---@class CPlayer Класс игрока
 ---@param playerid player Id игрока
 CPlayer = {}
 CPlayer.__index = CPlayer
@@ -2361,12 +2368,15 @@ function CPlayer:SetTechResearched(tech, level)
     SetPlayerTechResearched(self.player, tech, level)
 end
 
---- Вернуть текущий уровень технологии
+--- Получить текущий уровень технологии
 ---@param tech integer Id технологии
+---@return integer
 function CPlayer:GetTechCount(tech)
     return GetPlayerTechCountSimple(tech, self.player)
 end
 
+--- Получить id игрока
+---@return player
 function CPlayer:GetId()
     return self.player
 end
@@ -2672,7 +2682,7 @@ function Unit:_init(player, unit_id, location, face)
 end
 
 --- Авторегенерация юнита.
---- Восстанавливает по 15% здоровья и маны
+--- Восстанавливает по 15здоровья и маны
 ---@return nil
 function Unit:AutoRegen()
     Logger("Unit"):Info("Enable auto regen")
@@ -5617,9 +5627,9 @@ Spells = {
             manacost = 6,
             tooltip = "Благословение королей",
             key = "Q",
-            text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
+            text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-            buff_desc = "Все характеристики повышены на 10%."
+            buff_desc = "Все характеристики повышены на 10"
         },
         blessing_of_might = Ability {
             ability = BLESSING_OF_MIGHT,
@@ -5644,11 +5654,11 @@ Spells = {
             manacost = 7,
             tooltip = "Благословение неприкосновенности",
             key = "T",
-            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
-                    "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
+            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
+                    "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-            buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
-                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
+            buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
+                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
         },
         consecration = Ability {
             ability = CONSECRATION,
@@ -5667,7 +5677,7 @@ Spells = {
             tooltip = "Правосудие света",
             key = "C",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
+                    "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
             buff_desc = "Атакуя цель, противник может восстановить здоровье."
         },
@@ -5678,7 +5688,7 @@ Spells = {
             tooltip = "Правосудие мудрости",
             key = "V",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
+                    "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
             buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
         },
@@ -5698,8 +5708,8 @@ Spells = {
             cooldown = 60. * 5,
             tooltip = "Божественный щит",
             key = "Z",
-            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
-            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
+            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
+            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
         },
         hammer_of_righteous = Ability {
             ability = HAMMER_RIGHTEOUS,
@@ -5756,11 +5766,11 @@ Spells = {
             tooltip = "Оберегающий дух",
             key = "R",
             text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
+                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
                     "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-                    "50% ее максимального запаса здоровья. Время действия – 10 сек.",
+                    "50ее максимального запаса здоровья. Время действия – 10 сек.",
             icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-            buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
+            buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
         },
         prayer_of_mending = Ability {
             ability = PRAYER_OF_MENDING,
@@ -5808,7 +5818,7 @@ Spells = {
         spirit_of_redemption = Ability {
             ability = SPIRIT_OF_REDEMPTION,
             tooltip = "Дух воздаяния",
-            text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
                     "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
                     "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
                     "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -5854,14 +5864,13 @@ ALL_OFF_PRIEST_SPELLS = {
 function FixRangesHeroes()
     local event_enter = Events()
     local event_leave = Events()
-    ---@type CPlayer
-    local owner
 
-    -- TODO: сделать через выдачу технологии "длинноствольные мушкеты"
-    --  если хотя бы один игрок в бою, то выдавать улучшение всем
+    -- TODO: если на арене помимо босса есть другие мобы,
+    --  тогда если хотя бы один игрок в бою с боссом, то выдавать улучшение всем
 
     local function set_range(range)
         local unit = Unit(GetTriggerUnit())
+        local owner
         if unit:IsHero() then
             owner = CPlayer(unit:GetOwner())
             owner:SetTechResearched(UPGRADES.ADD_RANGE, range)
@@ -6149,22 +6158,23 @@ end
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
-
     local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
-    local target_location = target:GetLoc()
+    local add_x = 5000
+    local target_x_loc, target_y_loc = target:GetX(), target:GetY()
+    local new_location = Location(target_x_loc + add_x, target_y_loc)
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
         local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
-        coldflame_obj:SetMoveSpeed(0.6)
+        --coldflame_obj:SetMoveSpeed(10)
         coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
         coldflame_obj:ApplyTimedLife(9.)
 
         while true do
-            coldflame_obj:MoveToLoc(target_location)
+            coldflame_obj:MoveToLoc(new_location)
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
             LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
@@ -6196,10 +6206,10 @@ end
 function LordMarrowgar.Whirlwind()
     local spell_anim = "Attack Walk Stand Spin" -- 16
     local start_time = GetRandomInt(20, 30)
-    local duration = 5.
+    local duration = 5
     -- физ. урон сильно режется бронёй, хотя у этой абилки такого не должно быть
     local damage = 6000
-    -- время анимации см. в редакторе WE
+    -- время анимации см. в редакторе WE (0.267)
     local animate = Timer(0.267)
     animate:EnablePeriodic()
     animate:SetFunc(function()
@@ -6213,10 +6223,10 @@ function LordMarrowgar.Whirlwind()
     LordMarrowgar.whirlwind_effect = true
 
     TriggerSleepAction(start_time)
+    LordMarrowgar.unit:Pause(true)
     animate:Start()
 
     while duration > 0 do
-        print(duration)
         TriggerSleepAction(1.)
         LordMarrowgar.unit:DealPhysicalDamageLoc {
             damage = damage,
@@ -6228,7 +6238,7 @@ function LordMarrowgar.Whirlwind()
 
     LordMarrowgar.whirlwind_effect = false
     animate:Pause()
-
+    LordMarrowgar.unit:Pause(false)
 end
 
 function LordMarrowgar.StartWhirlwind()
@@ -6572,76 +6582,84 @@ function LowerTierTrashSpawn()
     ---@type Unit
     local trash
     local owner = PLAYERS[1]
-    local damned_points = {
-        { 660, -8160, -90 },
-        { 1060, -8160, -90 },
-        { 1420, -6160, 180 },
-        { -2170, -6260 },
-        { -1760, -6180 },
-        { -1690, -6420 },
-        { 3750, -6220 },
-        { 3900, -6240 },
-        { 3850, -6480 },
-        { -1870, -2180 },
-        { -1950, -2000 },
-        { -1850, -1810 },
-        { -1580, -1810 },
-        { 2500, -2450 },
-        { 3080, -1810 },
-        { 3400, -1780 },
-        { 3640, -2030 },
+    local points = {
+        DAMNED = {
+            { 660, -8160, -90 },
+            { 1060, -8160, -90 },
+            { 1420, -6160, 180 },
+            { -2170, -6260 },
+            { -1760, -6180 },
+            { -1690, -6420 },
+            { 3750, -6220 },
+            { 3900, -6240 },
+            { 3850, -6480 },
+            { -1870, -2180 },
+            { -1950, -2000 },
+            { -1850, -1810 },
+            { -1580, -1810 },
+            { 2500, -2450 },
+            { 3080, -1810 },
+            { 3400, -1780 },
+            { 3640, -2030 },
+        },
+        SERVANT_THRONE = {
+            { -1000, -5570, 0 },
+            { 860, -3350, -90 },
+            { 850, -1940, -90 },
+            { 150, -1230, -90 },
+            { 1520, -1260, -90 },
+            { -200, 2300, -90 },
+            { 1870, 2280, -90 },
+        },
+        NERUBAR_BROODKEEPER = {
+            { 360, -3640, -90 },
+            { 1340, -3660, -90 },
+            { 2870, -3420, 180 },
+            { -1060, -3340, 0 },
+            { 470, -1500, -90 },
+            { 1190, -1500, -90 },
+            { 350, 1880, -90 },
+            { 1310, 1880, -90 },
+        },
+        -- TODO: добавить точки ловушек
+        DEATHBOUND_WARD = {
+            { -3260, -4510, 0 },
+            { 4930, -4510, 180 },
+            { -900, 1280, 0 },
+            { 2560, 1280, 180 },
+        },
+        ANCIENT_SKELETAL_SOLDIER = {
+            { 680, 1440, -90 },
+            { 1120, 1440, -90 },
+            { 50, -3870, -90 },
+            { 1670, -3870, -90 },
+        },
+        DEATHSPEAKER_HIGH_PRIEST = {
+            { 3100, 18440, 180 },
+            { -1400, 18480, 0 },
+        },
+        DEATHSPEAKER_ATTENDANT = {
+            { 2000, 17540, 90 },
+        },
+        DEATHSPEAKER_SERVANT = {
+            { 80, 16600, 90 },
+            { 1715, 16580, 90 },
+        },
+        DEATHSPEAKER_ZEALOT = {
+            { -290, 16700, 90 },
+            { -10, 17520, 90 },
+            { 2070, 16740, 90 },
+            { 1700, 17400, 90 },
+        },
+        DEATHSPEAKER_DISCIPLE = {
+            { 1400, 17310, 90 },
+        },
     }
-    local servants_points = {
-        { -1000, -5570, 0 },
-        { 860, -3350, -90 },
-        { 850, -1940, -90 },
-        { 150, -1230, -90 },
-        { 1520, -1260, -90 },
-        { -200, 2300, -90 },
-        { 1870, 2280, -90 },
-    }
-    local broodkeeper_points = {
-        { 360, -3640, -90 },
-        { 1340, -3660, -90 },
-        { 2870, -3420, 180 },
-        { -1060, -3340, 0 },
-        { 470, -1500, -90 },
-        { 1190, -1500, -90 },
-        { 350, 1880, -90 },
-        { 1310, 1880, -90 },
-    }
-    local skeletal_points = {
-        { 680, 1440, -90 },
-        { 1120, 1440, -90 },
-        { 50, -3870, -90 },
-        { 1670, -3870, -90 },
-    }
-    -- TODO: добавить точки ловушек
-    local ward_points = {
-        { -3260, -4510, 0 },
-        { 4930, -4510, 180 },
-        { -900, 1280, 0 },
-        { 2560, 1280, 180 },
-    }
-    for _, i in pairs(damned_points) do
-        trash = Unit(owner, THE_DAMNED, Location(i[1], i[2]), i[3])
-        trash:AutoRegen()
-    end
-    for _, i in pairs(servants_points) do
-        trash = Unit(owner, SERVANT_OF_THE_THRONE, Location(i[1], i[2]), i[3])
-        trash:AutoRegen()
-    end
-    for _, i in pairs(broodkeeper_points) do
-        trash = Unit(owner, NERUBAR_BROODKEEPER, Location(i[1], i[2]), i[3])
-        trash:AutoRegen()
-    end
-    for _, i in pairs(skeletal_points) do
-        trash = Unit(owner, ANCIENT_SKELETAL_SOLDIER, Location(i[1], i[2]), i[3])
-        trash:AutoRegen()
-    end
-    for _, i in pairs(ward_points) do
-        trash = Unit(owner, DEATHBOUND_WARD, Location(i[1], i[2]), i[3])
-        trash:AutoRegen()
+    for k, pp in pairs(points) do
+        for _, i in pairs(pp) do
+            trash = Unit(owner, TRASH[k], Location(i[1], i[2]), i[3])
+            trash:AutoRegen()
+        end
     end
 end
 
@@ -7101,7 +7119,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42% от силы + 520 ед. урона дополнительно
+    -- 42от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
@@ -7641,7 +7659,6 @@ end
 
 --CUSTOM_CODE
 function Trig_EntryPoint_Actions()
-    SetPlayerTechResearchedSwap(FourCC("R000"), 0, Player(0))
         LowerTierEntryPoint()
 end
 
