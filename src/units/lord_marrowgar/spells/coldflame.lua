@@ -2,22 +2,26 @@
 
 function LordMarrowgar.Coldflame()
     TriggerSleepAction(GetRandomReal(2., 3.))
-
     local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
-    local target_location = target:GetLoc()
+    local add_x = 5000
+    -- TODO: высчитывать угол поворота от таргета
+    local new_location = PolarProjectionBJ(
+            target:GetLoc(),
+            add_x,
+            LordMarrowgar.unit:GetFacing()
+    )
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
         local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
-        coldflame_obj:SetMoveSpeed(0.6)
         coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
         coldflame_obj:ApplyTimedLife(9.)
 
         while true do
-            coldflame_obj:MoveToLoc(target_location)
+            coldflame_obj:MoveToLoc(new_location)
             -- другим дамми-юнитом кастуем flame strike, иммитируя coldflame
             LordMarrowgar.coldflame:CastToTarget("flamestrike", coldflame_obj)
             TriggerSleepAction(0.03)
