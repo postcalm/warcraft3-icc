@@ -1,6 +1,6 @@
 ---@author meiso
 
----@class Player Класс игрока
+---@class CPlayer Класс игрока
 ---@param playerid player Id игрока
 CPlayer = {}
 CPlayer.__index = CPlayer
