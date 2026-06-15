@@ -142,7 +142,7 @@ Items = {
     HP_ITEM                     = { item = FourCC("I002"), spell = FourCC("A00D"), str = "A00D" },
     --- Даёт 500 магической брони
     MAGICARMOR_ITEM             = { item = FourCC("I003"), spell = FourCC("A00I"), str = "A00I" },
-    --- Баф "Благословение неприкосновенности" - 3снижения урона
+    --- Баф "Благословение неприкосновенности" - 3% снижения урона
     BLESSING_OF_SANCTUARY_ITEM  = { item = FourCC("I004"), spell = FourCC("A00K"), str = "A00K" },
     --- Баф "Благословение мудрости" - восстанавливает 92 ед. маны раз в 5 сек
     BLESSING_OF_WISDOM_ITEM     = { item = FourCC("I005"), spell = FourCC("A00F"), str = "A00F" },
@@ -2682,7 +2682,7 @@ function Unit:_init(player, unit_id, location, face)
 end
 
 --- Авторегенерация юнита.
---- Восстанавливает по 15здоровья и маны
+--- Восстанавливает по 15% здоровья и маны
 ---@return nil
 function Unit:AutoRegen()
     Logger("Unit"):Info("Enable auto regen")
@@ -5627,9 +5627,9 @@ Spells = {
             manacost = 6,
             tooltip = "Благословение королей",
             key = "Q",
-            text = "Благословляет дружественную цель, повышая все ее характеристики на 10на 10 мин.",
+            text = "Благословляет дружественную цель, повышая все ее характеристики на 10% на 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_kings.tga",
-            buff_desc = "Все характеристики повышены на 10"
+            buff_desc = "Все характеристики повышены на 10%."
         },
         blessing_of_might = Ability {
             ability = BLESSING_OF_MIGHT,
@@ -5654,11 +5654,11 @@ Spells = {
             manacost = 7,
             tooltip = "Благословение неприкосновенности",
             key = "T",
-            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3и " ..
-                    "повышая ее силу и выносливость на 10 Эффект длится 10 мин.",
+            text = "Благословляет дружественную цель, уменьшая любой наносимый ей урон на 3% и " ..
+                    "повышая ее силу и выносливость на 10%. Эффект длится 10 мин.",
             icon = "ReplaceableTextures/CommandButtons/BTNblessing_of_sanctuary.tga",
-            buff_desc = "Получаемый урон снижен на 3, сила и выносливость повышены на 10 Если вы парируете, " ..
-                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2от максимального запаса маны."
+            buff_desc = "Получаемый урон снижен на 3%, сила и выносливость повышены на 10%. Если вы парируете, " ..
+                    "блокируете атаку или уклоняетесь от нее, вы восполняете 2% от максимального запаса маны."
         },
         consecration = Ability {
             ability = CONSECRATION,
@@ -5677,7 +5677,7 @@ Spells = {
             tooltip = "Правосудие света",
             key = "C",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2от максимального запаса здоровья атакующего.",
+                    "после чего каждая атака против него может восстановить 2% от максимального запаса здоровья атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_light.tga",
             buff_desc = "Атакуя цель, противник может восстановить здоровье."
         },
@@ -5688,7 +5688,7 @@ Spells = {
             tooltip = "Правосудие мудрости",
             key = "V",
             text = "Высвобождает энергию печати и обрушивает ее на противника, после чего в течение 20 сек. " ..
-                    "после чего каждая атака против него может восстановить 2базового запаса маны атакующего.",
+                    "после чего каждая атака против него может восстановить 2% базового запаса маны атакующего.",
             icon = "ReplaceableTextures/CommandButtons/BTNjudgement_of_wisdom.tga",
             buff_desc = "Атаки и заклинания, направленные против цели, могут восстановить немного маны атакующему."
         },
@@ -5708,8 +5708,8 @@ Spells = {
             cooldown = 60. * 5,
             tooltip = "Божественный щит",
             key = "Z",
-            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50",
-            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50"
+            text = "Защищает паладина от всех типов урона и заклинаний на 12 сек., но уменьшает весь наносимый им урон на 50%.",
+            buff_desc = "Невосприимчивость ко всем атакам и заклинаниям. Наносимый урон уменьшен на 50%."
         },
         hammer_of_righteous = Ability {
             ability = HAMMER_RIGHTEOUS,
@@ -5766,11 +5766,11 @@ Spells = {
             tooltip = "Оберегающий дух",
             key = "R",
             text = "Призывает оберегающего духа для охраны дружественной цели. " ..
-                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40и спасает его от смерти, " ..
+                    "Дух улучшает действие всех эффектов исцеления на выбранного союзника на 40% и спасает его от смерти, " ..
                     "жертвуя собой. Смерть духа прекращает действие эффекта улучшенного исцеления, но восстанавливает цели " ..
-                    "50ее максимального запаса здоровья. Время действия – 10 сек.",
+                    "50% ее максимального запаса здоровья. Время действия – 10 сек.",
             icon = "ReplaceableTextures/CommandButtons/BTNguardian_spirit.tga",
-            buff_desc = "Получаемое исцеление увеличено на 40 Предотвращает один смертельный удар."
+            buff_desc = "Получаемое исцеление увеличено на 40%. Предотвращает один смертельный удар."
         },
         prayer_of_mending = Ability {
             ability = PRAYER_OF_MENDING,
@@ -5818,7 +5818,7 @@ Spells = {
         spirit_of_redemption = Ability {
             ability = SPIRIT_OF_REDEMPTION,
             tooltip = "Дух воздаяния",
-            text = "Повышает дух на 5 Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
+            text = "Повышает дух на 5%. Умирая, жрец превращается в Дух воздаяния на 15 сек." ..
                     "Находясь в этом облике заклинатель не может двигаться, атаковать, быть атакованным " ..
                     "или стать целью любых заклинаний и воздействий, но может без затрат маны использовать " ..
                     "любые исцеляющие заклинания. По окончании действия эффекта жрец умирает.",
@@ -6161,13 +6161,16 @@ function LordMarrowgar.Coldflame()
     local target = Unit(GetUnitInArea(GroupHeroesInArea(AREAS.LORD_MARROW_ARENA, GetOwningPlayer(GetAttacker()))))
     local lord_location = LordMarrowgar.unit:GetLoc()
     local add_x = 5000
-    local target_x_loc, target_y_loc = target:GetX(), target:GetY()
-    local new_location = Location(target_x_loc + add_x, target_y_loc)
+    -- TODO: высчитывать угол поворота от таргета
+    local new_location = PolarProjectionBJ(
+            target:GetLoc(),
+            add_x,
+            LordMarrowgar.unit:GetFacing()
+    )
 
     if LordMarrowgar.coldflame_effect then
         -- призываем дамми-юнита и направляем его в сторону игрока
         local coldflame_obj = Unit(GetTriggerPlayer(), DUMMY, lord_location)
-        --coldflame_obj:SetMoveSpeed(10)
         coldflame_obj:SetPathing(false)
 
         -- через 9 сек дамми-юнит должен умереть
@@ -7119,7 +7122,7 @@ end
 ---@author meiso
 
 function Paladin.ShieldOfRighteousness()
-    -- 42от силы + 520 ед. урона дополнительно
+    -- 42% от силы + 520 ед. урона дополнительно
     local damage = GetHeroStr(GetTriggerUnit(), true) * 1.42 + 520.
     Paladin.hero:DealMagicDamage(GetSpellTargetUnit(), damage)
 end
