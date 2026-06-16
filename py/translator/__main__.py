@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from translator.translators.terrain import TerrainTranslator
-from translator.war3reader import War3Reader
+from py.translator.translators.terrain import TerrainTranslator
+from py.translator.war3reader import War3Reader
 
 # первые 4 байта - id - W3E!
 # 5 байт - версия карты (11)
